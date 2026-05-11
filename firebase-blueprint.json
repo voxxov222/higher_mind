@@ -1,0 +1,23 @@
+{
+  "entities": {
+    "UserCosmicProfile": {
+      "title": "User Cosmic Profile",
+      "description": "User's calculated cosmic reading, input data, and customizable profile.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "input": { "type": "object" },
+        "cosmicData": { "type": "object" },
+        "profileConfig": { "type": "object" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["userId", "input", "cosmicData", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserCosmicProfile" },
+      "description": "Stores a user's cosmic reading and inputs."
+    }
+  }
+}

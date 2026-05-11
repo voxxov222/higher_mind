@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { motion } from 'motion/react';
 import clsx from 'clsx';
 
@@ -15,14 +15,14 @@ interface HolographicPanelProps {
  * HolographicPanel Component
  * A distinctive, futuristic container with glassmorphic effects and subtle glows.
  */
-const HolographicPanel: React.FC<HolographicPanelProps> = ({ 
+const HolographicPanel = ({ 
   title, 
   className, 
   children, 
   glowColor = 'rgba(168, 85, 247, 0.2)',
   icon,
   id
-}) => {
+}: HolographicPanelProps) => {
   return (
     <motion.div 
       id={id}

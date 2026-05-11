@@ -1,5 +1,6 @@
 // --- CORE IMPORTS & EXTERNAL LIBRARIES ---
-import React, { useState, useRef, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useRef, useEffect, ReactNode } from 'react';
 import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'motion/react';
 import { CosmicData, UserProfileConfig } from '../types';
@@ -12,6 +13,8 @@ import {
 import { fetchTimelineDepth, fetchTimelineDeepDiveOption, fetchGeneralDeepDive } from '../services/geminiService';
 import { User } from 'firebase/auth';
 import { DeepSynthesis } from './DeepSynthesis';
+import { HarmonicVisualizer } from './HarmonicVisualizer';
+import { SoulBlueprintAura } from './SoulBlueprintAura';
 import BirthChartGuide from './BirthChartGuide';
 
 /**
@@ -22,8 +25,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity';
-  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity') => void;
+  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics';
+  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -456,7 +459,7 @@ const ActionMenu = ({ user, data, onSignIn, onSignOut, onEditProfile, profileCon
  * Primary Dashboard Component
  * The central UI hub for displaying readings, conducting research, and navigating modules.
  */
-export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoading, activeTab, setActiveTab, user, onSignIn, onSignOut, loadedInputs, profileConfig, onUpdateProfile, onPresentationRequest, externalDeepDive, onClearExternalDeepDive }) => {
+export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab, user, onSignIn, onSignOut, loadedInputs, profileConfig, onUpdateProfile, onPresentationRequest, externalDeepDive, onClearExternalDeepDive }: DashboardProps) => {
   // --- LOCAL COMPONENT STATE ---
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
@@ -624,7 +627,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
    * ResearchBox Component
    * [DATA DISPLAY & RESEARCH TOOLS]
    */
-  const ResearchBox = ({ title, content, children, className = "", category = "Miscellaneous" }: { title: string, content: string, children: React.ReactNode, className?: string, category?: string }) => (
+  const ResearchBox = ({ title, content, children, className = "", category = "Miscellaneous" }: { title: string, content: string, children: ReactNode, className?: string, category?: string }) => (
     <div className={`group relative bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-white/20 transition-all ${className}`}>
         <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10">
         <button 
@@ -849,6 +852,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
               <Tab active={activeTab === 'akashic'} onClick={() => setActiveTab('akashic')} icon={<BookOpen className="w-4 h-4"/>}>Akashic Records</Tab>
               <Tab active={activeTab === 'patterns'} onClick={() => setActiveTab('patterns')} icon={<Fingerprint className="w-4 h-4"/>}>Synchronicities</Tab>
               <Tab active={activeTab === 'findings'} onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
+              <Tab active={activeTab === 'harmonics'} onClick={() => setActiveTab('harmonics')} icon={<BarChart2 className="w-4 h-4"/>}>Harmonics</Tab>
             </div>
             
             <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/20">
@@ -1151,6 +1155,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
                     )}
                   </motion.div>
                 )}
+                {activeTab === 'harmonics' && (
+                  <motion.div key="harmonics" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="h-full">
+                     <HarmonicVisualizer data={data} />
+                  </motion.div>
+                )}
                 {activeTab === 'akashic' && (
                   <motion.div key="akashic" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     {!data.akashic ? (
@@ -1255,6 +1264,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
                                     <motion.span layout className="ml-3 text-xs uppercase tracking-[0.2em] text-stone-500 bg-black/40 px-2 py-1 rounded">Age {event.age}</motion.span>
                                   </div>
                                   <motion.div layout className="flex items-center gap-2">
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); handleTimelineEventSelect(event); }}
+                                      className="p-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg text-rose-400 hover:text-rose-300 transition-all flex items-center gap-1.5 text-[9px] uppercase tracking-widest font-bold"
+                                      title="Research Period"
+                                    >
+                                      <Search className="w-3 h-3" />
+                                      Research
+                                    </button>
                                      <span className={`text-[10px] uppercase tracking-widest px-3 py-1 rounded-full font-bold ${event.period === 'past' ? 'bg-stone-800 text-stone-400' : event.period === 'present' ? 'bg-rose-900/40 text-rose-300 border border-rose-500/20' : 'bg-purple-900/40 text-purple-300 border border-purple-500/20'}`}>
                                        {event.period}
                                      </span>
@@ -1570,20 +1587,29 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
                   </motion.div>
                 )}
                 {activeTab === 'torus' && (
-                  <motion.div key="torus" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 text-stone-200 font-light leading-relaxed">
-                    <ResearchBox title="Torus: Body & Flow" content={data.torusAnalysis.bodyAndFlow}>
-                      <Section title="Body & Flow" content={data.torusAnalysis.bodyAndFlow} />
-                    </ResearchBox>
-                    <ResearchBox title="Torus: Mind & Spirit" content={data.torusAnalysis.mindAndSpiritual}>
-                      <Section title="Mind & Spirit" content={data.torusAnalysis.mindAndSpiritual} />
-                    </ResearchBox>
-                    <ResearchBox title="Torus: Cosmic Alignment" content={data.torusAnalysis.cosmicAlignment}>
-                      <Section title="Cosmic Alignment" content={data.torusAnalysis.cosmicAlignment} />
-                    </ResearchBox>
-                    <ResearchBox title="Torus Reading Synthesis" content={data.torusAnalysis.overallAnalogy} className="bg-purple-900/20 border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
-                      <h4 className="text-purple-300 font-medium mb-2">Synthesis</h4>
-                      <p className="text-sm">{data.torusAnalysis.overallAnalogy}</p>
-                    </ResearchBox>
+                  <motion.div key="torus" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 text-stone-200 font-light leading-relaxed relative">
+                    <SoulBlueprintAura />
+                    <div className="relative z-10">
+                      <ResearchBox title="Torus: Body & Flow" content={data.torusAnalysis.bodyAndFlow}>
+                        <Section title="Body & Flow" content={data.torusAnalysis.bodyAndFlow} />
+                      </ResearchBox>
+                    </div>
+                    <div className="relative z-10">
+                      <ResearchBox title="Torus: Mind & Spirit" content={data.torusAnalysis.mindAndSpiritual}>
+                        <Section title="Mind & Spirit" content={data.torusAnalysis.mindAndSpiritual} />
+                      </ResearchBox>
+                    </div>
+                    <div className="relative z-10">
+                      <ResearchBox title="Torus: Cosmic Alignment" content={data.torusAnalysis.cosmicAlignment}>
+                        <Section title="Cosmic Alignment" content={data.torusAnalysis.cosmicAlignment} />
+                      </ResearchBox>
+                    </div>
+                    <div className="relative z-10">
+                      <ResearchBox title="Torus Reading Synthesis" content={data.torusAnalysis.overallAnalogy} className="bg-purple-900/20 border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
+                        <h4 className="text-purple-300 font-medium mb-2">Synthesis</h4>
+                        <p className="text-sm">{data.torusAnalysis.overallAnalogy}</p>
+                      </ResearchBox>
+                    </div>
                   </motion.div>
                 )}
                 
@@ -1644,18 +1670,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                       {data.planets.map(p => (
                         <ResearchBox key={p.name} title={`Planetary Influence: ${p.name}`} content={p.meaning} className="bg-transparent p-0 border-0 hover:border-0">
-                          <CelestialDetailBox name={p.name} data={p} themeColor={themeColor} />
+                          <CelestialDetailBox 
+                            name={p.name} 
+                            data={p} 
+                            themeColor={themeColor} 
+                            onResearch={() => handleGeneralDeepDive(`Planetary Influence: ${p.name}`, p.meaning)} 
+                          />
                         </ResearchBox>
                       ))}
                     </div>
                     <h3 className="text-sm uppercase tracking-widest text-stone-400 mb-3 text-center">Nodes & Points</h3>
                     <div className="grid grid-cols-1 gap-3">
-                       <ResearchBox title="North Node Deep Dive" content={data.nodes.north.meaning} className="p-0 border-0"><CelestialDetailBox name="North Node" data={data.nodes.north} themeColor={themeColor} /></ResearchBox>
-                       <ResearchBox title="South Node Deep Dive" content={data.nodes.south.meaning} className="p-0 border-0"><CelestialDetailBox name="South Node" data={data.nodes.south} themeColor={themeColor} /></ResearchBox>
-                       <ResearchBox title="Vertex Connection" content={data.points.vertex.meaning} className="p-0 border-0"><CelestialDetailBox name="Vertex" data={data.points.vertex} themeColor={themeColor} /></ResearchBox>
-                       <ResearchBox title="Part of Fortune Analysis" content={data.points.partOfFortune.meaning} className="p-0 border-0"><CelestialDetailBox name="Part of Fortune" data={data.points.partOfFortune} themeColor={themeColor} /></ResearchBox>
-                       <ResearchBox title="Chiron Healing Research" content={data.points.chiron.meaning} className="p-0 border-0"><CelestialDetailBox name="Chiron" data={data.points.chiron} themeColor={themeColor} /></ResearchBox>
-                       <ResearchBox title="Black Moon Lilith Shadow" content={data.points.blackMoonLilith.meaning} className="p-0 border-0"><CelestialDetailBox name="Lilith" data={data.points.blackMoonLilith} themeColor={themeColor} /></ResearchBox>
+                       <ResearchBox title="North Node Deep Dive" content={data.nodes.north.meaning} className="p-0 border-0"><CelestialDetailBox name="North Node" data={data.nodes.north} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("North Node", data.nodes.north.meaning)} /></ResearchBox>
+                       <ResearchBox title="South Node Deep Dive" content={data.nodes.south.meaning} className="p-0 border-0"><CelestialDetailBox name="South Node" data={data.nodes.south} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("South Node", data.nodes.south.meaning)} /></ResearchBox>
+                       <ResearchBox title="Vertex Connection" content={data.points.vertex.meaning} className="p-0 border-0"><CelestialDetailBox name="Vertex" data={data.points.vertex} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Vertex", data.points.vertex.meaning)} /></ResearchBox>
+                       <ResearchBox title="Part of Fortune Analysis" content={data.points.partOfFortune.meaning} className="p-0 border-0"><CelestialDetailBox name="Part of Fortune" data={data.points.partOfFortune} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Part of Fortune", data.points.partOfFortune.meaning)} /></ResearchBox>
+                       <ResearchBox title="Chiron Healing Research" content={data.points.chiron.meaning} className="p-0 border-0"><CelestialDetailBox name="Chiron" data={data.points.chiron} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Chiron", data.points.chiron.meaning)} /></ResearchBox>
+                       <ResearchBox title="Black Moon Lilith Shadow" content={data.points.blackMoonLilith.meaning} className="p-0 border-0"><CelestialDetailBox name="Lilith" data={data.points.blackMoonLilith} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Lilith", data.points.blackMoonLilith.meaning)} /></ResearchBox>
                     </div>
                   </motion.div>
                 )}
@@ -1712,9 +1743,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
                 {activeTab === 'numbers' && (
                    <motion.div key="numbers" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                       <div className="grid grid-cols-3 gap-4">
-                        <NumberBox label="Life Path" value={data.numerology.lifePath} delay={0.1} />
-                        <NumberBox label="Expression" value={data.numerology.expression} delay={0.2} />
-                        <NumberBox label="Soul Urge" value={data.numerology.soulUrge} delay={0.3} />
+                        <NumberBox label="Life Path" value={data.numerology.lifePath} delay={0.1} onResearch={() => handleGeneralDeepDive("Life Path Number", `The number ${data.numerology.lifePath} as a Life Path represents your core mission.`)} />
+                        <NumberBox label="Expression" value={data.numerology.expression} delay={0.2} onResearch={() => handleGeneralDeepDive("Expression Number", `The number ${data.numerology.expression} as an Expression represents your natural talents.`)} />
+                        <NumberBox label="Soul Urge" value={data.numerology.soulUrge} delay={0.3} onResearch={() => handleGeneralDeepDive("Soul Urge Number", `The number ${data.numerology.soulUrge} as a Soul Urge represents your inner desires.`)} />
                       </div>
 
                       {/* Numerology Bar Chart */}
@@ -1752,7 +1783,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
                         </div>
                       </div>
 
-                      <GematriaVisualizer gematria={data.gematria} name={name} />
+                      <GematriaVisualizer gematria={data.gematria} name={name} dob={date} />
 
                       <div className="p-6 bg-gradient-to-br from-purple-900/20 to-transparent border border-purple-500/20 rounded-[2rem]">
                         <h4 className="text-[10px] uppercase tracking-[0.3em] text-purple-400 mb-4 font-bold flex items-center gap-2">
@@ -2078,13 +2109,22 @@ const getSignElement = (sign: string) => {
   return { name: 'Space', color: '#a855f7' };
 };
 
-const CelestialDetailBox = ({ name, data, themeColor = '#a855f7' }: { name: string, data: any, themeColor?: string }) => {
-  const [expanded, setExpanded] = React.useState(false);
+const CelestialDetailBox = ({ name, data, themeColor = '#a855f7', onResearch }: { name: string, data: any, themeColor?: string, onResearch?: () => void }) => {
+  const [expanded, setExpanded] = useState(false);
   const element = getSignElement(data.sign);
   const symbol = getSignSymbol(data.sign);
 
   return (
-    <div className="bg-white/5 rounded-xl border border-white/5 overflow-hidden group/celestial">
+    <div className="bg-white/5 rounded-xl border border-white/5 overflow-hidden group/celestial relative">
+      {onResearch && (
+        <button 
+          onClick={(e) => { e.stopPropagation(); onResearch(); }}
+          className="absolute top-2 right-12 z-20 opacity-0 group-hover/celestial:opacity-100 transition-opacity bg-stone-800/80 hover:bg-stone-700 p-1.5 rounded-lg text-stone-300 hover:text-white border border-white/10 shadow-xl"
+          title="Deep Research"
+        >
+          <Search className="w-3 h-3" />
+        </button>
+      )}
       <button onClick={() => setExpanded(!expanded)} className="w-full text-left p-3 flex justify-between items-center hover:bg-white/5 transition-colors relative">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center border border-white/10 group-hover/celestial:border-purple-500/50 transition-colors">
@@ -2141,8 +2181,9 @@ const PointBox = ({ name, data }: { name: string, data: any }) => (
  * Visualizes the mathematical reduction and geometric patterns of name and birthday.
  * [GEMATRIA MAPPING & GEOMETRIC VIBRATION]
  */
-const GematriaVisualizer = ({ gematria, name }: { gematria: CosmicData['gematria'], name: string }) => {
+const GematriaVisualizer = ({ gematria, name, dob }: { gematria: CosmicData['gematria'], name: string, dob?: string }) => {
   const containerRef = useRef<SVGSVGElement>(null);
+  const [tooltip, setTooltip] = useState<{ x: number, y: number, text: string } | null>(null);
 
   const sephirothMap: Record<number, string> = {
     1: 'Kether (The Crown)',
@@ -2163,136 +2204,257 @@ const GematriaVisualizer = ({ gematria, name }: { gematria: CosmicData['gematria
     const svg = d3.select(containerRef.current);
     svg.selectAll("*").remove();
 
-    const width = 400;
-    const height = 400;
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    // Clean up name: remove spaces and non-alphabetic chars
-    const cleanName = name.replace(/[^a-zA-Z]/g, '').toUpperCase();
+    const width = 600;
+    const height = 500;
     
-    // Parse sequences
-    const numbers = (gematria.nameSequence || "").match(/\d+/g) || [];
-    
-    const displayChars = cleanName.split('');
-    const displayNumbers = numbers.slice(0, displayChars.length);
-
+    // Create Nodes and Links
     const nodes: any[] = [];
     const links: any[] = [];
 
     // Central reduction node
-    nodes.push({ id: 'reduction', label: gematria.reduction.toString(), group: 'reduction', x: centerX, y: centerY });
+    nodes.push({ id: 'reduction', label: gematria.reduction.toString(), group: 'reduction' });
 
-    const radius = 150;
-    const innerRadius = 85;
+    // Name nodes
+    const cleanName = name.replace(/[^a-zA-Z]/g, '').toUpperCase();
+    const numbers = (gematria.nameSequence || "").match(/\d+/g) || [];
+    const displayChars = cleanName.split('');
+    const displayNumbers = numbers.slice(0, displayChars.length);
 
     displayChars.forEach((char, i) => {
-      const angle = (i / displayChars.length) * Math.PI * 2 - Math.PI / 2;
-      const x = centerX + Math.cos(angle) * radius;
-      const y = centerY + Math.sin(angle) * radius;
-      
-      nodes.push({ id: `char-${i}`, label: char, group: 'char', x, y });
-      
+      nodes.push({ id: `char-${i}`, label: char, group: 'char' });
       if (displayNumbers[i]) {
-        const ix = centerX + Math.cos(angle) * innerRadius;
-        const iy = centerY + Math.sin(angle) * innerRadius;
-        nodes.push({ id: `val-${i}`, label: displayNumbers[i], group: 'val', x: ix, y: iy });
-        links.push({ source: `char-${i}`, target: `val-${i}` });
-        links.push({ source: `val-${i}`, target: 'reduction' });
+        nodes.push({ id: `val-${i}`, label: displayNumbers[i], group: 'val' });
+        links.push({ source: `char-${i}`, target: `val-${i}`, value: 1 });
+        links.push({ source: `val-${i}`, target: 'reduction', value: 2 });
       }
     });
 
-    // Draw Links
-    svg.append("g")
-      .selectAll("line")
-      .data(links)
-      .enter()
-      .append("line")
-      .attr("x1", d => nodes.find(n => n.id === d.source).x)
-      .attr("y1", d => nodes.find(n => n.id === d.source).y)
-      .attr("x2", d => nodes.find(n => n.id === d.target).x)
-      .attr("y2", d => nodes.find(n => n.id === d.target).y)
-      .attr("stroke", d => d.target === 'reduction' ? "rgba(168, 85, 247, 0.2)" : "rgba(59, 130, 246, 0.4)")
-      .attr("stroke-width", 1)
-      .attr("stroke-dasharray", d => d.target === 'reduction' ? "4,4" : "none");
+    // DOB nodes
+    if (gematria.dobSequence) {
+        const dobDigits = gematria.dobSequence.split('');
+        dobDigits.forEach((digit, i) => {
+            nodes.push({ id: `dob-${i}`, label: digit, group: 'dob' });
+            links.push({ source: `dob-${i}`, target: 'reduction', value: 1.5 });
+        });
+    }
+
+    // Force Simulation
+    const simulation = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id((d: any) => d.id).distance(d => d.value === 2 ? 100 : 60))
+        .force("charge", d3.forceManyBody().strength(-200))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("collision", d3.forceCollide().radius(30));
 
     // Glow Filter
     const defs = svg.append("defs");
-    const filter = defs.append("filter").attr("id", "glow");
-    filter.append("feGaussianBlur").attr("stdDeviation", "3").attr("result", "coloredBlur");
+    const filter = defs.append("filter").attr("id", "glow-gematria");
+    filter.append("feGaussianBlur").attr("stdDeviation", "2.5").attr("result", "coloredBlur");
     const feMerge = filter.append("feMerge");
     feMerge.append("feMergeNode").attr("in", "coloredBlur");
     feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 
-    // Draw Nodes
-    const nodeElems = svg.append("g")
-      .selectAll("g")
-      .data(nodes)
-      .enter()
-      .append("g")
-      .attr("transform", d => `translate(${d.x},${d.y})`);
+    // Add geometric background pattern
+    const bgPattern = svg.append("g").attr("class", "bg-geometric").attr("opacity", 0.1);
+    for (let i = 0; i < 6; i++) {
+        bgPattern.append("circle")
+            .attr("cx", width / 2)
+            .attr("cy", height / 2)
+            .attr("r", (i + 1) * 60)
+            .attr("fill", "none")
+            .attr("stroke", "#3b82f6")
+            .attr("stroke-width", 0.5)
+            .attr("stroke-dasharray", "2 8")
+            .append("animateTransform")
+            .attr("attributeName", "transform")
+            .attr("type", "rotate")
+            .attr("from", `0 ${width / 2} ${height / 2}`)
+            .attr("to", `${i % 2 === 0 ? 360 : -360} ${width / 2} ${height / 2}`)
+            .attr("dur", `${20 + i * 10}s`)
+            .attr("repeatCount", "indefinite");
+    }
 
-    nodeElems.append("circle")
-      .attr("r", d => d.group === 'reduction' ? 32 : 16)
-      .attr("fill", d => d.group === 'reduction' ? "rgba(232, 121, 249, 0.1)" : "rgba(59, 130, 246, 0.1)")
-      .attr("stroke", d => d.group === 'reduction' ? "#e879f9" : d.group === 'char' ? "#3b82f6" : "#a855f7")
-      .attr("stroke-width", 1.5)
-      .style("filter", "url(#glow)");
+    // Draw Links
+    const link = svg.append("g")
+        .selectAll("line")
+        .data(links)
+        .enter()
+        .append("line")
+        .attr("stroke", d => {
+            const sId = typeof d.source === 'string' ? d.source : d.source.id;
+            if (sId?.startsWith('dob')) return "rgba(16, 185, 129, 0.2)";
+            return "rgba(168, 85, 247, 0.2)";
+        })
+        .attr("stroke-width", 1.5)
+        .attr("stroke-dasharray", d => {
+            const tId = typeof d.target === 'string' ? d.target : d.target.id;
+            return tId === 'reduction' ? "4,4" : "none";
+        });
 
-    nodeElems.append("text")
-      .text(d => d.label)
-      .attr("text-anchor", "middle")
-      .attr("dy", ".35em")
-      .attr("fill", "#fff")
-      .attr("font-size", d => d.group === 'reduction' ? "24px" : "11px")
-      .attr("font-weight", "bold")
-      .attr("font-family", "monospace")
-      .style("text-shadow", "0 0 10px rgba(255,255,255,0.5)");
+    const node = svg.append("g")
+        .selectAll("g")
+        .data(nodes)
+        .enter()
+        .append("g")
+        .call(d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended) as any
+        )
+        .on("mouseenter", (event, d) => {
+            let text = "";
+            if (d.group === 'reduction') text = `Reduction: ${d.label} - ${sephirothMap[parseInt(d.label)] || 'Core Frequency'}`;
+            else if (d.group === 'char') text = `Identity: ${d.label}`;
+            else if (d.group === 'val') text = `Value: ${d.label}`;
+            else if (d.group === 'dob') text = `Temporal: ${d.label}`;
+            setTooltip({ x: event.clientX, y: event.clientY, text });
+        })
+        .on("mousemove", (event) => {
+             setTooltip(prev => prev ? { ...prev, x: event.clientX, y: event.clientY } : null);
+        })
+        .on("mouseleave", () => setTooltip(null));
 
+    node.append("circle")
+        .attr("r", d => d.group === 'reduction' ? 38 : 20)
+        .attr("fill", d => {
+            if (d.group === 'reduction') return "rgba(232, 121, 249, 0.1)";
+            if (d.group === 'dob') return "rgba(16, 185, 129, 0.1)";
+            return "rgba(59, 130, 246, 0.1)";
+        })
+        .attr("stroke", d => {
+            if (d.group === 'reduction') return "#e879f9";
+            if (d.group === 'dob') return "#10b981";
+            if (d.group === 'char') return "#3b82f6";
+            return "#a855f7";
+        })
+        .attr("stroke-width", 2)
+        .style("filter", "url(#glow-gematria)");
+
+    node.append("text")
+        .text(d => d.label)
+        .attr("text-anchor", "middle")
+        .attr("dy", ".35em")
+        .attr("fill", "#fff")
+        .attr("font-size", d => d.group === 'reduction' ? "20px" : "11px")
+        .attr("font-weight", "bold")
+        .attr("font-family", "monospace");
+
+    simulation.on("tick", () => {
+        link
+            .attr("x1", d => (d.source as any).x)
+            .attr("y1", d => (d.source as any).y)
+            .attr("x2", d => (d.target as any).x)
+            .attr("y2", d => (d.target as any).y);
+
+        node
+            .attr("transform", d => `translate(${(d as any).x},${(d as any).y})`);
+    });
+
+    function dragstarted(event: any) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+    }
+
+    function dragged(event: any) {
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+    }
+
+    function dragended(event: any) {
+        if (!event.active) simulation.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
+    }
+
+    return () => simulation.stop();
   }, [gematria, name]);
 
   return (
-    <div className="w-full flex flex-col items-center bg-black/30 rounded-[2.5rem] border border-white/5 p-6 my-6 overflow-hidden">
-      <div className="w-full flex justify-between items-center mb-6 px-4">
-        <h4 className="text-[10px] uppercase tracking-[0.4em] text-blue-400 font-bold">Gematria Resonance Mapping</h4>
-        <div className="flex gap-3">
-          <div className="flex items-center gap-1.5 font-mono">
-            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-            <span className="text-[9px] uppercase tracking-widest text-stone-400">Identity</span>
-          </div>
-          <div className="flex items-center gap-1.5 font-mono">
-            <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]"></div>
-            <span className="text-[9px] uppercase tracking-widest text-stone-400">Vibration</span>
-          </div>
-        </div>
-      </div>
-      
-      <div className="relative">
-        <svg ref={containerRef} width="400" height="400" viewBox="0 0 400 400" className="max-w-full h-auto" />
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/40 to-transparent"></div>
+    <div className="w-full flex flex-col items-center bg-black/40 backdrop-blur-xl rounded-[3rem] border border-white/10 p-8 my-8 relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-8 opacity-20 pointer-events-none">
+          <Grid className="w-24 h-24 text-white" />
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-8 w-full px-6 mb-4">
-        <div className="text-center">
-          <span className="block text-[8px] uppercase tracking-widest text-stone-500 mb-1">Total Value</span>
-          <span className="text-xl font-light text-white tracking-widest">{gematria.nameValue}</span>
+      <div className="w-full flex justify-between items-center mb-10 relative z-10">
+        <div className="flex flex-col">
+            <div className="flex items-center gap-2 mb-1">
+                <Hexagon size={14} className="text-blue-400" />
+                <h4 className="text-[10px] uppercase tracking-[0.5em] text-blue-400 font-bold">Gematria Neural Lattice</h4>
+            </div>
+            <span className="text-[9px] text-stone-600 font-mono italic">INTERACTIVE FORCE-DIRECTED MAPPING</span>
         </div>
-        <div className="text-center">
-          <span className="block text-[8px] uppercase tracking-widest text-stone-500 mb-1">Final Reduction</span>
-          <span className="text-xl font-light text-purple-400 tracking-widest">{gematria.reduction}</span>
+        <div className="hidden md:flex gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+            <span className="text-[9px] uppercase tracking-widest text-stone-500">Identity</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+            <span className="text-[9px] uppercase tracking-widest text-stone-500">Temporal</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
+            <span className="text-[9px] uppercase tracking-widest text-stone-500">Reduction</span>
+          </div>
         </div>
       </div>
 
-      <div className="w-full bg-white/5 rounded-2xl p-4 border border-white/10 text-center">
-         <span className="block text-[9px] uppercase tracking-[0.2em] text-stone-400 mb-1">Sephirotic Alignment</span>
-         <span className="text-sm text-purple-300 font-medium">{sephirothMap[gematria.reduction] || (gematria.reduction === 11 ? 'Da\'at / Master Number 11' : 'Higher Spheres')}</span>
+      <div className="relative w-full aspect-[6/5] bg-black/20 rounded-[2.5rem] border border-white/5 cursor-crosshair">
+          <svg 
+            ref={containerRef} 
+            className="w-full h-full" 
+            viewBox="0 0 600 500" 
+            preserveAspectRatio="xMidYMid meet" 
+          />
+          <AnimatePresence>
+              {tooltip && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                    style={{ position: 'fixed', left: tooltip.x + 20, top: tooltip.y + 20 }}
+                    className="z-[9999] px-4 py-2 bg-stone-900/90 backdrop-blur-md border border-white/20 rounded-xl text-[10px] text-white font-mono shadow-[0_10px_30px_rgba(0,0,0,0.5)] pointer-events-none whitespace-nowrap overflow-hidden"
+                  >
+                      <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
+                      {tooltip.text}
+                  </motion.div>
+              )}
+          </AnimatePresence>
+      </div>
+
+      <div className="mt-8 pt-8 border-t border-white/5 w-full grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="space-y-1.5">
+              <span className="text-[9px] text-stone-600 uppercase tracking-widest block font-bold">Signature Archetype</span>
+              <span className="text-sm text-white font-light lowercase truncate block">{name}</span>
+          </div>
+          <div className="space-y-1.5">
+              <span className="text-[9px] text-stone-600 uppercase tracking-widest block font-bold">Resonant Identity</span>
+              <span className="text-sm text-blue-400 font-mono">{gematria.nameValue}</span>
+          </div>
+          <div className="space-y-1.5">
+              <span className="text-[9px] text-stone-600 uppercase tracking-widest block font-bold">Core Reduction</span>
+              <span className="text-sm text-purple-400 font-bold">{gematria.reduction}</span>
+          </div>
+          <div className="space-y-1.5">
+              <span className="text-[9px] text-stone-600 uppercase tracking-widest block font-bold">Sephirotic Force</span>
+              <span className="text-sm text-stone-400">{sephirothMap[gematria.reduction]?.split('(')[0] || 'Unmanifest'}</span>
+          </div>
       </div>
     </div>
   );
 };
 
-const NumberBox = ({ label, value, delay = 0 }: { label: string, value: number, delay?: number }) => (
-  <div className="bg-white/5 rounded-2xl p-4 border border-white/10 text-center flex flex-col justify-center items-center">
+const NumberBox = ({ label, value, delay = 0, onResearch }: { label: string, value: number, delay?: number, onResearch?: () => void }) => (
+  <div className="group relative bg-white/5 rounded-2xl p-4 border border-white/10 text-center flex flex-col justify-center items-center hover:bg-white/10 transition-all">
+    {onResearch && (
+      <button 
+        onClick={(e) => { e.stopPropagation(); onResearch(); }}
+        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800/80 hover:bg-stone-700 p-1.5 rounded-lg text-stone-300 hover:text-white border border-white/10 z-10 shadow-xl"
+        title="Research Significance"
+      >
+        <Search className="w-3 h-3" />
+      </button>
+    )}
     <span className="text-[10px] uppercase tracking-widest text-stone-400 mb-2">{label}</span>
     <motion.span 
       initial={{ opacity: 0, scale: 0.5, y: 10 }} 

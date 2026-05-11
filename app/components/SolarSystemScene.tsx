@@ -1,11 +1,14 @@
-import React, { useRef, useMemo, useState, useEffect } from 'react';
+import * as React from 'react';
+import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Sphere, Trail, Float, Stars, Text, OrbitControls, PerspectiveCamera, Html, Ring, Sparkles, Line, Grid, Float as FloatDrei } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
-import { Activity, X, Info, Sparkle, BookOpen, Send, Bot, Cpu, Zap, Radio, Terminal, MousePointer2, ChevronRight, Binary } from 'lucide-react';
+import { Activity, X, Info, Sparkle, BookOpen, Send, Bot, Cpu, Zap, Radio, Terminal, MousePointer2, ChevronRight, Binary, Layers, Wind, Ghost, Atom, Eye, Loader2, Globe, Globe2, Compass, ArrowUpCircle, Rocket, ExternalLink, Moon as MoonIcon, Sun as SunIcon, ChevronDown } from 'lucide-react';
 import { CosmicData } from '../types';
 import { fetchAuraInsight } from '../services/geminiService';
+import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration } from '@react-three/postprocessing';
+import { BlendFunction } from 'postprocessing';
 
 interface AuraVisualNode {
   id: string;
@@ -106,9 +109,43 @@ const SIGN_NAMES = [
   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
 ];
 
+const ZodiacLabels = ({ radius }: { radius: number }) => {
+  return (
+    <group>
+      {SIGN_NAMES.map((name, i) => {
+        const angle = (i * 30 + 15) * Math.PI / 180;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        const element = SIGN_ELEMENTS[name];
+
+        return (
+          <group key={name} position={[x, 0.5, z]}>
+            <Text
+              rotation={[-Math.PI / 2, 0, -angle + Math.PI / 2]}
+              fontSize={4}
+              color={element.color}
+              anchorX="center"
+              anchorY="middle"
+              depthOffset={-1}
+            >
+              {name.toUpperCase()}
+            </Text>
+            {/* Visual separator */}
+            <mesh position={[0, -0.2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+               <circleGeometry args={[1, 32]} />
+               <meshBasicMaterial color={element.color} transparent opacity={0.1} />
+            </mesh>
+          </group>
+        );
+      })}
+    </group>
+  );
+};
+
 const AstrologicalHouses = ({ data, onHouseHover }: { data: CosmicData | null; onHouseHover: (house: any) => void }) => {
   return (
     <group>
+      <ZodiacLabels radius={130} />
       {Array.from({ length: 12 }).map((_, i) => {
         const houseNum = i + 1;
         const houseData = data?.houses?.find(h => h.houseNumber === houseNum);
@@ -120,8 +157,8 @@ const AstrologicalHouses = ({ data, onHouseHover }: { data: CosmicData | null; o
           <group key={i}>
             {/* Divider Line */}
             <mesh rotation={[0, -angle, 0]} position={[75, 0, 0]}>
-               <boxGeometry args={[150, 0.02, 0.02]} />
-               <meshBasicMaterial color="white" transparent opacity={0.1} />
+               <boxGeometry args={[150, 0.05, 0.05]} />
+               <meshBasicMaterial color="white" transparent opacity={0.2} />
             </mesh>
 
             {/* House Interactive Zone */}
@@ -137,28 +174,47 @@ const AstrologicalHouses = ({ data, onHouseHover }: { data: CosmicData | null; o
                 });
               }}
               onPointerOut={() => onHouseHover(null)}
+              onClick={() => {
+                onHouseHover(houseData || { 
+                  houseNumber: houseNum, 
+                  realmName: 'Sector of Experience', 
+                  sign: signName,
+                  description: HOUSE_DESCRIPTIONS[houseNum] || 'A unique sector of your life experience.' 
+                });
+              }}
             >
-              {/* Invisible trigger with box for better hover area */}
-              <mesh visible={false}>
-                <boxGeometry args={[40, 1, 40]} />
+              <mesh>
+                <boxGeometry args={[45, 0.5, 45]} />
+                <meshBasicMaterial color="#3b82f6" transparent opacity={0.01} />
               </mesh>
 
               <Text
                 rotation={[-Math.PI / 2, 0, -midAngle + Math.PI / 2]}
-                fontSize={5}
+                fontSize={6}
                 color={houseData ? "#fbbf24" : "white"}
-                opacity={0.4}
+                opacity={0.6}
               >
                 {houseNum}
               </Text>
+              
               <Text
-                position={[0, 0, 8]}
+                position={[0, 0, 10]}
                 rotation={[-Math.PI / 2, 0, -midAngle + Math.PI / 2]}
-                fontSize={2.5}
+                fontSize={3}
                 color="white"
-                opacity={0.2}
+                opacity={0.3}
               >
                 {signName.toUpperCase()}
+              </Text>
+
+              <Text
+                position={[0, 0, -10]}
+                rotation={[-Math.PI / 2, 0, -midAngle + Math.PI / 2]}
+                fontSize={1.5}
+                color="#60a5fa"
+                opacity={0.3}
+              >
+                {houseData?.realmName?.toUpperCase() || 'DOMAIN'}
               </Text>
             </group>
 
@@ -188,7 +244,7 @@ const AstrologicalHouses = ({ data, onHouseHover }: { data: CosmicData | null; o
   );
 };
 
-const AspectLines = ({ data }: { data: CosmicData | null }) => {
+const AspectLines = ({ data, onAspectClick }: { data: CosmicData | null; onAspectClick?: (aspect: any) => void }) => {
   if (!data?.aspects) return null;
 
   const ASPECT_COLORS: Record<string, string> = {
@@ -207,8 +263,6 @@ const AspectLines = ({ data }: { data: CosmicData | null }) => {
         
         if (!p1 || !p2) return null;
 
-        // For simplicity in 3D scene, we use the hardcoded distances from planets list
-        // but we need to find them or nodes
         const getDistance = (name: string) => {
           const planet = planets.find(p => p.name === name);
           if (planet) return planet.distance;
@@ -221,7 +275,6 @@ const AspectLines = ({ data }: { data: CosmicData | null }) => {
         const d1 = getDistance(aspect.planet1);
         const d2 = getDistance(aspect.planet2);
         
-        // Use static degrees for aspect lines to avoid "spaghetti" during animation
         const angle1 = (p1.degree * Math.PI) / 180;
         const angle2 = (p2.degree * Math.PI) / 180;
 
@@ -233,9 +286,19 @@ const AspectLines = ({ data }: { data: CosmicData | null }) => {
             <Line 
               points={[start, end]} 
               color={ASPECT_COLORS[aspect.type] || '#ffffff'} 
-              lineWidth={1} 
-              opacity={0.15} 
+              lineWidth={1.5} 
+              opacity={0.3} 
               transparent 
+              onClick={(e) => {
+                e.stopPropagation();
+                onAspectClick?.(aspect);
+              }}
+              onPointerOver={(e) => {
+                (e.object as any).material.opacity = 0.8;
+              }}
+              onPointerOut={(e) => {
+                (e.object as any).material.opacity = 0.3;
+              }}
             />
           </group>
         );
@@ -244,19 +307,19 @@ const AspectLines = ({ data }: { data: CosmicData | null }) => {
   );
 };
 
-const SIGN_ELEMENTS: Record<string, { type: string; color: string }> = {
-  'Aries': { type: 'Fire', color: '#ef4444' },
-  'Leo': { type: 'Fire', color: '#f59e0b' },
-  'Sagittarius': { type: 'Fire', color: '#f97316' },
-  'Taurus': { type: 'Earth', color: '#10b981' },
-  'Virgo': { type: 'Earth', color: '#84cc16' },
-  'Capricorn': { type: 'Earth', color: '#475569' },
-  'Gemini': { type: 'Air', color: '#fbbf24' },
-  'Libra': { type: 'Air', color: '#f472b6' },
-  'Aquarius': { type: 'Air', color: '#06b6d4' },
-  'Cancer': { type: 'Water', color: '#94a3b8' },
-  'Scorpio': { type: 'Water', color: '#7e22ce' },
-  'Pisces': { type: 'Water', color: '#6366f1' },
+const SIGN_ELEMENTS: Record<string, { type: string; color: string; description: string }> = {
+  'Aries': { type: 'Fire', color: '#ef4444', description: 'The pioneer, bold, energetic, and courageous.' },
+  'Leo': { type: 'Fire', color: '#f59e0b', description: 'The leader, creative, generous, and charismatic.' },
+  'Sagittarius': { type: 'Fire', color: '#f97316', description: 'The explorer, optimistic, free-spirited, and philosophical.' },
+  'Taurus': { type: 'Earth', color: '#10b981', description: 'The builder, practical, patient, and persistent.' },
+  'Virgo': { type: 'Earth', color: '#84cc16', description: 'The analyst, meticulous, practical, and helpful.' },
+  'Capricorn': { type: 'Earth', color: '#475569', description: 'The achiever, ambitious, disciplined, and responsible.' },
+  'Gemini': { type: 'Air', color: '#fbbf24', description: 'The communicator, adaptable, curious, and expressive.' },
+  'Libra': { type: 'Air', color: '#f472b6', description: 'The diplomat, balanced, social, and aesthetic.' },
+  'Aquarius': { type: 'Air', color: '#06b6d4', description: 'The visionary, innovative, original, and humanitarian.' },
+  'Cancer': { type: 'Water', color: '#94a3b8', description: 'The nurturer, sensitive, intuitive, and protective.' },
+  'Scorpio': { type: 'Water', color: '#7e22ce', description: 'The alchemist, intense, passionate, and magnetic.' },
+  'Pisces': { type: 'Water', color: '#6366f1', description: 'The dreamer, empathetic, spiritual, and imaginative.' },
 };
 
 interface PlanetProps extends PlanetData {
@@ -275,7 +338,7 @@ const SIGN_ANGLES: Record<string, number> = {
 const Planet = ({ name, color, size, distance, speed, onSelect, active, astro, isStatic, isBirthChartMode }: PlanetProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-  const [hovered, setHovered] = React.useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const elementInfo = astro?.sign ? SIGN_ELEMENTS[astro.sign] : null;
 
@@ -363,35 +426,29 @@ const Planet = ({ name, color, size, distance, speed, onSelect, active, astro, i
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  {astro && (
+                  {astro ? (
                     <>
                       <div className="bg-black/40 p-3 rounded-xl border border-white/5">
                         <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-0.5">Vibration</div>
                         <div className="text-white text-xs font-bold font-mono">{astro.sign}</div>
                       </div>
                       <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-0.5">Degree</div>
+                        <div className="text-white text-xs font-bold font-mono">{Math.floor(astro.degree)}°</div>
+                      </div>
+                      <div className="bg-black/40 p-3 rounded-xl border border-white/5">
                         <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-0.5">House</div>
                         <div className="text-white text-xs font-bold font-mono">Sector {astro.house}</div>
                       </div>
+                      <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                         <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-0.5">Element</div>
+                         <div className="text-white text-xs font-bold font-mono">{elementInfo?.type || 'Space'}</div>
+                      </div>
                     </>
-                  )}
-                  {elementInfo && (
-                    <div className="col-span-2 bg-black/40 p-3 rounded-xl border border-white/5 flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-0.5">Essence</div>
-                        <div className="text-white text-xs font-bold">{elementInfo.type}</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-12 h-1 rounded-full overflow-hidden bg-white/5">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: '100%' }}
-                            className="h-full"
-                            style={{ backgroundColor: elementInfo.color }}
-                          />
-                        </div>
-                        <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: elementInfo.color }} />
-                      </div>
+                  ) : (
+                    <div className="col-span-2 bg-black/40 p-3 rounded-xl border border-white/5 text-center">
+                       <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-1">Status</div>
+                       <div className="text-white text-[10px] font-mono">NODE_UNSYNCED</div>
                     </div>
                   )}
                 </div>
@@ -483,13 +540,19 @@ const HOUSE_DESCRIPTIONS: Record<number, string> = {
   12: 'Subconscious, secrets, spiritual retreat, and karmic endings.',
 };
 
-export const SolarSystemScene: React.FC<SolarSystemSceneProps> = ({ data, onPlanetClick }) => {
-  const [selectedPlanet, setSelectedPlanet] = React.useState<PlanetData | null>(null);
-  const [sunHovered, setSunHovered] = React.useState(false);
-  const [hoveredHouse, setHoveredHouse] = React.useState<any>(null);
-  const [isStatic, setIsStatic] = React.useState(false);
-  const [viewMode, setViewMode] = React.useState<'solar' | 'chart'>('solar');
-  const [showHouseGuide, setShowHouseGuide] = React.useState(false);
+export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps) => {
+  const [selectedPlanet, setSelectedPlanet] = useState<PlanetData | null>(null);
+  const [sunHovered, setSunHovered] = useState(false);
+  const [hoveredHouse, setHoveredHouse] = useState<any>(null);
+  const [selectedAspect, setSelectedAspect] = useState<any>(null);
+  const [isStatic, setIsStatic] = useState(false);
+  const [viewMode, setViewMode] = useState<'solar' | 'chart'>('chart');
+  const [rotationPerspective, setRotationPerspective] = useState<'top' | 'isometric' | 'orbit'>('isometric');
+  const [showHouseGuide, setShowHouseGuide] = useState(false);
+  const [sceneMode, setSceneMode] = useState<'cosmic' | 'quantum' | 'verdant' | 'void'>('cosmic');
+  const [isLatticeActive, setIsLatticeActive] = useState(true);
+  const [isNeuralSyncActive, setIsNeuralSyncActive] = useState(false);
+  const [activeAnalysisNode, setActiveAnalysisNode] = useState<string | null>(null);
 
   // Aura AI Agent State
   const [auraNodes, setAuraNodes] = useState<AuraVisualNode[]>([]);
@@ -499,6 +562,7 @@ export const SolarSystemScene: React.FC<SolarSystemSceneProps> = ({ data, onPlan
   const [isAuraThinking, setIsAuraThinking] = useState(false);
   const [auraInsight, setAuraInsight] = useState<string | null>(null);
   const [selectedAuraNode, setSelectedAuraNode] = useState<AuraVisualNode | null>(null);
+  const [auraLogs, setAuraLogs] = useState<string[]>(["Core systems initialized.", "Scanning celestial resonance..."]);
 
   const controlsRef = useRef<any>(null);
 
@@ -506,18 +570,20 @@ export const SolarSystemScene: React.FC<SolarSystemSceneProps> = ({ data, onPlan
     if (!auraPrompt.trim() || !data || isAuraThinking) return;
     
     setIsAuraThinking(true);
+    setAuraLogs(prev => [...prev.slice(-4), `Analyzing prompt: "${auraPrompt}"`]);
     setAuraInsight("Synchronizing with cosmic resonance frequencies...");
     
     try {
       const result = await fetchAuraInsight(auraPrompt, data);
       
-      // Seed new nodes into the scene
-      setAuraNodes(prev => [...prev, ...result.visualNodes].slice(-10)); // Keep last 10 nodes
+      setAuraLogs(prev => [...prev.slice(-4), "Vibrational match found.", "Synthesizing 3D manifestation..."]);
+      setAuraNodes(prev => [...prev, ...result.visualNodes].slice(-10)); 
       setAuraEdges(prev => [...prev, ...result.visualEdges].slice(-15));
       setAuraInsight(result.insight);
       setAuraPrompt('');
     } catch (error) {
       setAuraInsight("Neural connection unstable. Please re-initiate transmission.");
+      setAuraLogs(prev => [...prev.slice(-4), "ERROR: Connection timeout."]);
     } finally {
       setIsAuraThinking(false);
     }
@@ -530,22 +596,47 @@ export const SolarSystemScene: React.FC<SolarSystemSceneProps> = ({ data, onPlan
     if (name === 'South Node') return data.nodes?.south;
     if (name === 'Chiron') return data.points?.chiron;
     if (name === 'Lilith') return data.points?.blackMoonLilith;
+    if (name === 'Sun') return data.planets.find(p => p.name.toLowerCase() === 'sun');
+    if (name === 'Earth') return { name: 'Earth', sign: 'N/A', degree: 0, house: 0, meaning: 'Center of observation' };
     return data.planets.find(p => p.name.toLowerCase() === name.toLowerCase());
   };
 
   const getPlanetPos = (planet: PlanetData) => {
     const astro = getAstrologicalData(planet.name);
-    if (viewMode === 'chart' && astro?.sign) {
-      const baseAngle = SIGN_ANGLES[astro.sign] || 0;
-      const t = -((baseAngle + (astro.degree || 0)) * Math.PI) / 180;
-      return new THREE.Vector3(Math.cos(t) * planet.distance, 0, Math.sin(t) * planet.distance);
+    if (viewMode === 'chart') {
+      if (planet.name === 'Earth') return new THREE.Vector3(0, 0, 0);
+      if (astro?.sign) {
+        const baseAngle = SIGN_ANGLES[astro.sign] || 0;
+        const t = -((baseAngle + (astro.degree || 0)) * Math.PI) / 180;
+        const d = planet.name === 'Sun' ? 40 : planet.distance;
+        return new THREE.Vector3(Math.cos(t) * d, 0, Math.sin(t) * d);
+      }
     }
     return null;
   };
 
-  useFrame(({ clock }) => {
+  useFrame((state) => {
+    const { clock } = state;
     if (controlsRef.current) {
-      if (selectedPlanet) {
+      if (rotationPerspective === 'travel') {
+        // Auto-cycle through planets for an overview or focus on selected
+        const time = clock.getElapsedTime();
+        const planetToFocus = selectedPlanet || planets[Math.floor(time / 5) % planets.length];
+        const planetPos = getPlanetPos(planetToFocus) || new THREE.Vector3(planetToFocus.distance, 0, 0);
+        
+        const idealCamPos = planetPos.clone().add(new THREE.Vector3(15, 10, 15));
+        state.camera.position.lerp(idealCamPos, 0.05);
+        state.camera.lookAt(planetPos);
+        controlsRef.current.target.lerp(planetPos, 0.1);
+      } else if (rotationPerspective === 'top') {
+        controlsRef.current.object.position.lerp(new THREE.Vector3(0, 200, 0), 0.05);
+        controlsRef.current.object.lookAt(0, 0, 0);
+      } else if (rotationPerspective === 'isometric') {
+        controlsRef.current.object.position.lerp(new THREE.Vector3(120, 120, 120), 0.05);
+        controlsRef.current.object.lookAt(0, 0, 0);
+      }
+
+      if (selectedPlanet && rotationPerspective !== 'travel') {
         if (selectedPlanet.name === 'Sun') {
           controlsRef.current.target.lerp(new THREE.Vector3(0, 0, 0), 0.1);
         } else {
@@ -569,13 +660,13 @@ export const SolarSystemScene: React.FC<SolarSystemSceneProps> = ({ data, onPlan
 
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 70, 150]} fov={50} />
+      <PerspectiveCamera makeDefault position={[120, 120, 120]} fov={50} />
       <OrbitControls 
         ref={controlsRef}
         enablePan={false}
-        maxDistance={400}
+        maxDistance={500}
         minDistance={10}
-        autoRotate={!selectedPlanet}
+        autoRotate={!selectedPlanet && rotationPerspective === 'orbit'}
         autoRotateSpeed={0.5}
       />
       
@@ -583,12 +674,13 @@ export const SolarSystemScene: React.FC<SolarSystemSceneProps> = ({ data, onPlan
       <Stars radius={200} depth={40} count={5000} factor={4} saturation={0.5} fade speed={0.5} />
       
       <color attach="background" args={['#020205']} />
-      <fog attach="fog" args={['#020205', 100, 500]} />
+      <fog attach="fog" args={['#020205', 100, 600]} />
       
-      <ambientLight intensity={0.15} />
+      <ambientLight intensity={0.2} />
+      <pointLight position={[100, 100, 100]} intensity={1} color="#ffffff" />
       
       <AstrologicalHouses data={data} onHouseHover={setHoveredHouse} />
-      <AspectLines data={data} />
+      <AspectLines data={data} onAspectClick={setSelectedAspect} />
 
       {/* Grid Floor for Futuristic Feel */}
       <Grid 
@@ -640,38 +732,67 @@ export const SolarSystemScene: React.FC<SolarSystemSceneProps> = ({ data, onPlan
         return null;
       })}
 
-      {/* The Sun */}
+      {/* The Center Point (Sun in Solar / Earth in Chart) */}
       <group 
         onPointerOver={() => setSunHovered(true)}
         onPointerOut={() => setSunHovered(false)}
         onClick={() => {
-          const sunData = getAstrologicalData('Sun');
-          if (sunData) {
+          if (viewMode === 'solar') {
+            const sunData = getAstrologicalData('Sun');
+            if (sunData) {
+              setSelectedPlanet({
+                name: 'Sun',
+                color: '#FDB813',
+                size: 6,
+                distance: 0,
+                speed: 0,
+                description: `The core of your identity. Centered in ${sunData.sign} in the ${sunData.house}${sunData.house % 10 === 1 ? 'st' : sunData.house % 10 === 2 ? 'nd' : sunData.house % 10 === 3 ? 'rd' : 'th'} House. ${sunData.meaning}`
+              });
+            }
+          } else {
             setSelectedPlanet({
-              name: 'Sun',
-              color: '#FDB813',
-              size: 6,
+              name: 'Earth',
+              color: '#3b82f6',
+              size: 5,
               distance: 0,
               speed: 0,
-              description: `The core of your identity. Centered in ${sunData.sign} in the ${sunData.house}${sunData.house % 10 === 1 ? 'st' : sunData.house % 10 === 2 ? 'nd' : sunData.house % 10 === 3 ? 'rd' : 'th'} House. ${sunData.meaning}`
+              description: 'The physical vessel for your soul experience. Current incarnation grounded in material reality.'
             });
           }
         }}
       >
-        <Sphere args={[6, 64, 64]}>
+        <Sphere args={[viewMode === 'chart' ? 5 : 6, 64, 64]}>
           <meshStandardMaterial 
-            color={selectedPlanet?.name === 'Sun' ? "#ffffff" : "#FDB813"} 
-            emissive={selectedPlanet?.name === 'Sun' ? "#ffffff" : "#FDB813"} 
+            color={viewMode === 'chart' ? "#3b82f6" : (selectedPlanet?.name === 'Sun' ? "#ffffff" : "#FDB813")} 
+            emissive={viewMode === 'chart' ? "#3b82f6" : (selectedPlanet?.name === 'Sun' ? "#ffffff" : "#FDB813")} 
             emissiveIntensity={2} 
             roughness={0.4}
             metalness={0.6}
+            wireframe={viewMode === 'chart'}
           />
         </Sphere>
-        <pointLight intensity={4} color="#FDB813" />
+        <pointLight intensity={4} color={viewMode === 'chart' ? "#3b82f6" : "#FDB813"} />
         <mesh scale={[1.2, 1.2, 1.2]}>
-          <sphereGeometry args={[6, 64, 64]} />
-          <meshBasicMaterial color={selectedPlanet?.name === 'Sun' ? "#ffffff" : "#FDB813"} transparent opacity={0.15} />
+          <sphereGeometry args={[viewMode === 'chart' ? 5 : 6, 64, 64]} />
+          <meshBasicMaterial color={viewMode === 'chart' ? "#3b82f6" : (selectedPlanet?.name === 'Sun' ? "#ffffff" : "#FDB813")} transparent opacity={0.15} />
         </mesh>
+        
+        {viewMode === 'chart' && (
+          <group>
+            <Ring args={[6, 6.2, 128]} rotation={[Math.PI / 2, 0, 0]}>
+              <meshBasicMaterial color="#3b82f6" transparent opacity={0.4} />
+            </Ring>
+            <Grid 
+              args={[15, 15]} 
+              cellColor="#3b82f6" 
+              sectionColor="#ffffff" 
+              fadeDistance={20} 
+              fadeStrength={1} 
+              opacity={0.1}
+              rotation={[Math.PI / 2, 0, 0]}
+            />
+          </group>
+        )}
 
         {sunHovered && !selectedPlanet && (
           <group position={[0, 8, 0]}>
@@ -713,14 +834,48 @@ export const SolarSystemScene: React.FC<SolarSystemSceneProps> = ({ data, onPlan
                   <h3 className="text-4xl font-light text-white uppercase tracking-widest">Sun</h3>
                   <div className="w-16 h-1 mt-3 bg-amber-500" />
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); setSelectedPlanet(null); }} className="p-2 text-stone-500 hover:text-white">✕</button>
+                <button onClick={(e) => { e.stopPropagation(); setSelectedPlanet(null); }} className="p-2 text-stone-500 hover:text-white transition-colors">
+                  <X size={20} />
+                </button>
               </div>
-              <p className="text-stone-200 text-sm italic leading-relaxed mb-6">
-                {selectedPlanet.description}
-              </p>
-              <div className="pt-4 border-t border-white/10">
-                 <div className="text-[9px] uppercase tracking-widest text-stone-500">Gravitational Influence</div>
-                 <div className="text-white text-xs mt-1">Prime Source of Awareness</div>
+
+              <div className="space-y-6">
+                {(() => {
+                  const sunAstro = getAstrologicalData('Sun');
+                  return (
+                    <>
+                      <div className="bg-white/5 p-5 rounded-3xl border border-white/10">
+                        <p className="text-stone-200 text-sm italic leading-relaxed font-light">
+                          {sunAstro?.meaning || selectedPlanet.description}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+                          <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Vibration</div>
+                          <div className="text-white text-sm font-bold font-mono">{sunAstro?.sign || 'Aries'}</div>
+                        </div>
+                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+                          <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Degree</div>
+                          <div className="text-white text-sm font-bold font-mono">{Math.floor(sunAstro?.degree || 0)}°</div>
+                        </div>
+                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+                          <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">House</div>
+                          <div className="text-white text-sm font-bold font-mono">Sector {sunAstro?.house || 1}</div>
+                        </div>
+                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+                          <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Element</div>
+                          <div className="text-white text-sm font-bold font-mono">{sunAstro?.sign ? SIGN_ELEMENTS[sunAstro.sign]?.type : 'Fire'}</div>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+
+                <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                   <div className="text-[9px] uppercase tracking-widest text-stone-500 font-bold">Gravitational Influence</div>
+                   <div className="text-amber-500 text-[10px] uppercase tracking-tighter">Prime Source</div>
+                </div>
               </div>
             </motion.div>
           </Html>
@@ -812,202 +967,268 @@ export const SolarSystemScene: React.FC<SolarSystemSceneProps> = ({ data, onPlan
         </Html>
       )}
 
+      {/* Neural Lattice */}
+      {isLatticeActive && (
+        <group>
+          {planets.map((p1, i) => 
+            planets.slice(i + 1).map((p2, j) => {
+              const pos1 = getPlanetPos(p1);
+              const pos2 = getPlanetPos(p2);
+              const astro1 = getAstrologicalData(p1.name);
+              const astro2 = getAstrologicalData(p2.name);
+              
+              if (pos1 && pos2) {
+                const distance = p1.distance - p2.distance;
+                if (Math.abs(distance) < 80 || (astro1?.sign === astro2?.sign)) {
+                  return (
+                    <Line 
+                      key={`latt-${p1.name}-${p2.name}`}
+                      points={[pos1, pos2]} 
+                      color={sceneMode === 'quantum' ? '#f43f5e' : (astro1?.sign === astro2?.sign ? '#fbbf24' : '#3b82f6')}
+                      opacity={0.08}
+                      transparent
+                      lineWidth={1}
+                    />
+                  );
+                }
+              }
+              return null;
+            })
+          )}
+        </group>
+      )}
+
       {/* Astro Intelligence Overlay */}
       <Html fullscreen>
-        <div className="absolute top-8 left-8 z-50 flex flex-col gap-4 pointer-events-none">
+        <div className="absolute top-8 left-8 z-[110] flex flex-col gap-4 pointer-events-none">
           <motion.div 
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className="p-6 bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] pointer-events-auto"
+            className="p-6 bg-stone-950/80 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] pointer-events-auto"
           >
             <div className="flex items-center gap-3 mb-1">
               <Sparkle className="text-yellow-500" size={16} />
-              <span className="text-[10px] uppercase tracking-widest font-bold text-stone-500">Birth Chart Mode</span>
+              <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-stone-500">Core Matrix</span>
             </div>
             <h2 className="text-2xl font-light text-white tracking-widest uppercase">Celestial Blueprint</h2>
             
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               <button 
                 onClick={() => setViewMode(viewMode === 'solar' ? 'chart' : 'solar')}
-                className={`px-3 py-1 border rounded-full text-[9px] uppercase tracking-tighter transition-all ${viewMode === 'chart' ? 'bg-purple-500 border-purple-400 text-white' : 'bg-white/5 border-white/10 text-white/50'}`}
+                className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${viewMode === 'chart' ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_20px_rgba(147,51,234,0.4)]' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
               >
-                {viewMode === 'chart' ? 'Birth Chart Active' : 'Enable Birth Chart'}
+                {viewMode === 'chart' ? 'Zodiac Wheel' : 'Solar Dynamics'}
               </button>
+              <div className="flex bg-white/5 rounded-full border border-white/10 p-0.5">
+                {[
+                  { id: 'isometric', icon: Compass, label: '3D Orbit' },
+                  { id: 'top', icon: Globe, label: 'Top View' },
+                  { id: 'orbit', icon: Activity, label: 'Auto Rotation' },
+                  { id: 'travel', icon: Rocket, label: 'Zoom Focus' }
+                ].map(opt => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setRotationPerspective(opt.id as any)}
+                    className={`p-2 rounded-full transition-all ${rotationPerspective === opt.id ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white'}`}
+                    title={opt.label}
+                  >
+                    <opt.icon size={14} />
+                  </button>
+                ))}
+              </div>
               <button 
                 onClick={() => setIsStatic(!isStatic)}
-                className={`px-3 py-1 border rounded-full text-[9px] uppercase tracking-tighter transition-all ${isStatic ? 'bg-amber-500/20 border-amber-500 text-amber-500' : 'bg-white/5 border-white/10 text-white/50'}`}
+                className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${isStatic ? 'bg-amber-500/20 border-amber-500 text-amber-500' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
               >
-                {isStatic ? 'Orbits Paused' : 'Pause Orbits'}
+                {isStatic ? 'Orbits Paused' : 'Dynamic Flow'}
               </button>
+                    <button 
+                      onClick={() => {
+                        setShowHouseGuide(true);
+                      }}
+                      className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${showHouseGuide ? 'bg-emerald-500/20 border-emerald-500 text-emerald-500' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
+                    >
+                      Synthesis Guide
+                    </button>
               <button 
-                onClick={() => setShowHouseGuide(!showHouseGuide)}
-                className={`px-3 py-1 border rounded-full text-[9px] uppercase tracking-tighter transition-all ${showHouseGuide ? 'bg-emerald-500/20 border-emerald-500 text-emerald-500' : 'bg-white/5 border-white/10 text-white/50'}`}
+                onClick={() => setIsLatticeActive(!isLatticeActive)}
+                className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${isLatticeActive ? 'bg-blue-500/20 border-blue-500 text-blue-500' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
               >
-                House Meanings
+                Neural Lattice
               </button>
             </div>
-          </motion.div>
 
-          <AnimatePresence>
-            {showHouseGuide && (
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -20, opacity: 0 }}
-                className="max-w-[320px] p-6 bg-black/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] pointer-events-auto h-[400px] overflow-y-auto custom-scrollbar"
-              >
-                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-[10px] uppercase tracking-[0.3em] font-bold text-emerald-400">House Lexicon</h3>
-                    <button onClick={() => setShowHouseGuide(false)} className="text-stone-500 hover:text-white"><X size={14}/></button>
-                 </div>
-                 <div className="space-y-4">
-                    {Array.from({ length: 12 }).map((_, i) => (
-                      <div key={i} className="p-3 bg-white/5 rounded-xl border border-white/5">
-                         <div className="flex items-center justify-between mb-1">
-                            <span className="text-[9px] text-emerald-500 uppercase font-bold">House {i+1}</span>
-                            <span className="text-[8px] text-stone-600 font-mono tracking-tighter">{SIGN_NAMES[i]}</span>
-                         </div>
-                         <p className="text-[10px] text-stone-400 leading-relaxed italic">
-                            {HOUSE_DESCRIPTIONS[i+1]}
-                         </p>
-                      </div>
-                    ))}
-                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {data?.synthesis && (
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -20, opacity: 0 }}
-                className="max-w-[320px] p-6 bg-black/40 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] pointer-events-auto"
-              >
-                <h3 className="text-[10px] uppercase tracking-[0.3em] font-bold text-blue-400 mb-3">Core Resonance</h3>
-                <p className="text-xs text-stone-300 leading-relaxed italic">
-                  {data.synthesis.slice(0, 150)}...
-                </p>
-                <div className="mt-4 pt-4 border-t border-white/5">
-                   <div className="text-[9px] text-stone-600 uppercase tracking-widest mb-2">Key Harmonic</div>
-                   <div className="text-white text-[11px] font-medium">{data.patterns?.coreTheme || 'Integrated Consciousness'}</div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className="absolute top-8 right-8 z-50 pointer-events-auto flex flex-col gap-4 items-end">
-          <button 
-            className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-white/60 hover:text-white transition-all backdrop-blur-xl"
-            onClick={() => {
-              if (onPlanetClick) onPlanetClick('Birth Chart Guide', 'Exploring the houses, nodes, and aspects of your celestial blueprint.');
-            }}
-          >
-            <BookOpen size={20} />
-          </button>
-
-          <button 
-            onClick={() => setIsAuraOpen(!isAuraOpen)}
-            className={`p-4 rounded-full border transition-all backdrop-blur-xl ${isAuraOpen ? 'bg-emerald-500/20 border-emerald-500 text-emerald-500' : 'bg-black/60 border-white/10 text-white/60 hover:text-white'}`}
-          >
-            <Bot size={20} />
-          </button>
-        </div>
-
-        {/* Aura AI Agent Terminal */}
-        <AnimatePresence>
-          {isAuraOpen && (
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
-              className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[90%] max-w-[600px] z-50 pointer-events-auto"
-            >
-              <div className="bg-black/80 backdrop-blur-3xl border border-emerald-500/30 rounded-[2.5rem] overflow-hidden shadow-[0_-20px_100px_rgba(16,185,129,0.15)]">
-                <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-500">
-                      <Terminal size={18} />
-                    </div>
-                    <div>
-                      <div className="text-[8px] text-stone-500 uppercase tracking-widest font-bold">Neural Interface</div>
-                      <h3 className="text-xl text-white font-light tracking-widest uppercase">Aura Agent OS</h3>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
+            <div className="mt-6 pt-4 border-t border-white/5">
+              <div className="flex items-center gap-2 mb-3">
+                <Layers className="text-blue-400" size={14} />
+                <span className="text-[9px] text-stone-500 uppercase tracking-widest font-bold">Vibrational Dimension</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'cosmic', color: 'bg-blue-500', label: 'Cosmic-1', icon: Globe2 },
+                  { id: 'quantum', color: 'bg-rose-500', label: 'Quantum-X', icon: Atom },
+                  { id: 'verdant', color: 'bg-emerald-500', label: 'Verdant-Z', icon: Wind },
+                  { id: 'void', color: 'bg-stone-500', label: 'Deep Void', icon: Ghost }
+                ].map(mode => (
+                  <button 
+                    key={mode.id}
+                    onClick={() => setSceneMode(mode.id as any)}
+                    className={`flex items-center justify-between gap-3 px-4 py-2 rounded-2xl border transition-all ${sceneMode === mode.id ? 'bg-white/10 border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.05)]' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5'}`}
+                  >
                     <div className="flex items-center gap-2">
-                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                       <span className="text-[9px] text-emerald-500/70 font-mono tracking-tighter uppercase">Sync Active</span>
+                       <mode.icon size={12} className={sceneMode === mode.id ? 'text-white' : 'text-stone-500'} />
+                       <span className="text-[9px] text-white uppercase tracking-widest font-medium">{mode.label}</span>
                     </div>
-                    <button onClick={() => setIsAuraOpen(false)} className="text-stone-500 hover:text-white transition-colors">
-                      <X size={18} />
-                    </button>
-                  </div>
+                    <div className={`w-1.5 h-1.5 rounded-full ${mode.color} ${sceneMode === mode.id ? 'animate-ping' : ''}`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Aura Sentient Agent Hub Toggle */}
+        <div className="absolute bottom-8 right-8 z-[110] flex flex-col items-end gap-4 pointer-events-none">
+          <AnimatePresence>
+            {isAuraOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="w-[400px] bg-stone-950/95 backdrop-blur-3xl border border-emerald-500/30 rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] pointer-events-auto"
+              >
+                {/* Header */}
+                <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-emerald-500/5 cursor-default">
+                   <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping absolute inset-0" />
+                        <Bot className="text-emerald-500 relative z-10" size={24} />
+                      </div>
+                      <div>
+                        <div className="text-[8px] text-stone-500 uppercase tracking-[0.6em] font-bold">Resonance Engine</div>
+                        <h3 className="text-lg text-white font-light tracking-[0.2em] uppercase mt-1">Agent Aura</h3>
+                      </div>
+                   </div>
+                   <button onClick={() => setIsAuraOpen(false)} className="p-2 hover:bg-white/5 rounded-full text-stone-500 hover:text-white transition-colors">
+                      <X size={20} />
+                   </button>
                 </div>
 
-                <div className="p-8 space-y-6">
+                <div className="p-8 space-y-8">
+                  <div className="bg-black/60 rounded-3xl p-5 border border-white/5 font-mono text-[10px] max-h-32 overflow-y-auto scrollbar-hide">
+                     {auraLogs.map((log, i) => (
+                       <div key={i} className="flex gap-3 mb-2">
+                          <span className="text-stone-800 shrink-0">[{1000 + i}]</span>
+                          <span className={`${i === auraLogs.length - 1 ? 'text-emerald-400' : 'text-stone-600'}`}>{log}</span>
+                       </div>
+                     ))}
+                  </div>
+
                   {auraInsight && (
                     <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-5 bg-white/5 rounded-2xl border border-white/10 relative overflow-hidden group"
+                      key={auraInsight}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl relative overflow-hidden"
                     >
-                      <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
-                      <div className="flex items-center gap-2 mb-3">
-                        <Cpu size={12} className="text-emerald-500" />
-                        <span className="text-[9px] text-stone-500 uppercase tracking-widest">Neural Insight</span>
-                      </div>
-                      <p className="text-sm text-stone-300 leading-relaxed italic pr-4">
-                        {auraInsight}
-                      </p>
-                      {isAuraThinking && (
-                        <div className="mt-4 flex gap-1">
-                          {[0, 1, 2].map(i => (
-                            <motion.div
-                              key={i}
-                              animate={{ opacity: [0.3, 1, 0.3] }}
-                              transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
-                              className="w-1.5 h-1.5 rounded-full bg-emerald-500"
-                            />
-                          ))}
-                        </div>
-                      )}
+                      <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                      <p className="text-xs text-stone-300 leading-relaxed italic pr-4 font-light">{auraInsight}</p>
                     </motion.div>
                   )}
 
-                  <div className="relative group">
+                  <div className="relative">
                     <input 
                       type="text"
                       value={auraPrompt}
                       onChange={(e) => setAuraPrompt(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAuraSubmit()}
-                      placeholder="Input command (e.g. 'Build a bridge to Saturn', 'Analyze nodes')..."
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 text-sm text-white placeholder:text-stone-600 focus:outline-none focus:border-emerald-500/50 transition-all font-light"
+                      placeholder="Enter command..."
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white placeholder:text-stone-700 focus:outline-none focus:border-emerald-500/50 transition-all pr-14"
                     />
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-600 group-focus-within:text-emerald-500 transition-colors">
-                      <ChevronRight size={18} />
-                    </div>
                     <button 
                       onClick={handleAuraSubmit}
                       disabled={isAuraThinking}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-emerald-500 rounded-xl text-black hover:bg-emerald-400 transition-all disabled:opacity-50 disabled:grayscale"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 hover:scale-125 disabled:opacity-50 transition-transform"
                     >
-                      <Send size={16} />
+                      {isAuraThinking ? <Loader2 className="animate-spin" size={24} /> : <Send size={24} />}
                     </button>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    {['Trace Aspects', 'Expand Nodes', 'Neural Sync', 'Deep Space Scan'].map((tag) => (
+                  <div className="grid grid-cols-2 gap-3">
+                    {['Resonance Link', 'Neural Bloom', 'Void Search', 'Deep Sync'].map(tag => (
                       <button 
                         key={tag}
-                        onClick={() => setAuraPrompt(tag)}
-                        className="text-[8px] uppercase tracking-widest text-stone-600 hover:text-emerald-500 transition-colors bg-white/5 px-2 py-1 rounded-md border border-white/5"
+                        onClick={() => { setAuraPrompt(tag); handleAuraSubmit(); }}
+                        className="flex items-center gap-3 px-4 py-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all group"
                       >
-                        {tag}
+                         <Zap size={12} className="text-stone-600 group-hover:text-emerald-400 group-hover:animate-pulse" />
+                         <span className="text-[10px] text-stone-400 uppercase tracking-[0.2em] font-bold group-hover:text-emerald-500">{tag}</span>
                       </button>
                     ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <button 
+            onClick={() => setIsAuraOpen(!isAuraOpen)}
+            className={`w-20 h-20 rounded-full flex items-center justify-center transition-all pointer-events-auto shadow-2xl ${isAuraOpen ? 'bg-emerald-500/10 border-2 border-emerald-500 text-emerald-500' : 'bg-stone-900 border border-white/10 text-white hover:border-emerald-500'}`}
+          >
+            {isAuraOpen ? <X size={28} /> : <Bot size={32} className="animate-pulse" />}
+          </button>
+        </div>
+
+        {/* Aspect Detail Overlay */}
+        <AnimatePresence>
+          {selectedAspect && (
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0 }}
+              className="absolute top-1/2 -translate-y-1/2 left-8 z-[120] w-[380px] pointer-events-auto"
+            >
+              <div className="bg-stone-950/90 backdrop-blur-3xl border border-white/10 p-8 rounded-[3rem] shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 blur-3xl rounded-full translate-x-12 -translate-y-12" />
+                <div className="flex justify-between items-start mb-6 relative">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-2 h-2 rounded-full ${
+                        selectedAspect.type === 'conjunction' ? 'bg-white' :
+                        selectedAspect.type === 'square' ? 'bg-red-500' :
+                        selectedAspect.type === 'trine' ? 'bg-emerald-500' : 'bg-blue-500'
+                      } animate-pulse`} />
+                      <div className="text-[10px] text-stone-500 uppercase tracking-[0.4em] font-bold">Planetary Aspect</div>
+                    </div>
+                    <h3 className="text-2xl text-white font-light tracking-widest uppercase">
+                      {selectedAspect.planet1} <span className="text-stone-600">to</span> {selectedAspect.planet2}
+                    </h3>
+                  </div>
+                  <button onClick={() => setSelectedAspect(null)} className="p-2 hover:bg-white/5 rounded-full transition-colors text-stone-500 hover:text-white">
+                    <X size={20}/>
+                  </button>
+                </div>
+
+                <div className="space-y-6 relative">
+                  <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 group hover:border-purple-500/30 transition-all">
+                    <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold border border-purple-500/20">
+                      {selectedAspect.type.slice(0, 1).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="text-[9px] text-purple-400 uppercase tracking-widest mb-0.5">Energy Relationship</div>
+                      <div className="text-white text-lg font-light uppercase tracking-widest">{selectedAspect.type}</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-black/40 p-5 rounded-3xl border border-white/5">
+                    <p className="text-sm text-stone-300 leading-relaxed font-light italic">
+                      {selectedAspect.meaning}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 flex justify-between items-center text-[9px] uppercase tracking-widest text-stone-600 font-bold">
+                    <span>Harmonic Synchronicity</span>
+                    <span className="text-purple-500">Active Node</span>
                   </div>
                 </div>
               </div>
@@ -1015,43 +1236,119 @@ export const SolarSystemScene: React.FC<SolarSystemSceneProps> = ({ data, onPlan
           )}
         </AnimatePresence>
 
-        {/* Selected Aura Node Detail */}
+        {/* Selected Aura Node Detail Overlay */}
         <AnimatePresence>
           {selectedAuraNode && (
             <motion.div
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 20, opacity: 0 }}
-              className="absolute top-8 right-8 z-50 w-[300px] pointer-events-auto"
+              className="absolute top-32 right-12 z-[110] w-[350px] pointer-events-auto"
             >
-              <div className="bg-black/90 backdrop-blur-3xl border border-white/20 p-6 rounded-[2.5rem] shadow-2xl">
-                 <div className="flex justify-between items-start mb-4">
+              <div className="bg-stone-950/90 backdrop-blur-3xl border border-white/10 p-8 rounded-[3rem] shadow-2xl">
+                 <div className="flex justify-between items-start mb-6">
                     <div>
-                      <div className="text-[8px] text-stone-500 uppercase tracking-widest font-bold mb-1">AI Seeding Output</div>
-                      <h3 className="text-xl text-white font-light tracking-widest uppercase">{selectedAuraNode.label}</h3>
+                      <div className="text-[10px] text-emerald-500 uppercase tracking-[0.4em] font-bold mb-2">Neural Seeding Result</div>
+                      <h3 className="text-2xl text-white font-light tracking-widest uppercase">{selectedAuraNode.label}</h3>
                     </div>
-                    <button onClick={() => setSelectedAuraNode(null)} className="text-stone-500 hover:text-white"><X size={16}/></button>
+                    <button onClick={() => setSelectedAuraNode(null)} className="p-2 hover:bg-white/5 rounded-full transition-colors text-stone-500 hover:text-white">
+                      <X size={20}/>
+                    </button>
                  </div>
-                 <p className="text-xs text-stone-400 leading-relaxed italic mb-4">
-                   {selectedAuraNode.description}
-                 </p>
-                 <div className="pt-4 border-t border-white/10 grid grid-cols-2 gap-3">
-                    <div className="bg-white/5 p-2 rounded-xl border border-white/5 text-center">
-                       <span className="text-[7px] text-stone-600 uppercase block">Coord-X</span>
-                       <span className="text-[10px] text-white font-mono">{selectedAuraNode.position[0]}</span>
+                 <p className="text-sm text-stone-400 leading-relaxed italic mb-6 font-light">{selectedAuraNode.description}</p>
+                 <div className="pt-6 border-t border-white/10 grid grid-cols-2 gap-4">
+                    <div className="bg-white/5 p-4 rounded-2xl border border-white/5 text-center hover:bg-white/10 transition-colors">
+                       <span className="text-[8px] text-stone-600 uppercase tracking-widest block mb-1">Spatial-X</span>
+                       <span className="text-xs text-white font-mono">{selectedAuraNode.position[0].toFixed(2)}</span>
                     </div>
-                    <div className="bg-white/5 p-2 rounded-xl border border-white/5 text-center">
-                       <span className="text-[7px] text-stone-600 uppercase block">Resonance</span>
-                       <span className="text-[10px] text-white font-mono">STABLE</span>
+                    <div className="bg-white/5 p-4 rounded-2xl border border-white/5 text-center hover:bg-white/10 transition-colors">
+                       <span className="text-[8px] text-stone-600 uppercase tracking-widest block mb-1">Status</span>
+                       <span className="text-xs text-emerald-500 font-bold">STABLE</span>
                     </div>
                  </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Soul Synthesis Reference Guide */}
+        <AnimatePresence>
+          {showHouseGuide && data && (
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 20, opacity: 0 }}
+              className="absolute bottom-32 left-1/2 -translate-x-1/2 w-[95%] max-w-[1000px] z-[120] pointer-events-auto"
+            >
+               <div className="bg-stone-950/95 backdrop-blur-3xl border border-white/10 rounded-[4rem] overflow-hidden shadow-2xl p-12">
+                  <div className="flex justify-between items-start mb-10">
+                     <div>
+                        <div className="text-[10px] text-stone-500 uppercase tracking-[0.6em] font-bold mb-3">Synthesis Engine</div>
+                        <h3 className="text-4xl text-white font-light tracking-widest uppercase leading-none">Astrological Synthesis</h3>
+                        <p className="text-stone-400 mt-4 text-xs tracking-wider uppercase font-medium">Putting your entire celestial blueprint together</p>
+                     </div>
+                     <button onClick={() => setShowHouseGuide(false)} className="p-4 hover:bg-white/5 rounded-full transition-all text-stone-500 hover:text-white">
+                        <X size={28} />
+                     </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Left: Dominant Themes */}
+                    <div className="space-y-6">
+                      <div className="bg-white/5 p-6 rounded-[2.5rem] border border-white/10">
+                        <h4 className="text-xs uppercase tracking-widest text-emerald-400 mb-4">Core Resonance</h4>
+                        <div className="space-y-4">
+                           <div>
+                             <span className="text-[10px] text-stone-500 block mb-1 uppercase">Primal Identity (Sun)</span>
+                             <p className="text-sm text-stone-200">{data.planets.find(p => p.name === 'Sun')?.meaning || 'The solar frequency is active.'}</p>
+                           </div>
+                           <div>
+                             <span className="text-[10px] text-stone-500 block mb-1 uppercase">Directional Intent</span>
+                             <p className="text-sm text-stone-200">{data.nodes.north.meaning}</p>
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Middle: House Dynamics */}
+                    <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 h-[400px] overflow-y-auto pr-4 scrollbar-hide">
+                      {data.houses?.map(house => (
+                        <div key={house.houseNumber} className="bg-white/5 p-5 rounded-3xl border border-white/5 hover:border-emerald-500/30 transition-all group">
+                           <div className="flex justify-between items-start mb-3">
+                             <div className="text-emerald-500 font-mono text-xl opacity-50 group-hover:opacity-100">{house.houseNumber}</div>
+                             <span className="text-[9px] text-stone-500 uppercase tracking-widest font-bold">{house.realmName}</span>
+                           </div>
+                           <p className="text-xs text-stone-300 leading-relaxed font-light italic">{house.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-10 pt-8 border-t border-white/5 flex flex-wrap gap-4">
+                    {data.aspects?.slice(0, 4).map((aspect, i) => (
+                      <div key={i} className="px-5 py-3 bg-black/40 border border-white/10 rounded-2xl flex items-center gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                        <span className="text-[10px] text-stone-300 uppercase tracking-widest">{aspect.planet1} {aspect.type} {aspect.planet2}</span>
+                      </div>
+                    ))}
+                  </div>
+               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Html>
 
-      {/* Removed Global Html Panel - Now handled locally in Planet and Sun components */}
+      {/* Advanced Post-Processing Effects */}
+      <EffectComposer disableNormalPass>
+         <Bloom 
+           intensity={sceneMode === 'quantum' ? 2 : (sceneMode === 'void' ? 0.5 : 1.2)} 
+           mipmapBlur 
+           luminanceThreshold={0.7} 
+         />
+         <Noise opacity={sceneMode === 'void' ? 0.4 : 0.08} />
+         <Vignette eskil={false} offset={0.2} darkness={sceneMode === 'void' ? 1.6 : 1.2} />
+         {sceneMode === 'quantum' && <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={new THREE.Vector2(0.003, 0.003)} />}
+      </EffectComposer>
     </>
   );
 };

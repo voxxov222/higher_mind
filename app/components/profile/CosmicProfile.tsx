@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   User, Settings, Share2, Plus, Layout as LayoutIcon, 
@@ -13,7 +14,7 @@ import { useProfileStore } from '../../services/profileService';
 import { UserProfileConfig, CosmicWidget } from '../../types';
 import clsx from 'clsx';
 
-const CosmicProfile: React.FC<{ initialConfig?: UserProfileConfig }> = ({ initialConfig }) => {
+const CosmicProfile = ({ initialConfig }: { initialConfig?: UserProfileConfig }) => {
   const { config, isEditing, setConfig, setEditing, updateWidget, addWidget, removeWidget, updateTheme, saveProfile } = useProfileStore();
   const [activeLayout, setActiveLayout] = useState<'bento' | 'free' | 'column'>('bento');
 
@@ -241,7 +242,7 @@ const CosmicProfile: React.FC<{ initialConfig?: UserProfileConfig }> = ({ initia
   );
 };
 
-const WidgetRenderer: React.FC<{ widget: CosmicWidget; config: UserProfileConfig }> = ({ widget, config }) => {
+const WidgetRenderer = ({ widget, config }: { widget: CosmicWidget; config: UserProfileConfig }) => {
   const isEditing = useProfileStore(s => s.isEditing);
   const removeWidget = useProfileStore(s => s.removeWidget);
 

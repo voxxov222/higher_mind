@@ -1,4 +1,5 @@
-import React, { useRef, useMemo } from 'react';
+import * as React from 'react';
+import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Float, Sphere, MeshDistortMaterial, MeshWobbleMaterial, Stars, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
@@ -99,7 +100,7 @@ const SoulEntity = ({ color = '#a855f7' }: { color?: string }) => {
   );
 };
 
-export const SoulAvatar: React.FC<{ color?: string }> = ({ color = '#a855f7' }) => {
+export const SoulAvatar = ({ color = '#a855f7' }: { color?: string }) => {
   return (
     <div className="w-full h-full min-h-[300px] relative cursor-pointer">
       <Canvas camera={{ position: [0, 0, 5], fov: 45 }} gl={{ antialias: false, stencil: false, depth: true }}>

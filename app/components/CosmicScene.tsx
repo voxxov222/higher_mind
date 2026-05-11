@@ -1,5 +1,6 @@
 // --- CORE IMPORTS & THREE.JS FIBER REFS ---
-import React, { useRef, useMemo, useState, useEffect } from 'react';
+import * as React from 'react';
+import { useRef, useMemo, useState, useEffect, createContext, useContext } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Line, Ring, Sparkles, Stars, Text, Trail, OrbitControls, Html, PerspectiveCamera } from '@react-three/drei';
 // --- POST-PROCESSING EFFX ---
@@ -167,7 +168,7 @@ const HolographicMenu = ({ state, onUpdate, onClose }: { state: InteractionState
   );
 };
 
-const InteractionContext = React.createContext<{ color: string; animation: AnimationType; isLocked: boolean; glowIntensity: number } | null>(null);
+const InteractionContext = createContext<{ color: string; animation: AnimationType; isLocked: boolean; glowIntensity: number } | null>(null);
 
 /**
  * InteractiveObject Higher-Order Component
@@ -303,7 +304,7 @@ const InteractiveObject = ({ id, children, initialColor, onSelect }: any) => {
 };
 
 const CosmicMaterial = (props: any) => {
-  const context = React.useContext(InteractionContext);
+  const context = useContext(InteractionContext);
   return (
     <meshStandardMaterial 
       {...props} 
@@ -315,7 +316,7 @@ const CosmicMaterial = (props: any) => {
 };
 
 const CosmicText = (props: any) => {
-  const context = React.useContext(InteractionContext);
+  const context = useContext(InteractionContext);
   return (
     <Text 
       {...props} 
@@ -752,41 +753,49 @@ const TorusField = () => {
   return (
     <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
       {/* Outer Torus */}
-      <mesh ref={outerRef}>
-        <torusGeometry args={[10, 0.1, 8, 50]} />
-        <meshStandardMaterial 
-          color="#a855f7" 
-          transparent 
-          opacity={0.3} 
-          emissive="#7e22ce" 
-          emissiveIntensity={1} 
-        />
-      </mesh>
+      <InteractiveObject id="torus_outer" initialColor="#a855f7">
+        <mesh ref={outerRef}>
+          <torusGeometry args={[10, 0.1, 8, 50]} />
+          <CosmicMaterial 
+            color="#a855f7" 
+            transparent 
+            opacity={0.3} 
+            emissive="#7e22ce" 
+            emissiveIntensity={1} 
+          />
+        </mesh>
+      </InteractiveObject>
 
       {/* Mid Energetic Torus */}
-      <mesh ref={midRef}>
-        <torusGeometry args={[7, 2, 16, 50]} />
-        <meshStandardMaterial 
-          color="#8b5cf6" 
-          wireframe 
-          transparent 
-          opacity={0.15} 
-          emissive="#6d28d9" 
-          emissiveIntensity={0.8} 
-        />
-      </mesh>
+      <InteractiveObject id="torus_mid" initialColor="#8b5cf6">
+        <mesh ref={midRef}>
+          <torusGeometry args={[7, 2, 16, 50]} />
+          <CosmicMaterial 
+            color="#8b5cf6" 
+            wireframe 
+            transparent 
+            opacity={0.15} 
+            emissive="#6d28d9" 
+            emissiveIntensity={0.8} 
+          />
+        </mesh>
+      </InteractiveObject>
 
       {/* Inner Torus for depth */}
-      <mesh ref={innerRef}>
-         <torusGeometry args={[3, 0.5, 16, 50]} />
-         <meshStandardMaterial color="#3b82f6" wireframe transparent opacity={0.4} emissive="#1d4ed8" emissiveIntensity={0.5} />
-      </mesh>
+      <InteractiveObject id="torus_inner" initialColor="#3b82f6">
+        <mesh ref={innerRef}>
+           <torusGeometry args={[3, 0.5, 16, 50]} />
+           <CosmicMaterial color="#3b82f6" wireframe transparent opacity={0.4} emissive="#1d4ed8" emissiveIntensity={0.5} />
+        </mesh>
+      </InteractiveObject>
 
       {/* Core Sacred Knot (represents the center of the field) */}
-      <mesh ref={knotRef}>
-        <torusKnotGeometry args={[1, 0.3, 100, 16]} />
-        <meshStandardMaterial color="#fbbf24" wireframe transparent opacity={0.6} emissive="#d97706" emissiveIntensity={1} />
-      </mesh>
+      <InteractiveObject id="torus_knot" initialColor="#fbbf24">
+        <mesh ref={knotRef}>
+          <torusKnotGeometry args={[1, 0.3, 100, 16]} />
+          <CosmicMaterial color="#fbbf24" wireframe transparent opacity={0.6} emissive="#d97706" emissiveIntensity={1} />
+        </mesh>
+      </InteractiveObject>
     </Float>
   );
 }
@@ -1344,7 +1353,7 @@ const NumerologyGeometria = ({ data, onSelect }: { data: CosmicData, onSelect: (
  * The primary 3D rendering context using React Three Fiber.
  * Integrates geometry, lighting, effects, and camera management.
  */
-export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive }) => {
+export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive }: CosmicSceneProps) => {
 
   return (
     <Canvas id="cosmic-canvas" camera={{ position: [0, 15, 20], fov: 60 }} className="w-full h-full absolute inset-0 bg-black">

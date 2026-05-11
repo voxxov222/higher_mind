@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Stars } from '@react-three/drei';
 
@@ -6,7 +6,7 @@ import { Stars } from '@react-three/drei';
  * StarField Component
  * Provides a highly detailed, 3D starfield background using Three.js.
  */
-const StarField: React.FC = () => {
+const StarField = () => {
   return (
     <div 
       id="cosmic-starfield"

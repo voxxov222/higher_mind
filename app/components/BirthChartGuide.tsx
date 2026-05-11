@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { motion } from 'motion/react';
 import { BookOpen, Info, Sparkles, Compass, Hexagon, Network, Workflow } from 'lucide-react';
 
@@ -26,7 +26,7 @@ const NODE_MEANINGS = [
  * BirthChartGuide Component
  * Provides a comprehensive, educational overview of birth chart fundamentals.
  */
-const BirthChartGuide: React.FC = () => {
+const BirthChartGuide = () => {
   return (
     <div className="space-y-12 py-6">
       {/* Intro Section */}

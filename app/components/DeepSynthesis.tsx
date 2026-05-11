@@ -1,23 +1,68 @@
+// --- CORE IMPORTS ---
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Zap, Monitor, Share2, Download, BookOpen, PieChart, Network, 
   PlayCircle, Eye, ChevronRight, DownloadCloud, Layers, Target, 
-  Star, Activity, Moon, Sun, Globe, User, Fingerprint
+  Star, Activity, Moon, Sun, Globe, User, Fingerprint, Volume2
 } from 'lucide-react';
+// --- VISUALIZATION LIBRARIES ---
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid
 } from 'recharts';
 import { CosmicData } from '../types';
 
+/**
+ * Available Synthesis View Modes
+ */
 type SynthesisMode = 'overview' | 'infographic' | 'mindmap' | '3d' | 'video';
 
+/**
+ * DeepSynthesis Component
+ * High-fidelity data visualization module offering multiple perspectives on cosmic data.
+ */
 export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicData | null, onPresentationRequest: () => void }) => {
+  // --- COMPONENT STATE & VIEW REFS ---
   const [mode, setMode] = useState<SynthesisMode>('overview');
   const [videoStep, setVideoStep] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const [isReading, setIsReading] = useState(false);
 
+  // --- NARRATIVE AUDIO ENGINE ---
+  const handleReadOutLoud = (text: string) => {
+    if ('speechSynthesis' in window) {
+      if (isReading) {
+        window.speechSynthesis.cancel();
+        setIsReading(false);
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.onend = () => setIsReading(false);
+      utterance.onerror = () => setIsReading(false);
+      
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Premium')) || voices[0];
+      if (preferredVoice) utterance.voice = preferredVoice;
+      
+      utterance.rate = 0.95;
+      utterance.pitch = 1.1; // Slightly higher for "synthesis" vibe
+      
+      setIsReading(true);
+      window.speechSynthesis.speak(utterance);
+    } else {
+      alert("Speech synthesis is not supported in this browser.");
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  // --- ANIMATION & AUTO-PLAY LOGIC ---
   useEffect(() => {
     let interval: any;
     if (isAutoPlaying && mode === 'video') {
@@ -30,6 +75,7 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
 
   if (!data) return null;
 
+  // --- STATIC CONFIG DATA ---
   const infographicData = [
     { subject: 'Consciousness', A: 85, fullMark: 100 },
     { subject: 'Intuition', A: 92, fullMark: 100 },
@@ -41,7 +87,7 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
 
   return (
     <div className="h-full flex flex-col space-y-6">
-      {/* Control Bar */}
+      {/* --- TOP NAVIGATION BAR --- */}
       <div className="flex bg-black/40 border border-white/5 p-2 rounded-2xl md:rounded-[2.5rem] items-center justify-between shrink-0 overflow-x-auto no-scrollbar">
         <div className="flex gap-2 p-1">
           {[
@@ -63,6 +109,13 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
         </div>
         
         <div className="flex gap-2 pr-4">
+           <button 
+             onClick={() => handleReadOutLoud(mode === 'overview' ? data.synthesis : mode === 'infographic' ? `Identity report for ${data.planets?.[0]?.name}. Master synthesis: ${data.synthesis}` : 'Cosmic deep synthesis data')}
+             className={`p-2 transition-all rounded-lg ${isReading ? 'text-purple-400 bg-purple-500/10 animate-pulse' : 'text-stone-500 hover:text-white'}`}
+             title="Read Out Loud (AI)"
+           >
+             <Volume2 size={18} />
+           </button>
            <button className="p-2 text-stone-500 hover:text-white transition-colors"><Download size={18} /></button>
            <button className="p-2 text-stone-500 hover:text-white transition-colors"><Share2 size={18} /></button>
         </div>
@@ -91,15 +144,31 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
+                  {data.patterns?.timeDateDiscovery && (
+                    <motion.div 
+                      whileHover={{ scale: 1.02 }}
+                      className="col-span-2 bg-gradient-to-r from-amber-900/30 to-amber-600/10 border border-amber-500/30 rounded-3xl p-6 relative group overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
+                        <Star className="w-20 h-20 text-amber-400" />
+                      </div>
+                      <div className="text-amber-500 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold flex items-center gap-2">
+                        <Sparkles className="w-3 h-3" /> Essential Pattern Recognition
+                      </div>
+                      <div className="text-xl text-white font-light mb-1">{data.patterns.timeDateDiscovery.title}</div>
+                      <div className="text-[10px] font-mono text-amber-200/60 mb-2">{data.patterns.timeDateDiscovery.mathematicalPattern}</div>
+                      <p className="text-xs text-stone-300 italic leading-relaxed">"{data.patterns.timeDateDiscovery.description}"</p>
+                    </motion.div>
+                  )}
                   <div className="bg-white/5 border border-white/10 rounded-3xl p-6 hover:border-white/20 transition-all">
                      <div className="text-stone-500 text-[10px] uppercase tracking-widest mb-2">Primary Destiny Arc</div>
-                     <div className="text-xl text-white font-light">{data.planets[0]?.sign} {data.planets[0]?.name}</div>
-                     <p className="text-xs text-stone-400 mt-2 italic">"{data.planets[0]?.interpretation?.split('.')[0] || 'Celestial alignment in progress'}."</p>
+                     <div className="text-xl text-white font-light">{data.planets?.[0]?.sign} {data.planets?.[0]?.name}</div>
+                     <p className="text-xs text-stone-400 mt-2 italic">"{data.planets?.[0]?.interpretation?.split('.')[0] || 'Celestial alignment in progress'}."</p>
                   </div>
                   <div className="bg-white/5 border border-white/10 rounded-3xl p-6 hover:border-white/20 transition-all">
                      <div className="text-stone-500 text-[10px] uppercase tracking-widest mb-2">Soul Resonance Number</div>
-                     <div className="text-3xl text-sky-400 font-light">{data.numerology.coreNumbers[0]?.value}</div>
-                     <p className="text-xs text-stone-400 mt-2 font-bold uppercase tracking-widest">{data.numerology.coreNumbers[0]?.name}</p>
+                     <div className="text-3xl text-sky-400 font-light">{data.numerology.coreNumbers?.[0]?.value || '0'}</div>
+                     <p className="text-xs text-stone-400 mt-2 font-bold uppercase tracking-widest">{data.numerology.coreNumbers?.[0]?.name || 'Value'}</p>
                   </div>
                 </div>
               </div>
@@ -143,12 +212,12 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
                      <section>
                        <h3 className="text-xs uppercase tracking-widest text-stone-500 mb-4 font-bold border-b border-white/5 pb-2">Astrological Landscape</h3>
                        <div className="space-y-4">
-                         {data.planets.slice(0, 3).map((p, i) => (
+                         {data.planets?.slice(0, 3).map((p, i) => (
                            <div key={i} className="flex gap-4">
-                             <div className="text-2xl text-white font-light w-12">{p.sign.slice(0, 2)}</div>
+                             <div className="text-2xl text-white font-light w-12">{p.sign?.slice(0, 2)}</div>
                              <div>
                                <div className="text-sm text-stone-200 font-medium">{p.name} in {p.sign}</div>
-                               <p className="text-xs text-stone-500 leading-relaxed font-light">{p.interpretation.slice(0, 100)}...</p>
+                               <p className="text-xs text-stone-500 leading-relaxed font-light">{p.interpretation?.slice(0, 100)}...</p>
                              </div>
                            </div>
                          ))}
@@ -157,7 +226,7 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
                      <section>
                        <h3 className="text-xs uppercase tracking-widest text-stone-500 mb-4 font-bold border-b border-white/5 pb-2">Vibrational Values</h3>
                        <div className="grid grid-cols-2 gap-4">
-                          {data.numerology.coreNumbers.slice(0, 4).map((n, i) => (
+                          {data.numerology.coreNumbers?.slice(0, 4).map((n, i) => (
                             <div key={i} className="p-3 bg-black/20 rounded-xl border border-white/5">
                                <div className="text-[10px] text-stone-600 uppercase tracking-widest">{n.name}</div>
                                <div className="text-2xl text-sky-400 font-light">{n.value}</div>
@@ -316,9 +385,9 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
                           <div className="text-stone-500 text-[10px] uppercase tracking-[0.6em] font-bold">Chapter Two: The Alignment</div>
                           <h2 className="text-6xl font-light text-white tracking-widest uppercase">Origin</h2>
                           <div className="flex justify-center gap-6">
-                             {data.planets.slice(0, 3).map((p, i) => (
+                             {data.planets?.slice(0, 3).map((p, i) => (
                                <div key={i} className="text-center">
-                                 <div className="text-4xl text-purple-400 font-light">{p.sign.slice(0, 2)}</div>
+                                 <div className="text-4xl text-purple-400 font-light">{p.sign?.slice(0, 2)}</div>
                                  <div className="text-[10px] text-stone-600 mt-2">{p.name}</div>
                                </div>
                              ))}
@@ -331,7 +400,7 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
                           <div className="text-stone-500 text-[10px] uppercase tracking-[0.6em] font-bold">Chapter Three: The Vibration</div>
                           <h2 className="text-6xl font-light text-white tracking-widest uppercase">Essence</h2>
                           <div className="text-8xl text-sky-500 font-light">{data.numerology.lifePath}</div>
-                          <p className="text-xl font-light text-stone-400">Your Life Path frequency: {data.numerology.lifePathMeaning.slice(0, 100)}...</p>
+                          <p className="text-xl font-light text-stone-400">Your Life Path frequency: {data.numerology.lifePathMeaning?.slice(0, 100) || 'Universal calibration...'}...</p>
                         </>
                       )}
                       {videoStep === 3 && (

@@ -1,15 +1,20 @@
+// --- FIREBASE INFRASTRUCTURE & AUTH ---
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, Timestamp, updateDoc, serverTimestamp } from 'firebase/firestore';
-import firebaseConfig from './firebase-applet-config.json';
+import firebaseConfig from '../firebase-applet-config.json';
 import { CosmicData, UserProfileConfig } from './types';
 
+// Initialize the core Firebase App and services
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 
 export const authProvider = new GoogleAuthProvider();
 
+/**
+ * Executes a Google Sign-In popup for authentication.
+ */
 export const signIn = async () => {
   try {
     const result = await signInWithPopup(auth, authProvider);
@@ -76,6 +81,11 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   throw new Error(JSON.stringify(errInfo));
 }
 
+// --- FIRESTORE DATA PERSISTENCE ---
+
+/**
+ * Persists the main cosmic profile data for an authenticated user.
+ */
 export const saveCosmicProfile = async (userId: string, data: CosmicData, rawInput: {name: string, date: string, time: string, location: string}) => {
   const path = `users/${userId}`;
   try {
@@ -90,6 +100,9 @@ export const saveCosmicProfile = async (userId: string, data: CosmicData, rawInp
   }
 };
 
+/**
+ * Retrieves the profile configuration and cosmic data from the user's document.
+ */
 export const getCosmicProfile = async (userId: string): Promise<{input: any, cosmicData: CosmicData, profileConfig?: UserProfileConfig} | null> => {
   const path = `users/${userId}`;
   try {
@@ -105,6 +118,9 @@ export const getCosmicProfile = async (userId: string): Promise<{input: any, cos
   }
 };
 
+/**
+ * Updates UI-specific configuration settings like theme and biographic info.
+ */
 export const updateProfileConfig = async (userId: string, profileConfig: UserProfileConfig) => {
   const path = `users/${userId}`;
   try {

@@ -1,6 +1,8 @@
+// --- CORE IMPORTS & THREE.JS FIBER REFS ---
 import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Line, Ring, Sparkles, Stars, Text, Trail, OrbitControls, Html, PerspectiveCamera } from '@react-three/drei';
+// --- POST-PROCESSING EFFX ---
 import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 import * as THREE from 'three';
@@ -8,27 +10,37 @@ import { CosmicData } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Minus, Lock, Unlock, Play, Square, Palette, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity, Magnet, Shuffle, Waves } from 'lucide-react';
 
+/**
+ * Procedural Animation Types for Scene Objects
+ */
 type AnimationType = 'none' | 'spin' | 'bounce' | 'zigzag' | 'flash' | 'jump' | 'orbit' | 'randomPop' | 'pulse' | 'shake' | 'wobble' | 'slide' | 'vortex' | 'quantum' | 'infinity' | 'attractor' | 'chaos' | 'pendulum';
-
+/**
+ * Shared State Structure for Interactive Nodes
+ */
 interface InteractionState {
   id: string;
   animation: AnimationType;
   color: string;
   isLocked: boolean;
   isMinimized: boolean;
+  glowIntensity: number;
 }
 
 interface CosmicSceneProps {
   data: CosmicData | null;
   activeTab: string;
   setActiveTab: (tab: any) => void;
-  onPlanetClick?: (text: string) => void;
+  onPlanetClick?: (title: string, content: string) => void;
   isPresentationActive?: boolean;
 }
 
-// Global state for object interactions (simplified for direct use in scene)
+// --- GLOBAL OBJECT REGISTRY (VOLATILE) ---
 const objectStates: Record<string, InteractionState> = {};
 
+/**
+ * HolographicMenu Component
+ * Floating UI overlay within the 3D canvas for controlling individual object properties.
+ */
 const HolographicMenu = ({ state, onUpdate, onClose }: { state: InteractionState, onUpdate: (update: Partial<InteractionState>) => void, onClose: () => void }) => {
   if (state.isMinimized) {
     return (
@@ -103,6 +115,23 @@ const HolographicMenu = ({ state, onUpdate, onClose }: { state: InteractionState
             </div>
           </div>
 
+          {/* Glow Intensity Slider */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-[9px] uppercase tracking-widest text-stone-500">Glow Resonance</span>
+              <span className="text-[9px] font-mono text-rose-400">{(state.glowIntensity * 100).toFixed(0)}%</span>
+            </div>
+            <input 
+              type="range" 
+              min="0" 
+              max="5" 
+              step="0.1" 
+              value={state.glowIntensity} 
+              onChange={(e) => onUpdate({ glowIntensity: parseFloat(e.target.value) })}
+              className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-rose-500 hover:accent-rose-400 transition-all"
+            />
+          </div>
+
           <div className="flex items-center justify-between pt-2 border-t border-white/5">
             <div className="flex items-center gap-2">
               <button 
@@ -138,21 +167,28 @@ const HolographicMenu = ({ state, onUpdate, onClose }: { state: InteractionState
   );
 };
 
-const InteractionContext = React.createContext<{ color: string; animation: AnimationType; isLocked: boolean } | null>(null);
+const InteractionContext = React.createContext<{ color: string; animation: AnimationType; isLocked: boolean; glowIntensity: number } | null>(null);
 
+/**
+ * InteractiveObject Higher-Order Component
+ * Wraps Three.js primitives with procedural animation logic and mouse interaction states.
+ */
 const InteractiveObject = ({ id, children, initialColor, onSelect }: any) => {
+  // --- LOCAL KINEMATICS STATE ---
   const [state, setState] = useState<InteractionState>({
     id,
     animation: 'none',
     color: initialColor,
     isLocked: false,
-    isMinimized: false
+    isMinimized: false,
+    glowIntensity: 1.0
   });
   const [isSelected, setIsSelected] = useState(false);
   const meshRef = useRef<THREE.Group>(null);
   const originalPos = useRef<THREE.Vector3>(new THREE.Vector3());
   const hasCapturedPos = useRef(false);
 
+  // --- KINEMATIC UPDATE LOOP (R3F) ---
   useFrame((sceneState) => {
     if (!meshRef.current) return;
     if (!hasCapturedPos.current) {
@@ -246,7 +282,7 @@ const InteractiveObject = ({ id, children, initialColor, onSelect }: any) => {
   });
 
   return (
-    <InteractionContext.Provider value={{ color: state.color, animation: state.animation, isLocked: state.isLocked }}>
+    <InteractionContext.Provider value={{ color: state.color, animation: state.animation, isLocked: state.isLocked, glowIntensity: state.glowIntensity }}>
       <group 
         ref={meshRef} 
         onClick={(e) => { e.stopPropagation(); setIsSelected(true); onSelect?.(); }}
@@ -273,6 +309,7 @@ const CosmicMaterial = (props: any) => {
       {...props} 
       color={context?.color || props.color} 
       emissive={context?.color || props.emissive} 
+      emissiveIntensity={context?.glowIntensity !== undefined ? context.glowIntensity : (props.emissiveIntensity || 1)}
     />
   );
 };
@@ -319,12 +356,27 @@ const NavNode = ({ position, title, active, onClick, color }: any) => {
   );
 };
 
-const Planet = ({ degree, name, color, size, radius }: { degree: number, name: string, color: string, size: number, radius: number }) => {
+const ZODIAC_SIGNS = [
+  { name: 'Aries', symbol: '♈', color: '#ef4444', element: 'Fire', description: 'Energetic, adventurous, and dynamic.' },
+  { name: 'Taurus', symbol: '♉', color: '#10b981', element: 'Earth', description: 'Reliable, patient, and practical.' },
+  { name: 'Gemini', symbol: '♊', color: '#fbbf24', element: 'Air', description: 'Adaptable, versatile, and intellectual.' },
+  { name: 'Cancer', symbol: '♋', color: '#94a3b8', element: 'Water', description: 'Intuitive, sentimental, and compassionate.' },
+  { name: 'Leo', symbol: '♌', color: '#f59e0b', element: 'Fire', description: 'Confident, ambitious, and generous.' },
+  { name: 'Virgo', symbol: '♍', color: '#84cc16', element: 'Earth', description: 'Analytical, industrious, and kind.' },
+  { name: 'Libra', symbol: '♎', color: '#f472b6', element: 'Air', description: 'Diplomatic, artistic, and social.' },
+  { name: 'Scorpio', symbol: '♏', color: '#7e22ce', element: 'Water', description: 'Determined, forceful, and loyal.' },
+  { name: 'Sagittarius', symbol: '♐', color: '#f97316', element: 'Fire', description: 'Optimistic, freedom-loving, and honest.' },
+  { name: 'Capricorn', symbol: '♑', color: '#475569', element: 'Earth', description: 'Responsible, disciplined, and self-controlled.' },
+  { name: 'Aquarius', symbol: '♒', color: '#06b6d4', element: 'Air', description: 'Progressive, original, and independent.' },
+  { name: 'Pisces', symbol: '♓', color: '#6366f1', element: 'Water', description: 'Compassionate, artistic, and gentle.' },
+];
+
+const PlanetNode = ({ degree, name, color, size, radius, active, onClick }: { degree: number, name: string, color: string, size: number, radius: number, active?: boolean, onClick?: () => void }) => {
   const ref = useRef<THREE.Mesh>(null);
   const textRef = useRef<any>(null);
+  const [hovered, setHovered] = useState(false);
   
-  // Calculate position based on astrologocal degree
-  // 0 degree = Aries (Usually mapped to right/East in standard charts, so angle = 0 in polar)
+  // Calculate position based on astrological degree
   const angle = (degree) * (Math.PI / 180);
   const x = Math.cos(angle) * radius;
   const z = Math.sin(angle) * radius;
@@ -338,28 +390,41 @@ const Planet = ({ degree, name, color, size, radius }: { degree: number, name: s
       
       if (textRef.current) {
         textRef.current.position.x = ref.current.position.x;
-        textRef.current.position.z = ref.current.position.z + size + 0.5;
-        // make text face camera softly
-        // textRef.current.quaternion.copy(camera.quaternion);
+        textRef.current.position.z = ref.current.position.z + size + 0.8;
       }
     }
   });
 
   return (
     <group>
-      <Trail width={1} color={color} length={10} attenuation={(t) => t * t}>
-        <mesh ref={ref} position={[x, 0, z]}>
+      <Trail width={1.5} color={color} length={15} attenuation={(t) => t * t}>
+        <mesh 
+          ref={ref} 
+          position={[x, 0, z]}
+          onClick={(e) => { e.stopPropagation(); onClick?.(); }}
+          onPointerOver={() => setHovered(true)}
+          onPointerOut={() => setHovered(false)}
+          scale={hovered ? 1.5 : 1}
+        >
           <sphereGeometry args={[size, 32, 32]} />
-          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} roughness={0.2} metalness={0.8} />
+          <meshStandardMaterial 
+            color={active ? "#ffffff" : color} 
+            emissive={active ? "#ffffff" : color} 
+            emissiveIntensity={active ? 2 : (hovered ? 1 : 0.5)} 
+            roughness={0.2} 
+            metalness={0.8} 
+          />
         </mesh>
       </Trail>
       <Text
         ref={textRef}
         position={[x, size + 0.5, z]}
-        fontSize={0.4}
-        color="white"
+        fontSize={0.5}
+        color={active ? "#ffffff" : "white"}
         anchorX="center"
         anchorY="middle"
+        outlineWidth={0.02}
+        outlineColor={active ? color : "#000000"}
       >
         {name}
       </Text>
@@ -367,8 +432,9 @@ const Planet = ({ degree, name, color, size, radius }: { degree: number, name: s
   );
 };
 
-const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, onPlanetClick: (text: string) => void, setActiveTab: (tab: any) => void }) => {
+const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, onPlanetClick: (title: string, content: string) => void, setActiveTab: (tab: any) => void }) => {
   const ref = useRef<THREE.Group>(null);
+  const [activePlanet, setActivePlanet] = useState<string | null>(null);
   
   useFrame((state) => {
     if (ref.current) {
@@ -407,42 +473,126 @@ const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, on
           <meshBasicMaterial color="#3b82f6" transparent opacity={0.2} side={THREE.DoubleSide} />
         </mesh>
 
-        {/* Zodiac Divisions */}
-        {Array.from({ length: 12 }).map((_, i) => {
-          const angle = (i * 30 * Math.PI) / 180;
+        {/* Zodiac Wedges */}
+        {ZODIAC_SIGNS.map((sign, i) => {
+          const startAngle = (i * 30 * Math.PI) / 180;
           return (
-            <Line
-              key={i}
-              points={[
-                [Math.cos(angle) * 10, 0, Math.sin(angle) * 10],
-                [Math.cos(angle) * 15, 0, Math.sin(angle) * 15]
-              ]}
-              color="#ffffff"
-              opacity={0.1}
-              transparent
-            />
+            <mesh key={`wedge-${sign.name}`} rotation={[-Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[14.5, 17.5, 32, 1, startAngle, (30 * Math.PI) / 180]} />
+              <meshBasicMaterial color={sign.color} transparent opacity={0.05} side={THREE.DoubleSide} />
+            </mesh>
+          );
+        })}
+
+        {/* House Wedges (Subtle background) */}
+        {Array.from({ length: 12 }).map((_, i) => {
+          const startAngle = (i * 30 * Math.PI) / 180;
+          return (
+            <mesh key={`house-wedge-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
+              <ringGeometry args={[5, 14.5, 32, 1, startAngle, (30 * Math.PI) / 180]} />
+              <meshBasicMaterial color="#ffffff" transparent opacity={i % 2 === 0 ? 0.015 : 0} side={THREE.DoubleSide} />
+            </mesh>
+          );
+        })}
+
+        {/* Zodiac Divisions & Labels */}
+        {ZODIAC_SIGNS.map((sign, i) => {
+          const startAngle = (i * 30 * Math.PI) / 180;
+          const labelAngle = (i * 30 + 15) * Math.PI / 180;
+          const lx = Math.cos(labelAngle) * 16.5;
+          const lz = Math.sin(labelAngle) * 16.5;
+
+          return (
+            <group key={sign.name}>
+              <Line
+                points={[
+                  [Math.cos(startAngle) * 10, 0, Math.sin(startAngle) * 10],
+                  [Math.cos(startAngle) * 17, 0, Math.sin(startAngle) * 17]
+                ]}
+                color="#ffffff"
+                opacity={0.15}
+                transparent
+              />
+              <Text
+                position={[lx, 0, lz]}
+                rotation={[-Math.PI / 2, 0, -labelAngle + Math.PI / 2]}
+                fontSize={0.8}
+                color={sign.color}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPlanetClick(sign.name, `${sign.symbol}: ${sign.element} sign. ${sign.description}`);
+                }}
+                onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
+                onPointerOut={() => { document.body.style.cursor = 'auto'; }}
+              >
+                {sign.symbol}
+              </Text>
+              <Text
+                position={[Math.cos(labelAngle) * 18.5, -0.1, Math.sin(labelAngle) * 18.5]}
+                rotation={[-Math.PI / 2, 0, -labelAngle + Math.PI / 2]}
+                fontSize={0.4}
+                color="white"
+                opacity={0.5}
+              >
+                {sign.name.toUpperCase()}
+              </Text>
+            </group>
+          );
+        })}
+
+        {/* Outer Zodiac Belt */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[16, 17.5, 128]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.03} side={THREE.DoubleSide} />
+        </mesh>
+
+        {/* House Labels */}
+        {Array.from({ length: 12 }).map((_, i) => {
+          const angle = (i * 30 + 15) * Math.PI / 180;
+          const hx = Math.cos(angle) * 7.5;
+          const hz = Math.sin(angle) * 7.5;
+          const houseInfo = data.houses?.find(h => h.houseNumber === i + 1);
+
+          return (
+            <Text
+              key={`house-label-${i}`}
+              position={[hx, 0.1, hz]}
+              rotation={[-Math.PI / 2, 0, 0]}
+              fontSize={0.6}
+              color="#3b82f6"
+              opacity={0.6}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPlanetClick(`House ${i + 1}`, `${houseInfo?.realmName || 'Life Sector'}. ${houseInfo?.description || ''}`);
+              }}
+              onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
+              onPointerOut={() => { document.body.style.cursor = 'auto'; }}
+            >
+              {i + 1}
+            </Text>
           );
         })}
 
         {/* Planets */}
         {data.planets.map((p, i) => {
-          const radius = 11 + (i % 3) * 1.2; 
-          const pos = getPos(p.degree, radius);
+          const radius = 11 + (i % 3) * 1.5; 
           const color = getPlanetColor(p.name);
           
           return (
-            <InteractiveObject key={p.name} id={p.name} initialColor={color} onSelect={() => { setActiveTab('planets'); onPlanetClick(`${p.name} in House ${p.house}`); }}>
-              <group position={pos}>
-                <mesh>
-                  <sphereGeometry args={[0.4, 32, 32]} />
-                  <CosmicMaterial emissiveIntensity={1.5} />
-                </mesh>
-                <CosmicText position={[0, -0.8, 0]} fontSize={0.5} anchorX="center" anchorY="top">
-                  {p.name}
-                </CosmicText>
-                <Line points={[[0,0,0], [pos[0] * -0.1, 0, pos[2] * -0.1]]} opacity={0.3} transparent />
-              </group>
-            </InteractiveObject>
+            <PlanetNode 
+              key={p.name} 
+              name={p.name}
+              degree={p.degree}
+              color={color}
+              size={0.4}
+              radius={radius}
+              active={activePlanet === p.name}
+              onClick={() => { 
+                setActivePlanet(p.name);
+                setActiveTab('planets'); 
+                onPlanetClick(p.name, `In House ${p.house}. ${p.meaning}`); 
+              }} 
+            />
           );
         })}
 
@@ -473,7 +623,7 @@ const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, on
                  lineWidth={2} 
                  opacity={0.6} 
                  transparent 
-                 onClick={(e) => { e.stopPropagation(); setActiveTab('planets'); onPlanetClick(`${aspect.type.toUpperCase()}: ${aspect.planet1} & ${aspect.planet2}. ${aspect.meaning}`); }}
+                 onClick={(e) => { e.stopPropagation(); setActiveTab('planets'); onPlanetClick(aspect.type.toUpperCase(), `${aspect.planet1} & ${aspect.planet2}. ${aspect.meaning}`); }}
                  onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
                  onPointerOut={(e) => { document.body.style.cursor = 'auto'; }}
                />
@@ -488,7 +638,7 @@ const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, on
           return (
             <group key={node} position={pos}>
                <mesh
-                 onClick={(e) => { e.stopPropagation(); setActiveTab('planets'); onPlanetClick(`${n.name} in House ${n.house}. ${n.meaning || ''}`); }}
+                 onClick={(e) => { e.stopPropagation(); setActiveTab('planets'); onPlanetClick(n.name, `In House ${n.house}. ${n.meaning || ''}`); }}
                  onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
                  onPointerOut={(e) => { document.body.style.cursor = 'auto'; }}
                >
@@ -504,12 +654,17 @@ const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, on
   );
 };
 
+/**
+ * TorusField Component
+ * Represents the central energetic blueprint (Soul Blueprint) using nested geometries.
+ */
 const TorusField = () => {
   const outerRef = useRef<THREE.Mesh>(null);
   const midRef = useRef<THREE.Mesh>(null);
   const innerRef = useRef<THREE.Mesh>(null);
   const knotRef = useRef<THREE.Mesh>(null);
   
+  // Rotating the fields over time
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
     if (outerRef.current) {
@@ -779,6 +934,11 @@ const NameMindMap = ({ analysis, onNodeClick, name }: { analysis: any, onNodeCli
   );
 };
 
+/**
+ * CameraController Component
+ * Manages reactive camera positioning based on the active research module (activeTab).
+ * Implements smooth lerping for transitions between different metaphysical viewports.
+ */
 const CameraController = ({ isPresentationActive, activeTab, data }: { isPresentationActive?: boolean, activeTab: string, data: CosmicData | null }) => {
   const [isAutoFollowing, setIsAutoFollowing] = useState(true);
   const lastActiveTab = useRef(activeTab);
@@ -790,6 +950,7 @@ const CameraController = ({ isPresentationActive, activeTab, data }: { isPresent
     }
   }, [activeTab]);
 
+  // --- RENDERING LOOP: CAMERA LOGIC ---
   useFrame((state) => {
     if (isPresentationActive) {
       const t = state.clock.getElapsedTime();
@@ -878,10 +1039,156 @@ const CameraController = ({ isPresentationActive, activeTab, data }: { isPresent
   );
 };
 
+/**
+ * NumerologyGeometria Component
+ * Visualizes the mathematical reduction and geometric patterns of name and birthday.
+ * [GEOMETRIA & KABBALAH VISUALIZATION]
+ */
+const NumerologyGeometria = ({ data, onSelect }: { data: CosmicData, onSelect: (title: string, content: string) => void }) => {
+  const letters = data.gematria.nameSequence?.split(' ') || [];
+  
+  return (
+    <group>
+      <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+        {/* Central Core: The Reduction */}
+        <InteractiveObject id="reduction-core" initialColor="#e879f9" onSelect={() => onSelect("Numerical Reduction", data.gematria.pattern)}>
+          <mesh>
+            <icosahedronGeometry args={[1.5, 2]} />
+            <CosmicMaterial wireframe emissiveIntensity={2} transparent opacity={0.4} />
+          </mesh>
+          <CosmicText position={[0, 0, 0]} fontSize={1.2} fillOpacity={1}>
+            {data.gematria.reduction}
+          </CosmicText>
+        </InteractiveObject>
+
+        {/* Outer Orbit: Individual Numerology Units */}
+        <group>
+          {[
+            { label: 'Life Path', value: data.numerology.lifePath, pos: [6, 4, 2], color: '#60a5fa' },
+            { label: 'Expression', value: data.numerology.expression, pos: [-6, 2, -2], color: '#c084fc' },
+            { label: 'Soul Urge', value: data.numerology.soulUrge, pos: [0, 8, -4], color: '#a78bfa' }
+          ].map((item, i) => (
+            <group key={item.label} position={item.pos as [number, number, number]}>
+              <InteractiveObject id={`num-${item.label}`} initialColor={item.color} onSelect={() => onSelect(item.label, `The ${item.label} vibration: ${item.value}`)}>
+                <mesh>
+                  <octahedronGeometry args={[0.8, 0]} />
+                  <CosmicMaterial emissiveIntensity={1.5} />
+                </mesh>
+                <CosmicText position={[0, 1.2, 0]} fontSize={0.6} anchorY="bottom">
+                  {item.value}
+                </CosmicText>
+                <CosmicText position={[0, -1.2, 0]} fontSize={0.3} anchorY="top" color="#94a3b8">
+                  {item.label}
+                </CosmicText>
+              </InteractiveObject>
+              
+              {/* Connection to Core */}
+              <Line 
+                points={[[0, 0, 0], [-item.pos[0], -item.pos[1], -item.pos[2]]]} 
+                color={item.color} 
+                lineWidth={1} 
+                transparent 
+                opacity={0.3} 
+              />
+            </group>
+          ))}
+        </group>
+
+        {/* The Geometria Ring: Letters/Numbers forming a pattern */}
+        <group rotation={[Math.PI / 2, 0, 0]}>
+          {letters.map((char, i) => {
+            const angle = (i / letters.length) * Math.PI * 2;
+            const r = 10;
+            const x = Math.cos(angle) * r;
+            const y = Math.sin(angle) * r;
+            
+            return (
+              <group key={i} position={[x, y, 0]}>
+                <InteractiveObject id={`char-${i}`} initialColor="#3b82f6" onSelect={() => onSelect("Character Frequency", `Vibration of character: ${char}`)}>
+                  <mesh rotation={[-Math.PI / 2, 0, 0]}>
+                    <coneGeometry args={[0.3, 0.8, 4]} />
+                    <CosmicMaterial emissiveIntensity={1} />
+                  </mesh>
+                  <CosmicText position={[0, 0.8, 0]} fontSize={0.4} rotation={[-Math.PI / 2, 0, 0]}>
+                    {char}
+                  </CosmicText>
+                </InteractiveObject>
+                
+                {/* Geometria web lines */}
+                {letters.map((_, nextI) => {
+                   if (nextI === i) return null;
+                   const nextAngle = (nextI / letters.length) * Math.PI * 2;
+                   const nextX = Math.cos(nextAngle) * r;
+                   const nextY = Math.sin(nextAngle) * r;
+                   return (
+                     <Line 
+                       key={`web-${nextI}`}
+                       points={[[0,0,0], [nextX - x, nextY - y, 0]]}
+                       color="#1e3a8a"
+                       lineWidth={0.5}
+                       transparent
+                       opacity={0.1}
+                     />
+                   );
+                })}
+              </group>
+            )
+          })}
+        </group>
+
+        {/* Date of Birth Path: Secondary Ring */}
+        {data.gematria.dobSequence && (
+          <group rotation={[-Math.PI / 4, 0, 0]}>
+            {data.gematria.dobSequence.split('').map((num, i, arr) => {
+              const angle = (i / arr.length) * Math.PI * 2;
+              const r = 6;
+              const x = Math.cos(angle) * r;
+              const y = Math.sin(angle) * r;
+              return (
+                <group key={`dob-${i}`} position={[x, y, 0]}>
+                   <mesh rotation={[Math.PI / 2, 0, 0]}>
+                     <torusGeometry args={[0.2, 0.05, 12, 24]} />
+                     <meshStandardMaterial color="#60a5fa" emissive="#3b82f6" emissiveIntensity={0.5} />
+                   </mesh>
+                   <CosmicText position={[0, 0.5, 0]} fontSize={0.3} color="#93c5fd">
+                     {num}
+                   </CosmicText>
+                </group>
+              );
+            })}
+          </group>
+        )}
+
+        {/* Kabbalah Connection Pulses */}
+        <group>
+           <Text position={[0, -8, 0]} fontSize={0.7} color="#a855f7" italic>
+              Sephirah Alignment: {data.kabbalah.sephirah}
+           </Text>
+           <Line 
+             points={[[0, 0, 0], [0, -15, -10]]} 
+             color="#a855f7" 
+             lineWidth={2} 
+             dashed 
+             dashScale={0.5}
+             transparent 
+             opacity={0.4} 
+           />
+        </group>
+      </Float>
+    </group>
+  );
+};
+
+/**
+ * Main CosmicScene Component
+ * The primary 3D rendering context using React Three Fiber.
+ * Integrates geometry, lighting, effects, and camera management.
+ */
 export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive }) => {
 
   return (
     <Canvas id="cosmic-canvas" camera={{ position: [0, 15, 20], fov: 60 }} className="w-full h-full absolute inset-0 bg-black">
+      {/* --- SCENE INFRASTRUCTURE --- */}
       <CameraController isPresentationActive={isPresentationActive} activeTab={activeTab} data={data} />
       <fog attach="fog" args={['#000', 5, 50]} />
       <ambientLight intensity={0.2} />
@@ -890,8 +1197,10 @@ export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setAc
       {/* Lightened particle fields for mobile performance */}
       <Stars radius={100} depth={50} count={150} factor={4} saturation={0} fade />
 
+      {/* --- CENTRAL BLUEPRINT GEOMETRY --- */}
       <TorusField />
       
+      {/* --- MODULE NODES (NAVIGATION) --- */}
       {data && (
         <group>
           <NavNode position={[0, -8, 10]} title="Soul Blueprint" active={activeTab === 'torus'} onClick={() => setActiveTab('torus')} color="#fbbf24" />
@@ -910,6 +1219,7 @@ export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setAc
         </group>
       )}
 
+      {/* --- MODULE-SPECIFIC CONTENT (CONTEXTUAL RENDERING) --- */}
       {data && activeTab === 'patterns' && (
         <group position={[15, 0, -15]}>
           <Float speed={2} rotationIntensity={1} floatIntensity={1}>
@@ -955,7 +1265,7 @@ export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setAc
           <NameMindMap 
             analysis={data.nameAnalysis} 
             name={data.nameAnalysis?.first?.name ? `${data.nameAnalysis.first.name} ${data.nameAnalysis.last?.name || ''}` : 'IDENTITY'}
-            onNodeClick={(t) => onPlanetClick?.(t)} 
+            onNodeClick={(content) => onPlanetClick?.("Name Analysis", content)} 
           />
           <pointLight color="#0ea5e9" intensity={2} distance={30} />
           <Stars radius={50} depth={20} count={100} factor={2} saturation={0} fade />
@@ -964,34 +1274,30 @@ export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setAc
 
       {data && activeTab === 'planets' && (
         <group position={[-15, 0, 0]}>
-          <Astrolabe data={data} onPlanetClick={(t) => onPlanetClick?.(t)} setActiveTab={setActiveTab} />
+          <Astrolabe data={data} onPlanetClick={(title, content) => onPlanetClick?.(title, content)} setActiveTab={setActiveTab} />
         </group>
       )}
 
       {data && activeTab === 'numbers' && (
         <group position={[15, 5, 0]}>
-          <Float speed={3} rotationIntensity={0.5} floatIntensity={2}>
-             <InteractiveObject id="life-path" initialColor="#60a5fa" onSelect={() => onPlanetClick?.(`Life path: ${data.numerology.lifePath}`)}>
-               <CosmicText position={[0, 3, 2]} fontSize={2} material-toneMapped={false}>
-                 {data.numerology.lifePath}
-               </CosmicText>
-             </InteractiveObject>
-             <InteractiveObject id="expression" initialColor="#c084fc" onSelect={() => onPlanetClick?.(`Expression: ${data.numerology.expression}`)}>
-               <CosmicText position={[-3, 1, 0]} fontSize={1.5}>
-                 {data.numerology.expression}
-               </CosmicText>
-             </InteractiveObject>
-             <InteractiveObject id="soul-urge" initialColor="#a78bfa" onSelect={() => onPlanetClick?.(`Soul urge: ${data.numerology.soulUrge}`)}>
-               <CosmicText position={[3, 2, -1]} fontSize={1.2}>
-                 {data.numerology.soulUrge}
-               </CosmicText>
-             </InteractiveObject>
-             <InteractiveObject id="reduction" initialColor="#e879f9" onSelect={() => onPlanetClick?.(`Reduction: ${data.gematria.reduction}`)}>
-               <CosmicText position={[0, -1, 3]} fontSize={1.8} fillOpacity={0.6}>
-                 {data.gematria.reduction}
-               </CosmicText>
-             </InteractiveObject>
-          </Float>
+          <NumerologyGeometria data={data} onSelect={(title, content) => onPlanetClick?.(title, content)} />
+          <Stars radius={40} depth={10} count={50} factor={1} saturation={0} fade />
+        </group>
+      )}
+
+      {data && activeTab === 'kabbalistic_numerology' && data.kabbalisticNumerology && (
+        <group position={[0, -2, -15]} rotation={[0, Math.PI, 0]}>
+           <TreeOfLife 
+             activeSephirah={`${data.kabbalisticNumerology.lifePathCorrespondence.sephirah} ${data.kabbalisticNumerology.expressionCorrespondence.sephirah} ${data.kabbalisticNumerology.soulUrgeCorrespondence.sephirah}`} 
+           />
+           <group position={[0, 10, 0]}>
+             <CosmicText fontSize={0.8} color="#10b981">
+               Hierarchy of the Sephirah
+             </CosmicText>
+             <CosmicText position={[0, -1.2, 0]} fontSize={0.4} color="#6ee7b7">
+               Soul Journey Synthesis
+             </CosmicText>
+           </group>
         </group>
       )}
 
@@ -1003,7 +1309,7 @@ export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setAc
              fontSize={0.8} 
              color="white" 
              anchorY="top"
-             onClick={(e) => { e.stopPropagation(); setActiveTab('kabbalah'); onPlanetClick?.(`Kabbalah sephirah is ${data.kabbalah.sephirah}`); }}
+             onClick={(e) => { e.stopPropagation(); setActiveTab('kabbalah'); onPlanetClick?.("Kabbalah", `Sephirah: ${data.kabbalah.sephirah}`); }}
              onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
              onPointerOut={(e) => { document.body.style.cursor = 'auto'; }}
            >
@@ -1047,7 +1353,7 @@ export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setAc
                 const pos = [Math.cos(angle) * r, Math.sin(angle * 2) * 1, Math.sin(angle) * r] as [number, number, number];
                 
                 return (
-                  <InteractiveObject key={house.houseNumber} id={`house-${house.houseNumber}`} initialColor="#8b5cf6" onSelect={() => onPlanetClick?.(`${house.realmName}: ${house.description}`)}>
+                  <InteractiveObject key={house.houseNumber} id={`house-${house.houseNumber}`} initialColor="#8b5cf6" onSelect={() => onPlanetClick?.(house.realmName, house.description)}>
                     <group position={pos}>
                       <mesh rotation={[0, -angle, 0]}>
                          <boxGeometry args={[1.5, 1.5, 1.5]} />
@@ -1160,6 +1466,7 @@ export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setAc
       )}
 
 
+      {/* --- POST-PROCESSING PIPELINE --- */}
       <EffectComposer disableNormalPass>
         <Bloom luminanceThreshold={0.2} mipmapBlur intensity={1.5} />
         <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={new THREE.Vector2(0.002, 0.002)} />

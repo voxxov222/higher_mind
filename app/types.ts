@@ -113,6 +113,11 @@ export interface CosmicData {
       title: string;
       description: string;
     }[];
+    timeDateDiscovery?: {
+      title: string;
+      description: string;
+      mathematicalPattern: string;
+    };
     interestingFacts: string[];
     coreTheme: string;
   };

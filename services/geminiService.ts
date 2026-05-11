@@ -4,9 +4,14 @@
 */
 
 
+// --- AI CORE INTEGRATION ---
 import { GoogleGenAI, Type } from "@google/genai";
 import { CosmicData } from "../types";
 
+/**
+ * Initializes the Gemini Pro engine with the system API key.
+ * Uses lazy initialization to prevent startup crashes if key is missing.
+ */
 const getAI = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export interface CosmicInput {
@@ -16,6 +21,13 @@ export interface CosmicInput {
   location: string;
 }
 
+// --- CORE COSMIC READING ENGINE ---
+
+/**
+ * fetchCosmicReading
+ * Generates the primary multidimensional cosmic profile for a user.
+ * Combines Astrology, Numerology, Kabbalah, and Gematria calculation logic.
+ */
 export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData> => {
   const ai = getAI();
   const prompt = `
@@ -44,7 +56,9 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
   15. Name Analysis: First, Middle, Last names ('origin', 'meaning', short 'impact'). Max 1 short sentence for 'overallBigPicture'.
   16. Akashic Records: 'soulOrigin', 'pastLifeThemes', 'karmicDebts', 'soulGifts', 'guardianMessage' max 2 sentences each.
   17. Kabbalistic Numerology: Map Life Path, Expression, and Soul Urge to the Tree of Life. For each, provide a 'sephirah', 'path', and 'meaning' (how it fits their soul journey). Provide a 'treeSynthesis' overall.
-  18. Patterns & Synchronicities: Analyze user inputs for interesting esoteric connections (e.g., name meaning to gematria matching sign, numerical patterns, astrology aligning with numerology, initials mapping to significant values). Provide 2-3 'synchronicities' (each with 'title' and short 'description'), an array of 2-3 short 'interestingFacts', and a 'coreTheme'.
+  18. Patterns & Synchronicities: Analyze user inputs for interesting esoteric connections (e.g., name meaning to gematria matching sign, numerical patterns, astrology aligning with numerology, initials mapping to significant values). 
+      **ADDITIONALLY**: Identify if the Birth Time (${input.birthTime}) or Birth Date (${input.birthDate}) aligns with mathematical constants (like Pi 3:14, Golden Ratio 1.618, Fibonacci sequences). Look for "Incredible Discoveries" where birth time numbers mirror birth date digits or hidden geometry.
+      Provide 2-3 'synchronicities' (each with 'title' and short 'description'), an array of 2-3 short 'interestingFacts', a 'coreTheme', and a specific 'timeDateDiscovery' (with 'title', 'description', and 'mathematicalPattern').
   
   Format the output STRICTLY as valid JSON matching this schema:
   {
@@ -78,7 +92,12 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
       "soulUrgeCorrespondence": { "sephirah": "...", "path": "...", "meaning": "..." },
       "treeSynthesis": "..."
     },
-    "patterns": { "synchronicities": [{ "title": "...", "description": "..." }], "interestingFacts": ["..."], "coreTheme": "..." }
+    "patterns": { 
+      "synchronicities": [{ "title": "...", "description": "..." }], 
+      "timeDateDiscovery": { "title": "...", "description": "...", "mathematicalPattern": "..." },
+      "interestingFacts": ["..."], 
+      "coreTheme": "..." 
+    }
   }
   
   Do not wrap the JSON in Markdown formatting \`\`\`json. Output ONLY the JSON block.
@@ -86,7 +105,7 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -117,7 +136,12 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
               soulUrgeCorrespondence: { type: Type.OBJECT, properties: { sephirah: { type: Type.STRING }, path: { type: Type.STRING }, meaning: { type: Type.STRING } }, required: ["sephirah", "path", "meaning"] },
               treeSynthesis: { type: Type.STRING }
             }, required: ["lifePathCorrespondence", "expressionCorrespondence", "soulUrgeCorrespondence", "treeSynthesis"] },
-            patterns: { type: Type.OBJECT, properties: { synchronicities: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, description: { type: Type.STRING } }, required: ["title", "description"] } }, interestingFacts: { type: Type.ARRAY, items: { type: Type.STRING } }, coreTheme: { type: Type.STRING } }, required: ["synchronicities", "interestingFacts", "coreTheme"] }
+            patterns: { type: Type.OBJECT, properties: { 
+              synchronicities: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, description: { type: Type.STRING } }, required: ["title", "description"] } }, 
+              timeDateDiscovery: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, description: { type: Type.STRING }, mathematicalPattern: { type: Type.STRING } }, required: ["title", "description", "mathematicalPattern"] },
+              interestingFacts: { type: Type.ARRAY, items: { type: Type.STRING } }, 
+              coreTheme: { type: Type.STRING } 
+            }, required: ["synchronicities", "timeDateDiscovery", "interestingFacts", "coreTheme"] }
           },
           required: ["planets", "nodes", "points", "advancedCycles", "aspects", "houses", "numerology", "gematria", "kabbalah", "torusAnalysis", "dailyInsight", "weeklyInsight", "monthlyInsight", "yearlyInsight", "lifeStrategy", "timeline", "nameAnalysis", "akashic", "patterns"]
         }
@@ -139,6 +163,12 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
 };
 
 
+// --- RESEARCH & DEEP DIVE SERVICES ---
+
+/**
+ * fetchTimelineDepth
+ * Provides initial deep analysis for a specific timeline event.
+ */
 export const fetchTimelineDepth = async (
   event: any,
   cosmicData: CosmicData
@@ -168,7 +198,7 @@ export const fetchTimelineDepth = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -224,7 +254,7 @@ export const fetchTimelineDeepDiveOption = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -252,6 +282,11 @@ export const fetchTimelineDeepDiveOption = async (
   }
 };
 
+/**
+ * fetchGeneralDeepDive
+ * A multi-disciplinary research engine for exploring any specific node or topic
+ * within the user's cosmic profile.
+ */
 export const fetchGeneralDeepDive = async (
   topicTitle: string,
   topicContent: string,
@@ -283,7 +318,7 @@ export const fetchGeneralDeepDive = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         responseMimeType: "application/json",

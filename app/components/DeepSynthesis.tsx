@@ -1,22 +1,107 @@
 // --- CORE IMPORTS ---
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Zap, Monitor, Share2, Download, BookOpen, PieChart, Network, 
   PlayCircle, Eye, ChevronRight, DownloadCloud, Layers, Target, 
-  Star, Activity, Moon, Sun, Globe, User, Fingerprint, Volume2
+  Star, Activity, Moon, Sun, Globe, User, Fingerprint, Volume2,
+  Trash2, Plus, Edit3, Save, X, Sparkles, RefreshCw, MousePointer2
 } from 'lucide-react';
+import { 
+  ReactFlow, 
+  Background, 
+  Controls, 
+  Panel, 
+  useNodesState, 
+  useEdgesState, 
+  addEdge, 
+  MarkerType,
+  Connection,
+  Edge,
+  Node,
+  Handle,
+  Position,
+  NodeProps,
+  EdgeProps,
+  BaseEdge,
+  getBezierPath
+} from '@xyflow/react';
+
 // --- VISUALIZATION LIBRARIES ---
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid
 } from 'recharts';
-import { CosmicData } from '../types';
+import { CosmicData, MindMapNode } from '../types';
+import { fetchGeneralDeepDive } from '../services/geminiService';
+import { useProfileStore } from '../services/profileService';
+
+import { CosmicSummary } from './CosmicSummary';
+
+const colorMap: Record<string, { main: string, text: string, bg: string, border: string, glow: string }> = {
+  emerald: { main: 'emerald', text: 'text-emerald-400', bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', glow: 'shadow-[0_0_20px_rgba(16,185,129,0.2)]' },
+  sky: { main: 'sky', text: 'text-sky-400', bg: 'bg-sky-500/20', border: 'border-sky-500/30', glow: 'shadow-[0_0_20px_rgba(56,189,248,0.2)]' },
+  rose: { main: 'rose', text: 'text-rose-400', bg: 'bg-rose-500/20', border: 'border-rose-500/30', glow: 'shadow-[0_0_20px_rgba(244,63,94,0.2)]' },
+  amber: { main: 'amber', text: 'text-amber-400', bg: 'bg-amber-500/20', border: 'border-amber-500/30', glow: 'shadow-[0_0_20px_rgba(245,158,11,0.2)]' },
+  fuchsia: { main: 'fuchsia', text: 'text-fuchsia-400', bg: 'bg-fuchsia-500/20', border: 'border-fuchsia-500/30', glow: 'shadow-[0_0_20px_rgba(217,70,239,0.2)]' },
+  indigo: { main: 'indigo', text: 'text-indigo-400', bg: 'bg-indigo-500/20', border: 'border-indigo-500/30', glow: 'shadow-[0_0_30px_rgba(99,102,241,0.3)]' },
+  purple: { main: 'purple', text: 'text-purple-400', bg: 'bg-purple-500/20', border: 'border-purple-500/30', glow: 'shadow-[0_0_20px_rgba(168,85,247,0.2)]' },
+  stone: { main: 'stone', text: 'text-stone-400', bg: 'bg-stone-500/20', border: 'border-stone-500/30', glow: 'shadow-[0_0_20px_rgba(120,113,108,0.1)]' },
+};
+
+/**
+ * Custom Cosmic Node Component for React Flow
+ */
+const CosmicNode = ({ data, selected }: NodeProps) => {
+  const color = data.color as string || 'stone';
+  const colors = colorMap[color];
+  const type = data.type as string;
+
+  return (
+    <div className={`group relative w-48 transition-all duration-500 ${selected ? 'scale-105' : 'hover:scale-102'}`}>
+      <Handle type="target" position={Position.Top} className="opacity-0" />
+      
+      <div className={`w-full p-4 rounded-[2rem] border backdrop-blur-xl flex flex-col items-center text-center space-y-2 relative overflow-hidden transition-all duration-500
+        ${selected ? 'border-white bg-white/20' : 'border-white/10 bg-black/40'} 
+        ${selected ? colors.glow : ''}
+      `}>
+        {/* Type indicator */}
+        <div className={`text-[8px] uppercase tracking-widest font-bold ${colors.text} opacity-80 uppercase`}>
+          {data.label}
+        </div>
+        
+        {/* Accent line */}
+        <div className={`h-0.5 w-8 rounded-full ${colors.bg}`} />
+        
+        {/* Description */}
+        <div className="text-[10px] text-stone-400 font-light leading-relaxed italic line-clamp-3">
+          "{data.description}"
+        </div>
+
+        {selected && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="absolute -top-2 -right-2 bg-purple-600 rounded-full p-1.5 shadow-xl shadow-purple-900/40 z-20"
+          >
+            <Sparkles size={10} className="text-white" />
+          </motion.div>
+        )}
+      </div>
+
+      <Handle type="source" position={Position.Bottom} className="opacity-0" />
+    </div>
+  );
+};
+
+const nodeTypes = {
+  cosmic: CosmicNode,
+};
 
 /**
  * Available Synthesis View Modes
  */
-type SynthesisMode = 'overview' | 'infographic' | 'mindmap' | '3d' | 'video';
+type SynthesisMode = 'overview' | 'infographic' | 'mindmap' | '3d' | 'video' | 'summary';
 
 /**
  * DeepSynthesis Component
@@ -24,10 +109,141 @@ type SynthesisMode = 'overview' | 'infographic' | 'mindmap' | '3d' | 'video';
  */
 export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicData | null, onPresentationRequest: () => void }) => {
   // --- COMPONENT STATE & VIEW REFS ---
-  const [mode, setMode] = useState<SynthesisMode>('overview');
+  const [mode, setMode] = useState<SynthesisMode>('summary');
   const [videoStep, setVideoStep] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const [isReading, setIsReading] = useState(false);
+
+  // --- MIND MAP (REACT FLOW) STATE ---
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [isEditingNode, setIsEditingNode] = useState(false);
+  const [isExpanding, setIsExpanding] = useState(false);
+  const updateMindMap = useProfileStore(state => state.updateMindMap);
+  const saveProfile = useProfileStore(state => state.saveProfile);
+
+  // Initialize React Flow from data
+  useEffect(() => {
+    if (data && nodes.length === 0) {
+      const initialNodes: Node[] = [
+        { id: 'astrology', type: 'cosmic', position: { x: 100, y: 100 }, data: { label: 'ASTROLOGY', color: 'emerald', description: `Celestial alignments for ${data.planets?.[0]?.sign}`, type: 'category' } },
+        { id: 'numerology', type: 'cosmic', position: { x: 600, y: 150 }, data: { label: 'NUMEROLOGY', color: 'sky', description: `Vibrational resonance: Life Path ${data.numerology.lifePath}`, type: 'category' } },
+        { id: 'gematria', type: 'cosmic', position: { x: 150, y: 600 }, data: { label: 'GEMATRIA', color: 'rose', description: `Mathematical signature: ${data.gematria.nameValue}`, type: 'category' } },
+        { id: 'akashic', type: 'cosmic', position: { x: 650, y: 600 }, data: { label: 'AKASHIC', color: 'amber', description: `Soul origin: ${data.akashic?.soulOrigin}`, type: 'category' } },
+        { id: 'patterns', type: 'cosmic', position: { x: 800, y: 350 }, data: { label: 'PATTERNS', color: 'fuchsia', description: `Core theme: ${data.patterns?.coreTheme}`, type: 'category' } },
+        { id: 'center', type: 'cosmic', position: { x: 400, y: 400 }, data: { label: 'IDENTITY HUB', color: 'indigo', description: data.synthesis, type: 'core' } },
+      ];
+
+      const initialEdges: Edge[] = [
+        { id: 'e-astrology-center', source: 'astrology', target: 'center', markerEnd: { type: MarkerType.ArrowClosed, color: '#333' }, style: { stroke: '#444' } },
+        { id: 'e-numerology-center', source: 'numerology', target: 'center', markerEnd: { type: MarkerType.ArrowClosed, color: '#333' }, style: { stroke: '#444' } },
+        { id: 'e-gematria-center', source: 'gematria', target: 'center', markerEnd: { type: MarkerType.ArrowClosed, color: '#333' }, style: { stroke: '#444' } },
+        { id: 'e-akashic-center', source: 'akashic', target: 'center', markerEnd: { type: MarkerType.ArrowClosed, color: '#333' }, style: { stroke: '#444' } },
+        { id: 'e-patterns-center', source: 'patterns', target: 'center', markerEnd: { type: MarkerType.ArrowClosed, color: '#333' }, style: { stroke: '#444' } },
+      ];
+
+      setNodes(initialNodes);
+      setEdges(initialEdges);
+    }
+  }, [data]);
+
+  const onConnect = useCallback((params: Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+
+  const handleUpdateNode = (nodeId: string, updates: any) => {
+    setNodes((nds) => nds.map((node) => {
+      if (node.id === nodeId) {
+        return { ...node, data: { ...node.data, ...updates } };
+      }
+      return node;
+    }));
+  };
+
+  const handleAddNode = useCallback((event: any) => {
+    const id = `custom-${Date.now()}`;
+    const newNode: Node = {
+      id,
+      type: 'cosmic',
+      position: { x: Math.random() * 500, y: Math.random() * 500 },
+      data: {
+        label: 'NEW INSIGHT',
+        description: 'Define your cosmic connection...',
+        color: 'stone',
+        type: 'custom'
+      },
+    };
+    setNodes((nds) => nds.concat(newNode));
+    setSelectedNodeId(id);
+    setIsEditingNode(true);
+  }, [setNodes]);
+
+  const handleDeleteNode = useCallback((nodeId: string) => {
+    if (nodeId === 'center') return;
+    setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+    setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+    setSelectedNodeId(null);
+  }, [setNodes, setEdges]);
+
+  const handleExpandNode = async (node: Node) => {
+    if (!data || isExpanding) return;
+    setIsExpanding(true);
+    try {
+      const result = await fetchGeneralDeepDive(node.data.label as string, node.data.description as string, data);
+      
+      const id = `insight-${Date.now()}`;
+      const newNode: Node = {
+        id,
+        type: 'cosmic',
+        position: { x: node.position.x + 200, y: node.position.y + 100 },
+        data: {
+          label: result.followUpOptions[0].toUpperCase(),
+          description: result.detailedAnalysis.slice(0, 150) + '...',
+          color: 'purple',
+          type: 'insight'
+        },
+      };
+      
+      const newEdge: Edge = {
+        id: `e-${node.id}-${id}`,
+        source: node.id,
+        target: id,
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#333' },
+        style: { stroke: '#444' }
+      };
+
+      setNodes((nds) => nds.concat(newNode));
+      setEdges((eds) => eds.concat(newEdge));
+      setSelectedNodeId(id);
+    } catch (error) {
+      console.error("Failed to expand node:", error);
+    } finally {
+      setIsExpanding(false);
+    }
+  };
+
+  const selectedNode = useMemo(() => nodes.find(n => n.id === selectedNodeId), [nodes, selectedNodeId]);
+
+  const handleDownloadMindMap = () => {
+    if (nodes.length === 0) return;
+    const dataStr = JSON.stringify({ nodes, edges }, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const exportFileDefaultName = 'cosmic-mindmap.json';
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  const colorOptions = [
+    { id: 'emerald', label: 'Emerald' },
+    { id: 'sky', label: 'Sky' },
+    { id: 'rose', label: 'Rose' },
+    { id: 'amber', label: 'Amber' },
+    { id: 'fuchsia', label: 'Fuchsia' },
+    { id: 'indigo', label: 'Indigo' },
+    { id: 'purple', label: 'Purple' },
+    { id: 'stone', label: 'Stone' },
+  ];
 
   // --- NARRATIVE AUDIO ENGINE ---
   const handleReadOutLoud = (text: string) => {
@@ -91,6 +307,7 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
       <div className="flex bg-black/40 border border-white/5 p-2 rounded-2xl md:rounded-[2.5rem] items-center justify-between shrink-0 overflow-x-auto no-scrollbar">
         <div className="flex gap-2 p-1">
           {[
+            { id: 'summary', label: 'Summary', icon: BookOpen },
             { id: 'overview', label: 'Overview', icon: Zap },
             { id: 'infographic', label: 'Infographic', icon: Monitor },
             { id: 'mindmap', label: 'Mind Map', icon: Network },
@@ -124,6 +341,18 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
       {/* Main Content Area */}
       <div className="flex-1 min-h-0 relative">
         <AnimatePresence mode="wait">
+          {mode === 'summary' && (
+            <motion.div
+              key="summary"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              className="h-full"
+            >
+              <CosmicSummary data={data} />
+            </motion.div>
+          )}
+
           {mode === 'overview' && (
             <motion.div 
               key="overview"
@@ -267,59 +496,204 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="h-full bg-black/40 rounded-[3rem] border border-white/10 overflow-hidden relative cursor-grab active:cursor-grabbing"
+              className="h-full bg-black/40 rounded-[3rem] border border-white/10 overflow-hidden relative"
             >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(50,50,50,0.2),transparent)]"></div>
-              {/* Fake Interactive Mind Map */}
-              <div className="absolute inset-0 flex items-center justify-center p-10">
-                 <div className="relative w-full h-full">
-                    {/* Center Node */}
-                    <motion.div 
-                      drag
-                      dragConstraints={{ left: -100, right: 100, top: -100, bottom: 100 }}
-                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-center shadow-[0_0_50px_rgba(139,92,246,0.3)] z-10"
-                    >
-                      <div className="text-white">
-                        <div className="text-[10px] uppercase tracking-widest font-bold mb-1 opacity-60">Identity</div>
-                        <div className="text-sm font-light tracking-widest">CENTRAL HUB</div>
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                nodeTypes={nodeTypes}
+                onNodeClick={(_, node) => setSelectedNodeId(node.id)}
+                onPaneClick={() => { setSelectedNodeId(null); setIsEditingNode(false); }}
+                fitView
+                className="cosmic-flow"
+              >
+                <Background color="#333" gap={20} />
+                <Controls className="bg-stone-900 border border-white/10 p-1 fill-white" />
+                
+                <Panel position="top-right" className="flex gap-2">
+                  <button 
+                    onClick={handleAddNode}
+                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-[9px] uppercase tracking-widest font-bold shadow-lg shadow-purple-900/40 transition-all active:scale-95"
+                  >
+                    <Plus size={14} /> Add Cosmic Node
+                  </button>
+                </Panel>
+
+                <Panel position="bottom-left" className="p-4">
+                  <div className="px-6 py-3 bg-black/60 rounded-full border border-white/10 text-[9px] uppercase tracking-widest text-stone-400 font-bold backdrop-blur-md flex items-center gap-4">
+                     <span>V.03 Neural Flow • {nodes.length} Active Nodes</span>
+                     <div className="flex gap-1">
+                        <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
+                     </div>
+                  </div>
+                </Panel>
+              </ReactFlow>
+
+              {/* Node Sidebar / Modal */}
+              <AnimatePresence>
+                {selectedNodeId && selectedNode && (
+                  <motion.div 
+                    initial={{ x: 400 }}
+                    animate={{ x: 0 }}
+                    exit={{ x: 400 }}
+                    className="absolute top-0 right-0 h-full w-80 bg-black/80 backdrop-blur-xl border-l border-white/10 p-8 z-20 flex flex-col"
+                  >
+                    <div className="flex justify-between items-center mb-8">
+                       <div className="flex items-center gap-2">
+                         <Network size={16} className="text-purple-400" />
+                         <h3 className="text-white text-xs font-bold uppercase tracking-[0.3em]">Node Metadata</h3>
+                       </div>
+                       <button onClick={() => setSelectedNodeId(null)} className="p-2 text-stone-500 hover:text-white"><X size={18} /></button>
+                    </div>
+
+                    {isEditingNode ? (
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                           <label className="text-[10px] text-stone-500 uppercase font-bold">Resonance Label</label>
+                           <input 
+                             type="text" 
+                             value={selectedNode.data.label as string || ''}
+                             onChange={(e) => handleUpdateNode(selectedNodeId, { label: e.target.value })}
+                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-purple-500 outline-none"
+                           />
+                        </div>
+                        <div className="space-y-4">
+                           <label className="text-[10px] text-stone-500 uppercase font-bold">Vibrational Shade</label>
+                           <div className="grid grid-cols-4 gap-2">
+                              {colorOptions.map(opt => (
+                                <button
+                                  key={opt.id}
+                                  onClick={() => handleUpdateNode(selectedNodeId, { color: opt.id })}
+                                  className={`w-full aspect-square rounded-lg border transition-all ${selectedNode.data.color === opt.id ? 'border-white scale-110' : 'border-white/5 opacity-40 hover:opacity-100'}`}
+                                  style={{ backgroundColor: colorMap[opt.id]?.main === 'emerald' ? '#10b981' : colorMap[opt.id]?.main === 'sky' ? '#0ea5e9' : colorMap[opt.id]?.main === 'rose' ? '#f43f5e' : colorMap[opt.id]?.main === 'amber' ? '#f59e0b' : colorMap[opt.id]?.main === 'fuchsia' ? '#c026d3' : colorMap[opt.id]?.main === 'indigo' ? '#4f46e5' : colorMap[opt.id]?.main === 'purple' ? '#9333ea' : '#78716c' }}
+                                  title={opt.label}
+                                />
+                              ))}
+                           </div>
+                        </div>
+                        <div className="space-y-2">
+                           <label className="text-[10px] text-stone-500 uppercase font-bold">Insight Transmission</label>
+                           <textarea 
+                             rows={5}
+                             value={selectedNode.data.description as string || ''}
+                             onChange={(e) => handleUpdateNode(selectedNodeId, { description: e.target.value })}
+                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-purple-500 outline-none resize-none text-sm font-light italic"
+                           />
+                        </div>
+                        <button 
+                          onClick={() => setIsEditingNode(false)}
+                          className="w-full py-4 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-bold uppercase text-white tracking-widest transition-all border border-white/5"
+                        >
+                          Stabilize Selection
+                        </button>
                       </div>
-                    </motion.div>
+                    ) : (
+                      <div className="space-y-8">
+                        <div>
+                           <div className={`text-[10px] uppercase tracking-widest mb-2 font-bold ${colorMap[selectedNode.data.color as string]?.text || 'text-stone-500'}`}>
+                             {selectedNode.data.type as string === 'core' ? 'Primary Core' : 'Knowledge Node'}
+                           </div>
+                           <h2 className="text-3xl text-white font-light tracking-tight">{selectedNode.data.label as string}</h2>
+                        </div>
+                        <p className="text-stone-400 font-light italic leading-relaxed text-sm">
+                          "{selectedNode.data.description as string}"
+                        </p>
+                        
+                        <div className="space-y-3">
+                           <button onClick={() => setIsEditingNode(true)} className="w-full flex items-center justify-between px-6 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all group">
+                              <div className="flex items-center gap-3">
+                                <Edit3 size={14} className="text-stone-500 group-hover:text-purple-400" />
+                                <span className="text-[10px] uppercase tracking-widest font-bold text-stone-300">Edit Frequency</span>
+                              </div>
+                           </button>
+                           {selectedNode.id !== 'center' && (
+                             <>
+                               <button 
+                                 onClick={() => handleExpandNode(selectedNode)} 
+                                 disabled={isExpanding}
+                                 className="w-full flex items-center justify-between px-6 py-4 bg-purple-900/20 hover:bg-purple-900/40 border border-purple-500/30 rounded-2xl transition-all group"
+                               >
+                                  <div className="flex items-center gap-3">
+                                    <Sparkles size={14} className={isExpanding ? 'animate-spin text-purple-400' : 'text-purple-400'} />
+                                    <span className="text-[10px] uppercase tracking-widest font-bold text-purple-300">Trigger AI Synthesis</span>
+                                  </div>
+                               </button>
+                               <button 
+                                 onClick={() => handleDeleteNode(selectedNode.id)}
+                                 className="w-full flex items-center justify-between px-6 py-4 bg-rose-900/10 hover:bg-rose-900/20 border border-rose-500/20 rounded-2xl transition-all group"
+                               >
+                                  <div className="flex items-center gap-3">
+                                    <Trash2 size={14} className="text-rose-400" />
+                                    <span className="text-[10px] uppercase tracking-widest font-bold text-rose-400 opacity-60">Prune Connection</span>
+                                  </div>
+                               </button>
+                             </>
+                           )}
+                        </div>
+                        
+                        <div className="pt-8 border-t border-white/5">
+                           <div className="flex items-center gap-2 mb-4">
+                              <MousePointer2 size={12} className="text-stone-600" />
+                              <span className="text-[8px] uppercase tracking-[0.2em] text-stone-600 font-bold">Interface Tip</span>
+                           </div>
+                           <p className="text-[10px] text-stone-500 italic leading-relaxed">
+                             Click and drag to reposition nodes. Connect handles to form new associations. Use the mouse wheel to navigate dimensions.
+                           </p>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-                    {/* Orbiting Nodes */}
-                    {[
-                      { label: 'ASTROLOGY', pos: { top: '10%', left: '20%' }, color: 'emerald' },
-                      { label: 'NUMEROLOGY', pos: { top: '15%', left: '75%' }, color: 'sky' },
-                      { label: 'GEMATRIA', pos: { bottom: '15%', left: '25%' }, color: 'rose' },
-                      { label: 'MYSTICISM', pos: { bottom: '20%', left: '80%' }, color: 'amber' },
-                      { label: 'RECORDS', pos: { top: '50%', right: '10%' }, color: 'fuchsia' },
-                    ].map((node, i) => (
-                      <motion.div
-                        key={i}
-                        animate={{ y: [0, 15, 0], x: [0, 5, 0] }}
-                        transition={{ duration: 4 + i, repeat: Infinity, ease: 'easeInOut' }}
-                        style={node.pos as any}
-                        className="absolute w-32 h-32"
-                      >
-                         <div className={`w-full h-full rounded-[2rem] border border-white/10 bg-white/5 flex flex-col items-center justify-center text-center p-4 hover:border-white/40 transition-colors backdrop-blur-md`}>
-                            <div className={`text-[8px] uppercase tracking-widest font-bold mb-2 text-${node.color}-400`}>{node.label}</div>
-                            <div className="h-1 w-8 bg-white/10 rounded-full mb-2"></div>
-                            <div className="text-[10px] text-stone-500 font-light leading-tight">Click to expand node research</div>
-                         </div>
-                      </motion.div>
-                    ))}
-
-                    {/* Background Lines (SVG) */}
-                    <svg className="absolute inset-0 pointer-events-none opacity-20">
-                       <line x1="50%" y1="50%" x2="20%" y2="10%" stroke="white" strokeWidth="1" />
-                       <line x1="50%" y1="50%" x2="75%" y2="15%" stroke="white" strokeWidth="1" />
-                       <line x1="50%" y1="50%" x2="25%" y2="85%" stroke="white" strokeWidth="1" />
-                       <line x1="50%" y1="50%" x2="80%" y2="80%" stroke="white" strokeWidth="1" />
-                       <line x1="50%" y1="50%" x2="90%" y2="50%" stroke="white" strokeWidth="1" />
-                    </svg>
-                 </div>
-              </div>
-              <div className="absolute bottom-8 left-8 p-4 bg-black/40 rounded-2xl border border-white/10 text-[10px] uppercase tracking-widest text-stone-500">
-                 Interactive Map Integration • Node Vector Analysis Ready
+              <div className="absolute bottom-8 right-8 flex items-center justify-end gap-4 pointer-events-auto">
+                <button 
+                  onClick={handleDownloadMindMap}
+                  className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-stone-400 hover:text-white transition-all shadow-xl"
+                  title="Export Neural Map (JSON)"
+                >
+                  <DownloadCloud size={16} />
+                </button>
+                <button 
+                  className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-full text-[10px] uppercase tracking-widest text-white font-bold backdrop-blur-xl shadow-lg shadow-indigo-900/40 transition-all active:scale-95"
+                  onClick={async () => {
+                    if (nodes.length > 0) {
+                      // Map back to MindMapNode structure if needed for store
+                      const mappedMindMap = {
+                        nodes: nodes.map(n => ({
+                          id: n.id,
+                          label: n.data.label as string,
+                          description: n.data.description as string,
+                          x: n.position.x,
+                          y: n.position.y,
+                          color: n.data.color as string,
+                          connections: edges.filter(e => e.source === n.id).map(e => e.target),
+                          type: n.data.type as any
+                        })),
+                        centerNode: nodes.find(n => n.id === 'center') ? {
+                           id: 'center',
+                           label: nodes.find(n => n.id === 'center')!.data.label as string,
+                           description: nodes.find(n => n.id === 'center')!.data.description as string,
+                           x: nodes.find(n => n.id === 'center')!.position.x,
+                           y: nodes.find(n => n.id === 'center')!.position.y,
+                           color: nodes.find(n => n.id === 'center')!.data.color as string,
+                           connections: [],
+                           type: 'core'
+                        } as any : null
+                      };
+                      updateMindMap(mappedMindMap);
+                      await saveProfile();
+                      alert('Neural Matrix stabilized and saved to your Research Vault.');
+                    }
+                  }}
+                >
+                   Stabilize Connection
+                </button>
               </div>
             </motion.div>
           )}

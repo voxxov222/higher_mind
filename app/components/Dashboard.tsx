@@ -12,6 +12,7 @@ import {
 import { fetchTimelineDepth, fetchTimelineDeepDiveOption, fetchGeneralDeepDive } from '../services/geminiService';
 import { User } from 'firebase/auth';
 import { DeepSynthesis } from './DeepSynthesis';
+import BirthChartGuide from './BirthChartGuide';
 
 /**
  * Interface for DashboardProps
@@ -694,11 +695,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
             </div>
           ) : (
             <div className="space-y-8">
-              <div className="prose prose-invert max-w-none text-stone-300 leading-relaxed font-light text-lg">
-                <p className="whitespace-pre-wrap">{deepDiveData.detailedAnalysis}</p>
-              </div>
+              {deepDiveData.title === 'Birth Chart Guide' ? (
+                <BirthChartGuide />
+              ) : (
+                <div className="prose prose-invert max-w-none text-stone-300 leading-relaxed font-light text-lg">
+                  <p className="whitespace-pre-wrap">{deepDiveData.detailedAnalysis}</p>
+                </div>
+              )}
 
-              {deepDiveData.followUpOptions.length > 0 && (
+              {deepDiveData.followUpOptions.length > 0 && deepDiveData.title !== 'Birth Chart Guide' && (
                 <div className="space-y-4 pt-8 border-t border-white/10">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent to-purple-500/30"></div>
@@ -1710,6 +1715,41 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
                         <NumberBox label="Life Path" value={data.numerology.lifePath} delay={0.1} />
                         <NumberBox label="Expression" value={data.numerology.expression} delay={0.2} />
                         <NumberBox label="Soul Urge" value={data.numerology.soulUrge} delay={0.3} />
+                      </div>
+
+                      {/* Numerology Bar Chart */}
+                      <div className="bg-stone-900/40 rounded-[2.5rem] border border-white/5 p-8 mt-6">
+                        <div className="flex items-center justify-between mb-8">
+                           <h3 className="text-[10px] uppercase tracking-[0.3em] font-bold text-stone-500 flex items-center gap-2">
+                             <BarChart2 className="w-3 h-3 text-emerald-400" />
+                             Vibrational Magnitude (Main Numbers)
+                           </h3>
+                        </div>
+                        <div className="h-64">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={[
+                              { name: 'Life Path', value: data.numerology.lifePath, fill: '#10b981' },
+                              { name: 'Expression', value: data.numerology.expression, fill: '#3b82f6' },
+                              { name: 'Soul Urge', value: data.numerology.soulUrge, fill: '#a855f7' }
+                            ]}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
+                              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 10 }} />
+                              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 10 }} />
+                              <RechartsTooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: '#1c1917', border: '1px solid #333', borderRadius: '12px' }} />
+                              <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={40}>
+                                {
+                                  [
+                                    { name: 'Life Path', value: data.numerology.lifePath, fill: '#10b981' },
+                                    { name: 'Expression', value: data.numerology.expression, fill: '#3b82f6' },
+                                    { name: 'Soul Urge', value: data.numerology.soulUrge, fill: '#a855f7' }
+                                  ].map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                                  ))
+                                }
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
                       </div>
 
                       <GematriaVisualizer gematria={data.gematria} name={name} />

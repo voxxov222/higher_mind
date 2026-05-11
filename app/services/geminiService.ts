@@ -345,3 +345,98 @@ export const fetchGeneralDeepDive = async (
     throw error;
   }
 };
+
+/**
+ * fetchAuraInsight
+ * The AI Agent engine for the 3D Cosmic Scene.
+ * Takes a user prompt and returns both text insight and 3D visualization data.
+ */
+export const fetchAuraInsight = async (
+  prompt: string,
+  cosmicData: CosmicData
+): Promise<{ 
+  insight: string; 
+  visualNodes: { id: string; label: string; position: [number, number, number]; color: string; description: string }[];
+  visualEdges: { source: string; target: string; color: string }[];
+  suggestedAction?: string;
+}> => {
+  const ai = getAI();
+  const systemPrompt = `
+  You are 'AURA', the Sentient AI guide of this 3D Cosmic Neural interface.
+  The user is exploring their 3D Natal Chart / Solar System.
+  
+  User Prompt: "${prompt}"
+  
+  Your goal is to provide a profound insight AND suggest a 3D visual cluster of nodes to render in the scene that represents this insight.
+  
+  Guidelines:
+  1. The 'insight' should be concise, futuristic, and highly intelligent (max 3 sentences).
+  2. Create 3-5 'visualNodes' that will appear in 3D space. 
+     - Coordinates (position) should be within a radius of 50 to 150 units from the center (Sun).
+     - Use colors like 'emerald', 'sky', 'rose', 'amber', 'purple', 'fuchsia'.
+     - Labels should be short (1-2 words).
+  3. Create 'visualEdges' to connect these nodes or link them back to planets in the chart.
+  
+  Format the output STRICTLY as JSON:
+  {
+    "insight": "...",
+    "visualNodes": [
+      { "id": "node1", "label": "SYNCHRONICITY", "position": [80, 20, 50], "color": "emerald", "description": "..." }
+    ],
+    "visualEdges": [
+      { "source": "node1", "target": "Sun", "color": "white" }
+    ],
+    "suggestedAction": "Analyzing vibrational drift..."
+  }
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: systemPrompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            insight: { type: Type.STRING },
+            visualNodes: { 
+              type: Type.ARRAY, 
+              items: { 
+                type: Type.OBJECT, 
+                properties: { 
+                  id: { type: Type.STRING },
+                  label: { type: Type.STRING },
+                  position: { type: Type.ARRAY, items: { type: Type.NUMBER } },
+                  color: { type: Type.STRING },
+                  description: { type: Type.STRING }
+                },
+                required: ["id", "label", "position", "color", "description"]
+              } 
+            },
+            visualEdges: { 
+              type: Type.ARRAY, 
+              items: { 
+                type: Type.OBJECT, 
+                properties: { 
+                  source: { type: Type.STRING },
+                  target: { type: Type.STRING },
+                  color: { type: Type.STRING }
+                },
+                required: ["source", "target", "color"]
+              } 
+            },
+            suggestedAction: { type: Type.STRING }
+          },
+          required: ["insight", "visualNodes", "visualEdges"]
+        }
+      }
+    });
+
+    let text = response.text?.trim() || "{}";
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Error fetching Aura insight:", error);
+    throw error;
+  }
+};

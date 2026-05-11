@@ -432,6 +432,78 @@ const PlanetNode = ({ degree, name, color, size, radius, active, onClick }: { de
   );
 };
 
+const HOUSE_DATA = [
+  { house: 1, realm: "Self", keywords: "Identity, Appearance, Beginnings" },
+  { house: 2, realm: "Value", keywords: "Possessions, Income, Self-Worth" },
+  { house: 3, realm: "Mind", keywords: "Communication, Siblings, Learning" },
+  { house: 4, realm: "Roots", keywords: "Home, Family, Subconscious" },
+  { house: 5, realm: "Joy", keywords: "Creativity, Romance, Children" },
+  { house: 6, realm: "Health", keywords: "Service, Routine, Wellness" },
+  { house: 7, realm: "Others", keywords: "Partnerships, Marriage, Balance" },
+  { house: 8, realm: "Depth", keywords: "Transformation, Shared Assets, Secrets" },
+  { house: 9, realm: "Spirit", keywords: "Philosophy, Travel, Expansion" },
+  { house: 10, realm: "Success", keywords: "Career, Status, Public Image" },
+  { house: 11, realm: "Vision", keywords: "Friends, Hopes, Community" },
+  { house: 12, realm: "Soul", keywords: "Spirituality, Solitude, Completion" },
+];
+
+const HouseNode = ({ houseNumber, angle, houseInfo, onClick }: { houseNumber: number, angle: number, houseInfo?: any, onClick: () => void }) => {
+  const [hovered, setHovered] = useState(false);
+  const hx = Math.cos(angle) * 7.5;
+  const hz = Math.sin(angle) * 7.5;
+  
+  const fallback = HOUSE_DATA[houseNumber - 1];
+  const title = houseInfo?.realmName || fallback.realm;
+  const description = houseInfo?.description || fallback.keywords;
+
+  useEffect(() => {
+    if (hovered) document.body.style.cursor = 'pointer';
+    else document.body.style.cursor = 'auto';
+  }, [hovered]);
+
+  return (
+    <group position={[hx, 0.1, hz]}>
+      <Text
+        rotation={[-Math.PI / 2, 0, 0]}
+        fontSize={hovered ? 0.8 : 0.6}
+        color={hovered ? "#60a5fa" : "#3b82f6"}
+        opacity={hovered ? 1 : 0.6}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+        onPointerOut={() => { setHovered(false); }}
+      >
+        {houseNumber}
+      </Text>
+      
+      <AnimatePresence>
+        {hovered && (
+          <Html center distanceFactor={15} position={[0, 1, 0]}>
+            <motion.div 
+              initial={{ opacity: 0, y: 10, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 5, scale: 0.9 }}
+              className="bg-black/90 backdrop-blur-md border border-blue-500/30 p-3 rounded-xl min-w-[120px] shadow-2xl pointer-events-none"
+            >
+              <div className="text-[10px] uppercase tracking-widest text-blue-400 font-bold mb-1">House {houseNumber}</div>
+              <div className="text-[13px] text-white font-medium mb-0.5">{title.toUpperCase()}</div>
+              <div className="text-[9px] text-stone-400 font-light leading-tight">{description}</div>
+            </motion.div>
+          </Html>
+        )}
+      </AnimatePresence>
+      
+      {/* Visual ring/marker */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
+        <ringGeometry args={[0.7, 0.8, 32]} />
+        <meshBasicMaterial color="#3b82f6" transparent opacity={hovered ? 0.3 : 0.1} />
+      </mesh>
+    </group>
+  );
+};
+
 const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, onPlanetClick: (title: string, content: string) => void, setActiveTab: (tab: any) => void }) => {
   const ref = useRef<THREE.Group>(null);
   const [activePlanet, setActivePlanet] = useState<string | null>(null);
@@ -549,27 +621,18 @@ const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, on
         {/* House Labels */}
         {Array.from({ length: 12 }).map((_, i) => {
           const angle = (i * 30 + 15) * Math.PI / 180;
-          const hx = Math.cos(angle) * 7.5;
-          const hz = Math.sin(angle) * 7.5;
           const houseInfo = data.houses?.find(h => h.houseNumber === i + 1);
 
           return (
-            <Text
-              key={`house-label-${i}`}
-              position={[hx, 0.1, hz]}
-              rotation={[-Math.PI / 2, 0, 0]}
-              fontSize={0.6}
-              color="#3b82f6"
-              opacity={0.6}
-              onClick={(e) => {
-                e.stopPropagation();
-                onPlanetClick(`House ${i + 1}`, `${houseInfo?.realmName || 'Life Sector'}. ${houseInfo?.description || ''}`);
+            <HouseNode 
+              key={`house-node-${i}`}
+              houseNumber={i + 1}
+              angle={angle}
+              houseInfo={houseInfo}
+              onClick={() => {
+                onPlanetClick(`House ${i + 1}`, `${houseInfo?.realmName || HOUSE_DATA[i].realm}. ${houseInfo?.description || HOUSE_DATA[i].keywords}`);
               }}
-              onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
-              onPointerOut={() => { document.body.style.cursor = 'auto'; }}
-            >
-              {i + 1}
-            </Text>
+            />
           );
         })}
 
@@ -728,64 +791,161 @@ const TorusField = () => {
   );
 }
 
-const TreeOfLife = ({ activeSephirah }: { activeSephirah: string }) => {
-  const sephiroth = [
-    { id: 1, name: 'Kether', pos: [0, 8, 0] },
-    { id: 2, name: 'Chokhmah', pos: [3, 6, 0] },
-    { id: 3, name: 'Binah', pos: [-3, 6, 0] },
-    { id: 4, name: 'Chesed', pos: [3, 2, 0] },
-    { id: 5, name: 'Gevurah', pos: [-3, 2, 0] },
-    { id: 6, name: 'Tiferet', pos: [0, 4, 0] },
-    { id: 7, name: 'Netzach', pos: [3, -1, 0] },
-    { id: 8, name: 'Hod', pos: [-3, -1, 0] },
-    { id: 9, name: 'Yesod', pos: [0, 1, 0] },
-    { id: 10, name: 'Malkuth', pos: [0, -4, 0] }
-  ];
+const SEPHIROTH_DATA = [
+  { id: 1, name: 'Kether', pos: [0, 10, 0], meaning: 'Crown, Divine Will' },
+  { id: 2, name: 'Chokhmah', pos: [4, 8, 0], meaning: 'Wisdom, Creative Power' },
+  { id: 3, name: 'Binah', pos: [-4, 8, 0], meaning: 'Understanding, Form' },
+  { id: 4, name: 'Chesed', pos: [4, 4, 0], meaning: 'Mercy, Expansion' },
+  { id: 5, name: 'Gevurah', pos: [-4, 4, 0], meaning: 'Severity, Restriction' },
+  { id: 6, name: 'Tiferet', pos: [0, 2, 0], meaning: 'Beauty, Harmony, Balance' },
+  { id: 7, name: 'Netzach', pos: [4, -2, 0], meaning: 'Victory, Emotion' },
+  { id: 8, name: 'Hod', pos: [-4, -2, 0], meaning: 'Splendor, Intellect' },
+  { id: 9, name: 'Yesod', pos: [0, -4, 0], meaning: 'Foundation, Subconscious' },
+  { id: 10, name: 'Malkuth', pos: [0, -9, 0], meaning: 'Kingdom, Physical Reality' }
+];
 
-  const paths = [
-    [1, 2], [1, 3], [1, 6],
-    [2, 3], [2, 4], [2, 6],
-    [3, 5], [3, 6],
-    [4, 5], [4, 6], [4, 7],
-    [5, 6], [5, 8],
-    [6, 7], [6, 8], [6, 9],
-    [7, 8], [7, 9], [7, 10],
-    [8, 9], [8, 10],
-    [9, 10]
-  ];
+const TREE_PATHS = [
+  { id: 11, nodes: [1, 2], name: 'Aleph', hebrew: 'א' },
+  { id: 12, nodes: [1, 3], name: 'Beth', hebrew: 'ב' },
+  { id: 13, nodes: [1, 6], name: 'Gimel', hebrew: 'ג' },
+  { id: 14, nodes: [2, 3], name: 'Daleth', hebrew: 'ד' },
+  { id: 15, nodes: [2, 6], name: 'He', hebrew: 'ה' },
+  { id: 16, nodes: [2, 4], name: 'Vav', hebrew: 'ו' },
+  { id: 17, nodes: [3, 6], name: 'Zayin', hebrew: 'ז' },
+  { id: 18, nodes: [3, 5], name: 'Cheth', hebrew: 'ח' },
+  { id: 19, nodes: [4, 5], name: 'Teth', hebrew: 'ט' },
+  { id: 20, nodes: [4, 6], name: 'Yod', hebrew: 'י' },
+  { id: 21, nodes: [4, 7], name: 'Kaph', hebrew: 'כ' },
+  { id: 22, nodes: [5, 6], name: 'Lamed', hebrew: 'ל' },
+  { id: 23, nodes: [5, 8], name: 'Mem', hebrew: 'מ' },
+  { id: 24, nodes: [6, 7], name: 'Nun', hebrew: 'נ' },
+  { id: 25, nodes: [6, 8], name: 'Samekh', hebrew: 'ס' },
+  { id: 26, nodes: [6, 9], name: 'Ayin', hebrew: 'ע' },
+  { id: 27, nodes: [7, 8], name: 'Pe', hebrew: 'פ' },
+  { id: 28, nodes: [7, 9], name: 'Tzaddi', hebrew: 'צ' },
+  { id: 29, nodes: [7, 10], name: 'Qoph', hebrew: 'ק' },
+  { id: 30, nodes: [8, 9], name: 'Resh', hebrew: 'ר' },
+  { id: 31, nodes: [8, 10], name: 'Shin', hebrew: 'ש' },
+  { id: 32, nodes: [9, 10], name: 'Tav', hebrew: 'ת' }
+];
+
+const TreeOfLife = ({ activeSephirah, activePaths = [] }: { activeSephirah: string, activePaths?: string[] }) => {
+  const [hoveredNode, setHoveredNode] = useState<number | null>(null);
+  const [hoveredPath, setHoveredPath] = useState<number | null>(null);
 
   return (
-    <Float speed={1} rotationIntensity={0.1} floatIntensity={0.5}>
-      {paths.map((path, i) => {
-        const start = sephiroth.find(s => s.id === path[0])!;
-        const end = sephiroth.find(s => s.id === path[1])!;
+    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.8}>
+      {/* 22 paths of the Tree */}
+      {TREE_PATHS.map((path) => {
+        const start = SEPHIROTH_DATA.find(s => s.id === path.nodes[0])!;
+        const end = SEPHIROTH_DATA.find(s => s.id === path.nodes[1])!;
+        
+        // Check if path is active in user profile
+        const isPathActive = activePaths.some(ap => ap.toLowerCase().includes(path.name.toLowerCase()) || ap.includes(path.id.toString()));
+        const isHovered = hoveredPath === path.id;
+
         return (
-          <Line
-            key={`path-${i}`}
-            points={[start.pos as [number, number, number], end.pos as [number, number, number]]}
-            color="#fbbf24"
-            opacity={0.3}
-            transparent
-            lineWidth={1}
-          />
+          <group key={`path-${path.id}`}>
+            <Line
+              points={[start.pos as [number, number, number], end.pos as [number, number, number]]}
+              color={isPathActive ? "#fbbf24" : (isHovered ? "#ffffff" : "#fbbf24")}
+              opacity={isPathActive ? 1 : (isHovered ? 0.6 : 0.15)}
+              transparent
+              lineWidth={isPathActive ? 3 : (isHovered ? 2 : 1)}
+              onPointerOver={(e) => { e.stopPropagation(); setHoveredPath(path.id); }}
+              onPointerOut={() => setHoveredPath(null)}
+            />
+            
+            {(isHovered || isPathActive) && (
+              <Html distanceFactor={15} position={[
+                (start.pos[0] + end.pos[0]) / 2,
+                (start.pos[1] + end.pos[1]) / 2 + 0.5,
+                (start.pos[2] + end.pos[2]) / 2
+              ]}>
+                <div className={`px-2 py-1 ${isPathActive ? 'bg-amber-500/90' : 'bg-black/80'} backdrop-blur-md border border-amber-500/30 rounded text-[9px] text-white uppercase tracking-tighter whitespace-nowrap`}>
+                  {path.hebrew} {path.name}
+                </div>
+              </Html>
+            )}
+          </group>
         );
       })}
       
-      {sephiroth.map(s => {
+      {/* 10 Sephiroth */}
+      {SEPHIROTH_DATA.map(s => {
         const isActive = activeSephirah.toLowerCase().includes(s.name.toLowerCase());
-        const color = isActive ? "#fca5a5" : "#d8b4fe";
-        const emissive = isActive ? "#ef4444" : "#c084fc";
+        const isHovered = hoveredNode === s.id;
+        
+        // Theme-based colors
+        const color = isActive ? "#fca5a5" : (isHovered ? "#ffffff" : "#d8b4fe");
+        const emissive = isActive ? "#ef4444" : (isHovered ? "#ffffff" : "#c084fc");
+        const intensity = isActive ? 4 : (isHovered ? 2 : 0.5);
         
         return (
-          <InteractiveObject key={s.id} id={`sephirah-${s.id}`} initialColor={color}>
-            <group position={s.pos as [number, number, number]}>
-              <mesh>
-                <sphereGeometry args={[isActive ? 0.7 : 0.4, 32, 32]} />
-                <CosmicMaterial emissiveIntensity={isActive ? 2 : 1} />
+          <InteractiveObject 
+            key={s.id} 
+            id={`sephirah-${s.id}`} 
+            initialColor={color}
+          >
+            <group 
+              position={s.pos as [number, number, number]}
+              onPointerOver={(e) => { e.stopPropagation(); setHoveredNode(s.id); }}
+              onPointerOut={() => setHoveredNode(null)}
+            >
+              {/* Outer Glow */}
+              <mesh scale={isActive ? 1.4 : 1.2}>
+                <sphereGeometry args={[0.5, 32, 32]} />
+                <meshStandardMaterial 
+                  color={color} 
+                  transparent 
+                  opacity={0.1} 
+                  emissive={emissive} 
+                  emissiveIntensity={intensity} 
+                />
               </mesh>
-              <CosmicText position={[0, -0.8, 0]} fontSize={0.4} anchorY="top">
+
+              {/* Core Node */}
+              <mesh>
+                <sphereGeometry args={[isActive ? 0.6 : 0.45, 32, 32]} />
+                <CosmicMaterial emissiveIntensity={intensity} />
+              </mesh>
+
+              {isActive && (
+                <Sparkles 
+                  count={20} 
+                  scale={1.5} 
+                  size={4} 
+                  speed={0.5} 
+                  color="#fbbf24" 
+                />
+              )}
+
+              {/* Sephirah Label */}
+              <Text 
+                position={[0, -1, 0]} 
+                fontSize={0.5} 
+                anchorY="top" 
+                color="white"
+                outlineWidth={0.02}
+                outlineColor="#000000"
+              >
                 {s.name}
-              </CosmicText>
+              </Text>
+
+              {/* Insight Label on Hover/Active */}
+              {(isHovered || isActive) && (
+                <Html distanceFactor={15} position={[0, 1.2, 0]}>
+                   <motion.div 
+                     initial={{ opacity: 0, y: 10 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     className="bg-black/90 backdrop-blur-xl border border-white/20 p-3 rounded-xl min-w-[150px] shadow-2xl text-center pointer-events-none"
+                   >
+                     <div className="text-[10px] uppercase tracking-widest text-purple-400 font-bold mb-1">Sephirah {s.id}</div>
+                     <div className="text-sm text-white font-medium mb-1">{s.name.toUpperCase()}</div>
+                     <div className="text-[9px] text-stone-400 italic">"{s.meaning}"</div>
+                   </motion.div>
+                </Html>
+              )}
             </group>
           </InteractiveObject>
         );
@@ -1289,6 +1449,12 @@ export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setAc
         <group position={[0, -2, -15]} rotation={[0, Math.PI, 0]}>
            <TreeOfLife 
              activeSephirah={`${data.kabbalisticNumerology.lifePathCorrespondence.sephirah} ${data.kabbalisticNumerology.expressionCorrespondence.sephirah} ${data.kabbalisticNumerology.soulUrgeCorrespondence.sephirah}`} 
+             activePaths={[
+               data.kabbalisticNumerology.lifePathCorrespondence.path,
+               data.kabbalisticNumerology.expressionCorrespondence.path,
+               data.kabbalisticNumerology.soulUrgeCorrespondence.path,
+               ...(data.planets.map(p => p.treeOfLifeConnection).filter(Boolean) as string[])
+             ]}
            />
            <group position={[0, 10, 0]}>
              <CosmicText fontSize={0.8} color="#10b981">
@@ -1303,7 +1469,10 @@ export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setAc
 
       {data && activeTab === 'kabbalah' && (
         <group position={[0, -2, -15]} rotation={[0, Math.PI, 0]}>
-           <TreeOfLife activeSephirah={data.kabbalah.sephirah} />
+           <TreeOfLife 
+             activeSephirah={data.kabbalah.sephirah} 
+             activePaths={[data.kabbalah.path]}
+           />
            <Text 
              position={[0, -6, 0]} 
              fontSize={0.8} 

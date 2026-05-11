@@ -1,7 +1,7 @@
 // --- FIREBASE INFRASTRUCTURE & AUTH ---
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, Timestamp, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, getDocFromServer, collection, query, where, getDocs, Timestamp, updateDoc, serverTimestamp } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 import { CosmicData, UserProfileConfig } from './types';
 
@@ -148,7 +148,7 @@ export const updateProfileConfig = async (userId: string, profileConfig: UserPro
 async function testConnection(retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
-      await getDoc(doc(db, 'test', 'connection'));
+      await getDocFromServer(doc(db, 'test', 'connection'));
       console.log("Firebase connection established.");
       return;
     } catch (error) {

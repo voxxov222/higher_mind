@@ -6,6 +6,7 @@ interface ProfileStore {
   isEditing: boolean;
   setConfig: (config: UserProfileConfig) => void;
   setEditing: (isEditing: boolean) => void;
+  updateMindMap: (mindMap: any) => void;
   updateWidget: (widgetId: string, updates: Partial<CosmicWidget>) => void;
   addWidget: (widget: CosmicWidget) => void;
   removeWidget: (widgetId: string) => void;
@@ -18,6 +19,13 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
   isEditing: false,
   setConfig: (config) => set({ config }),
   setEditing: (isEditing) => set({ isEditing }),
+  updateMindMap: (mindMap) => {
+    const config = get().config;
+    if (!config) return;
+    // We'll store it in a special widget or a top level field if we update types later
+    // For now let's find a 'cosmic_stats' or similar widget to store it in, or just keep it in researchVault
+    set({ config: { ...config, researchVault: [...config.researchVault, { id: 'mindmap', title: 'Cosmic Mind Map', content: JSON.stringify(mindMap), category: 'synthesis', timestamp: Date.now() }] } });
+  },
   updateWidget: (widgetId, updates) => {
     const config = get().config;
     if (!config) return;

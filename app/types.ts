@@ -121,6 +121,21 @@ export interface CosmicData {
     interestingFacts: string[];
     coreTheme: string;
   };
+  mindMap?: {
+    nodes: MindMapNode[];
+    centerNode: MindMapNode;
+  };
+}
+
+export interface MindMapNode {
+  id: string;
+  label: string;
+  description: string;
+  x: number;
+  y: number;
+  color: string;
+  connections: string[];
+  type: 'core' | 'category' | 'insight' | 'custom';
 }
 
 export interface CosmicWidget {

@@ -54,7 +54,8 @@ const CosmicProfile: React.FC<{ initialConfig?: UserProfileConfig }> = ({ initia
         bio: {
           text: "Celestial architect mapping the intersection of ancient wisdom and futuristic tech. Always dreaming in stardust.",
           moodStatus: "Exploring the 5th Dimension"
-        }
+        },
+        researchVault: []
       };
       setConfig(defaultConfig);
     }

@@ -173,4 +173,12 @@ export interface UserProfileConfig {
     moodStatus?: string;
     voiceIntroUrl?: string;
   };
+  researchVault: {
+    id: string;
+    title: string;
+    content: string;
+    category: string;
+    timestamp: number;
+    tags?: string[];
+  }[];
 }

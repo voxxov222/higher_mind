@@ -13,6 +13,10 @@ service cloud.firestore {
     function isSignedIn() { return request.auth != null; }
     function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
 
+    match /test/connection {
+      allow read: if true;
+    }
+
     function isValidUserCosmicProfile(data) {
       return data.keys().hasAll(['userId', 'input', 'cosmicData', 'updatedAt'])
         && data.userId is string && data.userId.size() <= 128

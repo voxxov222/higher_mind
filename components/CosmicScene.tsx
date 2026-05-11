@@ -23,6 +23,7 @@ interface CosmicSceneProps {
   activeTab: string;
   setActiveTab: (tab: any) => void;
   onPlanetClick?: (text: string) => void;
+  isPresentationActive?: boolean;
 }
 
 // Global state for object interactions (simplified for direct use in scene)
@@ -778,117 +779,110 @@ const NameMindMap = ({ analysis, onNodeClick, name }: { analysis: any, onNodeCli
   );
 };
 
-export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setActiveTab, onPlanetClick }) => {
-  
-  const getPlanetColor = (name: string) => {
-    const colors: Record<string, string> = {
-      'Sun': '#fbbf24',
-      'Moon': '#e2e8f0',
-      'Mercury': '#94a3b8',
-      'Venus': '#f472b6',
-      'Mars': '#ef4444',
-      'Jupiter': '#f59e0b',
-      'Saturn': '#d97706',
-      'Uranus': '#06b6d4',
-      'Neptune': '#3b82f6',
-      'Pluto': '#475569',
-      'Ascendant': '#10b981'
-    };
-    return colors[name] || '#a855f7';
-  };
+const CameraController = ({ isPresentationActive, activeTab, data }: { isPresentationActive?: boolean, activeTab: string, data: CosmicData | null }) => {
+  const [isAutoFollowing, setIsAutoFollowing] = useState(true);
+  const lastActiveTab = useRef(activeTab);
 
-  const CameraController = () => {
-    const [isAutoFollowing, setIsAutoFollowing] = useState(true);
-    const lastActiveTab = useRef(activeTab);
+  useEffect(() => {
+    if (activeTab !== lastActiveTab.current) {
+      setIsAutoFollowing(true);
+      lastActiveTab.current = activeTab;
+    }
+  }, [activeTab]);
 
-    useEffect(() => {
-      if (activeTab !== lastActiveTab.current) {
-        setIsAutoFollowing(true);
-        lastActiveTab.current = activeTab;
-      }
-    }, [activeTab]);
+  useFrame((state) => {
+    if (isPresentationActive) {
+      const t = state.clock.getElapsedTime();
+      state.camera.position.x = Math.sin(t * 0.2) * 25;
+      state.camera.position.z = Math.cos(t * 0.2) * 25;
+      state.camera.position.y = 15 + Math.sin(t * 0.1) * 8;
+      state.camera.lookAt(0, 0, 0);
+      return;
+    }
 
-    useFrame((state) => {
-      if (!isAutoFollowing) return;
+    if (!isAutoFollowing) return;
 
-      const targetPos = new THREE.Vector3(0, 15, 20);
-      const lookAtTarget = new THREE.Vector3(0, 0, 0);
+    const targetPos = new THREE.Vector3(0, 15, 20);
+    const lookAtTarget = new THREE.Vector3(0, 0, 0);
 
-      if (activeTab === 'torus') {
-        targetPos.set(0, 15, 25);
-        lookAtTarget.set(0, 0, 0);
-      } else if (activeTab === 'planets') {
-        targetPos.set(-20, 5, 10);
-        lookAtTarget.set(-15, 0, 0);
-      } else if (activeTab === 'numbers') {
-        targetPos.set(20, 5, 10);
-        lookAtTarget.set(15, 0, 0);
-      } else if (activeTab === 'kabbalah') {
-        targetPos.set(0, 10, -25);
-        lookAtTarget.set(0, 0, -15);
-      } else if (activeTab === 'cycles') {
-        targetPos.set(0, 5, 30);
-        lookAtTarget.set(0, 0, 15);
-      } else if (activeTab === 'houses') {
-        targetPos.set(15, 10, 20);
-        lookAtTarget.set(0, -5, 10);
-      } else if (activeTab === 'daily') {
-        targetPos.set(-20, 10, -20);
-        lookAtTarget.set(-10, 0, -10);
-      } else if (activeTab === 'synthesis') {
-        targetPos.set(-5, 5, 35);
-        lookAtTarget.set(-5, 0, 20);
-      } else if (activeTab === 'strategy') {
-        targetPos.set(0, 25, 0);
-        lookAtTarget.set(0, 0, 0);
-      } else if (activeTab === 'timeline') {
-        targetPos.set(10, 5, 35);
-        lookAtTarget.set(10, 0, 20);
-      } else if (activeTab === 'name') {
-        targetPos.set(0, 10, -35); 
-        lookAtTarget.set(0, 0, -20);
-      } else if (activeTab === 'akashic') {
-        targetPos.set(-20, 15, -20);
-        lookAtTarget.set(-15, 0, -15);
-      } else if (activeTab === 'patterns') {
-        targetPos.set(20, 15, -20);
-        lookAtTarget.set(15, 0, -15);
-      }
-      
-      const distance = state.camera.position.distanceTo(targetPos);
-      const targetDistance = (state.get().controls as any)?.target.distanceTo(lookAtTarget) || 0;
+    if (activeTab === 'torus') {
+      targetPos.set(0, 15, 25);
+      lookAtTarget.set(0, 0, 0);
+    } else if (activeTab === 'planets') {
+      targetPos.set(-20, 5, 10);
+      lookAtTarget.set(-15, 0, 0);
+    } else if (activeTab === 'numbers') {
+      targetPos.set(20, 5, 10);
+      lookAtTarget.set(15, 0, 0);
+    } else if (activeTab === 'kabbalah') {
+      targetPos.set(0, 10, -25);
+      lookAtTarget.set(0, 0, -15);
+    } else if (activeTab === 'cycles') {
+      targetPos.set(0, 5, 30);
+      lookAtTarget.set(0, 0, 15);
+    } else if (activeTab === 'houses') {
+      targetPos.set(15, 10, 20);
+      lookAtTarget.set(0, -5, 10);
+    } else if (activeTab === 'daily') {
+      targetPos.set(-20, 10, -20);
+      lookAtTarget.set(-10, 0, -10);
+    } else if (activeTab === 'synthesis') {
+      targetPos.set(0, 30, 5);
+      lookAtTarget.set(0, 0, 0);
+    } else if (activeTab === 'findings') {
+      targetPos.set(0, 40, 20);
+      lookAtTarget.set(0, 0, 0);
+    } else if (activeTab === 'strategy') {
+      targetPos.set(0, 25, 0);
+      lookAtTarget.set(0, 0, 0);
+    } else if (activeTab === 'timeline') {
+      targetPos.set(10, 5, 35);
+      lookAtTarget.set(10, 0, 20);
+    } else if (activeTab === 'name') {
+      targetPos.set(0, 10, -35); 
+      lookAtTarget.set(0, 0, -20);
+    } else if (activeTab === 'akashic') {
+      targetPos.set(-20, 15, -20);
+      lookAtTarget.set(-15, 0, -15);
+    } else if (activeTab === 'patterns') {
+      targetPos.set(20, 15, -20);
+      lookAtTarget.set(15, 0, -15);
+    }
+    
+    const distance = state.camera.position.distanceTo(targetPos);
+    const targetDistance = (state.get().controls as any)?.target.distanceTo(lookAtTarget) || 0;
 
-      if (distance > 0.05 || targetDistance > 0.05) {
-        state.camera.position.lerp(targetPos, 0.05);
-        if (state.get().controls) {
-          (state.get().controls as any).target.lerp(lookAtTarget, 0.05);
-        } else {
-          state.camera.lookAt(lookAtTarget);
-        }
+    if (distance > 0.05 || targetDistance > 0.05) {
+      state.camera.position.lerp(targetPos, 0.05);
+      if (state.get().controls) {
+        (state.get().controls as any).target.lerp(lookAtTarget, 0.05);
       } else {
-        // We've arrived, but we stay in auto-following mode until the user moves
+        state.camera.lookAt(lookAtTarget);
       }
-    });
+    }
+  });
 
-    return (
-      <OrbitControls 
-        makeDefault 
-        enableDamping
-        dampingFactor={0.05}
-        rotateSpeed={0.5}
-        zoomSpeed={1.2}
-        maxDistance={60} 
-        minDistance={5} 
-        autoRotate={!data} 
-        autoRotateSpeed={0.5}
-        onStart={() => setIsAutoFollowing(false)}
-      />
-    );
-  };
+  return (
+    <OrbitControls 
+      makeDefault 
+      enableDamping
+      dampingFactor={0.05}
+      rotateSpeed={0.5}
+      zoomSpeed={1.2}
+      maxDistance={60} 
+      minDistance={5} 
+      autoRotate={!data} 
+      autoRotateSpeed={0.5}
+      onStart={() => setIsAutoFollowing(false)}
+    />
+  );
+};
+
+export const CosmicScene: React.FC<CosmicSceneProps> = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive }) => {
 
   return (
     <Canvas id="cosmic-canvas" camera={{ position: [0, 15, 20], fov: 60 }} className="w-full h-full absolute inset-0 bg-black">
-      <CameraController />
+      <CameraController isPresentationActive={isPresentationActive} activeTab={activeTab} data={data} />
       <fog attach="fog" args={['#000', 5, 50]} />
       <ambientLight intensity={0.2} />
       <pointLight position={[0, 0, 0]} intensity={2} color="#ffffff" />

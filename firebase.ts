@@ -129,12 +129,21 @@ export const updateProfileConfig = async (userId: string, profileConfig: UserPro
   }
 };
 
-async function testConnection() {
-  try {
-    await getDoc(doc(db, 'test', 'connection'));
-  } catch (error) {
-    if(error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration.");
+async function testConnection(retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await getDoc(doc(db, 'test', 'connection'));
+      console.log("Firebase connection established.");
+      return;
+    } catch (error) {
+      if (i === retries - 1) {
+        console.error("Firebase connection failed after retries:", error);
+        if(error instanceof Error && error.message.includes('the client is offline')) {
+          console.error("Please check your Firebase configuration. You may need to accept terms in the Firebase setup UI.");
+        }
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
     }
   }
 }

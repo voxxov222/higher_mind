@@ -1,77 +1,292 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CosmicData, UserProfileConfig } from '../types';
-import { Sparkles, Moon, Sun, Star, Activity, Hexagon, Fingerprint, Network, Menu, X, Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, PieChart, Zap } from 'lucide-react';
+import { Sparkles, Moon, Sun, Star, Activity, Hexagon, Fingerprint, Network, Menu, X, Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, PieChart, Zap, Upload, Palette, Bookmark, History, LifeBuoy, Monitor, Layout, Share2, Download, PlayCircle, Eye } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, Pie, PieChart as RechartsPieChart
 } from 'recharts';
 import { fetchTimelineDepth, fetchTimelineDeepDiveOption, fetchGeneralDeepDive } from '../services/geminiService';
 import { User } from 'firebase/auth';
+import { DeepSynthesis } from './DeepSynthesis';
 
 interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns';
-  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns') => void;
+  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity';
+  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
   loadedInputs: any;
-  profileConfig: UserProfileConfig;
+  profileConfig?: UserProfileConfig;
   onUpdateProfile: (config: UserProfileConfig) => void;
+  onPresentationRequest?: () => void;
 }
 
-const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedInputs }: { isOpen: boolean, onClose: () => void, profileConfig: UserProfileConfig, onUpdateProfile: (c: UserProfileConfig) => void, loadedInputs: any }) => {
-  const [bio, setBio] = useState(profileConfig.bio || '');
-  const [bgUrl, setBgUrl] = useState(profileConfig.backgroundUrl || '');
-  const [themeColor, setThemeColor] = useState(profileConfig.themeColor || '#a855f7');
-  const [astrologicalSign, setAstrologicalSign] = useState(profileConfig.astrologicalSign || '');
+const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedInputs }: { isOpen: boolean, onClose: () => void, profileConfig?: UserProfileConfig, onUpdateProfile: (c: UserProfileConfig) => void, loadedInputs: any }) => {
+  const [activeSettingsTab, setActiveSettingsTab] = useState<'identity' | 'style' | 'vault'>('identity');
+  
+  const [displayName, setDisplayName] = useState(profileConfig?.displayName || '');
+  const [bioText, setBioText] = useState(profileConfig?.bio?.text || '');
+  const [avatarUrl, setAvatarUrl] = useState(profileConfig?.avatarUrl || '');
+  const [bannerUrl, setBannerUrl] = useState(profileConfig?.bannerUrl || '');
+  const [primaryColor, setPrimaryColor] = useState(profileConfig?.theme?.primaryColor || '#a855f7');
+  const [secondaryColor, setSecondaryColor] = useState(profileConfig?.theme?.secondaryColor || '#3b82f6');
+  const [backgroundEffect, setBackgroundEffect] = useState(profileConfig?.theme?.backgroundEffect || 'stars');
+
+  useEffect(() => {
+    if (profileConfig) {
+      setDisplayName(profileConfig.displayName || '');
+      setBioText(profileConfig.bio?.text || '');
+      setAvatarUrl(profileConfig.avatarUrl || '');
+      setBannerUrl(profileConfig.bannerUrl || '');
+      setPrimaryColor(profileConfig.theme?.primaryColor || '#a855f7');
+      setSecondaryColor(profileConfig.theme?.secondaryColor || '#3b82f6');
+      setBackgroundEffect(profileConfig.theme?.backgroundEffect || 'stars');
+    }
+  }, [profileConfig]);
 
   if (!isOpen) return null;
 
+  const handleSave = () => {
+    if (!profileConfig) return;
+    const updatedConfig: UserProfileConfig = {
+      ...profileConfig,
+      displayName,
+      avatarUrl,
+      bannerUrl,
+      bio: {
+        ...profileConfig.bio,
+        text: bioText
+      },
+      theme: {
+        ...profileConfig.theme,
+        primaryColor,
+        secondaryColor,
+        backgroundEffect
+      }
+    };
+    onUpdateProfile(updatedConfig);
+    onClose();
+  };
+
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-stone-900 border border-white/20 p-6 rounded-2xl w-full max-w-md shadow-2xl relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-stone-400 hover:text-white"><X size={20} /></button>
-        <h2 className="text-xl font-light text-white mb-6">Customize Profile</h2>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-stone-400 mb-2">Astrological Sign</label>
-            <input type="text" value={astrologicalSign} onChange={e => setAstrologicalSign(e.target.value)} placeholder="e.g. Scorpio Sun, Cancer Moon" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-stone-200 outline-none focus:border-purple-500" />
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-stone-400 mb-2">Biography</label>
-            <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Share your cosmic journey..." className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-stone-200 outline-none focus:border-purple-500 h-24 resize-none" />
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-stone-400 mb-2">Background Image URL</label>
-            <input type="text" value={bgUrl} onChange={e => setBgUrl(e.target.value)} placeholder="https://..." className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-stone-200 outline-none focus:border-purple-500" />
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-stone-400 mb-2">Theme Color</label>
-            <div className="flex gap-2">
-              {['#a855f7', '#3b82f6', '#10b981', '#f59e0b', '#f43f5e'].map(color => (
-                <button key={color} onClick={() => setThemeColor(color)} className={`w-8 h-8 rounded-full border-2 ${themeColor === color ? 'border-white' : 'border-transparent'}`} style={{ backgroundColor: color }} />
-              ))}
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-0 md:p-8 bg-black/80 backdrop-blur-md">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+        animate={{ opacity: 1, scale: 1, y: 0 }} 
+        className="bg-stone-950 border border-white/10 rounded-none md:rounded-[2.5rem] w-full max-w-5xl h-full max-h-screen md:max-h-[85vh] shadow-[0_0_100px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden relative"
+      >
+        {/* Header / Banner Preview */}
+        <div className="h-48 md:h-64 bg-stone-900 relative overflow-hidden shrink-0">
+          {bannerUrl ? (
+            <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover opacity-60" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-stone-800 to-black flex items-center justify-center opacity-30">
+               <Globe className="w-32 h-32 text-white" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent"></div>
+          
+          <div className="absolute -bottom-12 left-8 flex items-end gap-6">
+            <div className="relative group cursor-pointer">
+              <div className="w-32 h-32 rounded-3xl bg-stone-900 border-4 border-stone-950 shadow-2xl overflow-hidden flex items-center justify-center ring-1 ring-white/10">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <UserIcon className="w-16 h-16 text-stone-700" />
+                )}
+              </div>
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-3xl">
+                <Camera className="text-white w-6 h-6" />
+              </div>
+            </div>
+            <div className="mb-2">
+               <h2 className="text-3xl font-light text-white tracking-widest leading-none mb-2">{displayName || 'Anonymous Traveler'}</h2>
+               <div className="flex gap-2">
+                 <span className="px-2 py-1 bg-white/5 border border-white/10 rounded text-[9px] uppercase tracking-widest text-stone-400">Level 4 Consciousness</span>
+                 <span className="px-2 py-1 bg-white/5 border border-white/10 rounded text-[9px] uppercase tracking-widest text-stone-400">Node Connected</span>
+               </div>
             </div>
           </div>
           
-          <button onClick={() => {
-            onUpdateProfile({ bio, backgroundUrl: bgUrl, themeColor, astrologicalSign });
-            onClose();
-          }} className="w-full mt-4 bg-purple-600 hover:bg-purple-500 text-white font-medium py-3 rounded-xl transition-colors">
-            Save Changes
+          <button onClick={onClose} className="absolute top-6 right-6 p-3 bg-black/40 hover:bg-white/10 rounded-full border border-white/10 text-stone-400 hover:text-white transition-all backdrop-blur-md">
+            <X size={20} />
           </button>
+        </div>
+
+        {/* Navigation */}
+        <div className="mt-16 px-8 flex border-b border-white/5 shrink-0 overflow-x-auto no-scrollbar">
+          {[
+            { id: 'identity', label: 'Identity Matrix', icon: Fingerprint },
+            { id: 'style', label: 'Cosmic Aesthetics', icon: Palette },
+            { id: 'vault', label: 'Research Vault', icon: BookOpen }
+          ].map(tab => (
+            <button 
+              key={tab.id}
+              onClick={() => setActiveSettingsTab(tab.id as any)}
+              className={`flex items-center gap-2 px-6 py-4 text-xs uppercase tracking-[0.2em] transition-all border-b-2 ${activeSettingsTab === tab.id ? 'border-purple-500 text-white' : 'border-transparent text-stone-500 hover:text-stone-300'}`}
+            >
+              <tab.icon size={16} className={activeSettingsTab === tab.id ? 'text-purple-400' : ''} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 p-8 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
+          <div className="max-w-3xl mx-auto">
+            {activeSettingsTab === 'identity' && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+                <div className="grid md:grid-cols-2 gap-8">
+                   <div className="space-y-4">
+                     <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">Public Name</label>
+                     <input 
+                       type="text" 
+                       value={displayName} 
+                       onChange={e => setDisplayName(e.target.value)}
+                       className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-purple-500/50 transition-all font-light text-lg"
+                       placeholder="Enter cosmic alias..."
+                     />
+                     <p className="text-[10px] text-stone-600 italic">This name identifies your node in the global astral collective.</p>
+                   </div>
+                   <div className="space-y-4">
+                     <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">Avatar Transporter</label>
+                     <div className="flex gap-2">
+                       <input 
+                         type="text" 
+                         value={avatarUrl} 
+                         onChange={e => setAvatarUrl(e.target.value)}
+                         className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-stone-300 focus:outline-none focus:border-purple-500/50 transition-all font-light text-sm"
+                         placeholder="Image URL (square preferred)"
+                       />
+                       <button className="bg-white/5 border border-white/10 p-3 rounded-2xl text-stone-400 hover:text-white transition-colors">
+                         <Upload size={18} />
+                       </button>
+                     </div>
+                   </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">Incarnation Biography</label>
+                  <textarea 
+                    value={bioText} 
+                    onChange={e => setBioText(e.target.value)}
+                    className="w-full h-40 bg-white/5 border border-white/10 rounded-3xl px-6 py-5 text-stone-200 focus:outline-none focus:border-purple-500/50 transition-all font-light leading-relaxed resize-none text-lg"
+                    placeholder="Describe your current manifestation..."
+                  />
+                  <div className="flex justify-between text-[10px] text-stone-600">
+                    <span>Markdown supported</span>
+                    <span>{bioText.length}/512</span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeSettingsTab === 'style' && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
+                <div className="space-y-4">
+                  <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">Atmospheric Resonance (Header)</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      value={bannerUrl} 
+                      onChange={e => setBannerUrl(e.target.value)}
+                      className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-stone-300 focus:outline-none focus:border-purple-500/50 transition-all font-light"
+                      placeholder="Enter banner image URL..."
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-10">
+                  <div className="space-y-4">
+                    <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">Aura Signature (Theme)</label>
+                    <div className="flex flex-wrap gap-4">
+                      {['#a855f7', '#3b82f6', '#10b981', '#f59e0b', '#f43f5e', '#ffffff'].map(color => (
+                        <button 
+                          key={color} 
+                          onClick={() => setPrimaryColor(color)}
+                          className={`w-10 h-10 rounded-2xl border-4 transition-all ${primaryColor === color ? 'border-white scale-110' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">Background Dimensionality</label>
+                    <div className="grid grid-cols-2 gap-2">
+                       {['stars', 'nebula', 'aurora', 'particles'].map(effect => (
+                         <button 
+                           key={effect}
+                           onClick={() => setBackgroundEffect(effect as any)}
+                           className={`px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest border transition-all ${backgroundEffect === effect ? 'bg-white/10 border-white/30 text-white' : 'bg-black/40 border-white/5 text-stone-500 hover:text-stone-300'}`}
+                         >
+                           {effect}
+                         </button>
+                       ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeSettingsTab === 'vault' && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                {!profileConfig.researchVault || profileConfig.researchVault.length === 0 ? (
+                  <div className="py-20 text-center space-y-4 bg-white/5 rounded-[2.5rem] border border-dashed border-white/10 mx-auto max-w-md">
+                     <BookOpen className="w-12 h-12 text-stone-700 mx-auto" />
+                     <p className="text-stone-500 font-light italic">Your vault is currently empty. Pin findings from your explorations to see them here.</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {profileConfig.researchVault.map((item, i) => (
+                      <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 relative group overflow-hidden">
+                        <div className={`absolute top-0 right-0 w-1 h-full ${item.category === 'Astrology' ? 'bg-purple-500' : item.category === 'Numerology' ? 'bg-blue-500' : 'bg-emerald-500'}`}></div>
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-[10px] uppercase tracking-widest text-stone-500">{item.category} • {new Date(item.timestamp).toLocaleDateString()}</span>
+                          <button 
+                            onClick={() => {
+                              const newVault = profileConfig.researchVault.filter(ri => ri.id !== item.id);
+                              onUpdateProfile({ ...profileConfig, researchVault: newVault });
+                            }} 
+                            className="opacity-0 group-hover:opacity-100 transition-opacity text-stone-500 hover:text-red-400"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                        <h4 className="text-lg font-light text-white mb-2">{item.title}</h4>
+                        <p className="text-xs text-stone-400 leading-relaxed font-light line-clamp-3">{item.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-8 border-t border-white/5 bg-black/40 flex justify-between items-center shrink-0">
+          <p className="text-[10px] text-stone-600 italic">All configurations are stored in the local consciousness node.</p>
+          <div className="flex gap-4">
+            <button onClick={onClose} className="px-8 py-3 text-xs uppercase tracking-widest text-stone-400 hover:text-white transition-colors">Cancel</button>
+            <button 
+              onClick={() => { handleSave(); onClose(); }} 
+              className="px-10 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs uppercase tracking-[0.2em] font-bold shadow-lg shadow-purple-900/40 transition-all"
+            >
+              Sync Matrix Changes
+            </button>
+          </div>
         </div>
       </motion.div>
     </div>
   );
 };
 
-const ActionMenu = ({ user, data, onSignIn, onSignOut, onEditProfile }: { user: User | null, data: CosmicData | null, onSignIn: () => void, onSignOut: () => void, onEditProfile: () => void }) => {
+const ActionMenu = ({ user, data, onSignIn, onSignOut, onEditProfile, profileConfig }: { user: User | null, data: CosmicData | null, onSignIn: () => void, onSignOut: () => void, onEditProfile: () => void, profileConfig?: UserProfileConfig }) => {
   const [open, setOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -134,17 +349,20 @@ const ActionMenu = ({ user, data, onSignIn, onSignOut, onEditProfile }: { user: 
                  <>
                    <div className="px-4 py-3 border-b border-white/10 mb-1 flex flex-col gap-2">
                      <div className="flex items-center gap-3">
-                       {user.photoURL ? (
-                         <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full" />
+                       {profileConfig?.avatarUrl || user.photoURL ? (
+                         <img src={profileConfig?.avatarUrl || user.photoURL || ''} alt="Profile" className="w-8 h-8 rounded-full border border-white/10" />
                        ) : (
                          <div className="w-8 h-8 rounded-full bg-purple-900/50 flex items-center justify-center text-purple-300"><UserIcon size={16}/></div>
                        )}
                        <div className="flex flex-col">
-                         <span className="text-sm font-medium text-white">{user.displayName || 'Traveler'}</span>
-                         <span className="text-xs text-stone-400 truncate w-32">{user.email}</span>
+                         <span className="text-sm font-medium text-white">{profileConfig?.displayName || user.displayName || 'Traveler'}</span>
+                         <span className="text-[10px] text-stone-500 truncate w-32 uppercase tracking-widest">{user.email}</span>
                        </div>
                      </div>
-                     <button onClick={() => { setOpen(false); onEditProfile(); }} className="mt-2 text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1"><Edit3 size={12}/> Edit Profile Configurations</button>
+                     <button onClick={() => { setOpen(false); onEditProfile(); }} className="mt-2 text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 group/edit">
+                        <Edit3 size={12} className="group-hover/edit:rotate-12 transition-transform" /> 
+                        Edit Profile Matrix
+                      </button>
                    </div>
                    <button onClick={onSignOut} className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-stone-200 transition-colors w-full text-left text-sm font-medium">
                      <LogOut className="w-4 h-4 text-stone-400" /> Sign Out
@@ -200,7 +418,7 @@ const ActionMenu = ({ user, data, onSignIn, onSignOut, onEditProfile }: { user: 
   );
 };
 
-export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoading, activeTab, setActiveTab, user, onSignIn, onSignOut, loadedInputs, profileConfig, onUpdateProfile }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoading, activeTab, setActiveTab, user, onSignIn, onSignOut, loadedInputs, profileConfig, onUpdateProfile, onPresentationRequest }) => {
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
@@ -272,6 +490,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
     }
   };
 
+  const handleSaveToVault = (title: string, content: string, category: string = 'General') => {
+    if (!profileConfig) return;
+    const newItem = {
+      id: Math.random().toString(36).substr(2, 9),
+      title,
+      content,
+      category,
+      timestamp: Date.now()
+    };
+    const currentVault = profileConfig.researchVault || [];
+    onUpdateProfile({
+      ...profileConfig,
+      researchVault: [...currentVault, newItem]
+    });
+    // Add some feedback here? Maybe a toast or just let the button change
+  };
+
   const handleDeepDiveNext = async (option: string) => {
     if (!data || !deepDiveData) return;
     setIsDeepDiveLoading(true);
@@ -297,15 +532,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
     }
   };
 
-  const ResearchBox = ({ title, content, children, className = "" }: { title: string, content: string, children: React.ReactNode, className?: string }) => (
+  const ResearchBox = ({ title, content, children, className = "", category = "Miscellaneous" }: { title: string, content: string, children: React.ReactNode, className?: string, category?: string }) => (
     <div className={`group relative bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-white/20 transition-all ${className}`}>
-      <button 
-        onClick={() => handleGeneralDeepDive(title, content)}
-        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800/80 hover:bg-stone-700 p-2 rounded-lg text-stone-300 hover:text-white flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold border border-white/10 z-10 shadow-xl"
-      >
-        <Search className="w-3 h-3" />
-        Research
-      </button>
+      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10">
+        <button 
+          onClick={() => handleSaveToVault(title, content, category)}
+          className="bg-stone-800/80 hover:bg-emerald-700 p-2 rounded-lg text-stone-300 hover:text-white transition-all border border-white/10 shadow-xl"
+          title="Save to Research Vault"
+        >
+          <Bookmark className="w-3 h-3" />
+        </button>
+        <button 
+          onClick={() => handleGeneralDeepDive(title, content)}
+          className="bg-stone-800/80 hover:bg-stone-700 p-2 rounded-lg text-stone-300 hover:text-white flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold border border-white/10 shadow-xl"
+        >
+          <Search className="w-3 h-3" />
+          Research
+        </button>
+      </div>
       {children}
     </div>
   );
@@ -376,7 +620,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
     );
   };
 
-  const themeColor = profileConfig?.themeColor || '#a855f7';
+  const themeColor = profileConfig?.theme?.primaryColor || '#a855f7';
 
   useEffect(() => {
     if (loadedInputs) {
@@ -389,7 +633,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
 
   return (
     <div className="absolute inset-0 pointer-events-none p-4 md:p-8 flex flex-col justify-between overflow-hidden">
-      <ActionMenu user={user} data={data} onSignIn={onSignIn} onSignOut={onSignOut} onEditProfile={() => setIsProfileModalOpen(true)} />
+      <ActionMenu user={user} data={data} onSignIn={onSignIn} onSignOut={onSignOut} onEditProfile={() => setIsProfileModalOpen(true)} profileConfig={profileConfig} />
       <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} profileConfig={profileConfig || {}} onUpdateProfile={onUpdateProfile} loadedInputs={loadedInputs} />
 
       {/* Header */}
@@ -399,24 +643,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
           ASTRAL MIND
         </h1>
       </header>
-
-      {/* User Customized Profile Presentation */}
-      <AnimatePresence>
-        {user && profileConfig?.bio && activeTab === 'torus' && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="absolute top-24 left-8 pointer-events-auto max-w-sm backdrop-blur-md bg-black/40 border border-white/10 p-6 rounded-2xl z-20">
-            <h2 className="text-xl font-light text-white mb-1 flex items-center gap-2">
-              {user.photoURL && <img src={user.photoURL} alt="" className="w-6 h-6 rounded-full" />}
-              {loadedInputs?.name || user.displayName}
-            </h2>
-            {profileConfig?.astrologicalSign && (
-              <p className="text-sm tracking-widest mb-3 uppercase font-semibold" style={{ color: themeColor }}>{profileConfig.astrologicalSign}</p>
-            )}
-            <p className="text-sm font-light text-stone-300 leading-relaxed italic border-l-2 pl-3" style={{ borderColor: themeColor }}>
-              "{profileConfig?.bio}"
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Main Content Area */}
       <div className="flex-1 flex items-center justify-start z-10 my-8">
@@ -479,6 +705,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
               <Minimize2 className="w-4 h-4" />
             </button>
             <div className="flex border-b border-white/10 p-2 gap-2 overflow-x-auto no-scrollbar pr-14">
+              <Tab active={activeTab === 'identity'} onClick={() => setActiveTab('identity')} icon={<UserIcon className="w-4 h-4"/>}>My Identity</Tab>
               <Tab active={activeTab === 'torus'} onClick={() => setActiveTab('torus')} icon={<Activity className="w-4 h-4"/>}>Soul Blueprint</Tab>
               <Tab active={activeTab === 'planets'} onClick={() => setActiveTab('planets')} icon={<Moon className="w-4 h-4"/>}>Astrology</Tab>
               <Tab active={activeTab === 'houses'} onClick={() => setActiveTab('houses')} icon={<Globe className="w-4 h-4"/>}>Houses</Tab>
@@ -493,11 +720,130 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
               <Tab active={activeTab === 'name'} onClick={() => setActiveTab('name')} icon={<Type className="w-4 h-4"/>}>Name Analysis</Tab>
               <Tab active={activeTab === 'akashic'} onClick={() => setActiveTab('akashic')} icon={<BookOpen className="w-4 h-4"/>}>Akashic Records</Tab>
               <Tab active={activeTab === 'patterns'} onClick={() => setActiveTab('patterns')} icon={<Fingerprint className="w-4 h-4"/>}>Synchronicities</Tab>
+              <Tab active={activeTab === 'findings'} onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
             </div>
             
             <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/20">
               <AnimatePresence mode="wait">
                 <DeepDiveModal />
+                {activeTab === 'identity' && (
+                  <motion.div key="identity" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8 pb-32">
+                    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 shadow-2xl">
+                      {/* Banner */}
+                      <div className="h-40 bg-stone-900 relative">
+                        {profileConfig?.bannerUrl ? (
+                          <img src={profileConfig.bannerUrl} alt="" className="w-full h-full object-cover opacity-60" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-r from-purple-900/50 via-blue-900/50 to-emerald-900/50 opacity-40" />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      </div>
+
+                      {/* Header Content */}
+                      <div className="px-8 pb-8 pt-0 -mt-12 relative flex flex-col md:flex-row items-end gap-6">
+                        <div className="w-24 h-24 rounded-[2rem] bg-stone-950 border-4 border-stone-950 shadow-2xl overflow-hidden flex items-center justify-center ring-1 ring-white/10 shrink-0">
+                          {profileConfig?.avatarUrl || user?.photoURL ? (
+                            <img src={profileConfig?.avatarUrl || user?.photoURL || ''} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <UserIcon className="w-10 h-10 text-stone-700" />
+                          )}
+                        </div>
+                        <div className="mb-2 flex-1">
+                          <h2 className="text-3xl font-light text-white leading-none mb-2 tracking-tight">
+                            {profileConfig?.displayName || user?.displayName || 'Traveler'}
+                          </h2>
+                          <div className="flex flex-wrap gap-2">
+                             <span className="px-2 py-1 bg-purple-500/20 border border-purple-500/30 rounded-lg text-[10px] uppercase tracking-widest text-purple-300 font-bold shadow-lg shadow-purple-500/10">Resonance Level 4</span>
+                             <span className="px-2 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-[10px] uppercase tracking-widest text-blue-300 font-bold shadow-lg shadow-blue-500/10">Node Active</span>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => setIsProfileModalOpen(true)}
+                          className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl border border-white/10 text-xs uppercase tracking-widest text-white transition-all backdrop-blur-md flex items-center gap-2 mb-2"
+                        >
+                          <Edit3 size={12} /> Edit Matrix
+                        </button>
+                      </div>
+
+                      {/* Bio */}
+                      <div className="px-8 pb-8">
+                        <div className="space-y-6">
+                          {profileConfig?.bio?.text && (
+                            <div className="relative">
+                              <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 to-blue-500 rounded-full opacity-50" />
+                              <p className="text-xl font-light text-stone-200 leading-relaxed italic pl-2">
+                                "{profileConfig?.bio.text}"
+                              </p>
+                            </div>
+                          )}
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-white/5 border border-white/5 p-6 rounded-2xl">
+                              <h4 className="text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold mb-4">Aura Signature</h4>
+                              <div className="flex items-center gap-4">
+                                <div className="w-8 h-8 rounded-full shadow-lg" style={{ backgroundColor: themeColor, boxShadow: `0 0 20px ${themeColor}40` }} />
+                                <div>
+                                  <div className="text-sm text-stone-200 font-light">Custom Resonance</div>
+                                  <div className="text-[9px] uppercase tracking-widest text-stone-500">Linked to {themeColor}</div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-white/5 border border-white/5 p-6 rounded-2xl">
+                              <h4 className="text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold mb-4">Node Connection</h4>
+                              <div className="flex items-center gap-4">
+                                <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                                  <Globe size={14} />
+                                </div>
+                                <div>
+                                  <div className="text-sm text-stone-200 font-light">Global Collective</div>
+                                  <div className="text-[9px] uppercase tracking-widest text-stone-500">Connected to Web3 Matrix</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Research Vault Preview in Identity Tab */}
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center px-2">
+                        <h3 className="text-sm uppercase tracking-[0.3em] text-stone-400 font-bold flex items-center gap-2">
+                          <BookOpen size={16} className="text-purple-400" />
+                          Vaulted Findings
+                        </h3>
+                        <span className="text-[10px] text-stone-500 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/10">
+                          {profileConfig?.researchVault?.length || 0} Items
+                        </span>
+                      </div>
+                      
+                      {profileConfig?.researchVault && profileConfig.researchVault.length > 0 ? (
+                        <div className="grid gap-3">
+                          {profileConfig.researchVault.slice(0, 3).map(item => (
+                            <ResearchBox key={item.id} title={item.title} content={item.content} category={item.category}>
+                              <div className="flex justify-between items-start mb-2">
+                                <span className="text-[9px] uppercase tracking-widest text-stone-500 px-2 py-0.5 bg-white/5 rounded border border-white/5">{item.category}</span>
+                              </div>
+                              <h4 className="text-base text-white font-light mb-1">{item.title}</h4>
+                              <p className="text-xs text-stone-400 line-clamp-2 italic font-light">"{item.content}"</p>
+                            </ResearchBox>
+                          ))}
+                          {profileConfig.researchVault.length > 3 && (
+                            <button className="w-full py-4 text-xs uppercase tracking-[0.3em] text-stone-500 hover:text-white transition-colors bg-white/2 bg-white/2 hover:bg-white/5 rounded-2xl border border-dashed border-white/10">
+                              View All {profileConfig.researchVault.length} Discoveries in Settings
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="py-12 border border-dashed border-white/10 bg-white/2 rounded-[2.5rem] flex flex-col items-center justify-center space-y-3 opacity-50">
+                           <BookOpen className="w-8 h-8 text-stone-700" />
+                           <p className="text-[10px] uppercase tracking-widest text-stone-600">Vault Currently Empty</p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
                 {activeTab === 'name' && (
                   <motion.div key="name" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-8">
                     {!data.nameAnalysis ? (
@@ -835,6 +1181,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onGenerate, isLoadin
                         </div>
                       </>
                     )}
+                  </motion.div>
+                )}
+                {activeTab === 'findings' && (
+                  <motion.div key="findings" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="h-full">
+                     <DeepSynthesis data={data} onPresentationRequest={onPresentationRequest} />
                   </motion.div>
                 )}
                 {activeTab === 'synthesis' && (

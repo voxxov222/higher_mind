@@ -14,12 +14,13 @@ const App: React.FC = () => {
   const [data, setData] = useState<CosmicData | null>(null);
   const [state, setState] = useState<AppState>(AppState.IDLE);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns'>('torus');
+  const [activeTab, setActiveTab] = useState<'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity'>('torus');
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [loadedInputs, setLoadedInputs] = useState<any>(null);
   const [profileConfig, setProfileConfig] = useState<UserProfileConfig | null>(null);
   const [viewMode, setViewMode] = useState<'blueprint' | 'universe'>('blueprint');
+  const [isPresentationMode, setIsPresentationMode] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -33,6 +34,31 @@ const App: React.FC = () => {
             setLoadedInputs(profile.input);
             if (profile.profileConfig) {
               setProfileConfig(profile.profileConfig);
+            } else {
+              setProfileConfig({
+                userId: currentUser.uid,
+                username: currentUser.email?.split('@')?.[0] || 'traveler',
+                displayName: currentUser.displayName || 'Traveler',
+                theme: {
+                  primaryColor: '#a855f7',
+                  secondaryColor: '#3b82f6',
+                  glowIntensity: 1,
+                  transparency: 0.8,
+                  borderStyle: 'glass',
+                  fontFamily: 'Inter',
+                  backgroundEffect: 'stars'
+                },
+                layout: {
+                  widgets: [],
+                  mainLayoutType: 'bento',
+                  snapToGrid: true
+                },
+                socialLinks: [],
+                bio: {
+                  text: 'A traveler on a cosmic journey across the astral plains.'
+                },
+                researchVault: []
+              });
             }
             setState(AppState.READY);
           }
@@ -111,7 +137,13 @@ const App: React.FC = () => {
     <div className="relative w-full h-screen bg-black overflow-hidden font-sans">
       {viewMode === 'blueprint' ? (
         <>
-          <CosmicScene data={data} activeTab={activeTab} setActiveTab={setActiveTab} onPlanetClick={handleSpeak} />
+          <CosmicScene 
+            data={data} 
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab} 
+            onPlanetClick={handleSpeak} 
+            isPresentationActive={isPresentationMode}
+          />
           <Dashboard 
             data={data} 
             onGenerate={handleGenerate} 
@@ -124,6 +156,10 @@ const App: React.FC = () => {
             loadedInputs={loadedInputs}
             profileConfig={profileConfig || undefined}
             onUpdateProfile={handleUpdateProfile}
+            onPresentationRequest={() => {
+              setIsPresentationMode(true);
+              setTimeout(() => setIsPresentationMode(false), 15000); // Presentation mode for 15s
+            }}
           />
         </>
       ) : (

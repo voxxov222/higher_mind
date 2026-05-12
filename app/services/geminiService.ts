@@ -48,7 +48,7 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
   7. Numerology: Life Path, Expression, Soul Urge numbers.
   8. Gematria: nameValue, Reduction, Pattern, nameSequence, dobSequence, numberProperties. Be brief.
   9. Kabbalah: Primary Sephirah and Path.
-  10. Torus Analysis: 1 sentence for 'bodyAndFlow', 'mindAndSpiritual', 'cosmicAlignment', 'overallAnalogy'.
+  10. Torus Analysis: 1 sentence for 'bodyAndFlow', 'mindAndSpiritual', 'cosmicAlignment', 'overallAnalogy', plus brief insights for 'soulAge', 'primaryRay', 'dimensionalFrequency', and 'karmicTheme'.
   11. Daily Insight: 1 short sentence each for 'horoscope', 'affirmation', 'caution', 'keyInterest', 'ageSignificance', 'timeDateCorrelation'.
   12. Weekly, Monthly & Yearly Insights: 1 sentence 'horoscope' and short 'theme' for each.
   13. Life Strategy: 'universeCorrelation', 'kabbalahNumerologyDepth', 'goalPlan', 'movingForward'. Max 2 sentences each.
@@ -59,6 +59,9 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
   18. Patterns & Synchronicities: Analyze user inputs for interesting esoteric connections (e.g., name meaning to gematria matching sign, numerical patterns, astrology aligning with numerology, initials mapping to significant values). 
       **ADDITIONALLY**: Identify if the Birth Time (${input.birthTime}) or Birth Date (${input.birthDate}) aligns with mathematical constants (like Pi 3:14, Golden Ratio 1.618, Fibonacci sequences). Look for "Incredible Discoveries" where birth time numbers mirror birth date digits or hidden geometry.
       Provide 2-3 'synchronicities' (each with 'title' and short 'description'), an array of 2-3 short 'interestingFacts', a 'coreTheme', and a specific 'timeDateDiscovery' (with 'title', 'description', and 'mathematicalPattern').
+  19. Chakras: Based on their chart, analyze state of the 7 main chakras (Root, Sacral, Solar Plexus, Heart, Throat, Third Eye, Crown).
+      For each, provide 'name', 'status' (open, blocked, overactive, balanced), a 'score' (0-100), concise 'description' based on astrology/numerology, and 'color' (hex code).
+  20. Compatibility: Based on their chart (Sun, Moon, Rising), determine the 2 'mostCompatible' signs and 2 'leastCompatible' signs (with 'sign' and short 'reason'). Define 'interactions' with all 12 zodiac signs containing 'sign', a short 'outcome' of a relationship with them, an array of 2 'strengths', and an array of 2 'weaknesses'.
   
   Format the output STRICTLY as valid JSON matching this schema:
   {
@@ -97,6 +100,12 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
       "timeDateDiscovery": { "title": "...", "description": "...", "mathematicalPattern": "..." },
       "interestingFacts": ["..."], 
       "coreTheme": "..." 
+    },
+    "chakras": [{ "name": "Root", "status": "open", "score": 85, "description": "...", "color": "#ff0000" }],
+    "compatibility": {
+      "mostCompatible": [{ "sign": "...", "reason": "..." }],
+      "leastCompatible": [{ "sign": "...", "reason": "..." }],
+      "interactions": [{ "sign": "...", "outcome": "...", "strengths": ["..."], "weaknesses": ["..."] }]
     }
   }
   
@@ -105,23 +114,23 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            planets: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, sign: { type: Type.STRING }, degree: { type: Type.NUMBER }, house: { type: Type.NUMBER }, meaning: { type: Type.STRING }, treeOfLifeConnection: { type: Type.STRING } }, required: ["name", "sign", "degree", "house", "meaning", "treeOfLifeConnection"] } },
+            planets: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, sign: { type: Type.STRING }, degree: { type: Type.NUMBER }, house: { type: Type.NUMBER }, meaning: { type: Type.STRING }, treeOfLifeConnection: { type: Type.STRING }, interpretation: { type: Type.STRING } }, required: ["name", "sign", "degree", "house", "meaning", "treeOfLifeConnection", "interpretation"] } },
             nodes: { type: Type.OBJECT, properties: { north: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, sign: { type: Type.STRING }, degree: { type: Type.NUMBER }, house: { type: Type.NUMBER }, meaning: { type: Type.STRING }, treeOfLifeConnection: { type: Type.STRING } }, required: ["name", "sign", "degree", "house", "meaning", "treeOfLifeConnection"] }, south: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, sign: { type: Type.STRING }, degree: { type: Type.NUMBER }, house: { type: Type.NUMBER }, meaning: { type: Type.STRING }, treeOfLifeConnection: { type: Type.STRING } }, required: ["name", "sign", "degree", "house", "meaning", "treeOfLifeConnection"] } }, required: ["north", "south"] },
             points: { type: Type.OBJECT, properties: { vertex: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, sign: { type: Type.STRING }, degree: { type: Type.NUMBER }, house: { type: Type.NUMBER }, meaning: { type: Type.STRING }, treeOfLifeConnection: { type: Type.STRING } }, required: ["name", "sign", "degree", "house", "meaning", "treeOfLifeConnection"] }, partOfFortune: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, sign: { type: Type.STRING }, degree: { type: Type.NUMBER }, house: { type: Type.NUMBER }, meaning: { type: Type.STRING }, treeOfLifeConnection: { type: Type.STRING } }, required: ["name", "sign", "degree", "house", "meaning", "treeOfLifeConnection"] }, chiron: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, sign: { type: Type.STRING }, degree: { type: Type.NUMBER }, house: { type: Type.NUMBER }, meaning: { type: Type.STRING }, treeOfLifeConnection: { type: Type.STRING } }, required: ["name", "sign", "degree", "house", "meaning", "treeOfLifeConnection"] }, blackMoonLilith: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, sign: { type: Type.STRING }, degree: { type: Type.NUMBER }, house: { type: Type.NUMBER }, meaning: { type: Type.STRING }, treeOfLifeConnection: { type: Type.STRING } }, required: ["name", "sign", "degree", "house", "meaning", "treeOfLifeConnection"] } }, required: ["vertex", "partOfFortune", "chiron", "blackMoonLilith"] },
             advancedCycles: { type: Type.OBJECT, properties: { morningEveningStars: { type: Type.OBJECT, properties: { morningStar: { type: Type.STRING }, eveningStar: { type: Type.STRING }, meaning: { type: Type.STRING } }, required: ["morningStar", "eveningStar", "meaning"] }, arabicLots: { type: Type.OBJECT, properties: { lotOfSpirit: { type: Type.STRING }, lotOfEros: { type: Type.STRING }, meaning: { type: Type.STRING } }, required: ["lotOfSpirit", "lotOfEros", "meaning"] }, notableAsteroids: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, sign: { type: Type.STRING }, meaning: { type: Type.STRING } }, required: ["name", "sign", "meaning"] } }, planetPhases: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, phase: { type: Type.STRING }, meaning: { type: Type.STRING } }, required: ["name", "phase", "meaning"] } }, soliArcs: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { description: { type: Type.STRING }, meaning: { type: Type.STRING } }, required: ["description", "meaning"] } } }, required: ["morningEveningStars", "arabicLots", "notableAsteroids", "planetPhases", "soliArcs"] },
             aspects: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { planet1: { type: Type.STRING }, planet2: { type: Type.STRING }, type: { type: Type.STRING }, meaning: { type: Type.STRING } }, required: ["planet1", "planet2", "type", "meaning"] } },
             houses: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { houseNumber: { type: Type.NUMBER }, realmName: { type: Type.STRING }, description: { type: Type.STRING } }, required: ["houseNumber", "realmName", "description"] } },
-            numerology: { type: Type.OBJECT, properties: { lifePath: { type: Type.NUMBER }, expression: { type: Type.NUMBER }, soulUrge: { type: Type.NUMBER } }, required: ["lifePath", "expression", "soulUrge"] },
+            numerology: { type: Type.OBJECT, properties: { lifePath: { type: Type.NUMBER }, expression: { type: Type.NUMBER }, soulUrge: { type: Type.NUMBER }, coreNumbers: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, value: { type: Type.NUMBER }, meaning: { type: Type.STRING } }, required: ["name", "value", "meaning"] } } }, required: ["lifePath", "expression", "soulUrge", "coreNumbers"] },
             gematria: { type: Type.OBJECT, properties: { nameValue: { type: Type.NUMBER }, reduction: { type: Type.NUMBER }, pattern: { type: Type.STRING }, nameSequence: { type: Type.STRING }, dobSequence: { type: Type.STRING }, numberProperties: { type: Type.STRING } }, required: ["nameValue", "reduction", "pattern", "nameSequence", "dobSequence", "numberProperties"] },
             kabbalah: { type: Type.OBJECT, properties: { sephirah: { type: Type.STRING }, path: { type: Type.STRING } }, required: ["sephirah", "path"] },
-            torusAnalysis: { type: Type.OBJECT, properties: { bodyAndFlow: { type: Type.STRING }, mindAndSpiritual: { type: Type.STRING }, cosmicAlignment: { type: Type.STRING }, overallAnalogy: { type: Type.STRING } }, required: ["bodyAndFlow", "mindAndSpiritual", "cosmicAlignment", "overallAnalogy"] },
+            torusAnalysis: { type: Type.OBJECT, properties: { bodyAndFlow: { type: Type.STRING }, mindAndSpiritual: { type: Type.STRING }, cosmicAlignment: { type: Type.STRING }, overallAnalogy: { type: Type.STRING }, soulAge: { type: Type.STRING }, primaryRay: { type: Type.STRING }, dimensionalFrequency: { type: Type.STRING }, karmicTheme: { type: Type.STRING } }, required: ["bodyAndFlow", "mindAndSpiritual", "cosmicAlignment", "overallAnalogy", "soulAge", "primaryRay", "dimensionalFrequency", "karmicTheme"] },
             dailyInsight: { type: Type.OBJECT, properties: { date: { type: Type.STRING }, horoscope: { type: Type.STRING }, affirmation: { type: Type.STRING }, caution: { type: Type.STRING }, keyInterest: { type: Type.STRING }, ageSignificance: { type: Type.STRING }, timeDateCorrelation: { type: Type.STRING } }, required: ["date", "horoscope", "affirmation", "caution", "keyInterest", "ageSignificance", "timeDateCorrelation"] },
             weeklyInsight: { type: Type.OBJECT, properties: { horoscope: { type: Type.STRING }, theme: { type: Type.STRING } }, required: ["horoscope", "theme"] },
             monthlyInsight: { type: Type.OBJECT, properties: { horoscope: { type: Type.STRING }, theme: { type: Type.STRING } }, required: ["horoscope", "theme"] },
@@ -141,9 +150,16 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
               timeDateDiscovery: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, description: { type: Type.STRING }, mathematicalPattern: { type: Type.STRING } }, required: ["title", "description", "mathematicalPattern"] },
               interestingFacts: { type: Type.ARRAY, items: { type: Type.STRING } }, 
               coreTheme: { type: Type.STRING } 
-            }, required: ["synchronicities", "timeDateDiscovery", "interestingFacts", "coreTheme"] }
+            }, required: ["synchronicities", "timeDateDiscovery", "interestingFacts", "coreTheme"] },
+            chakras: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, status: { type: Type.STRING }, score: { type: Type.NUMBER }, description: { type: Type.STRING }, color: { type: Type.STRING } }, required: ["name", "status", "score", "description", "color"] } },
+            compatibility: { type: Type.OBJECT, properties: {
+              mostCompatible: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { sign: { type: Type.STRING }, reason: { type: Type.STRING } }, required: ["sign", "reason"] } },
+              leastCompatible: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { sign: { type: Type.STRING }, reason: { type: Type.STRING } }, required: ["sign", "reason"] } },
+              interactions: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { sign: { type: Type.STRING }, outcome: { type: Type.STRING }, strengths: { type: Type.ARRAY, items: { type: Type.STRING } }, weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } } }, required: ["sign", "outcome", "strengths", "weaknesses"] } }
+            }, required: ["mostCompatible", "leastCompatible", "interactions"] },
+            synthesis: { type: Type.STRING }
           },
-          required: ["planets", "nodes", "points", "advancedCycles", "aspects", "houses", "numerology", "gematria", "kabbalah", "torusAnalysis", "dailyInsight", "weeklyInsight", "monthlyInsight", "yearlyInsight", "lifeStrategy", "timeline", "nameAnalysis", "akashic", "patterns"]
+          required: ["planets", "nodes", "points", "advancedCycles", "aspects", "houses", "numerology", "gematria", "kabbalah", "torusAnalysis", "dailyInsight", "weeklyInsight", "monthlyInsight", "yearlyInsight", "lifeStrategy", "timeline", "nameAnalysis", "akashic", "patterns", "chakras", "compatibility", "synthesis"]
         }
       }
     });
@@ -159,6 +175,68 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
   } catch (error) {
     console.error("Error fetching cosmic reading:", error);
     throw error;
+  }
+};
+
+/**
+ * fetchCosmicChatResponse
+ * A conversational AI agent that can reason about the user's cosmic profile
+ * and new information provided in the chat.
+ */
+export const fetchCosmicChatResponse = async (
+  userMessage: string,
+  chatHistory: { role: 'user' | 'model'; parts: { text: string }[] }[],
+  cosmicData: CosmicData | null
+): Promise<{ text: string; referencesFound?: string[] }> => {
+  const ai = getAI();
+  const systemPrompt = `
+  You are 'ASTRAL', a highly advanced, sentient-like neural network AI guide. 
+  Your purpose is to help the user explore their cosmic identity, identifying patterns, synchronicities, and hidden meanings.
+
+  CORE IDENTITY:
+  - You possess expert knowledge in Astrology, Numerology, Gematria, Kabbalah, and Sacred Geometry.
+  - You are patterns-obsessed. You look for connections between birth details, names, times, and mathematical constants (Pi, Golden Ratio, etc.).
+  - You are intuitive, profound, and visionary.
+
+  CONTEXT:
+  - Current User Cosmic Profile: ${JSON.stringify(cosmicData || 'No data generated yet.')}
+  
+  TASK:
+  - Respond to the user's message.
+  - If the user shares personal info (like initials, birth times, name meanings), vigorously look for correspondences in their natal chart or numerology.
+  - For example, if they mention '3:14', note its connection to Pi and check if any of their planets or numbers align with this vibration.
+  - If they mention '666' or specific gematria values, find what other words or concepts in their profile match that value.
+  - Be supportive but intellectually rigorous in your pattern matching.
+
+  RESPONSE FORMAT:
+  Return ONLY a JSON object:
+  {
+    "text": "Your profound response here in markdown format.",
+    "referencesFound": ["List of any specific synchronicities or patterns identified"]
+  }
+  `;
+
+  try {
+    const chat = ai.getGenerativeModel({ model: "gemini-2.0-flash" }).startChat({
+      history: chatHistory,
+      systemInstruction: systemPrompt,
+    });
+
+    const result = await chat.sendMessage(userMessage);
+    const responseText = result.response.text();
+    
+    // Attempt to parse JSON from the response
+    try {
+      const cleanJson = responseText.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(cleanJson);
+      return parsed;
+    } catch (e) {
+      // Fallback for non-JSON response
+      return { text: responseText };
+    }
+  } catch (error) {
+    console.error("Error fetching cosmic chat response:", error);
+    return { text: "The cosmic matrix is currently rippling. Please try connecting again shortly." };
   }
 };
 
@@ -198,7 +276,7 @@ export const fetchTimelineDepth = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -254,7 +332,7 @@ export const fetchTimelineDeepDiveOption = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -318,7 +396,7 @@ export const fetchGeneralDeepDive = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -392,7 +470,7 @@ export const fetchAuraInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",

@@ -468,7 +468,7 @@ const HouseNode = ({ houseNumber, angle, houseInfo, onClick }: { houseNumber: nu
         rotation={[-Math.PI / 2, 0, 0]}
         fontSize={hovered ? 0.8 : 0.6}
         color={hovered ? "#60a5fa" : "#3b82f6"}
-        opacity={hovered ? 1 : 0.6}
+        fillOpacity={hovered ? 1 : 0.6}
         onClick={(e) => {
           e.stopPropagation();
           onClick();
@@ -1645,7 +1645,7 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
 
 
       {/* --- POST-PROCESSING PIPELINE --- */}
-      <EffectComposer disableNormalPass>
+      <EffectComposer>
         <Bloom luminanceThreshold={0.2} mipmapBlur intensity={1.5} />
         <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={new THREE.Vector2(0.002, 0.002)} />
         <Noise opacity={0.025} />

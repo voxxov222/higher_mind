@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "remix vite:dev",
-    "build": "remix vite:build",
-    "start": "remix-serve ./build/server/index.js",
+    "build": "remix vite:build && rm -rf dist && cp -r build/client dist",
     "lint": "eslint app --ext .ts,.tsx"
   },
   "dependencies": {

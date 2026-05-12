@@ -4,7 +4,7 @@ import { useFrame } from '@react-three/fiber';
 import { Sphere, Trail, Float, Stars, Text, OrbitControls, PerspectiveCamera, Html, Ring, Sparkles, Line, Grid, Float as FloatDrei } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
-import { Activity, X, Info, Sparkle, BookOpen, Send, Bot, Cpu, Zap, Radio, Terminal, MousePointer2, ChevronRight, Binary, Layers, Wind, Ghost, Atom, Eye, Loader2, Globe, Globe2, Compass, ArrowUpCircle, Rocket, ExternalLink, Moon as MoonIcon, Sun as SunIcon, ChevronDown } from 'lucide-react';
+import { Activity, X, Info, Sparkle, BookOpen, Send, Bot, Cpu, Zap, Radio, Terminal, MousePointer2, ChevronRight, Binary, Layers, Wind, Ghost, Atom, Eye, Loader2, Globe, Globe2, Compass } from 'lucide-react';
 import { CosmicData } from '../types';
 import { fetchAuraInsight } from '../services/geminiService';
 import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration } from '@react-three/postprocessing';
@@ -157,8 +157,8 @@ const AstrologicalHouses = ({ data, onHouseHover }: { data: CosmicData | null; o
           <group key={i}>
             {/* Divider Line */}
             <mesh rotation={[0, -angle, 0]} position={[75, 0, 0]}>
-               <boxGeometry args={[150, 0.05, 0.05]} />
-               <meshBasicMaterial color="white" transparent opacity={0.2} />
+               <boxGeometry args={[150, 0.02, 0.02]} />
+               <meshBasicMaterial color="white" transparent opacity={0.1} />
             </mesh>
 
             {/* House Interactive Zone */}
@@ -174,47 +174,28 @@ const AstrologicalHouses = ({ data, onHouseHover }: { data: CosmicData | null; o
                 });
               }}
               onPointerOut={() => onHouseHover(null)}
-              onClick={() => {
-                onHouseHover(houseData || { 
-                  houseNumber: houseNum, 
-                  realmName: 'Sector of Experience', 
-                  sign: signName,
-                  description: HOUSE_DESCRIPTIONS[houseNum] || 'A unique sector of your life experience.' 
-                });
-              }}
             >
-              <mesh>
-                <boxGeometry args={[45, 0.5, 45]} />
-                <meshBasicMaterial color="#3b82f6" transparent opacity={0.01} />
+              {/* Invisible trigger with box for better hover area */}
+              <mesh visible={false}>
+                <boxGeometry args={[40, 1, 40]} />
               </mesh>
 
               <Text
                 rotation={[-Math.PI / 2, 0, -midAngle + Math.PI / 2]}
-                fontSize={6}
+                fontSize={5}
                 color={houseData ? "#fbbf24" : "white"}
-                opacity={0.6}
+                fillOpacity={0.4}
               >
                 {houseNum}
               </Text>
-              
               <Text
-                position={[0, 0, 10]}
+                position={[0, 0, 8]}
                 rotation={[-Math.PI / 2, 0, -midAngle + Math.PI / 2]}
-                fontSize={3}
+                fontSize={2.5}
                 color="white"
-                opacity={0.3}
+                fillOpacity={0.2}
               >
                 {signName.toUpperCase()}
-              </Text>
-
-              <Text
-                position={[0, 0, -10]}
-                rotation={[-Math.PI / 2, 0, -midAngle + Math.PI / 2]}
-                fontSize={1.5}
-                color="#60a5fa"
-                opacity={0.3}
-              >
-                {houseData?.realmName?.toUpperCase() || 'DOMAIN'}
               </Text>
             </group>
 
@@ -307,19 +288,19 @@ const AspectLines = ({ data, onAspectClick }: { data: CosmicData | null; onAspec
   );
 };
 
-const SIGN_ELEMENTS: Record<string, { type: string; color: string; description: string }> = {
-  'Aries': { type: 'Fire', color: '#ef4444', description: 'The pioneer, bold, energetic, and courageous.' },
-  'Leo': { type: 'Fire', color: '#f59e0b', description: 'The leader, creative, generous, and charismatic.' },
-  'Sagittarius': { type: 'Fire', color: '#f97316', description: 'The explorer, optimistic, free-spirited, and philosophical.' },
-  'Taurus': { type: 'Earth', color: '#10b981', description: 'The builder, practical, patient, and persistent.' },
-  'Virgo': { type: 'Earth', color: '#84cc16', description: 'The analyst, meticulous, practical, and helpful.' },
-  'Capricorn': { type: 'Earth', color: '#475569', description: 'The achiever, ambitious, disciplined, and responsible.' },
-  'Gemini': { type: 'Air', color: '#fbbf24', description: 'The communicator, adaptable, curious, and expressive.' },
-  'Libra': { type: 'Air', color: '#f472b6', description: 'The diplomat, balanced, social, and aesthetic.' },
-  'Aquarius': { type: 'Air', color: '#06b6d4', description: 'The visionary, innovative, original, and humanitarian.' },
-  'Cancer': { type: 'Water', color: '#94a3b8', description: 'The nurturer, sensitive, intuitive, and protective.' },
-  'Scorpio': { type: 'Water', color: '#7e22ce', description: 'The alchemist, intense, passionate, and magnetic.' },
-  'Pisces': { type: 'Water', color: '#6366f1', description: 'The dreamer, empathetic, spiritual, and imaginative.' },
+const SIGN_ELEMENTS: Record<string, { type: string; color: string }> = {
+  'Aries': { type: 'Fire', color: '#ef4444' },
+  'Leo': { type: 'Fire', color: '#f59e0b' },
+  'Sagittarius': { type: 'Fire', color: '#f97316' },
+  'Taurus': { type: 'Earth', color: '#10b981' },
+  'Virgo': { type: 'Earth', color: '#84cc16' },
+  'Capricorn': { type: 'Earth', color: '#475569' },
+  'Gemini': { type: 'Air', color: '#fbbf24' },
+  'Libra': { type: 'Air', color: '#f472b6' },
+  'Aquarius': { type: 'Air', color: '#06b6d4' },
+  'Cancer': { type: 'Water', color: '#94a3b8' },
+  'Scorpio': { type: 'Water', color: '#7e22ce' },
+  'Pisces': { type: 'Water', color: '#6366f1' },
 };
 
 interface PlanetProps extends PlanetData {
@@ -493,7 +474,7 @@ const Planet = ({ name, color, size, distance, speed, onSelect, active, astro, i
                   color={color}
                   anchorX="center"
                   anchorY="top"
-                  opacity={0.9}
+                  fillOpacity={0.9}
                   letterSpacing={0.1}
                 >
                   {`${astro.sign.toUpperCase()} ${Math.floor(astro.degree)}° • H${astro.house}`}
@@ -552,7 +533,6 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
   const [sceneMode, setSceneMode] = useState<'cosmic' | 'quantum' | 'verdant' | 'void'>('cosmic');
   const [isLatticeActive, setIsLatticeActive] = useState(true);
   const [isNeuralSyncActive, setIsNeuralSyncActive] = useState(false);
-  const [activeAnalysisNode, setActiveAnalysisNode] = useState<string | null>(null);
 
   // Aura AI Agent State
   const [auraNodes, setAuraNodes] = useState<AuraVisualNode[]>([]);
@@ -615,20 +595,9 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
     return null;
   };
 
-  useFrame((state) => {
-    const { clock } = state;
+  useFrame(({ clock }) => {
     if (controlsRef.current) {
-      if (rotationPerspective === 'travel') {
-        // Auto-cycle through planets for an overview or focus on selected
-        const time = clock.getElapsedTime();
-        const planetToFocus = selectedPlanet || planets[Math.floor(time / 5) % planets.length];
-        const planetPos = getPlanetPos(planetToFocus) || new THREE.Vector3(planetToFocus.distance, 0, 0);
-        
-        const idealCamPos = planetPos.clone().add(new THREE.Vector3(15, 10, 15));
-        state.camera.position.lerp(idealCamPos, 0.05);
-        state.camera.lookAt(planetPos);
-        controlsRef.current.target.lerp(planetPos, 0.1);
-      } else if (rotationPerspective === 'top') {
+      if (rotationPerspective === 'top') {
         controlsRef.current.object.position.lerp(new THREE.Vector3(0, 200, 0), 0.05);
         controlsRef.current.object.lookAt(0, 0, 0);
       } else if (rotationPerspective === 'isometric') {
@@ -636,7 +605,7 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
         controlsRef.current.object.lookAt(0, 0, 0);
       }
 
-      if (selectedPlanet && rotationPerspective !== 'travel') {
+      if (selectedPlanet) {
         if (selectedPlanet.name === 'Sun') {
           controlsRef.current.target.lerp(new THREE.Vector3(0, 0, 0), 0.1);
         } else {
@@ -695,7 +664,8 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
         cellThickness={0.2} 
         position={[0, -2, 0]}
         rotation={[0, 0, 0]}
-        opacity={0.05}
+        transparent
+        material-opacity={0.05}
       />
       
       {/* AI Generated Aura Nodes */}
@@ -812,7 +782,7 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
                 color="#FDB813"
                 anchorX="center"
                 anchorY="top"
-                opacity={0.8}
+                fillOpacity={0.8}
                 letterSpacing={0.1}
               >
                 {`${getAstrologicalData('Sun')?.sign.toUpperCase()} • HOUSE ${getAstrologicalData('Sun')?.house}`}
@@ -972,25 +942,26 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
         <group>
           {planets.map((p1, i) => 
             planets.slice(i + 1).map((p2, j) => {
-              const pos1 = getPlanetPos(p1);
-              const pos2 = getPlanetPos(p2);
               const astro1 = getAstrologicalData(p1.name);
               const astro2 = getAstrologicalData(p2.name);
               
-              if (pos1 && pos2) {
-                const distance = p1.distance - p2.distance;
-                if (Math.abs(distance) < 80 || (astro1?.sign === astro2?.sign)) {
-                  return (
-                    <Line 
-                      key={`latt-${p1.name}-${p2.name}`}
-                      points={[pos1, pos2]} 
-                      color={sceneMode === 'quantum' ? '#f43f5e' : (astro1?.sign === astro2?.sign ? '#fbbf24' : '#3b82f6')}
-                      opacity={0.08}
-                      transparent
-                      lineWidth={1}
-                    />
-                  );
-                }
+              if (!astro1 || !astro2) return null;
+              
+              const distance = p1.distance - p2.distance;
+              if (Math.abs(distance) < 80 || (astro1?.sign === astro2?.sign)) {
+                return (
+                  <Line 
+                    key={`latt-${p1.name}-${p2.name}`}
+                    points={[
+                      [Math.cos((astro1.degree * Math.PI)/180) * p1.distance, 0, Math.sin((astro1.degree * Math.PI)/180) * p1.distance],
+                      [Math.cos((astro2.degree * Math.PI)/180) * p2.distance, 0, Math.sin((astro2.degree * Math.PI)/180) * p2.distance]
+                    ]} 
+                    color={sceneMode === 'quantum' ? '#f43f5e' : (astro1?.sign === astro2?.sign ? '#fbbf24' : '#3b82f6')}
+                    opacity={0.08}
+                    transparent
+                    lineWidth={1}
+                  />
+                );
               }
               return null;
             })
@@ -1021,10 +992,9 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
               </button>
               <div className="flex bg-white/5 rounded-full border border-white/10 p-0.5">
                 {[
-                  { id: 'isometric', icon: Compass, label: '3D Orbit' },
-                  { id: 'top', icon: Globe, label: 'Top View' },
-                  { id: 'orbit', icon: Activity, label: 'Auto Rotation' },
-                  { id: 'travel', icon: Rocket, label: 'Zoom Focus' }
+                  { id: 'top', icon: Globe, label: 'Flat' },
+                  { id: 'isometric', icon: Compass, label: '3D' },
+                  { id: 'orbit', icon: Activity, label: 'Spin' }
                 ].map(opt => (
                   <button
                     key={opt.id}
@@ -1042,14 +1012,12 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
               >
                 {isStatic ? 'Orbits Paused' : 'Dynamic Flow'}
               </button>
-                    <button 
-                      onClick={() => {
-                        setShowHouseGuide(true);
-                      }}
-                      className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${showHouseGuide ? 'bg-emerald-500/20 border-emerald-500 text-emerald-500' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
-                    >
-                      Synthesis Guide
-                    </button>
+              <button 
+                onClick={() => setShowHouseGuide(!showHouseGuide)}
+                className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${showHouseGuide ? 'bg-emerald-500/20 border-emerald-500 text-emerald-500' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
+              >
+                Chart Synthesis
+              </button>
               <button 
                 onClick={() => setIsLatticeActive(!isLatticeActive)}
                 className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${isLatticeActive ? 'bg-blue-500/20 border-blue-500 text-blue-500' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
@@ -1339,7 +1307,7 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
       </Html>
 
       {/* Advanced Post-Processing Effects */}
-      <EffectComposer disableNormalPass>
+      <EffectComposer>
          <Bloom 
            intensity={sceneMode === 'quantum' ? 2 : (sceneMode === 'void' ? 0.5 : 1.2)} 
            mipmapBlur 

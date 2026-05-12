@@ -67,7 +67,7 @@ const CosmicNode = ({ data, selected }: NodeProps) => {
       `}>
         {/* Type indicator */}
         <div className={`text-[8px] uppercase tracking-widest font-bold ${colors.text} opacity-80 uppercase`}>
-          {data.label}
+          {data.label as React.ReactNode}
         </div>
         
         {/* Accent line */}
@@ -75,7 +75,7 @@ const CosmicNode = ({ data, selected }: NodeProps) => {
         
         {/* Description */}
         <div className="text-[10px] text-stone-400 font-light leading-relaxed italic line-clamp-3">
-          "{data.description}"
+          "{data.description as React.ReactNode}"
         </div>
 
         {selected && (

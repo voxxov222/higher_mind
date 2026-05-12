@@ -17,6 +17,7 @@ export interface CelestialBody {
   house: number;
   meaning?: string;
   treeOfLifeConnection?: string;
+  interpretation?: string;
 }
 
 export interface CosmicData {
@@ -27,6 +28,8 @@ export interface CosmicData {
     lifePath: number;
     expression: number;
     soulUrge: number;
+    coreNumbers?: { name: string; value: number; meaning: string; }[];
+    lifePathMeaning?: string;
   };
   gematria: {
     nameValue: number;
@@ -39,6 +42,23 @@ export interface CosmicData {
   kabbalah: {
     sephirah: string;
     path: string;
+  };
+  chakras?: {
+    name: string;
+    status: 'open' | 'blocked' | 'overactive' | 'balanced';
+    score: number; // 0 to 100
+    description: string;
+    color: string;
+  }[];
+  compatibility?: {
+    mostCompatible: { sign: string; reason: string }[];
+    leastCompatible: { sign: string; reason: string }[];
+    interactions: {
+      sign: string;
+      outcome: string;
+      strengths: string[];
+      weaknesses: string[];
+    }[];
   };
   advancedCycles?: {
     morningEveningStars: { morningStar: string; eveningStar: string; meaning: string; };
@@ -57,12 +77,17 @@ export interface CosmicData {
     houseNumber: number;
     realmName: string;
     description: string;
+    sign?: string;
   }[];
   torusAnalysis: {
     bodyAndFlow: string;
     mindAndSpiritual: string;
     cosmicAlignment: string;
     overallAnalogy: string;
+    soulAge?: string;
+    primaryRay?: string;
+    dimensionalFrequency?: string;
+    karmicTheme?: string;
   };
   dailyInsight?: {
     date: string;
@@ -121,6 +146,7 @@ export interface CosmicData {
     interestingFacts: string[];
     coreTheme: string;
   };
+  synthesis?: string;
   mindMap?: {
     nodes: MindMapNode[];
     centerNode: MindMapNode;

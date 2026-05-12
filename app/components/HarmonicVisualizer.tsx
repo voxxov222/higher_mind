@@ -71,12 +71,11 @@ export const HarmonicVisualizer = ({ data }: HarmonicVisualizerProps) => {
 
   // 6. Orbital Resonance
   const orbitalData = useMemo(() => {
-    if (!data?.planets) return [];
     return data.planets.map((p, i) => ({
-      name: p?.name || 'Unknown',
+      name: p.name,
       dist: 50 + i * 25,
-      angle: p?.degree || 0,
-      val: p?.house || 1
+      angle: p.degree,
+      val: p.house
     }));
   }, [data]);
 
@@ -509,7 +508,7 @@ export const HarmonicVisualizer = ({ data }: HarmonicVisualizerProps) => {
         <div className="w-full h-full pt-12">
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={timelineData}>
-                    <Line type="basis" dataKey="val" stroke="#a855f7" strokeWidth={3} dot={false} animate={{ strokeDashoffset: [0, 100] }} />
+                    <Line type="basis" dataKey="val" stroke="#a855f7" strokeWidth={3} dot={false} isAnimationActive={true} animationDuration={1500} />
                     <Line type="basis" dataKey="val" stroke="#3b82f6" strokeWidth={2} dot={false} strokeDasharray="5 5" />
                 </LineChart>
             </ResponsiveContainer>

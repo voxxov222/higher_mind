@@ -110,7 +110,7 @@ export const SoulAvatar = ({ color = '#a855f7' }: { color?: string }) => {
         
         <SoulEntity color={color} />
         
-        <EffectComposer disableNormalPass>
+        <EffectComposer>
           <Bloom luminanceThreshold={1} mipmapBlur intensity={1.5} radius={0.4} />
         </EffectComposer>
 

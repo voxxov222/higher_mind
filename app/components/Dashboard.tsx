@@ -4,18 +4,20 @@ import { useState, useRef, useEffect, ReactNode } from 'react';
 import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'motion/react';
 import { CosmicData, UserProfileConfig } from '../types';
-import { Sparkles, Moon, Sun, Star, Activity, Hexagon, Fingerprint, Network, Menu, X, Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, PieChart, Zap, Upload, Palette, Bookmark, History, LifeBuoy, Monitor, Layout, Share2, Download, PlayCircle, Eye, Volume2 } from 'lucide-react';
+import { Sparkles, Moon, Sun, Star, Activity, Hexagon, Fingerprint, Network, Menu, X, Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, PieChart, Zap, Upload, Palette, Bookmark, History, LifeBuoy, Monitor, Layout, Share2, Download, PlayCircle, Eye, Volume2, Grid, Heart } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, Pie, PieChart as RechartsPieChart
+  BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, Pie, PieChart as RechartsPieChart, CartesianGrid
 } from 'recharts';
 // --- SERVICE INTEGRATIONS ---
 import { fetchTimelineDepth, fetchTimelineDeepDiveOption, fetchGeneralDeepDive } from '../services/geminiService';
 import { User } from 'firebase/auth';
 import { DeepSynthesis } from './DeepSynthesis';
 import { HarmonicVisualizer } from './HarmonicVisualizer';
-import { SoulBlueprintAura } from './SoulBlueprintAura';
+import { SoulBlueprintAura, SoulBlueprintTab } from './SoulBlueprintAura';
 import BirthChartGuide from './BirthChartGuide';
+import { ChakraScene } from './ChakraScene';
+import { CompatibilityMatrix } from './CompatibilityMatrix';
 
 /**
  * Interface for DashboardProps
@@ -25,8 +27,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics';
-  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics') => void;
+  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics';
+  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -43,7 +45,7 @@ interface DashboardProps {
  * Handles user customization, identity matrix, styles, and the research vault.
  * [PROFILE & IDENTITY MANAGEMENT]
  */
-const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedInputs }: { isOpen: boolean, onClose: () => void, profileConfig?: UserProfileConfig, onUpdateProfile: (c: UserProfileConfig) => void, loadedInputs: any }) => {
+const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedInputs, isReading, handleReadOutLoud }: { isOpen: boolean, onClose: () => void, profileConfig?: UserProfileConfig, onUpdateProfile: (c: UserProfileConfig) => void, loadedInputs: any, isReading: boolean, handleReadOutLoud: (text: string) => void }) => {
   const [activeSettingsTab, setActiveSettingsTab] = useState<'identity' | 'style' | 'vault'>('identity');
   
   const [displayName, setDisplayName] = useState(profileConfig?.displayName || '');
@@ -765,7 +767,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
         isMinimized={isMinimized}
         onToggleMinimize={() => setIsMinimized(!isMinimized)}
       />
-      <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} profileConfig={profileConfig || {}} onUpdateProfile={onUpdateProfile} loadedInputs={loadedInputs} />
+      <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} profileConfig={profileConfig || {} as UserProfileConfig} onUpdateProfile={onUpdateProfile} loadedInputs={loadedInputs} isReading={isReading} handleReadOutLoud={handleReadOutLoud} />
 
       {/* Brand Header */}
       <header className="flex justify-between items-center z-10 pointer-events-auto">
@@ -843,6 +845,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'numbers'} onClick={() => setActiveTab('numbers')} icon={<Fingerprint className="w-4 h-4"/>}>Numerology</Tab>
               <Tab active={activeTab === 'kabbalah'} onClick={() => setActiveTab('kabbalah')} icon={<Hexagon className="w-4 h-4"/>}>Mysticism</Tab>
               <Tab active={activeTab === 'kabbalistic_numerology'} onClick={() => setActiveTab('kabbalistic_numerology')} icon={<Network className="w-4 h-4"/>}>Kabbalistic Numerology</Tab>
+              <Tab active={activeTab === 'chakras'} onClick={() => setActiveTab('chakras')} icon={<Activity className="w-4 h-4"/>}>Pranic Energy</Tab>
+              <Tab active={activeTab === 'compatibility'} onClick={() => setActiveTab('compatibility')} icon={<Heart className="w-4 h-4"/>}>Compatibility</Tab>
               <Tab active={activeTab === 'cycles'} onClick={() => setActiveTab('cycles')} icon={<Star className="w-4 h-4"/>}>Cycles</Tab>
               <Tab active={activeTab === 'daily'} onClick={() => setActiveTab('daily')} icon={<Sun className="w-4 h-4"/>}>Forecasts</Tab>
               <Tab active={activeTab === 'synthesis'} onClick={() => setActiveTab('synthesis')} icon={<Network className="w-4 h-4"/>}>Synthesis</Tab>
@@ -1587,29 +1591,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                   </motion.div>
                 )}
                 {activeTab === 'torus' && (
-                  <motion.div key="torus" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 text-stone-200 font-light leading-relaxed relative">
-                    <SoulBlueprintAura />
-                    <div className="relative z-10">
-                      <ResearchBox title="Torus: Body & Flow" content={data.torusAnalysis.bodyAndFlow}>
-                        <Section title="Body & Flow" content={data.torusAnalysis.bodyAndFlow} />
-                      </ResearchBox>
-                    </div>
-                    <div className="relative z-10">
-                      <ResearchBox title="Torus: Mind & Spirit" content={data.torusAnalysis.mindAndSpiritual}>
-                        <Section title="Mind & Spirit" content={data.torusAnalysis.mindAndSpiritual} />
-                      </ResearchBox>
-                    </div>
-                    <div className="relative z-10">
-                      <ResearchBox title="Torus: Cosmic Alignment" content={data.torusAnalysis.cosmicAlignment}>
-                        <Section title="Cosmic Alignment" content={data.torusAnalysis.cosmicAlignment} />
-                      </ResearchBox>
-                    </div>
-                    <div className="relative z-10">
-                      <ResearchBox title="Torus Reading Synthesis" content={data.torusAnalysis.overallAnalogy} className="bg-purple-900/20 border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
-                        <h4 className="text-purple-300 font-medium mb-2">Synthesis</h4>
-                        <p className="text-sm">{data.torusAnalysis.overallAnalogy}</p>
-                      </ResearchBox>
-                    </div>
+                  <motion.div key="torus" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 text-stone-200 font-light leading-relaxed relative min-h-[70vh]">
+                    <SoulBlueprintTab data={data} ResearchBox={ResearchBox} Section={Section} />
                   </motion.div>
                 )}
                 
@@ -1933,6 +1916,16 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                         </div>
                       </>
                     )}
+                  </motion.div>
+                )}
+                {activeTab === 'chakras' && (
+                  <motion.div key="chakras" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <ChakraScene data={data} />
+                  </motion.div>
+                )}
+                {activeTab === 'compatibility' && (
+                  <motion.div key="compatibility" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <CompatibilityMatrix data={data} />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -2366,7 +2359,7 @@ const GematriaVisualizer = ({ gematria, name, dob }: { gematria: CosmicData['gem
         event.subject.fy = null;
     }
 
-    return () => simulation.stop();
+    return () => { simulation.stop(); };
   }, [gematria, name]);
 
   return (

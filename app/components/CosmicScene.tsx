@@ -9,6 +9,7 @@ import { BlendFunction } from 'postprocessing';
 import * as THREE from 'three';
 import { CosmicData } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
+import { AstralMind, ThinkingMode } from './AstralMind';
 import { X, Minus, Lock, Unlock, Play, Square, Palette, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity, Magnet, Shuffle, Waves } from 'lucide-react';
 
 /**
@@ -33,6 +34,7 @@ interface CosmicSceneProps {
   setActiveTab: (tab: any) => void;
   onPlanetClick?: (title: string, content: string) => void;
   isPresentationActive?: boolean;
+  mode?: ThinkingMode;
 }
 
 // --- GLOBAL OBJECT REGISTRY (VOLATILE) ---
@@ -718,84 +720,33 @@ const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, on
   );
 };
 
-/**
- * TorusField Component
- * Represents the central energetic blueprint (Soul Blueprint) using nested geometries.
- */
-const TorusField = () => {
-  const outerRef = useRef<THREE.Mesh>(null);
-  const midRef = useRef<THREE.Mesh>(null);
-  const innerRef = useRef<THREE.Mesh>(null);
-  const knotRef = useRef<THREE.Mesh>(null);
-  
-  // Rotating the fields over time
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
-    if (outerRef.current) {
-      outerRef.current.rotation.x = Math.PI / 2;
-      outerRef.current.rotation.z = t * 0.05;
-    }
-    if (midRef.current) {
-      midRef.current.rotation.x = Math.PI / 2 + Math.sin(t * 0.2) * 0.1;
-      midRef.current.rotation.y = Math.cos(t * 0.2) * 0.1;
-      midRef.current.rotation.z = -t * 0.1;
-    }
-    if (innerRef.current) {
-      innerRef.current.rotation.y = t * 0.2;
-      innerRef.current.rotation.x = t * 0.1;
-    }
-    if (knotRef.current) {
-      knotRef.current.rotation.z = t * 0.3;
-      knotRef.current.rotation.x = t * 0.2;
-    }
-  });
+const BlueprintGrid = () => {
+  return (
+    <group>
+      <gridHelper args={[100, 100, '#0284c7', '#0284c7']} position={[0, -5, 0]} material-opacity={0.15} material-transparent={true} />
+      <gridHelper args={[100, 100, '#0284c7', '#0284c7']} position={[0, -5, 0]} rotation={[0, 0, Math.PI / 2]} material-opacity={0.05} material-transparent={true} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -4.9, 0]}>
+        <ringGeometry args={[2, 2.05, 64]} />
+        <meshBasicMaterial color="#38bdf8" transparent opacity={0.3} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -4.9, 0]}>
+        <ringGeometry args={[4, 4.02, 64]} />
+        <meshBasicMaterial color="#38bdf8" transparent opacity={0.1} />
+      </mesh>
+    </group>
+  );
+};
 
+/**
+ * CentralCore Component
+ * Represents the central living intelligence core.
+ */
+const CentralCore = ({ mode = 'idle' }: { mode?: ThinkingMode }) => {
   return (
     <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
-      {/* Outer Torus */}
-      <InteractiveObject id="torus_outer" initialColor="#a855f7">
-        <mesh ref={outerRef}>
-          <torusGeometry args={[10, 0.1, 8, 50]} />
-          <CosmicMaterial 
-            color="#a855f7" 
-            transparent 
-            opacity={0.3} 
-            emissive="#7e22ce" 
-            emissiveIntensity={1} 
-          />
-        </mesh>
-      </InteractiveObject>
-
-      {/* Mid Energetic Torus */}
-      <InteractiveObject id="torus_mid" initialColor="#8b5cf6">
-        <mesh ref={midRef}>
-          <torusGeometry args={[7, 2, 16, 50]} />
-          <CosmicMaterial 
-            color="#8b5cf6" 
-            wireframe 
-            transparent 
-            opacity={0.15} 
-            emissive="#6d28d9" 
-            emissiveIntensity={0.8} 
-          />
-        </mesh>
-      </InteractiveObject>
-
-      {/* Inner Torus for depth */}
-      <InteractiveObject id="torus_inner" initialColor="#3b82f6">
-        <mesh ref={innerRef}>
-           <torusGeometry args={[3, 0.5, 16, 50]} />
-           <CosmicMaterial color="#3b82f6" wireframe transparent opacity={0.4} emissive="#1d4ed8" emissiveIntensity={0.5} />
-        </mesh>
-      </InteractiveObject>
-
-      {/* Core Sacred Knot (represents the center of the field) */}
-      <InteractiveObject id="torus_knot" initialColor="#fbbf24">
-        <mesh ref={knotRef}>
-          <torusKnotGeometry args={[1, 0.3, 100, 16]} />
-          <CosmicMaterial color="#fbbf24" wireframe transparent opacity={0.6} emissive="#d97706" emissiveIntensity={1} />
-        </mesh>
-      </InteractiveObject>
+      <group>
+        <AstralMind mode={mode} />
+      </group>
     </Float>
   );
 }
@@ -1139,8 +1090,8 @@ const CameraController = ({ isPresentationActive, activeTab, data }: { isPresent
       targetPos.set(0, 15, 25);
       lookAtTarget.set(0, 0, 0);
     } else if (activeTab === 'planets') {
-      targetPos.set(-20, 5, 10);
-      lookAtTarget.set(-15, 0, 0);
+      targetPos.set(0, 20, 25);
+      lookAtTarget.set(0, 0, 0);
     } else if (activeTab === 'numbers') {
       targetPos.set(20, 5, 10);
       lookAtTarget.set(15, 0, 0);
@@ -1353,7 +1304,7 @@ const NumerologyGeometria = ({ data, onSelect }: { data: CosmicData, onSelect: (
  * The primary 3D rendering context using React Three Fiber.
  * Integrates geometry, lighting, effects, and camera management.
  */
-export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive }: CosmicSceneProps) => {
+export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive, mode }: CosmicSceneProps) => {
 
   return (
     <Canvas id="cosmic-canvas" camera={{ position: [0, 15, 20], fov: 60 }} className="w-full h-full absolute inset-0 bg-black">
@@ -1367,7 +1318,8 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
       <Stars radius={100} depth={50} count={150} factor={4} saturation={0} fade />
 
       {/* --- CENTRAL BLUEPRINT GEOMETRY --- */}
-      <TorusField />
+      <CentralCore mode={mode} />
+      {activeTab === 'torus' && <BlueprintGrid />}
       
       {/* --- MODULE NODES (NAVIGATION) --- */}
       {data && (
@@ -1442,7 +1394,7 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
       )}
 
       {data && activeTab === 'planets' && (
-        <group position={[-15, 0, 0]}>
+        <group position={[0, 0, 0]}>
           <Astrolabe data={data} onPlanetClick={(title, content) => onPlanetClick?.(title, content)} setActiveTab={setActiveTab} />
         </group>
       )}

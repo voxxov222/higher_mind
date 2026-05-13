@@ -4,11 +4,14 @@ import { useFrame } from '@react-three/fiber';
 import { Sphere, Trail, Float, Stars, Text, OrbitControls, PerspectiveCamera, Html, Ring, Sparkles, Line, Grid, Float as FloatDrei } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
-import { Activity, X, Info, Sparkle, BookOpen, Send, Bot, Cpu, Zap, Radio, Terminal, MousePointer2, ChevronRight, Binary, Layers, Wind, Ghost, Atom, Eye, Loader2, Globe, Globe2, Compass } from 'lucide-react';
+import { Activity, X, Info, Sparkle, BookOpen, Send, Bot, Cpu, Zap, Radio, Terminal, MousePointer2, ChevronRight, Binary, Layers, Wind, Ghost, Atom, Eye, Loader2, Globe, Globe2, Compass, Minimize2, Maximize2 } from 'lucide-react';
 import { CosmicData } from '../types';
 import { fetchAuraInsight } from '../services/geminiService';
 import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
+
+import { NatalChartAdvanced } from './NatalChartAdvanced';
+import { CelestialSolarCore, CelestialDNAHelix, PlanetaryGravityNetwork } from './CelestialSolarCore';
 
 interface AuraVisualNode {
   id: string;
@@ -533,6 +536,7 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
   const [sceneMode, setSceneMode] = useState<'cosmic' | 'quantum' | 'verdant' | 'void'>('cosmic');
   const [isLatticeActive, setIsLatticeActive] = useState(true);
   const [isNeuralSyncActive, setIsNeuralSyncActive] = useState(false);
+  const [isBlueprintMinimized, setIsBlueprintMinimized] = useState(false);
 
   // Aura AI Agent State
   const [auraNodes, setAuraNodes] = useState<AuraVisualNode[]>([]);
@@ -627,6 +631,17 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
     }
   });
 
+  const mappedPlanetsForGravity = useMemo(() => {
+    return [...planets, ...SPECIAL_POINTS].map(p => {
+      const astro = getAstrologicalData(p.name);
+      return {
+        ...p,
+        degree: astro?.degree,
+        distance: p.name === 'Sun' ? 40 : p.distance
+      };
+    }).filter(p => p.degree !== undefined);
+  }, [data]);
+
   return (
     <>
       <PerspectiveCamera makeDefault position={[120, 120, 120]} fov={50} />
@@ -648,325 +663,259 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
       <ambientLight intensity={0.2} />
       <pointLight position={[100, 100, 100]} intensity={1} color="#ffffff" />
       
-      <AstrologicalHouses data={data} onHouseHover={setHoveredHouse} />
-      <AspectLines data={data} onAspectClick={setSelectedAspect} />
-
-      {/* Grid Floor for Futuristic Feel */}
-      <Grid 
-        infiniteGrid 
-        fadeDistance={200} 
-        fadeStrength={5}
-        sectionColor="#ffffff" 
-        sectionSize={50} 
-        sectionThickness={0.5} 
-        cellColor="#3b82f6" 
-        cellSize={10} 
-        cellThickness={0.2} 
-        position={[0, -2, 0]}
-        rotation={[0, 0, 0]}
-        transparent
-        material-opacity={0.05}
-      />
-      
-      {/* AI Generated Aura Nodes */}
-      {auraNodes.map(node => (
-        <AuraNode key={node.id} node={node} onSelect={setSelectedAuraNode} />
-      ))}
-
-      {/* Aura Transmission Edges */}
-      {auraEdges.map((edge, i) => {
-        const sourceNode = auraNodes.find(n => n.id === edge.source);
-        let targetPos: [number, number, number] = [0, 0, 0];
-        
-        if (edge.target === 'Sun') {
-          targetPos = [0, 0, 0];
-        } else {
-          const targetNode = auraNodes.find(n => n.id === edge.target);
-          if (targetNode) targetPos = targetNode.position;
-        }
-
-        if (sourceNode) {
-          return (
-            <Line 
-              key={i}
-              points={[new THREE.Vector3(...sourceNode.position), new THREE.Vector3(...targetPos)]}
-              color={edge.color || 'white'}
-              lineWidth={0.5}
-              opacity={0.2}
-              transparent
-              dashSize={1}
-              gapSize={0.5}
-            />
-          );
-        }
-        return null;
-      })}
-
-      {/* The Center Point (Sun in Solar / Earth in Chart) */}
-      <group 
-        onPointerOver={() => setSunHovered(true)}
-        onPointerOut={() => setSunHovered(false)}
-        onClick={() => {
-          if (viewMode === 'solar') {
-            const sunData = getAstrologicalData('Sun');
-            if (sunData) {
-              setSelectedPlanet({
-                name: 'Sun',
-                color: '#FDB813',
-                size: 6,
-                distance: 0,
-                speed: 0,
-                description: `The core of your identity. Centered in ${sunData.sign} in the ${sunData.house}${sunData.house % 10 === 1 ? 'st' : sunData.house % 10 === 2 ? 'nd' : sunData.house % 10 === 3 ? 'rd' : 'th'} House. ${sunData.meaning}`
-              });
-            }
-          } else {
-            setSelectedPlanet({
-              name: 'Earth',
-              color: '#3b82f6',
-              size: 5,
-              distance: 0,
-              speed: 0,
-              description: 'The physical vessel for your soul experience. Current incarnation grounded in material reality.'
-            });
-          }
-        }}
-      >
-        <Sphere args={[viewMode === 'chart' ? 5 : 6, 64, 64]}>
-          <meshStandardMaterial 
-            color={viewMode === 'chart' ? "#3b82f6" : (selectedPlanet?.name === 'Sun' ? "#ffffff" : "#FDB813")} 
-            emissive={viewMode === 'chart' ? "#3b82f6" : (selectedPlanet?.name === 'Sun' ? "#ffffff" : "#FDB813")} 
-            emissiveIntensity={2} 
-            roughness={0.4}
-            metalness={0.6}
-            wireframe={viewMode === 'chart'}
+      {viewMode === 'chart' ? (
+        <NatalChartAdvanced data={data} selectedPlanet={selectedPlanet} onPlanetClick={setSelectedPlanet} />
+      ) : (
+        <>
+          <AstrologicalHouses data={data} onHouseHover={setHoveredHouse} />
+          <AspectLines data={data} onAspectClick={setSelectedAspect} />
+          <PlanetaryGravityNetwork planets={mappedPlanetsForGravity} />
+          <CelestialDNAHelix />
+          
+          {/* Grid Floor for Futuristic Feel */}
+          <Grid 
+            infiniteGrid 
+            fadeDistance={200} 
+            fadeStrength={5}
+            sectionColor="#ffffff" 
+            sectionSize={50} 
+            sectionThickness={0.5} 
+            cellColor="#3b82f6" 
+            cellSize={10} 
+            cellThickness={0.2} 
+            position={[0, -2, 0]}
+            rotation={[0, 0, 0]}
+            transparent
+            material-opacity={0.05}
           />
-        </Sphere>
-        <pointLight intensity={4} color={viewMode === 'chart' ? "#3b82f6" : "#FDB813"} />
-        <mesh scale={[1.2, 1.2, 1.2]}>
-          <sphereGeometry args={[viewMode === 'chart' ? 5 : 6, 64, 64]} />
-          <meshBasicMaterial color={viewMode === 'chart' ? "#3b82f6" : (selectedPlanet?.name === 'Sun' ? "#ffffff" : "#FDB813")} transparent opacity={0.15} />
-        </mesh>
-        
-        {viewMode === 'chart' && (
-          <group>
-            <Ring args={[6, 6.2, 128]} rotation={[Math.PI / 2, 0, 0]}>
-              <meshBasicMaterial color="#3b82f6" transparent opacity={0.4} />
-            </Ring>
-            <Grid 
-              args={[15, 15]} 
-              cellColor="#3b82f6" 
-              sectionColor="#ffffff" 
-              fadeDistance={20} 
-              fadeStrength={1} 
-              opacity={0.1}
-              rotation={[Math.PI / 2, 0, 0]}
-            />
-          </group>
-        )}
 
-        {sunHovered && !selectedPlanet && (
-          <group position={[0, 8, 0]}>
-            <Text
-              fontSize={1}
-              color="#ffffff"
-              anchorX="center"
-              anchorY="bottom"
-              letterSpacing={0.2}
-            >
-              SUN
-            </Text>
-            {getAstrologicalData('Sun') && (
-              <Text
-                position={[0, -0.2, 0]}
-                fontSize={0.6}
-                color="#FDB813"
-                anchorX="center"
-                anchorY="top"
-                fillOpacity={0.8}
-                letterSpacing={0.1}
-              >
-                {`${getAstrologicalData('Sun')?.sign.toUpperCase()} • HOUSE ${getAstrologicalData('Sun')?.house}`}
-              </Text>
+          {/* The Center Point (Sun in Solar) */}
+          <group 
+            onPointerOver={() => setSunHovered(true)}
+            onPointerOut={() => setSunHovered(false)}
+            onClick={() => {
+              if (viewMode === 'solar') {
+                const sunData = getAstrologicalData('Sun');
+                if (sunData) {
+                  setSelectedPlanet({
+                    name: 'Sun',
+                    color: '#FDB813',
+                    size: 6,
+                    distance: 0,
+                    speed: 0,
+                    description: `The core of your identity. Centered in ${sunData.sign} in the ${sunData.house}${sunData.house % 10 === 1 ? 'st' : sunData.house % 10 === 2 ? 'nd' : sunData.house % 10 === 3 ? 'rd' : 'th'} House. ${sunData.meaning}`
+                  });
+                }
+              }
+            }}
+          >
+            <CelestialSolarCore selected={selectedPlanet?.name === 'Sun'} hovered={sunHovered} />
+
+            {sunHovered && !selectedPlanet && (
+              <group position={[0, 8, 0]}>
+                <Text
+                  fontSize={1}
+                  color="#ffffff"
+                  anchorX="center"
+                  anchorY="bottom"
+                  letterSpacing={0.2}
+                >
+                  SUN
+                </Text>
+                {getAstrologicalData('Sun') && (
+                  <Text
+                    position={[0, -0.2, 0]}
+                    fontSize={0.6}
+                    color="#FDB813"
+                    anchorX="center"
+                    anchorY="top"
+                    fillOpacity={0.8}
+                    letterSpacing={0.1}
+                  >
+                    {`${getAstrologicalData('Sun')?.sign.toUpperCase()} • HOUSE ${getAstrologicalData('Sun')?.house}`}
+                  </Text>
+                )}
+              </group>
+            )}
+
+            {selectedPlanet?.name === 'Sun' && (
+              <Html position={[8, 8, 0]} center distanceFactor={20}>
+                <motion.div 
+                   initial={{ opacity: 0, scale: 0.8 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   className="w-[400px] bg-black/80 backdrop-blur-3xl border border-white/20 p-8 rounded-[40px] shadow-[0_0_80px_rgba(253,184,19,0.2)] pointer-events-auto"
+                >
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <h4 className="text-[10px] uppercase tracking-[0.5em] text-amber-500 mb-2">Solar Core</h4>
+                      <h3 className="text-4xl font-light text-white uppercase tracking-widest">Sun</h3>
+                      <div className="w-16 h-1 mt-3 bg-amber-500" />
+                    </div>
+                    <button onClick={(e) => { e.stopPropagation(); setSelectedPlanet(null); }} className="p-2 text-stone-500 hover:text-white transition-colors">
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <div className="space-y-6">
+                    {(() => {
+                      const sunAstro = getAstrologicalData('Sun');
+                      return (
+                        <>
+                          <div className="bg-white/5 p-5 rounded-3xl border border-white/10">
+                            <p className="text-stone-200 text-sm italic leading-relaxed font-light">
+                              {sunAstro?.meaning || selectedPlanet.description}
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+                              <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Vibration</div>
+                              <div className="text-white text-sm font-bold font-mono">{sunAstro?.sign || 'Aries'}</div>
+                            </div>
+                            <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+                              <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Degree</div>
+                              <div className="text-white text-sm font-bold font-mono">{Math.floor(sunAstro?.degree || 0)}°</div>
+                            </div>
+                            <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+                              <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">House</div>
+                              <div className="text-white text-sm font-bold font-mono">Sector {sunAstro?.house || 1}</div>
+                            </div>
+                            <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+                              <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Element</div>
+                              <div className="text-white text-sm font-bold font-mono">{sunAstro?.sign ? SIGN_ELEMENTS[sunAstro.sign]?.type : 'Fire'}</div>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
+
+                    <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                       <div className="text-[9px] uppercase tracking-widest text-stone-500 font-bold">Gravitational Influence</div>
+                       <div className="text-amber-500 text-[10px] uppercase tracking-tighter">Prime Source</div>
+                    </div>
+                  </div>
+                </motion.div>
+              </Html>
             )}
           </group>
-        )}
 
-        {selectedPlanet?.name === 'Sun' && (
-          <Html position={[8, 8, 0]} center distanceFactor={20}>
-            <motion.div 
-               initial={{ opacity: 0, scale: 0.8 }}
-               animate={{ opacity: 1, scale: 1 }}
-               className="w-[400px] bg-black/80 backdrop-blur-3xl border border-white/20 p-8 rounded-[40px] shadow-[0_0_80px_rgba(253,184,19,0.2)] pointer-events-auto"
+          {planets.map((planet) => {
+            const astro = getAstrologicalData(planet.name);
+            return (
+              <Planet 
+                key={planet.name} 
+                {...planet} 
+                active={selectedPlanet?.name === planet.name}
+                astro={astro}
+                isStatic={isStatic}
+                isBirthChartMode={false}
+                onSelect={(p) => setSelectedPlanet(p ? planets.find(item => item.name === p.name) || p : null)} 
+              />
+            );
+          })}
+
+          {SPECIAL_POINTS.map((point) => {
+            const astro = getAstrologicalData(point.name);
+            return (
+              <Planet 
+                key={point.name} 
+                {...point} 
+                active={selectedPlanet?.name === point.name}
+                astro={astro}
+                isStatic={isStatic}
+                isBirthChartMode={false}
+                onSelect={(p) => setSelectedPlanet(p ? (SPECIAL_POINTS.find(item => item.name === p.name) as any) || p : null)} 
+              />
+            );
+          })}
+
+          {hoveredHouse && (
+            <Html 
+              position={[
+                Math.cos(((hoveredHouse.houseNumber - 1) * 30 + 15) * Math.PI / 180) * 100,
+                5,
+                Math.sin(((hoveredHouse.houseNumber - 1) * 30 + 15) * Math.PI / 180) * 100
+              ]} 
+              center 
+              distanceFactor={20}
             >
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h4 className="text-[10px] uppercase tracking-[0.5em] text-amber-500 mb-2">Solar Core</h4>
-                  <h3 className="text-4xl font-light text-white uppercase tracking-widest">Sun</h3>
-                  <div className="w-16 h-1 mt-3 bg-amber-500" />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="w-[300px] bg-black/90 backdrop-blur-3xl border border-blue-500/40 p-6 rounded-[2.5rem] shadow-[0_0_50px_rgba(59,130,246,0.3)] pointer-events-auto"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-500/10 rounded-xl text-blue-400">
+                      <Radio size={16} />
+                    </div>
+                    <div>
+                      <div className="text-[8px] text-stone-500 uppercase tracking-[0.4em] font-bold">Resonance Point</div>
+                      <h3 className="text-xl text-white font-light tracking-widest uppercase">House {hoveredHouse.houseNumber}</h3>
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-blue-500 font-mono font-bold tracking-tighter">
+                    {hoveredHouse.sign?.toUpperCase()}
+                  </div>
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); setSelectedPlanet(null); }} className="p-2 text-stone-500 hover:text-white transition-colors">
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="space-y-6">
-                {(() => {
-                  const sunAstro = getAstrologicalData('Sun');
-                  return (
-                    <>
-                      <div className="bg-white/5 p-5 rounded-3xl border border-white/10">
-                        <p className="text-stone-200 text-sm italic leading-relaxed font-light">
-                          {sunAstro?.meaning || selectedPlanet.description}
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                          <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Vibration</div>
-                          <div className="text-white text-sm font-bold font-mono">{sunAstro?.sign || 'Aries'}</div>
-                        </div>
-                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                          <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Degree</div>
-                          <div className="text-white text-sm font-bold font-mono">{Math.floor(sunAstro?.degree || 0)}°</div>
-                        </div>
-                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                          <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">House</div>
-                          <div className="text-white text-sm font-bold font-mono">Sector {sunAstro?.house || 1}</div>
-                        </div>
-                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                          <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Element</div>
-                          <div className="text-white text-sm font-bold font-mono">{sunAstro?.sign ? SIGN_ELEMENTS[sunAstro.sign]?.type : 'Fire'}</div>
-                        </div>
-                      </div>
-                    </>
-                  );
-                })()}
-
-                <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                   <div className="text-[9px] uppercase tracking-widest text-stone-500 font-bold">Gravitational Influence</div>
-                   <div className="text-amber-500 text-[10px] uppercase tracking-tighter">Prime Source</div>
+                
+                <div className="space-y-4">
+                  <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
+                    <div className="text-[8px] text-blue-400 uppercase tracking-widest mb-1">Archetypal Domain</div>
+                    <div className="text-white text-xs font-medium leading-relaxed italic pr-2">
+                      {hoveredHouse.realmName || 'Sector of existence'}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-black/40 p-4 rounded-xl border border-white/5">
+                    <p className="text-[11px] text-stone-300 leading-relaxed font-light italic">
+                      {hoveredHouse.description || HOUSE_DESCRIPTIONS[hoveredHouse.houseNumber]}
+                    </p>
+                  </div>
+                  
+                  <div className="pt-2 flex justify-between items-center">
+                     <div className="flex gap-1">
+                        {[0,1,2].map(i => <div key={i} className="w-1 h-1 rounded-full bg-blue-500/30" />)}
+                     </div>
+                     <span className="text-[8px] text-stone-600 uppercase font-bold tracking-widest">Active Influence</span>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          </Html>
-        )}
-      </group>
-
-      {planets.map((planet) => {
-        const astro = getAstrologicalData(planet.name);
-        return (
-          <Planet 
-            key={planet.name} 
-            {...planet} 
-            active={selectedPlanet?.name === planet.name}
-            astro={astro}
-            isStatic={isStatic}
-            isBirthChartMode={viewMode === 'chart'}
-            onSelect={(p) => setSelectedPlanet(p ? planets.find(item => item.name === p.name) || p : null)} 
-          />
-        );
-      })}
-
-      {SPECIAL_POINTS.map((point) => {
-        const astro = getAstrologicalData(point.name);
-        return (
-          <Planet 
-            key={point.name} 
-            {...point} 
-            active={selectedPlanet?.name === point.name}
-            astro={astro}
-            isStatic={isStatic}
-            isBirthChartMode={viewMode === 'chart'}
-            onSelect={(p) => setSelectedPlanet(p ? (SPECIAL_POINTS.find(item => item.name === p.name) as any) || p : null)} 
-          />
-        );
-      })}
-
-      {hoveredHouse && (
-        <Html 
-          position={[
-            Math.cos(((hoveredHouse.houseNumber - 1) * 30 + 15) * Math.PI / 180) * 100,
-            5,
-            Math.sin(((hoveredHouse.houseNumber - 1) * 30 + 15) * Math.PI / 180) * 100
-          ]} 
-          center 
-          distanceFactor={20}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="w-[300px] bg-black/90 backdrop-blur-3xl border border-blue-500/40 p-6 rounded-[2.5rem] shadow-[0_0_50px_rgba(59,130,246,0.3)] pointer-events-auto"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500/10 rounded-xl text-blue-400">
-                  <Radio size={16} />
-                </div>
-                <div>
-                  <div className="text-[8px] text-stone-500 uppercase tracking-[0.4em] font-bold">Resonance Point</div>
-                  <h3 className="text-xl text-white font-light tracking-widest uppercase">House {hoveredHouse.houseNumber}</h3>
-                </div>
-              </div>
-              <div className="text-[10px] text-blue-500 font-mono font-bold tracking-tighter">
-                {hoveredHouse.sign?.toUpperCase()}
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-                <div className="text-[8px] text-blue-400 uppercase tracking-widest mb-1">Archetypal Domain</div>
-                <div className="text-white text-xs font-medium leading-relaxed italic pr-2">
-                  {hoveredHouse.realmName || 'Sector of existence'}
-                </div>
-              </div>
-              
-              <div className="bg-black/40 p-4 rounded-xl border border-white/5">
-                <p className="text-[11px] text-stone-300 leading-relaxed font-light italic">
-                  {hoveredHouse.description || HOUSE_DESCRIPTIONS[hoveredHouse.houseNumber]}
-                </p>
-              </div>
-              
-              <div className="pt-2 flex justify-between items-center">
-                 <div className="flex gap-1">
-                    {[0,1,2].map(i => <div key={i} className="w-1 h-1 rounded-full bg-blue-500/30" />)}
-                 </div>
-                 <span className="text-[8px] text-stone-600 uppercase font-bold tracking-widest">Active Influence</span>
-              </div>
-            </div>
-          </motion.div>
-        </Html>
-      )}
-
-      {/* Neural Lattice */}
-      {isLatticeActive && (
-        <group>
-          {planets.map((p1, i) => 
-            planets.slice(i + 1).map((p2, j) => {
-              const astro1 = getAstrologicalData(p1.name);
-              const astro2 = getAstrologicalData(p2.name);
-              
-              if (!astro1 || !astro2) return null;
-              
-              const distance = p1.distance - p2.distance;
-              if (Math.abs(distance) < 80 || (astro1?.sign === astro2?.sign)) {
-                return (
-                  <Line 
-                    key={`latt-${p1.name}-${p2.name}`}
-                    points={[
-                      [Math.cos((astro1.degree * Math.PI)/180) * p1.distance, 0, Math.sin((astro1.degree * Math.PI)/180) * p1.distance],
-                      [Math.cos((astro2.degree * Math.PI)/180) * p2.distance, 0, Math.sin((astro2.degree * Math.PI)/180) * p2.distance]
-                    ]} 
-                    color={sceneMode === 'quantum' ? '#f43f5e' : (astro1?.sign === astro2?.sign ? '#fbbf24' : '#3b82f6')}
-                    opacity={0.08}
-                    transparent
-                    lineWidth={1}
-                  />
-                );
-              }
-              return null;
-            })
+              </motion.div>
+            </Html>
           )}
-        </group>
+
+          {/* Neural Lattice */}
+          {isLatticeActive && (
+            <group>
+              {planets.map((p1, i) => 
+                planets.slice(i + 1).map((p2, j) => {
+                  const astro1 = getAstrologicalData(p1.name);
+                  const astro2 = getAstrologicalData(p2.name);
+                  
+                  if (!astro1 || !astro2) return null;
+                  
+                  const distance = p1.distance - p2.distance;
+                  if (Math.abs(distance) < 80 || (astro1?.sign === astro2?.sign)) {
+                    return (
+                      <Line 
+                        key={`latt-${p1.name}-${p2.name}`}
+                        points={[
+                          [Math.cos((astro1.degree * Math.PI)/180) * p1.distance, 0, Math.sin((astro1.degree * Math.PI)/180) * p1.distance],
+                          [Math.cos((astro2.degree * Math.PI)/180) * p2.distance, 0, Math.sin((astro2.degree * Math.PI)/180) * p2.distance]
+                        ]} 
+                        color={sceneMode === 'quantum' ? '#f43f5e' : (astro1?.sign === astro2?.sign ? '#fbbf24' : '#3b82f6')}
+                        opacity={0.08}
+                        transparent
+                        lineWidth={1}
+                      />
+                    );
+                  }
+                  return null;
+                })
+              )}
+            </group>
+          )}
+        </>
       )}
 
       {/* Astro Intelligence Overlay */}
@@ -975,84 +924,178 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
           <motion.div 
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className="p-6 bg-stone-950/80 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] pointer-events-auto"
+            className="p-6 bg-stone-950/80 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] pointer-events-auto relative"
           >
-            <div className="flex items-center gap-3 mb-1">
+            <button 
+              onClick={() => setIsBlueprintMinimized(!isBlueprintMinimized)}
+              className="absolute top-6 right-6 p-2 rounded-full text-stone-500 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              {isBlueprintMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
+            </button>
+            <div className="flex items-center gap-3 mb-1 pr-8">
               <Sparkle className="text-yellow-500" size={16} />
               <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-stone-500">Core Matrix</span>
             </div>
-            <h2 className="text-2xl font-light text-white tracking-widest uppercase">Celestial Blueprint</h2>
+            <h2 className="text-2xl font-light text-white tracking-widest uppercase pr-8">Celestial Blueprint</h2>
             
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button 
-                onClick={() => setViewMode(viewMode === 'solar' ? 'chart' : 'solar')}
-                className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${viewMode === 'chart' ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_20px_rgba(147,51,234,0.4)]' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
-              >
-                {viewMode === 'chart' ? 'Zodiac Wheel' : 'Solar Dynamics'}
-              </button>
-              <div className="flex bg-white/5 rounded-full border border-white/10 p-0.5">
-                {[
-                  { id: 'top', icon: Globe, label: 'Flat' },
-                  { id: 'isometric', icon: Compass, label: '3D' },
-                  { id: 'orbit', icon: Activity, label: 'Spin' }
-                ].map(opt => (
-                  <button
-                    key={opt.id}
-                    onClick={() => setRotationPerspective(opt.id as any)}
-                    className={`p-2 rounded-full transition-all ${rotationPerspective === opt.id ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white'}`}
-                    title={opt.label}
-                  >
-                    <opt.icon size={14} />
-                  </button>
-                ))}
-              </div>
-              <button 
-                onClick={() => setIsStatic(!isStatic)}
-                className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${isStatic ? 'bg-amber-500/20 border-amber-500 text-amber-500' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
-              >
-                {isStatic ? 'Orbits Paused' : 'Dynamic Flow'}
-              </button>
-              <button 
-                onClick={() => setShowHouseGuide(!showHouseGuide)}
-                className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${showHouseGuide ? 'bg-emerald-500/20 border-emerald-500 text-emerald-500' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
-              >
-                Chart Synthesis
-              </button>
-              <button 
-                onClick={() => setIsLatticeActive(!isLatticeActive)}
-                className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${isLatticeActive ? 'bg-blue-500/20 border-blue-500 text-blue-500' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
-              >
-                Neural Lattice
-              </button>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-white/5">
-              <div className="flex items-center gap-2 mb-3">
-                <Layers className="text-blue-400" size={14} />
-                <span className="text-[9px] text-stone-500 uppercase tracking-widest font-bold">Vibrational Dimension</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { id: 'cosmic', color: 'bg-blue-500', label: 'Cosmic-1', icon: Globe2 },
-                  { id: 'quantum', color: 'bg-rose-500', label: 'Quantum-X', icon: Atom },
-                  { id: 'verdant', color: 'bg-emerald-500', label: 'Verdant-Z', icon: Wind },
-                  { id: 'void', color: 'bg-stone-500', label: 'Deep Void', icon: Ghost }
-                ].map(mode => (
-                  <button 
-                    key={mode.id}
-                    onClick={() => setSceneMode(mode.id as any)}
-                    className={`flex items-center justify-between gap-3 px-4 py-2 rounded-2xl border transition-all ${sceneMode === mode.id ? 'bg-white/10 border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.05)]' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5'}`}
-                  >
-                    <div className="flex items-center gap-2">
-                       <mode.icon size={12} className={sceneMode === mode.id ? 'text-white' : 'text-stone-500'} />
-                       <span className="text-[9px] text-white uppercase tracking-widest font-medium">{mode.label}</span>
+            <AnimatePresence>
+              {!isBlueprintMinimized && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button 
+                      onClick={() => setViewMode(viewMode === 'solar' ? 'chart' : 'solar')}
+                      className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${viewMode === 'chart' ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_20px_rgba(147,51,234,0.4)]' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
+                    >
+                      {viewMode === 'chart' ? 'Zodiac Wheel' : 'Solar Dynamics'}
+                    </button>
+                    <div className="flex bg-white/5 rounded-full border border-white/10 p-0.5">
+                      {[
+                        { id: 'top', icon: Globe, label: 'Flat' },
+                        { id: 'isometric', icon: Compass, label: '3D' },
+                        { id: 'orbit', icon: Activity, label: 'Spin' }
+                      ].map(opt => (
+                        <button
+                          key={opt.id}
+                          onClick={() => setRotationPerspective(opt.id as any)}
+                          className={`p-2 rounded-full transition-all ${rotationPerspective === opt.id ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white'}`}
+                          title={opt.label}
+                        >
+                          <opt.icon size={14} />
+                        </button>
+                      ))}
                     </div>
-                    <div className={`w-1.5 h-1.5 rounded-full ${mode.color} ${sceneMode === mode.id ? 'animate-ping' : ''}`} />
-                  </button>
-                ))}
-              </div>
-            </div>
+                    <button 
+                      onClick={() => setIsStatic(!isStatic)}
+                      className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${isStatic ? 'bg-amber-500/20 border-amber-500 text-amber-500' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
+                    >
+                      {isStatic ? 'Orbits Paused' : 'Dynamic Flow'}
+                    </button>
+                    <button 
+                      onClick={() => setShowHouseGuide(!showHouseGuide)}
+                      className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${showHouseGuide ? 'bg-emerald-500/20 border-emerald-500 text-emerald-500' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
+                    >
+                      Chart Synthesis
+                    </button>
+                    <button 
+                      onClick={() => setIsLatticeActive(!isLatticeActive)}
+                      className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${isLatticeActive ? 'bg-blue-500/20 border-blue-500 text-blue-500' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
+                    >
+                      Neural Lattice
+                    </button>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-white/5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Layers className="text-blue-400" size={14} />
+                      <span className="text-[9px] text-stone-500 uppercase tracking-widest font-bold">Vibrational Dimension</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: 'cosmic', color: 'bg-blue-500', label: 'Cosmic-1', icon: Globe2 },
+                        { id: 'quantum', color: 'bg-rose-500', label: 'Quantum-X', icon: Atom },
+                        { id: 'verdant', color: 'bg-emerald-500', label: 'Verdant-Z', icon: Wind },
+                        { id: 'void', color: 'bg-stone-500', label: 'Deep Void', icon: Ghost }
+                      ].map(mode => (
+                        <button 
+                          key={mode.id}
+                          onClick={() => setSceneMode(mode.id as any)}
+                          className={`flex items-center justify-between gap-3 px-4 py-2 rounded-2xl border transition-all ${sceneMode === mode.id ? 'bg-white/10 border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.05)]' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5'}`}
+                        >
+                          <div className="flex items-center gap-2">
+                             <mode.icon size={12} className={sceneMode === mode.id ? 'text-white' : 'text-stone-500'} />
+                             <span className="text-[9px] text-white uppercase tracking-widest font-medium">{mode.label}</span>
+                          </div>
+                          <div className={`w-1.5 h-1.5 rounded-full ${mode.color} ${sceneMode === mode.id ? 'animate-ping' : ''}`} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
+
+          {viewMode === 'solar' && !isBlueprintMinimized && (
+            <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               className="p-6 bg-stone-950/80 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] pointer-events-auto mt-4"
+            >
+              <h3 className="text-stone-500 uppercase text-[9px] tracking-[0.3em] mb-4">Solar Frequency Map</h3>
+              <div className="space-y-4">
+                 <div className="space-y-1">
+                   <div className="flex justify-between text-[10px] uppercase">
+                     <span className="text-rose-400">Emotional Resonance</span>
+                     <span className="text-white">78%</span>
+                   </div>
+                   <div className="h-1 bg-white/10 rounded-full overflow-hidden flex">
+                     <div className="h-full bg-rose-500 w-[78%] shadow-[0_0_10px_rgba(244,63,94,0.5)]" />
+                   </div>
+                 </div>
+                 <div className="space-y-1">
+                   <div className="flex justify-between text-[10px] uppercase">
+                     <span className="text-sky-400">Cognitive Clarity</span>
+                     <span className="text-white">92%</span>
+                   </div>
+                   <div className="h-1 bg-white/10 rounded-full overflow-hidden flex">
+                     <div className="h-full bg-sky-500 w-[92%] shadow-[0_0_10px_rgba(14,165,233,0.5)]" />
+                   </div>
+                 </div>
+                 <div className="space-y-1">
+                   <div className="flex justify-between text-[10px] uppercase">
+                     <span className="text-emerald-400">Spiritual Alignment</span>
+                     <span className="text-white">88%</span>
+                   </div>
+                   <div className="h-1 bg-white/10 rounded-full overflow-hidden flex">
+                     <div className="h-full bg-emerald-500 w-[88%] shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                   </div>
+                 </div>
+                 <div className="space-y-1">
+                   <div className="flex justify-between text-[10px] uppercase">
+                     <span className="text-amber-400">Creative Flow</span>
+                     <span className="text-white">85%</span>
+                   </div>
+                   <div className="h-1 bg-white/10 rounded-full overflow-hidden flex">
+                     <div className="h-full bg-amber-500 w-[85%] shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+                   </div>
+                 </div>
+                 <div className="flex justify-between items-center pt-2">
+                   <span className="text-[9px] text-stone-500 uppercase">Cosmic Weather</span>
+                   <span className="text-[10px] text-white font-mono bg-white/10 px-2 py-0.5 rounded border border-white/20">OPTIMAL</span>
+                 </div>
+              </div>
+            </motion.div>
+          )}
+
+          {viewMode === 'solar' && !isBlueprintMinimized && (
+            <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               className="p-6 bg-stone-950/80 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] pointer-events-auto mt-4"
+            >
+              <h3 className="text-stone-500 uppercase text-[9px] tracking-[0.3em] mb-4">Destiny Probability</h3>
+              <div className="space-y-4">
+                 <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
+                     <Layers className="text-purple-400" size={16} />
+                   </div>
+                   <div>
+                     <div className="text-[10px] uppercase text-stone-400 tracking-widest">Primary Timeline</div>
+                     <div className="text-white text-xs font-mono">Convergence Approaching</div>
+                   </div>
+                 </div>
+                 <div className="text-xs text-stone-300 font-light italic opacity-80 border-l-2 border-purple-500/50 pl-3">
+                    A period of rapid growth and creative expansion is mapped in the probability field.
+                 </div>
+              </div>
+            </motion.div>
+          )}
+
         </div>
 
         {/* Aura Sentient Agent Hub Toggle */}

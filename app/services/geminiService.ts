@@ -114,7 +114,7 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -217,13 +217,18 @@ export const fetchCosmicChatResponse = async (
   `;
 
   try {
-    const chat = ai.getGenerativeModel({ model: "gemini-2.0-flash" }).startChat({
-      history: chatHistory,
-      systemInstruction: systemPrompt,
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: [
+        ...chatHistory,
+        { role: 'user', parts: [{ text: userMessage }] }
+      ],
+      config: {
+        systemInstruction: systemPrompt,
+      },
     });
 
-    const result = await chat.sendMessage(userMessage);
-    const responseText = result.response.text();
+    const responseText = response.text || "";
     
     // Attempt to parse JSON from the response
     try {
@@ -276,7 +281,7 @@ export const fetchTimelineDepth = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -332,7 +337,7 @@ export const fetchTimelineDeepDiveOption = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -396,7 +401,7 @@ export const fetchGeneralDeepDive = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -470,7 +475,7 @@ export const fetchAuraInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",

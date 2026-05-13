@@ -1,8 +1,8 @@
 // --- CORE IMPORTS & EXTERNAL LIBRARIES ---
 import * as React from 'react';
-import { useState, useRef, useEffect, ReactNode } from 'react';
+import { useState, useRef, useEffect, ReactNode, useMemo } from 'react';
 import * as d3 from 'd3';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent, useTransform } from 'motion/react';
 import { CosmicData, UserProfileConfig } from '../types';
 import { Sparkles, Moon, Sun, Star, Activity, Hexagon, Fingerprint, Network, Menu, X, Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, PieChart, Zap, Upload, Palette, Bookmark, History, LifeBuoy, Monitor, Layout, Share2, Download, PlayCircle, Eye, Volume2, Grid, Heart } from 'lucide-react';
 import { 
@@ -14,10 +14,10 @@ import { fetchTimelineDepth, fetchTimelineDeepDiveOption, fetchGeneralDeepDive }
 import { User } from 'firebase/auth';
 import { DeepSynthesis } from './DeepSynthesis';
 import { HarmonicVisualizer } from './HarmonicVisualizer';
-import { SoulBlueprintAura, SoulBlueprintTab } from './SoulBlueprintAura';
-import BirthChartGuide from './BirthChartGuide';
 import { ChakraScene } from './ChakraScene';
 import { CompatibilityMatrix } from './CompatibilityMatrix';
+import { SoulBlueprintAura } from './SoulBlueprintAura';
+import BirthChartGuide from './BirthChartGuide';
 
 /**
  * Interface for DashboardProps
@@ -47,6 +47,8 @@ interface DashboardProps {
  */
 const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedInputs, isReading, handleReadOutLoud }: { isOpen: boolean, onClose: () => void, profileConfig?: UserProfileConfig, onUpdateProfile: (c: UserProfileConfig) => void, loadedInputs: any, isReading: boolean, handleReadOutLoud: (text: string) => void }) => {
   const [activeSettingsTab, setActiveSettingsTab] = useState<'identity' | 'style' | 'vault'>('identity');
+  const [vaultSearch, setVaultSearch] = useState('');
+  const [vaultCategory, setVaultCategory] = useState('All');
   
   const [displayName, setDisplayName] = useState(profileConfig?.displayName || '');
   const [bioText, setBioText] = useState(profileConfig?.bio?.text || '');
@@ -255,18 +257,53 @@ const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedI
 
             {activeSettingsTab === 'vault' && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                {!profileConfig.researchVault || profileConfig.researchVault.length === 0 ? (
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-500" />
+                    <input 
+                      type="text" 
+                      placeholder="Search vault..." 
+                      value={vaultSearch}
+                      onChange={(e) => setVaultSearch(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-all font-light"
+                    />
+                  </div>
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0">
+                    {['All', 'Astrology', 'Numerology', 'Synthesis', 'Deep Dive'].map(cat => (
+                      <button 
+                        key={cat} 
+                        onClick={() => setVaultCategory(cat)}
+                        className={`px-4 py-2 rounded-xl border text-[9px] uppercase tracking-widest transition-all whitespace-nowrap ${vaultCategory === cat ? 'bg-purple-600 border-purple-500 text-white' : 'bg-white/5 border-white/5 text-stone-500 hover:text-white'}`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {(!profileConfig.researchVault || profileConfig.researchVault.length === 0) ? (
                   <div className="py-20 text-center space-y-4 bg-white/5 rounded-[2.5rem] border border-dashed border-white/10 mx-auto max-w-md">
                      <BookOpen className="w-12 h-12 text-stone-700 mx-auto" />
                      <p className="text-stone-500 font-light italic">Your vault is currently empty. Pin findings from your explorations to see them here.</p>
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    {profileConfig.researchVault.map((item, i) => (
+                    {profileConfig.researchVault
+                      .filter(item => {
+                        const matchesSearch = item.title.toLowerCase().includes(vaultSearch.toLowerCase()) || item.content.toLowerCase().includes(vaultSearch.toLowerCase());
+                        const matchesCategory = vaultCategory === 'All' || item.category === vaultCategory;
+                        return matchesSearch && matchesCategory;
+                      })
+                      .map((item, i) => (
                       <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 relative group overflow-hidden">
-                        <div className={`absolute top-0 right-0 w-1 h-full ${item.category === 'Astrology' ? 'bg-purple-500' : item.category === 'Numerology' ? 'bg-blue-500' : 'bg-emerald-500'}`}></div>
+                        <div className={`absolute top-0 left-0 w-1 h-full ${item.category === 'Astrology' ? 'bg-purple-500' : item.category === 'Numerology' ? 'bg-blue-500' : 'bg-emerald-500'}`}></div>
                         <div className="flex justify-between items-start mb-2">
-                          <span className="text-[10px] uppercase tracking-widest text-stone-500">{item.category} • {new Date(item.timestamp).toLocaleDateString()}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] uppercase tracking-widest text-stone-500">{item.category} • {new Date(item.timestamp).toLocaleDateString()}</span>
+                            {item.tags && item.tags.length > 0 && item.tags.map(tag => (
+                              <span key={tag} className="text-[8px] uppercase tracking-[0.2em] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded border border-purple-500/20">{tag}</span>
+                            ))}
+                          </div>
                           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button 
                               onClick={() => handleReadOutLoud(item.content)}
@@ -461,6 +498,315 @@ const ActionMenu = ({ user, data, onSignIn, onSignOut, onEditProfile, profileCon
  * Primary Dashboard Component
  * The central UI hub for displaying readings, conducting research, and navigating modules.
  */
+/**
+ * Section Component
+ * A consistent layout for displaying esoteric analysis sections.
+ */
+const Section = ({ title, content }: { title: string, content: string }) => (
+  <div className="space-y-2">
+    <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-white/40 mb-3">{title}</h4>
+    <p className="text-stone-300 font-light leading-relaxed">{content}</p>
+  </div>
+);
+
+/**
+ * SoulBlueprintTab Component
+ * Detailed 3D torus visualization for soul blueprint analysis.
+ * Moved here to resolve React hook dispatcher issues between module boundaries.
+ */
+const SoulBlueprintTab = ({ data, ResearchBox, isReading, handleReadOutLoud, handleSaveToVault, handleGeneralDeepDive }: { 
+  data: any, 
+  ResearchBox: any, 
+  isReading: boolean,
+  handleReadOutLoud: (text: string) => void,
+  handleSaveToVault: (title: string, content: string, category: string) => void,
+  handleGeneralDeepDive: (title: string, content: string) => void
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  return (
+    <div className="absolute inset-0 -mx-6 -my-6 overflow-hidden rounded-3xl group bg-black/40">
+      <SoulBlueprintAura />
+      {/* HUD overlays */}
+      <div className="absolute top-8 left-4 right-4 md:left-8 md:right-8 flex flex-col gap-4 z-20 pointer-events-none">
+        <div className="flex flex-col md:flex-row justify-between gap-4">
+           {data.torusAnalysis?.soulAge && (
+             <motion.div initial={{opacity: 0, x: -20}} animate={{opacity: 1, x: 0}} transition={{delay: 0.5}} className="bg-sky-950/50 backdrop-blur-md border border-sky-500/30 p-4 rounded-2xl shadow-[0_0_15px_rgba(14,165,233,0.15)] md:min-w-[200px]">
+               <span className="text-[10px] text-sky-400 uppercase tracking-widest font-bold block mb-1">Soul Age</span>
+               <span className="text-xl text-sky-100 font-light">{data.torusAnalysis.soulAge}</span>
+             </motion.div>
+           )}
+           {data.torusAnalysis?.dimensionalFrequency && (
+             <motion.div initial={{opacity: 0, x: 20}} animate={{opacity: 1, x: 0}} transition={{delay: 0.6}} className="bg-sky-950/50 backdrop-blur-md border border-sky-500/30 p-4 rounded-2xl shadow-[0_0_15px_rgba(14,165,233,0.15)] md:text-right md:min-w-[200px]">
+               <span className="text-[10px] text-sky-400 uppercase tracking-widest font-bold block mb-1">Resonance Freq</span>
+               <span className="text-xl text-sky-100 font-light">{data.torusAnalysis.dimensionalFrequency}</span>
+             </motion.div>
+           )}
+        </div>
+        <div className="flex flex-col md:flex-row justify-between gap-4">
+           {data.torusAnalysis?.primaryRay && (
+             <motion.div initial={{opacity: 0, x: -20}} animate={{opacity: 1, x: 0}} transition={{delay: 0.7}} className="bg-sky-950/50 backdrop-blur-md border border-sky-500/30 p-4 rounded-2xl shadow-[0_0_15px_rgba(14,165,233,0.15)] md:min-w-[200px]">
+               <span className="text-[10px] text-sky-400 uppercase tracking-widest font-bold block mb-1">Primary Ray</span>
+               <span className="text-xl text-sky-100 font-light">{data.torusAnalysis.primaryRay}</span>
+             </motion.div>
+           )}
+           {data.torusAnalysis?.karmicTheme && (
+             <motion.div initial={{opacity: 0, x: 20}} animate={{opacity: 1, x: 0}} transition={{delay: 0.8}} className="bg-sky-950/50 backdrop-blur-md border border-sky-500/30 p-4 rounded-2xl shadow-[0_0_15px_rgba(14,165,233,0.15)] md:text-right md:max-w-[300px]">
+               <span className="text-[10px] text-sky-400 uppercase tracking-widest font-bold block mb-1">Karmic Theme</span>
+               <span className="text-sm text-sky-100 font-light leading-snug">{data.torusAnalysis.karmicTheme}</span>
+             </motion.div>
+           )}
+        </div>
+      </div>
+
+      <div 
+        ref={containerRef}
+        className="absolute inset-0 overflow-y-auto no-scrollbar pt-[80vh] pb-[40vh] px-8 scroll-smooth"
+      >
+         <motion.div className="space-y-48 max-w-2xl mx-auto pb-48">
+             
+             {/* Box 1 */}
+             <motion.div
+               initial={{ opacity: 0, y: 100, scale: 0.9, rotateX: 10 }}
+               whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+               exit={{ opacity: 0, y: -100, scale: 1.1, filter: 'blur(10px)' }}
+               viewport={{ once: false, amount: 0.5, margin: "-100px" }}
+               transition={{ type: "spring", stiffness: 100, damping: 20 }}
+               className="relative z-10"
+             >
+                <div className="absolute -inset-4 bg-sky-500/20 blur-2xl rounded-[3rem]" />
+                <ResearchBox 
+                  title="Torus: Body & Flow" 
+                  content={data.torusAnalysis?.bodyAndFlow || 'Analyzing...' } 
+                  className="bg-sky-950/40 backdrop-blur-3xl border-sky-500/30 shadow-[0_0_30px_rgba(14,165,233,0.2)]"
+                  isReading={isReading}
+                  handleReadOutLoud={handleReadOutLoud}
+                  handleSaveToVault={handleSaveToVault}
+                  handleGeneralDeepDive={handleGeneralDeepDive}
+                >
+                  <div className="text-sky-200 font-light leading-relaxed">
+                    <Section title="Body & Flow" content={data.torusAnalysis?.bodyAndFlow || 'Analyzing...' } />
+                  </div>
+                </ResearchBox>
+             </motion.div>
+
+             {/* Box 2 */}
+             <motion.div
+               initial={{ opacity: 0, y: 100, scale: 0.9, rotateX: 10 }}
+               whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+               exit={{ opacity: 0, y: -100, scale: 1.1, filter: 'blur(10px)' }}
+               viewport={{ once: false, amount: 0.5, margin: "-100px" }}
+               transition={{ type: "spring", stiffness: 100, damping: 20 }}
+               className="relative z-10"
+             >
+                <div className="absolute -inset-4 bg-blue-500/20 blur-2xl rounded-[3rem]" />
+                <ResearchBox 
+                  title="Torus: Mind & Spirit" 
+                  content={data.torusAnalysis?.mindAndSpiritual || 'Analyzing...' } 
+                  className="bg-blue-950/40 backdrop-blur-3xl border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.2)]"
+                  isReading={isReading}
+                  handleReadOutLoud={handleReadOutLoud}
+                  handleSaveToVault={handleSaveToVault}
+                  handleGeneralDeepDive={handleGeneralDeepDive}
+                >
+                  <div className="text-blue-200 font-light leading-relaxed">
+                    <Section title="Mind & Spirit" content={data.torusAnalysis?.mindAndSpiritual || 'Analyzing...' } />
+                  </div>
+                </ResearchBox>
+             </motion.div>
+
+             {/* Box 3 */}
+             <motion.div
+               initial={{ opacity: 0, y: 100, scale: 0.9, rotateX: 10 }}
+               whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+               exit={{ opacity: 0, y: -100, scale: 1.1, filter: 'blur(10px)' }}
+               viewport={{ once: false, amount: 0.5, margin: "-100px" }}
+               transition={{ type: "spring", stiffness: 100, damping: 20 }}
+               className="relative z-10"
+             >
+                 <div className="absolute -inset-4 bg-cyan-500/20 blur-2xl rounded-[3rem]" />
+                 <ResearchBox 
+                  title="Torus: Cosmic Alignment" 
+                  content={data.torusAnalysis?.cosmicAlignment || 'Analyzing...' } 
+                  className="bg-cyan-950/40 backdrop-blur-3xl border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.2)]"
+                  isReading={isReading}
+                  handleReadOutLoud={handleReadOutLoud}
+                  handleSaveToVault={handleSaveToVault}
+                  handleGeneralDeepDive={handleGeneralDeepDive}
+                >
+                  <div className="text-cyan-200 font-light leading-relaxed">
+                    <Section title="Cosmic Alignment" content={data.torusAnalysis?.cosmicAlignment || 'Analyzing...' } />
+                  </div>
+                </ResearchBox>
+             </motion.div>
+
+             {/* Box 4 */}
+             <motion.div
+               initial={{ opacity: 0, y: 100, scale: 0.9, rotateX: 10 }}
+               whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+               exit={{ opacity: 0, y: -100, scale: 1.1, filter: 'blur(10px)' }}
+               viewport={{ once: false, amount: 0.5, margin: "-100px" }}
+               transition={{ type: "spring", stiffness: 100, damping: 20 }}
+               className="relative z-10"
+             >
+                 <div className="absolute -inset-4 bg-sky-400/20 blur-2xl rounded-[3rem]" />
+                 <ResearchBox 
+                  title="Torus Reading Synthesis" 
+                  content={data.torusAnalysis?.overallAnalogy || 'Analyzing...' } 
+                  className="bg-sky-900/40 backdrop-blur-3xl border-sky-400/30 shadow-[0_0_50px_rgba(56,189,248,0.3)]"
+                  isReading={isReading}
+                  handleReadOutLoud={handleReadOutLoud}
+                  handleSaveToVault={handleSaveToVault}
+                  handleGeneralDeepDive={handleGeneralDeepDive}
+                >
+                  <h4 className="text-sky-300 font-medium mb-4 flex items-center gap-2"><Activity className="w-5 h-5"/> Torus Synthesis</h4>
+                  <p className="text-lg leading-relaxed text-sky-100/90 font-light italic border-l-2 border-sky-500/50 pl-4">{data.torusAnalysis?.overallAnalogy || 'Analyzing...'}</p>
+                </ResearchBox>
+             </motion.div>
+
+         </motion.div>
+      </div>
+      
+      {/* Scroll indicator overlay */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none opacity-50">
+         <span className="text-[10px] text-sky-300 uppercase tracking-[0.3em] font-bold mb-2">Scroll To Explore</span>
+         <div className="w-px h-12 bg-gradient-to-b from-sky-400 to-transparent" />
+      </div>
+    </div>
+  );
+};
+
+const ResearchBox = ({ title, content, children, className = "", category = "Miscellaneous", isReading, handleReadOutLoud, handleSaveToVault, handleGeneralDeepDive }: { 
+  title: string, 
+  content: string, 
+  children: ReactNode, 
+  className?: string, 
+  category?: string,
+  isReading: boolean,
+  handleReadOutLoud: (text: string) => void,
+  handleSaveToVault: (title: string, content: string, category: string) => void,
+  handleGeneralDeepDive: (title: string, content: string) => void
+}) => (
+  <div className={`group relative bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-white/20 transition-all ${className}`}>
+    <div className="flex justify-end gap-2 mb-2 z-30 relative opacity-40 group-hover:opacity-100 transition-opacity pointer-events-auto">
+      <button 
+        onClick={() => handleReadOutLoud(content)}
+        className={`px-3 py-2 rounded-lg transition-all border border-white/10 shadow-lg flex items-center gap-2 text-[9px] uppercase tracking-widest font-bold ${isReading ? 'bg-purple-600 text-white animate-pulse' : 'bg-stone-800/80 text-stone-300 hover:bg-stone-700 hover:text-white'}`}
+        title="Listen"
+      >
+        <Volume2 className="w-3 h-3" />
+        {isReading ? 'Reading...' : 'Listen'}
+      </button>
+      <button 
+        onClick={() => handleSaveToVault(title, content, category)}
+        className="bg-stone-800/80 hover:bg-emerald-700 p-2 rounded-lg text-stone-300 hover:text-white transition-all border border-white/10 shadow-lg"
+        title="Save"
+      >
+        <Bookmark className="w-3 h-3" />
+      </button>
+      <button 
+        onClick={() => handleGeneralDeepDive(title, content)}
+        className="bg-stone-800/80 hover:bg-stone-700 p-2 rounded-lg text-stone-300 hover:text-white flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold border border-white/10 shadow-lg"
+      >
+        <Search className="w-3 h-3" />
+        Research
+      </button>
+    </div>
+    <div className="relative z-10 w-full">
+      {children}
+    </div>
+  </div>
+);
+
+const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handleReadOutLoud, isReading, isDeepDiveLoading, handleDeepDiveNext, data }: {
+  deepDiveData: any,
+  setDeepDiveData: (d: any) => void,
+  handleSaveToVault: any,
+  handleReadOutLoud: any,
+  isReading: boolean,
+  isDeepDiveLoading: boolean,
+  handleDeepDiveNext: any,
+  data: any
+}) => {
+  if (!deepDiveData) return null;
+  return (
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <motion.div 
+        initial={{ opacity: 0, y: 20, scale: 0.95 }} 
+        animate={{ opacity: 1, y: 0, scale: 1 }} 
+        className="bg-stone-900 border border-white/20 p-8 rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl relative scrollbar-thin scrollbar-thumb-white/20"
+      >
+        <button 
+          onClick={() => setDeepDiveData(null)} 
+          className="absolute top-6 right-6 text-stone-400 hover:text-white bg-white/5 p-2 rounded-full border border-white/10 transition-colors"
+        >
+          <X size={20} />
+        </button>
+        
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3">
+            <Search className="w-6 h-6 text-purple-400" />
+            <h2 className="text-2xl font-light text-white tracking-wide">Esoteric Research: <span className="font-medium text-purple-200">{deepDiveData.title}</span></h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => handleSaveToVault(deepDiveData.title, deepDiveData.detailedAnalysis, 'Deep Dive', ['exploration'])}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold border border-white/10 bg-white/5 text-stone-400 hover:text-white hover:bg-white/10 transition-all"
+              title="Save to Vault"
+            >
+              <Bookmark size={14} />
+              Save finding
+            </button>
+            <button 
+              onClick={() => handleReadOutLoud(deepDiveData.detailedAnalysis)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold border border-white/10 transition-all ${isReading ? 'bg-purple-600 text-white animate-pulse shadow-[0_0_15px_rgba(168,85,247,0.5)]' : 'bg-white/5 text-stone-400 hover:text-white hover:bg-white/10'}`}
+            >
+              <Volume2 size={14} />
+              {isReading ? 'Stop Reading' : 'Read Deep Dive'}
+            </button>
+          </div>
+        </div>
+
+        {isDeepDiveLoading ? (
+          <div className="py-20 text-center space-y-4">
+            <div className="w-12 h-12 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin mx-auto"></div>
+            <p className="text-stone-400 font-light italic animate-pulse">Accessing the universal knowledge matrix...</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {deepDiveData.title === 'Birth Chart Guide' ? (
+               <BirthChartGuide />
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-black/40 p-6 rounded-2xl border border-white/5">
+                  <p className="text-stone-200 font-light leading-relaxed whitespace-pre-wrap">{deepDiveData.detailedAnalysis}</p>
+                </div>
+                
+                {deepDiveData.followUpOptions && deepDiveData.followUpOptions.length > 0 && (
+                  <div className="pt-4 border-t border-white/10">
+                    <h4 className="text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4 font-bold">Resonant Pathways</h4>
+                    <div className="flex flex-wrap gap-2">
+                       {deepDiveData.followUpOptions.map((option: string) => (
+                         <button 
+                           key={option}
+                           onClick={() => handleDeepDiveNext(option)}
+                           className="px-4 py-2 bg-white/5 hover:bg-purple-900/30 border border-white/10 hover:border-purple-500/50 rounded-xl text-xs text-stone-300 hover:text-white transition-all"
+                         >
+                           {option}
+                         </button>
+                       ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
 export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab, user, onSignIn, onSignOut, loadedInputs, profileConfig, onUpdateProfile, onPresentationRequest, externalDeepDive, onClearExternalDeepDive }: DashboardProps) => {
   // --- LOCAL COMPONENT STATE ---
   const [name, setName] = useState('');
@@ -516,6 +862,16 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
       alert("Speech synthesis is not supported in this browser.");
     }
   };
+
+  const BoundResearchBox = (props: any) => (
+    <ResearchBox 
+      {...props} 
+      isReading={isReading} 
+      handleReadOutLoud={handleReadOutLoud} 
+      handleSaveToVault={handleSaveToVault} 
+      handleGeneralDeepDive={handleGeneralDeepDive} 
+    />
+  );
 
   useEffect(() => {
     // Stop reading when switching tabs
@@ -582,21 +938,21 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
     }
   };
 
-  const handleSaveToVault = (title: string, content: string, category: string = 'General') => {
+  const handleSaveToVault = (title: string, content: string, category: string = 'General', tags: string[] = []) => {
     if (!profileConfig) return;
     const newItem = {
       id: Math.random().toString(36).substr(2, 9),
       title,
       content,
       category,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      tags
     };
     const currentVault = profileConfig.researchVault || [];
     onUpdateProfile({
       ...profileConfig,
       researchVault: [...currentVault, newItem]
     });
-    // Add some feedback here? Maybe a toast or just let the button change
   };
 
   const handleDeepDiveNext = async (option: string) => {
@@ -622,124 +978,6 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
     } finally {
       setIsDeepDiveLoading(false);
     }
-  };
-
-  // --- SUB-COMPONENTS (INLINE) ---
-  /**
-   * ResearchBox Component
-   * [DATA DISPLAY & RESEARCH TOOLS]
-   */
-  const ResearchBox = ({ title, content, children, className = "", category = "Miscellaneous" }: { title: string, content: string, children: ReactNode, className?: string, category?: string }) => (
-    <div className={`group relative bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-white/20 transition-all ${className}`}>
-        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10">
-        <button 
-          onClick={() => handleReadOutLoud(content)}
-          className={`px-3 py-2 rounded-lg transition-all border border-white/10 shadow-xl flex items-center gap-2 text-[9px] uppercase tracking-widest font-bold ${isReading ? 'bg-purple-600 text-white animate-pulse' : 'bg-stone-800/80 text-stone-300 hover:bg-stone-700 hover:text-white'}`}
-          title="Read Out Loud (AI Voice)"
-        >
-          <Volume2 className="w-3 h-3" />
-          {isReading ? 'Reading...' : 'Listen'}
-        </button>
-        <button 
-          onClick={() => handleSaveToVault(title, content, category)}
-          className="bg-stone-800/80 hover:bg-emerald-700 p-2 rounded-lg text-stone-300 hover:text-white transition-all border border-white/10 shadow-xl"
-          title="Save to Research Vault"
-        >
-          <Bookmark className="w-3 h-3" />
-        </button>
-        <button 
-          onClick={() => handleGeneralDeepDive(title, content)}
-          className="bg-stone-800/80 hover:bg-stone-700 p-2 rounded-lg text-stone-300 hover:text-white flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold border border-white/10 shadow-xl"
-        >
-          <Search className="w-3 h-3" />
-          Research
-        </button>
-      </div>
-      {children}
-    </div>
-  );
-
-  /**
-   * DeepDiveModal Component
-   * [ADVANCED ESOTERIC RESEARCH INTERFACE]
-   */
-  const DeepDiveModal = () => {
-    if (!deepDiveData) return null;
-    return (
-      <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-        <motion.div 
-          initial={{ opacity: 0, y: 20, scale: 0.95 }} 
-          animate={{ opacity: 1, y: 0, scale: 1 }} 
-          className="bg-stone-900 border border-white/20 p-8 rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl relative scrollbar-thin scrollbar-thumb-white/20"
-        >
-          <button 
-            onClick={() => setDeepDiveData(null)} 
-            className="absolute top-6 right-6 text-stone-400 hover:text-white bg-white/5 p-2 rounded-full border border-white/10 transition-colors"
-          >
-            <X size={20} />
-          </button>
-          
-          <div className="flex items-center justify-between gap-3 mb-6">
-            <div className="flex items-center gap-3">
-              <Search className="w-6 h-6 text-purple-400" />
-              <h2 className="text-2xl font-light text-white tracking-wide">Esoteric Research: <span className="font-medium text-purple-200">{deepDiveData.title}</span></h2>
-            </div>
-            <button 
-              onClick={() => handleReadOutLoud(deepDiveData.detailedAnalysis)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold border border-white/10 transition-all ${isReading ? 'bg-purple-600 text-white animate-pulse shadow-[0_0_15px_rgba(168,85,247,0.5)]' : 'bg-white/5 text-stone-400 hover:text-white hover:bg-white/10'}`}
-            >
-              <Volume2 size={14} />
-              {isReading ? 'Stop Reading' : 'Read Deep Dive'}
-            </button>
-          </div>
-
-          {isDeepDiveLoading ? (
-            <div className="py-20 text-center space-y-4">
-              <div className="w-12 h-12 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin mx-auto"></div>
-              <p className="text-stone-400 font-light italic animate-pulse">Accessing the universal knowledge matrix...</p>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {deepDiveData.title === 'Birth Chart Guide' ? (
-                <BirthChartGuide />
-              ) : (
-                <div className="prose prose-invert max-w-none text-stone-300 leading-relaxed font-light text-lg">
-                  <p className="whitespace-pre-wrap">{deepDiveData.detailedAnalysis}</p>
-                </div>
-              )}
-
-              {deepDiveData.followUpOptions.length > 0 && deepDiveData.title !== 'Birth Chart Guide' && (
-                <div className="space-y-4 pt-8 border-t border-white/10">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent to-purple-500/30"></div>
-                    <h4 className="text-[10px] uppercase tracking-[0.3em] text-purple-400 font-bold whitespace-nowrap px-4 py-1 bg-purple-900/20 rounded-full border border-purple-500/20">Explore Further Branches</h4>
-                    <div className="h-px flex-1 bg-gradient-to-l from-transparent to-purple-500/30"></div>
-                  </div>
-                  <div className="grid gap-3">
-                    {deepDiveData.followUpOptions.map((opt, i) => (
-                      <motion.button 
-                        key={i} 
-                        whileHover={{ x: 5, backgroundColor: 'rgba(168, 85, 247, 0.1)' }}
-                        onClick={() => handleDeepDiveNext(opt)}
-                        className="w-full text-left bg-white/5 border border-white/10 p-5 rounded-2xl text-stone-300 hover:text-white transition-all flex items-center justify-between group shadow-lg hover:shadow-purple-500/10"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-8 h-8 rounded-full bg-purple-900/30 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-all">
-                            <Compass className="w-4 h-4" />
-                          </div>
-                          <span className="text-sm font-light italic leading-relaxed">{opt}</span>
-                        </div>
-                        <Search className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all text-purple-400" />
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </motion.div>
-      </div>
-    );
   };
 
   const themeColor = profileConfig?.theme?.primaryColor || '#a855f7';
@@ -861,7 +1099,16 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             
             <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/20">
               <AnimatePresence mode="wait">
-                <DeepDiveModal />
+      <DeepDiveModal 
+        deepDiveData={deepDiveData} 
+        setDeepDiveData={setDeepDiveData} 
+        handleSaveToVault={handleSaveToVault} 
+        handleReadOutLoud={handleReadOutLoud} 
+        isReading={isReading} 
+        isDeepDiveLoading={isDeepDiveLoading} 
+        handleDeepDiveNext={handleDeepDiveNext} 
+        data={data} 
+      />
                 {activeTab === 'identity' && (
                   <motion.div key="identity" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8 pb-32">
                     <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 shadow-2xl">
@@ -1106,13 +1353,13 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                         </div>
                         <div className="space-y-6">
                           {data.patterns.timeDateDiscovery && (
-                            <ResearchBox 
+                            <BoundResearchBox 
                               title={`Discovery: ${data.patterns.timeDateDiscovery.title}`} 
                               content={`${data.patterns.timeDateDiscovery.mathematicalPattern}: ${data.patterns.timeDateDiscovery.description}`}
                               category="Incredible Discovery"
                               className="bg-amber-900/20 border-amber-500/40 shadow-[0_0_30px_rgba(245,158,11,0.15)] relative overflow-hidden"
                             >
-                              <div className="absolute top-0 right-0 p-6 opacity-10 rotate-12">
+                              <div className="absolute top-0 right-0 p-6 opacity-10 rotate-12 pointer-events-none">
                                 <Zap className="w-24 h-24 text-amber-400" />
                               </div>
                               <div className="relative z-10">
@@ -1126,24 +1373,24 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                                 </div>
                                 <p className="text-sm text-stone-200 leading-relaxed font-light italic">"{data.patterns.timeDateDiscovery.description}"</p>
                               </div>
-                            </ResearchBox>
+                            </BoundResearchBox>
                           )}
 
-                          <ResearchBox title="Core Esoteric Theme" content={data.patterns.coreTheme} className="bg-teal-900/10 border-teal-500/20 shadow-[0_0_15px_rgba(45,212,191,0.1)]">
+                          <BoundResearchBox title="Core Esoteric Theme" content={data.patterns.coreTheme} className="bg-teal-900/10 border-teal-500/20 shadow-[0_0_15px_rgba(45,212,191,0.1)]">
                             <h4 className="text-[10px] uppercase tracking-widest text-teal-400 mb-2">Core Theme</h4>
                             <p className="text-sm text-stone-200 leading-relaxed font-light">{data.patterns.coreTheme}</p>
-                          </ResearchBox>
+                          </BoundResearchBox>
                           
                           <div className="grid gap-4 md:grid-cols-2">
                             {data.patterns.synchronicities.map((sync, i) => (
-                              <ResearchBox key={i} title={`Synchronicity: ${sync.title}`} content={sync.description} className="bg-white/5">
+                              <BoundResearchBox key={i} title={`Synchronicity: ${sync.title}`} content={sync.description} className="bg-white/5">
                                 <h4 className="text-sm font-medium text-teal-300 mb-2 flex items-center gap-2"><Network className="w-4 h-4"/> {sync.title}</h4>
                                 <p className="text-sm text-stone-300 font-light leading-relaxed">{sync.description}</p>
-                              </ResearchBox>
+                              </BoundResearchBox>
                             ))}
                           </div>
                           
-                          <ResearchBox title="Cosmic Interesting Facts Exploration" content={data.patterns.interestingFacts.join('\n')}>
+                          <BoundResearchBox title="Cosmic Interesting Facts Exploration" content={data.patterns.interestingFacts.join('\n')}>
                             <h4 className="text-[10px] uppercase tracking-widest text-stone-500 mb-3 flex items-center gap-2"><Sparkles className="w-3 h-3"/> Interesting Facts</h4>
                             <ul className="space-y-3">
                               {data.patterns.interestingFacts.map((fact, i) => (
@@ -1153,7 +1400,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                                 </li>
                               ))}
                             </ul>
-                          </ResearchBox>
+                          </BoundResearchBox>
                         </div>
                       </>
                     )}
@@ -1188,25 +1435,25 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                           <h3 className="text-xl font-light text-white">Akashic Records</h3>
                         </div>
                         <div className="space-y-6">
-                          <ResearchBox title="Akashic: Soul Origin" content={data.akashic.soulOrigin}>
+                          <BoundResearchBox title="Akashic: Soul Origin" content={data.akashic.soulOrigin}>
                             <Section title="Soul Origin" content={data.akashic.soulOrigin} />
-                          </ResearchBox>
-                          <ResearchBox title="Akashic: Past Life Themes" content={data.akashic.pastLifeThemes}>
+                          </BoundResearchBox>
+                          <BoundResearchBox title="Akashic: Past Life Themes" content={data.akashic.pastLifeThemes}>
                             <Section title="Past Life Themes" content={data.akashic.pastLifeThemes} />
-                          </ResearchBox>
-                          <ResearchBox title="Akashic: Karmic Debts" content={data.akashic.karmicDebts}>
+                          </BoundResearchBox>
+                          <BoundResearchBox title="Akashic: Karmic Debts" content={data.akashic.karmicDebts}>
                             <Section title="Karmic Debts & Lessons" content={data.akashic.karmicDebts} />
-                          </ResearchBox>
-                          <ResearchBox title="Akashic: Soul Gifts" content={data.akashic.soulGifts}>
+                          </BoundResearchBox>
+                          <BoundResearchBox title="Akashic: Soul Gifts" content={data.akashic.soulGifts}>
                             <Section title="Soul Gifts" content={data.akashic.soulGifts} />
-                          </ResearchBox>
+                          </BoundResearchBox>
                           
-                          <ResearchBox title="Guide Message Research" content={data.akashic.guardianMessage} className="bg-indigo-900/20 border-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
+                          <BoundResearchBox title="Guide Message Research" content={data.akashic.guardianMessage} className="bg-indigo-900/20 border-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
                             <h4 className="text-sm uppercase tracking-widest text-indigo-300 mb-3 flex items-center gap-2">
                               <Star className="w-4 h-4" /> Message from your Guides
                             </h4>
                             <p className="text-md text-indigo-100 leading-relaxed italic border-l-2 border-indigo-500/50 pl-4">{data.akashic.guardianMessage}</p>
-                          </ResearchBox>
+                          </BoundResearchBox>
                         </div>
                       </>
                     )}
@@ -1433,7 +1680,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                           )}
 
                           {data.advancedCycles.soliArcs && (
-                            <ResearchBox title="Soli-Arcs Cosmic Fusion" content={data.advancedCycles.soliArcs.map(a => a.description).join('; ')} className="bg-orange-900/10 border-orange-500/20">
+                            <BoundResearchBox title="Soli-Arcs Cosmic Fusion" content={data.advancedCycles.soliArcs.map(a => a.description).join('; ')} className="bg-orange-900/10 border-orange-500/20">
                               <h4 className="text-xs uppercase tracking-widest text-orange-400 mb-4 flex items-center gap-2"><Sun className="w-4 h-4"/> Soli-Arcs</h4>
                               <div className="space-y-3">
                                 {data.advancedCycles.soliArcs.map((arc, i) => (
@@ -1443,7 +1690,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                                   </div>
                                 ))}
                               </div>
-                            </ResearchBox>
+                            </BoundResearchBox>
                           )}
                         </div>
                       </>
@@ -1475,13 +1722,13 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                         </div>
                         <div className="grid grid-cols-1 gap-4">
                           {data.houses.map((house) => (
-                             <ResearchBox key={house.houseNumber} title={`Astrological House ${house.houseNumber}: ${house.realmName}`} content={house.description}>
+                             <BoundResearchBox key={house.houseNumber} title={`Astrological House ${house.houseNumber}: ${house.realmName}`} content={house.description}>
                                <div className="flex justify-between items-center mb-2">
                                  <h4 className="text-sm font-medium text-indigo-300">House {house.houseNumber}</h4>
                                  <span className="text-xs uppercase tracking-widest text-indigo-400 font-light">{house.realmName}</span>
                                </div>
                                <p className="text-xs font-light leading-relaxed text-stone-300">{house.description}</p>
-                             </ResearchBox>
+                             </BoundResearchBox>
                           ))}
                         </div>
                       </>
@@ -1514,37 +1761,37 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                         </div>
 
                         <div className="space-y-4 mb-8">
-                          <ResearchBox title="Daily Horoscope Research" content={data.dailyInsight.horoscope}>
+                          <BoundResearchBox title="Daily Horoscope Research" content={data.dailyInsight.horoscope}>
                             <h4 className="text-xs uppercase tracking-widest text-blue-400 mb-2">Horoscope</h4>
                             <p className="text-sm font-light leading-relaxed text-stone-200">{data.dailyInsight.horoscope}</p>
-                          </ResearchBox>
+                          </BoundResearchBox>
 
-                          <ResearchBox title="Daily Affirmation Deep Dive" content={data.dailyInsight.affirmation} className="bg-purple-900/20 border-purple-500/20">
+                          <BoundResearchBox title="Daily Affirmation Deep Dive" content={data.dailyInsight.affirmation} className="bg-purple-900/20 border-purple-500/20">
                             <h4 className="text-xs uppercase tracking-widest text-purple-400 mb-2">Affirmation</h4>
                             <p className="text-sm font-medium italic text-purple-200">"{data.dailyInsight.affirmation}"</p>
-                          </ResearchBox>
+                          </BoundResearchBox>
 
                           <div className="grid grid-cols-2 gap-4">
-                            <ResearchBox title="Daily Cautionary Influence" content={data.dailyInsight.caution} className="bg-red-900/10 border-red-500/10">
+                            <BoundResearchBox title="Daily Cautionary Influence" content={data.dailyInsight.caution} className="bg-red-900/10 border-red-500/10">
                               <h4 className="text-xs uppercase tracking-widest text-red-400/80 mb-2">Caution</h4>
                               <p className="text-xs font-light text-stone-300 leading-relaxed">{data.dailyInsight.caution}</p>
-                            </ResearchBox>
-                            <ResearchBox title="Daily Key Universal Interest" content={data.dailyInsight.keyInterest} className="bg-emerald-900/10 border-emerald-500/20">
+                            </BoundResearchBox>
+                            <BoundResearchBox title="Daily Key Universal Interest" content={data.dailyInsight.keyInterest} className="bg-emerald-900/10 border-emerald-500/20">
                               <h4 className="text-xs uppercase tracking-widest text-emerald-400/80 mb-2">Key Interest</h4>
                               <p className="text-xs font-light text-stone-300 leading-relaxed">{data.dailyInsight.keyInterest}</p>
-                            </ResearchBox>
+                            </BoundResearchBox>
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <ResearchBox title="Age Significance Meaning" content={data.dailyInsight.ageSignificance} className="bg-black/30 border-white/5">
+                            <BoundResearchBox title="Age Significance Meaning" content={data.dailyInsight.ageSignificance} className="bg-black/30 border-white/5">
                               <h4 className="text-[10px] uppercase tracking-widest text-stone-500 mb-1">Age Significance</h4>
                               <p className="text-sm text-stone-300">{data.dailyInsight.ageSignificance}</p>
-                            </ResearchBox>
+                            </BoundResearchBox>
                             
-                            <ResearchBox title="Time & Date Space Correlation" content={data.dailyInsight.timeDateCorrelation} className="bg-black/30 border-white/5">
+                            <BoundResearchBox title="Time & Date Space Correlation" content={data.dailyInsight.timeDateCorrelation} className="bg-black/30 border-white/5">
                               <h4 className="text-[10px] uppercase tracking-widest text-stone-500 mb-1">Time & Date Correlation</h4>
                               <p className="text-sm text-stone-300">{data.dailyInsight.timeDateCorrelation}</p>
-                            </ResearchBox>
+                            </BoundResearchBox>
                           </div>
                         </div>
 
@@ -1555,9 +1802,9 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                               <h3 className="text-lg font-light text-indigo-300">Weekly Forecast</h3>
                               <span className="text-[10px] uppercase tracking-widest text-indigo-400 bg-indigo-900/30 px-2 py-0.5 rounded border border-indigo-500/20">{data.weeklyInsight.theme}</span>
                             </div>
-                            <ResearchBox title={`Weekly Outlook: ${data.weeklyInsight.theme}`} content={data.weeklyInsight.horoscope} className="bg-indigo-900/10 border-indigo-500/10">
+                            <BoundResearchBox title={`Weekly Outlook: ${data.weeklyInsight.theme}`} content={data.weeklyInsight.horoscope} className="bg-indigo-900/10 border-indigo-500/10">
                               <p className="text-sm font-light leading-relaxed text-stone-300">{data.weeklyInsight.horoscope}</p>
-                            </ResearchBox>
+                            </BoundResearchBox>
                           </div>
                         )}
 
@@ -1568,9 +1815,9 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                               <h3 className="text-lg font-light text-fuchsia-300">Monthly Forecast</h3>
                               <span className="text-[10px] uppercase tracking-widest text-fuchsia-400 bg-fuchsia-900/30 px-2 py-0.5 rounded border border-fuchsia-500/20">{data.monthlyInsight.theme}</span>
                             </div>
-                            <ResearchBox title={`Monthly Outlook: ${data.monthlyInsight.theme}`} content={data.monthlyInsight.horoscope} className="bg-fuchsia-900/10 border-fuchsia-500/10">
+                            <BoundResearchBox title={`Monthly Outlook: ${data.monthlyInsight.theme}`} content={data.monthlyInsight.horoscope} className="bg-fuchsia-900/10 border-fuchsia-500/10">
                               <p className="text-sm font-light leading-relaxed text-stone-300">{data.monthlyInsight.horoscope}</p>
-                            </ResearchBox>
+                            </BoundResearchBox>
                           </div>
                         )}
 
@@ -1581,9 +1828,9 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                               <h3 className="text-lg font-light text-amber-300">Yearly Forecast</h3>
                               <span className="text-[10px] uppercase tracking-widest text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded border border-amber-500/20">{data.yearlyInsight.theme}</span>
                             </div>
-                            <ResearchBox title={`Yearly Outlook: ${data.yearlyInsight.theme}`} content={data.yearlyInsight.horoscope} className="bg-amber-900/10 border-amber-500/10">
+                            <BoundResearchBox title={`Yearly Outlook: ${data.yearlyInsight.theme}`} content={data.yearlyInsight.horoscope} className="bg-amber-900/10 border-amber-500/10">
                               <p className="text-sm font-light leading-relaxed text-stone-300">{data.yearlyInsight.horoscope}</p>
-                            </ResearchBox>
+                            </BoundResearchBox>
                           </div>
                         )}
                       </>
@@ -1592,7 +1839,14 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 )}
                 {activeTab === 'torus' && (
                   <motion.div key="torus" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 text-stone-200 font-light leading-relaxed relative min-h-[70vh]">
-                    <SoulBlueprintTab data={data} ResearchBox={ResearchBox} Section={Section} />
+                    <SoulBlueprintTab 
+                      data={data} 
+                      ResearchBox={ResearchBox} 
+                      isReading={isReading}
+                      handleReadOutLoud={handleReadOutLoud}
+                      handleSaveToVault={handleSaveToVault}
+                      handleGeneralDeepDive={handleGeneralDeepDive}
+                    />
                   </motion.div>
                 )}
                 
@@ -1652,31 +1906,31 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <p className="text-xs text-stone-400 mb-4 italic text-center">Click any planetary body to explore its deep meaning and Tree of Life connection.</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                       {data.planets.map(p => (
-                        <ResearchBox key={p.name} title={`Planetary Influence: ${p.name}`} content={p.meaning} className="bg-transparent p-0 border-0 hover:border-0">
+                        <BoundResearchBox key={p.name} title={`Planetary Influence: ${p.name}`} content={p.meaning} className="bg-transparent p-0 border-0 hover:border-0">
                           <CelestialDetailBox 
                             name={p.name} 
                             data={p} 
                             themeColor={themeColor} 
                             onResearch={() => handleGeneralDeepDive(`Planetary Influence: ${p.name}`, p.meaning)} 
                           />
-                        </ResearchBox>
+                        </BoundResearchBox>
                       ))}
                     </div>
                     <h3 className="text-sm uppercase tracking-widest text-stone-400 mb-3 text-center">Nodes & Points</h3>
                     <div className="grid grid-cols-1 gap-3">
-                       <ResearchBox title="North Node Deep Dive" content={data.nodes.north.meaning} className="p-0 border-0"><CelestialDetailBox name="North Node" data={data.nodes.north} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("North Node", data.nodes.north.meaning)} /></ResearchBox>
-                       <ResearchBox title="South Node Deep Dive" content={data.nodes.south.meaning} className="p-0 border-0"><CelestialDetailBox name="South Node" data={data.nodes.south} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("South Node", data.nodes.south.meaning)} /></ResearchBox>
-                       <ResearchBox title="Vertex Connection" content={data.points.vertex.meaning} className="p-0 border-0"><CelestialDetailBox name="Vertex" data={data.points.vertex} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Vertex", data.points.vertex.meaning)} /></ResearchBox>
-                       <ResearchBox title="Part of Fortune Analysis" content={data.points.partOfFortune.meaning} className="p-0 border-0"><CelestialDetailBox name="Part of Fortune" data={data.points.partOfFortune} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Part of Fortune", data.points.partOfFortune.meaning)} /></ResearchBox>
-                       <ResearchBox title="Chiron Healing Research" content={data.points.chiron.meaning} className="p-0 border-0"><CelestialDetailBox name="Chiron" data={data.points.chiron} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Chiron", data.points.chiron.meaning)} /></ResearchBox>
-                       <ResearchBox title="Black Moon Lilith Shadow" content={data.points.blackMoonLilith.meaning} className="p-0 border-0"><CelestialDetailBox name="Lilith" data={data.points.blackMoonLilith} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Lilith", data.points.blackMoonLilith.meaning)} /></ResearchBox>
+                       <BoundResearchBox title="North Node Deep Dive" content={data.nodes.north.meaning} className="p-0 border-0"><CelestialDetailBox name="North Node" data={data.nodes.north} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("North Node", data.nodes.north.meaning)} /></BoundResearchBox>
+                       <BoundResearchBox title="South Node Deep Dive" content={data.nodes.south.meaning} className="p-0 border-0"><CelestialDetailBox name="South Node" data={data.nodes.south} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("South Node", data.nodes.south.meaning)} /></BoundResearchBox>
+                       <BoundResearchBox title="Vertex Connection" content={data.points.vertex.meaning} className="p-0 border-0"><CelestialDetailBox name="Vertex" data={data.points.vertex} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Vertex", data.points.vertex.meaning)} /></BoundResearchBox>
+                       <BoundResearchBox title="Part of Fortune Analysis" content={data.points.partOfFortune.meaning} className="p-0 border-0"><CelestialDetailBox name="Part of Fortune" data={data.points.partOfFortune} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Part of Fortune", data.points.partOfFortune.meaning)} /></BoundResearchBox>
+                       <BoundResearchBox title="Chiron Healing Research" content={data.points.chiron.meaning} className="p-0 border-0"><CelestialDetailBox name="Chiron" data={data.points.chiron} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Chiron", data.points.chiron.meaning)} /></BoundResearchBox>
+                       <BoundResearchBox title="Black Moon Lilith Shadow" content={data.points.blackMoonLilith.meaning} className="p-0 border-0"><CelestialDetailBox name="Lilith" data={data.points.blackMoonLilith} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Lilith", data.points.blackMoonLilith.meaning)} /></BoundResearchBox>
                     </div>
                   </motion.div>
                 )}
 
                 {activeTab === 'cycles' && data.advancedCycles && (
                   <motion.div key="cycles" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
-                    <ResearchBox title="Morning & Evening Stars Significance" content={data.advancedCycles.morningEveningStars.meaning}>
+                    <BoundResearchBox title="Morning & Evening Stars Significance" content={data.advancedCycles.morningEveningStars.meaning}>
                       <h4 className="text-xs uppercase tracking-widest text-fuchsia-400 mb-4">Morning & Evening Stars</h4>
                       <div className="space-y-3 mb-4">
                         <div className="flex justify-between border-b border-white/5 pb-2">
@@ -1689,9 +1943,9 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                         </div>
                       </div>
                       <p className="text-sm text-stone-300 bg-black/20 p-3 rounded-lg leading-relaxed">{data.advancedCycles.morningEveningStars.meaning}</p>
-                    </ResearchBox>
+                    </BoundResearchBox>
 
-                    <ResearchBox title="Arabic Lots Interpretation" content={data.advancedCycles.arabicLots.meaning} className="bg-white/5 border-white/10">
+                    <BoundResearchBox title="Arabic Lots Interpretation" content={data.advancedCycles.arabicLots.meaning} className="bg-white/5 border-white/10">
                       <h4 className="text-xs uppercase tracking-widest text-amber-400 mb-4">Arabic Lots</h4>
                       <div className="space-y-3 mb-4">
                         <div className="flex justify-between border-b border-white/5 pb-2">
@@ -1704,19 +1958,19 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                         </div>
                       </div>
                       <p className="text-sm text-stone-300 bg-black/20 p-3 rounded-lg leading-relaxed">{data.advancedCycles.arabicLots.meaning}</p>
-                    </ResearchBox>
+                    </BoundResearchBox>
 
                     <div>
                       <h4 className="text-xs uppercase tracking-widest text-stone-500 mb-3 ml-2">Notable Asteroids</h4>
                       <div className="space-y-3">
                         {data.advancedCycles.notableAsteroids.map(ast => (
-                          <ResearchBox key={ast.name} title={`Asteroid Research: ${ast.name}`} content={ast.meaning} className="bg-black/30 border-white/5">
+                          <BoundResearchBox key={ast.name} title={`Asteroid Research: ${ast.name}`} content={ast.meaning} className="bg-black/30 border-white/5">
                             <div className="flex justify-between items-center mb-2">
                               <span className="text-emerald-300 font-medium">{ast.name}</span>
                               <span className="text-xs text-stone-400">{ast.sign}</span>
                             </div>
                             <p className="text-xs leading-relaxed text-stone-300">{ast.meaning}</p>
-                          </ResearchBox>
+                          </BoundResearchBox>
                         ))}
                       </div>
                     </div>
@@ -1797,7 +2051,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                       )}
 
                       <div className="p-5 bg-gradient-to-br from-blue-900/20 to-transparent border border-blue-500/20 rounded-2xl">
-                        <ResearchBox title="Gematria Analysis & Patterns" content={data.gematria.pattern + " reduction: " + data.gematria.reduction} className="bg-transparent p-0 border-0">
+                        <BoundResearchBox title="Gematria Analysis & Patterns" content={data.gematria.pattern + " reduction: " + data.gematria.reduction} className="bg-transparent p-0 border-0">
                           <h4 className="text-xs uppercase tracking-widest text-blue-300 mb-4 flex justify-between">
                             <span>Gematria & Reduction</span>
                             <span>{data.gematria.nameSequence}</span>
@@ -1826,21 +2080,21 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                             </motion.span>
                           </div>
                           <p className="text-sm text-stone-300 mt-4 leading-relaxed bg-black/20 p-3 rounded-lg border border-white/5">{data.gematria.pattern}</p>
-                        </ResearchBox>
+                        </BoundResearchBox>
                       </div>
 
                       {data.gematria.numberProperties && (
-                         <ResearchBox title="Number Properties Research" content={data.gematria.numberProperties} className="bg-teal-900/20 border-teal-500/20">
+                         <BoundResearchBox title="Number Properties Research" content={data.gematria.numberProperties} className="bg-teal-900/20 border-teal-500/20">
                            <h4 className="text-[10px] uppercase tracking-widest text-teal-400 mb-2">Number Properties</h4>
                            <p className="text-sm text-stone-300 leading-relaxed font-light">{data.gematria.numberProperties}</p>
-                         </ResearchBox>
+                         </BoundResearchBox>
                       )}
                    </motion.div>
                 )}
 
                 {activeTab === 'kabbalah' && (
                   <motion.div key="kabbalah" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-8 mt-12 p-6">
-                    <ResearchBox title="Mystical Sephirah & Path" content={data.kabbalah.sephirah + " " + data.kabbalah.path} className="max-w-md mx-auto bg-transparent border-0">
+                    <BoundResearchBox title="Mystical Sephirah & Path" content={data.kabbalah.sephirah + " " + data.kabbalah.path} className="max-w-md mx-auto bg-transparent border-0">
                       <div className="relative group">
                         <div className="absolute inset-0 bg-purple-500/20 blur-[100px] rounded-full group-hover:bg-purple-500/30 transition-all"></div>
                         <Hexagon className="w-32 h-32 text-purple-500 mx-auto relative z-10 animate-[spin_20s_linear_infinite]" />
@@ -1858,7 +2112,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                         <p className="text-stone-400 text-xs uppercase tracking-widest mb-2">Soul Path Designation</p>
                         <p className="text-xl text-stone-200 font-light italic leading-relaxed">"{data.kabbalah.path}"</p>
                       </div>
-                    </ResearchBox>
+                    </BoundResearchBox>
                   </motion.div>
                 )}
                 {activeTab === 'kabbalistic_numerology' && (
@@ -1885,10 +2139,10 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                         </div>
                         
                         <div className="space-y-6">
-                           <ResearchBox title="Tree of Life Synthesis" content={data.kabbalisticNumerology.treeSynthesis} className="bg-emerald-900/10 border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                           <BoundResearchBox title="Tree of Life Synthesis" content={data.kabbalisticNumerology.treeSynthesis} className="bg-emerald-900/10 border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
                              <h4 className="text-xs uppercase tracking-widest text-emerald-400 mb-2">Soul Journey Synthesis</h4>
                              <p className="text-sm font-medium leading-relaxed text-emerald-50">{data.kabbalisticNumerology.treeSynthesis}</p>
-                           </ResearchBox>
+                           </BoundResearchBox>
 
                            <div className="grid gap-6">
                               <CorrespondenceBox 
@@ -1947,13 +2201,6 @@ const Tab = ({ active, children, onClick, icon }: any) => (
   >
     {icon} {children}
   </button>
-);
-
-const Section = ({ title, content }: { title: string, content: string }) => (
-  <div>
-    <h3 className="text-xs uppercase tracking-widest text-stone-500 mb-2">{title}</h3>
-    <p className="text-sm bg-white/5 p-4 rounded-2xl border border-white/5">{content}</p>
-  </div>
 );
 
 const AstrologyCharts = ({ planets }: { planets: any[] }) => {

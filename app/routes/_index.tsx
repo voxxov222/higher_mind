@@ -83,6 +83,24 @@ export default function Index() {
     }
   };
 
+  const getThinkingMode = (tab: string) => {
+    switch (tab) {
+      case 'torus': return 'transcendent';
+      case 'planets': return 'synergetic';
+      case 'numbers':
+      case 'kabbalah':
+      case 'kabbalistic_numerology': return 'kabbalistic';
+      case 'synthesis':
+      case 'strategy':
+      case 'patterns':
+      case 'findings': return 'analyzing';
+      case 'chakras':
+      case 'identity':
+      case 'harmonics': return 'transcendent';
+      default: return 'idle';
+    }
+  };
+
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden font-sans">
       <AnimatePresence mode="wait">
@@ -94,8 +112,30 @@ export default function Index() {
             exit={{ opacity: 0 }}
             className="w-full h-full"
           >
-            <CosmicScene data={data} activeTab={activeTab} setActiveTab={setActiveTab} onPlanetClick={handleSpeak} isPresentationActive={isPresentationMode} />
-            <Dashboard data={data} onGenerate={handleGenerate} isLoading={state === AppState.GENERATING || isAuthLoading} activeTab={activeTab} setActiveTab={setActiveTab} user={user} onSignIn={handleSignIn} onSignOut={handleSignOut} loadedInputs={loadedInputs} profileConfig={profileConfig || undefined} onUpdateProfile={handleUpdateProfile} onPresentationRequest={() => { setIsPresentationMode(true); setTimeout(() => setIsPresentationMode(false), 15000); }} externalDeepDive={externalDeepDive} onClearExternalDeepDive={() => setExternalDeepDive(null)} />
+            <CosmicScene 
+              data={data} 
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab} 
+              onPlanetClick={handleSpeak} 
+              isPresentationActive={isPresentationMode}
+              mode={getThinkingMode(activeTab)}
+            />
+            <Dashboard 
+              data={data} 
+              onGenerate={handleGenerate} 
+              isLoading={state === AppState.GENERATING || isAuthLoading} 
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab} 
+              user={user} 
+              onSignIn={handleSignIn} 
+              onSignOut={handleSignOut} 
+              loadedInputs={loadedInputs} 
+              profileConfig={profileConfig || undefined} 
+              onUpdateProfile={handleUpdateProfile} 
+              onPresentationRequest={() => { setIsPresentationMode(true); setTimeout(() => setIsPresentationMode(false), 15000); }} 
+              externalDeepDive={externalDeepDive} 
+              onClearExternalDeepDive={() => setExternalDeepDive(null)} 
+            />
           </motion.div>
         ) : viewMode === 'universe' ? (
           <motion.div

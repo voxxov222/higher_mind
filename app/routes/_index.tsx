@@ -11,13 +11,23 @@ import { AnimatePresence, motion } from 'motion/react';
 import { auth, signIn, signOut, getCosmicProfile, saveCosmicProfile, updateProfileConfig } from '../firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { UserProfileConfig } from '../types';
-import { Stars, Navigation } from 'lucide-react';
+import { Stars, Navigation, Globe } from 'lucide-react';
 
 export default function Index() {
   const [data, setData] = useState<CosmicData | null>(null);
   const [state, setState] = useState<AppState>(AppState.IDLE);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics'>(() => 'torus');
+  const [activeTab, setActiveTab] = useState<'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('astral_active_tab');
+      return (saved as any) || 'torus';
+    }
+    return 'torus';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('astral_active_tab', activeTab);
+  }, [activeTab]);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [loadedInputs, setLoadedInputs] = useState<any>(null);
@@ -25,6 +35,7 @@ export default function Index() {
   const [viewMode, setViewMode] = useState<'blueprint' | 'universe' | 'solar'>('blueprint');
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [externalDeepDive, setExternalDeepDive] = useState<{ title: string; content: string } | null>(null);
+  const [vortexMode, setVortexMode] = useState<'material' | 'spirit' | 'sync'>('sync');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -96,7 +107,10 @@ export default function Index() {
       case 'findings': return 'analyzing';
       case 'chakras':
       case 'identity':
+      case 'angel_numbers':
+      case 'vortex':
       case 'harmonics': return 'transcendent';
+      case 'gematria_calc': return 'kabbalistic';
       default: return 'idle';
     }
   };
@@ -119,6 +133,7 @@ export default function Index() {
               onPlanetClick={handleSpeak} 
               isPresentationActive={isPresentationMode}
               mode={getThinkingMode(activeTab)}
+              vortexMode={vortexMode}
             />
             <Dashboard 
               data={data} 
@@ -135,6 +150,8 @@ export default function Index() {
               onPresentationRequest={() => { setIsPresentationMode(true); setTimeout(() => setIsPresentationMode(false), 15000); }} 
               externalDeepDive={externalDeepDive} 
               onClearExternalDeepDive={() => setExternalDeepDive(null)} 
+              vortexMode={vortexMode}
+              setVortexMode={setVortexMode}
             />
           </motion.div>
         ) : viewMode === 'universe' ? (
@@ -155,7 +172,7 @@ export default function Index() {
             exit={{ opacity: 0 }}
             className="w-full h-full"
           >
-            <Canvas shadows>
+            <Canvas shadows dpr={[1, 1.5]} gl={{ powerPreference: "high-performance" }}>
               <SolarSystemScene data={data} onPlanetClick={handleSpeak} />
             </Canvas>
           </motion.div>
@@ -165,6 +182,7 @@ export default function Index() {
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex gap-4">
         <button onClick={() => setViewMode('blueprint')} className={`bg-black/40 backdrop-blur-xl border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 transition-all ${viewMode === 'blueprint' ? 'text-purple-400' : 'text-white/60 font-bold uppercase tracking-widest'}`}><Navigation className="w-4 h-4" /><span>Blueprint</span></button>
         <button onClick={() => setViewMode('solar')} className={`bg-black/40 backdrop-blur-xl border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 transition-all ${viewMode === 'solar' ? 'text-amber-400' : 'text-white/60 font-bold uppercase tracking-widest'}`}><Stars className="w-4 h-4" /><span>Solar</span></button>
+        <button onClick={() => setViewMode('universe')} className={`bg-black/40 backdrop-blur-xl border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 transition-all ${viewMode === 'universe' ? 'text-emerald-400' : 'text-white/60 font-bold uppercase tracking-widest'}`}><Globe className="w-4 h-4" /><span>Identity</span></button>
       </div>
 
       {error && <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-red-900 text-white px-6 py-3 rounded-2xl">{error}<button onClick={() => setError(null)} className="ml-4">✕</button></div>}

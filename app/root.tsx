@@ -26,6 +26,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { HigherMindProvider } from "./components/HigherMindProvider";
+
 export default function App() {
-  return <Outlet />;
+  return (
+    <HigherMindProvider>
+      <Outlet />
+    </HigherMindProvider>
+  );
 }

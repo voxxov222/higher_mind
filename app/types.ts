@@ -153,6 +153,62 @@ export interface CosmicData {
   };
 }
 
+export interface Thought {
+  thoughtId: string;
+  timestamp: string;
+  content: string;
+  semanticEmbedding?: number[];
+  intent?: { clarity: number; complexity: number; purpose: string };
+}
+
+export interface Feeling {
+  feelingId: string;
+  timestamp: string;
+  emotion: string;
+  intensity: number;
+  frequency: number;
+  astralAmplitude: number;
+}
+
+export interface Experience {
+  experienceId: string;
+  timestamp: string;
+  type: string;
+  narrative: string;
+  keyLearnings: string[];
+  astralLocation?: string;
+  retentionStrength: number;
+}
+
+export interface SynapticCluster {
+  clusterId: string;
+  timestamp: string;
+  boundElements: {
+    thoughts: string[];
+    feelings: string[];
+    experiences: string[];
+  };
+  integrationStrength: number;
+  neuralCoherence: number;
+  emergentMeaning: string;
+}
+
+export interface ConsciousnessPacket {
+  thought_id: string;
+  thought_content: string;
+  feeling_id: string;
+  emotion: string;
+  frequency: number;
+  astral_amplitude: number;
+  experience_being_encoded: boolean;
+  experience_type: string;
+  synaptic_cluster_strength: number;
+  neural_coherence: number;
+  emergent_insight: string;
+  astral_alignment: number;
+  next_thought_direction: string;
+}
+
 export interface MindMapNode {
   id: string;
   label: string;
@@ -185,6 +241,65 @@ export interface CosmicWidget {
   };
 }
 
+export interface CommunityPost {
+  id: string;
+  userId: string;
+  username: string;
+  timestamp: string;
+  type: 'text' | 'image' | 'video' | 'astrology_insight' | 'ritual_share' | 'question' | 'reflection';
+  title: string;
+  content: string;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
+  tags: string[];
+  likes: number;
+  comments: number;
+  astralContext?: {
+    posterResonance: number;
+    topicalFrequency?: number;
+    relatedAspects?: string[];
+  };
+}
+
+export interface Message {
+  id: string;
+  senderId: string;
+  recipientId: string;
+  timestamp: string;
+  content: string;
+  type: 'text' | 'image' | 'video' | 'voice' | 'astrology_reading';
+  mediaUrl?: string;
+  astralContext?: {
+    senderResonance: number;
+    compatibilityScore?: number;
+    suggestedFrequency?: number;
+  };
+}
+
+export interface MasterNumberMeaning {
+  name: string;
+  archetype: string;
+  traits: string[];
+  gifts: string;
+  shadow: string;
+  purpose: string;
+  relatedFrequency: number;
+  relatedColor: string;
+  keyPractice: string;
+}
+
+export interface WallPost {
+  id: string;
+  fromUserId: string;
+  fromUsername: string;
+  toUserId: string;
+  timestamp: string;
+  content: string;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
+  likes: number;
+}
+
 export interface UserProfileConfig {
   userId: string;
   username: string;
@@ -193,6 +308,16 @@ export interface UserProfileConfig {
   avatarType?: 'image' | 'video' | 'animated';
   bannerUrl?: string;
   bannerType?: 'image' | 'video' | 'animated';
+  astrology?: {
+    sunSign?: string;
+    moonSign?: string;
+    risingSign?: string;
+    masterNumber?: number;
+    masterNumberMeaning?: string;
+    personalSignificance?: string;
+    resonanceLevel: number;
+    resonanceMeaning?: string;
+  };
   theme: {
     primaryColor: string;
     secondaryColor: string;
@@ -218,6 +343,9 @@ export interface UserProfileConfig {
     formatting?: 'rich' | 'markdown';
     moodStatus?: string;
     voiceIntroUrl?: string;
+    spiritualPractices?: string[];
+    interests?: string[];
+    personalSymbols?: string[];
   };
   researchVault: {
     id: string;

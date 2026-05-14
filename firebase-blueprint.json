@@ -6,18 +6,85 @@
       "type": "object",
       "properties": {
         "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "displayName": { "type": "string" },
         "input": { "type": "object" },
         "cosmicData": { "type": "object" },
         "profileConfig": { "type": "object" },
+        "astrology": { "type": "object" },
+        "bio": { "type": "object" },
         "updatedAt": { "type": "timestamp" }
       },
-      "required": ["userId", "input", "cosmicData", "updatedAt"]
+      "required": ["userId", "updatedAt"]
+    },
+    "CommunityPost": {
+      "title": "Community Post",
+      "description": "Public post for astrology discussions and insights.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "timestamp": { "type": "timestamp" },
+        "type": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "mediaUrl": { "type": "string" },
+        "mediaType": { "type": "string" },
+        "tags": { "type": "array" },
+        "likes": { "type": "number" },
+        "comments": { "type": "number" },
+        "astralContext": { "type": "object" }
+      },
+      "required": ["userId", "username", "timestamp", "type", "title", "content"]
+    },
+    "Message": {
+      "title": "Direct Message",
+      "description": "Private message between users.",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "recipientId": { "type": "string" },
+        "timestamp": { "type": "timestamp" },
+        "content": { "type": "string" },
+        "type": { "type": "string" },
+        "mediaUrl": { "type": "string" },
+        "astralContext": { "type": "object" }
+      },
+      "required": ["senderId", "recipientId", "timestamp", "content"]
+    },
+    "WallPost": {
+      "title": "Wall Post",
+      "description": "Post on another user's cosmic profile.",
+      "type": "object",
+      "properties": {
+        "fromUserId": { "type": "string" },
+        "fromUsername": { "type": "string" },
+        "toUserId": { "type": "string" },
+        "timestamp": { "type": "timestamp" },
+        "content": { "type": "string" },
+        "mediaUrl": { "type": "string" },
+        "mediaType": { "type": "string" },
+        "likes": { "type": "number" }
+      },
+      "required": ["fromUserId", "fromUsername", "toUserId", "timestamp", "content"]
     }
   },
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/entities/UserCosmicProfile" },
       "description": "Stores a user's cosmic reading and inputs."
+    },
+    "/community_posts/{postId}": {
+      "schema": { "$ref": "#/entities/CommunityPost" },
+      "description": "Public feed of astral discussions."
+    },
+    "/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "Direct messages between users."
+    },
+    "/users/{userId}/wall_posts/{postId}": {
+      "schema": { "$ref": "#/entities/WallPost" },
+      "description": "Public messages as a collection under the soul profile."
     }
   }
 }

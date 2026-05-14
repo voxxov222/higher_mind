@@ -18,28 +18,55 @@ service cloud.firestore {
     }
 
     function isValidUserCosmicProfile(data) {
-      return data.keys().hasAll(['userId', 'input', 'cosmicData', 'updatedAt'])
+      return data.keys().hasAll(['userId', 'updatedAt'])
         && data.userId is string && data.userId.size() <= 128
         && data.userId == request.auth.uid
-        && data.input is map
-        && data.cosmicData is map
-        && (!data.keys().hasAny(['profileConfig']) || data.profileConfig is map)
         && data.updatedAt == request.time;
     }
 
+    function isValidCommunityPost(data) {
+      return data.keys().hasAll(['userId', 'username', 'timestamp', 'type', 'title', 'content'])
+        && data.userId == request.auth.uid
+        && data.timestamp == request.time;
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['senderId', 'recipientId', 'timestamp', 'content'])
+        && data.senderId == request.auth.uid
+        && data.timestamp == request.time;
+    }
+
     match /users/{userId} {
-      allow get: if isOwner(userId) && isValidId(userId);
-      allow list: if false;
+      allow get: if isSignedIn() && isValidId(userId);
+      allow list: if isSignedIn();
 
       allow create: if isOwner(userId) && isValidId(userId) 
-        && isValidUserCosmicProfile(incoming()) 
-        && (incoming().keys().size() == 4 || incoming().keys().size() == 5);
+        && isValidUserCosmicProfile(incoming());
 
       allow update: if isOwner(userId) && isValidId(userId) 
         && isValidUserCosmicProfile(incoming()) 
-        && incoming().diff(existing()).affectedKeys().hasOnly(['userId', 'input', 'cosmicData', 'profileConfig', 'updatedAt']);
+        && incoming().diff(existing()).affectedKeys().hasOnly(['userId', 'username', 'displayName', 'input', 'cosmicData', 'profileConfig', 'astrology', 'bio', 'updatedAt']);
 
       allow delete: if false;
+    }
+
+    match /community_posts/{postId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(postId) && isValidCommunityPost(incoming());
+      allow update: if isSignedIn() && isValidId(postId) && (
+        (isOwner(existing().userId) && isValidCommunityPost(incoming())) ||
+        (incoming().diff(existing()).affectedKeys().hasOnly(['likes']))
+      );
+      allow delete: if isOwner(existing().userId);
+    }
+
+    match /messages/{messageId} {
+      allow read: if isSignedIn() && (isOwner(existing().senderId) || isOwner(existing().recipientId));
+      allow create: if isSignedIn() && isValidId(messageId) && isValidMessage(incoming());
+      allow update: if isSignedIn() && (isOwner(existing().senderId) || isOwner(existing().recipientId)) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['read', 'astralContext'])
+      );
+      allow delete: if isOwner(existing().senderId);
     }
   }
 }

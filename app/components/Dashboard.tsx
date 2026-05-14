@@ -1,10 +1,15 @@
 // --- CORE IMPORTS & EXTERNAL LIBRARIES ---
 import * as React from 'react';
-import { useState, useRef, useEffect, ReactNode, useMemo } from 'react';
+import { useState, useRef, useEffect, ReactNode } from 'react';
 import * as d3 from 'd3';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent, useTransform } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { CosmicData, UserProfileConfig } from '../types';
-import { Sparkles, Moon, Sun, Star, Activity, Hexagon, Fingerprint, Network, Menu, X, Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, PieChart, Zap, Upload, Palette, Bookmark, History, LifeBuoy, Monitor, Layout, Share2, Download, PlayCircle, Eye, Volume2, Grid, Heart } from 'lucide-react';
+import { 
+  Sparkles, Moon, Sun, Star, Activity, Hexagon, Fingerprint, Network, Menu, X, 
+  Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, 
+  Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, Zap, Upload, Palette, 
+  Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box 
+} from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, Pie, PieChart as RechartsPieChart, CartesianGrid
@@ -17,7 +22,16 @@ import { HarmonicVisualizer } from './HarmonicVisualizer';
 import { ChakraScene } from './ChakraScene';
 import { CompatibilityMatrix } from './CompatibilityMatrix';
 import { SoulBlueprintAura } from './SoulBlueprintAura';
+import { CelestialDNASection } from './CelestialDNASection';
+import { NeuralBrainSection } from './NeuralBrainSection';
+import { AngelNumbersSection } from './AngelNumbersSection';
+import { GematriaCalculatorSection } from './GematriaCalculatorSection';
+import { VortexSequencingSection } from './VortexSequencingSection';
+import CommunityFeed from './social/CommunityFeed';
+import LiveMessenger from './social/LiveMessenger';
+import { getAstralProfile } from '../services/socialService';
 import BirthChartGuide from './BirthChartGuide';
+import { SandboxSection } from './sandbox/SandboxSection';
 
 /**
  * Interface for DashboardProps
@@ -27,8 +41,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics';
-  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics') => void;
+  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'community' | 'messages' | 'sandbox';
+  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'community' | 'messages' | 'sandbox') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -38,6 +52,8 @@ interface DashboardProps {
   onPresentationRequest?: () => void;
   externalDeepDive?: { title: string; content: string } | null;
   onClearExternalDeepDive?: () => void;
+  vortexMode?: 'material' | 'spirit' | 'sync';
+  setVortexMode?: (mode: 'material' | 'spirit' | 'sync') => void;
 }
 
 /**
@@ -807,7 +823,7 @@ const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handl
   );
 };
 
-export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab, user, onSignIn, onSignOut, loadedInputs, profileConfig, onUpdateProfile, onPresentationRequest, externalDeepDive, onClearExternalDeepDive }: DashboardProps) => {
+export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab, user, onSignIn, onSignOut, loadedInputs, profileConfig, onUpdateProfile, onPresentationRequest, externalDeepDive, onClearExternalDeepDive, vortexMode, setVortexMode }: DashboardProps) => {
   // --- LOCAL COMPONENT STATE ---
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
@@ -827,6 +843,21 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
   } | null>(null);
   const [isDeepDiveLoading, setIsDeepDiveLoading] = useState(false);
   const [isReading, setIsReading] = useState(false);
+  const [selectedRecipientId, setSelectedRecipientId] = useState<string | undefined>();
+  const [selectedRecipientProfile, setSelectedRecipientProfile] = useState<UserProfileConfig | undefined>();
+
+  const handleSelectUser = async (userId: string) => {
+    setSelectedRecipientId(userId);
+    setActiveTab('messages');
+    try {
+      const profile = await getAstralProfile(userId);
+      if (profile) {
+        setSelectedRecipientProfile(profile);
+      }
+    } catch (error) {
+      console.error("Failed to fetch recipient profile:", error);
+    }
+  };
 
   useEffect(() => {
     if (externalDeepDive) {
@@ -863,15 +894,18 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
     }
   };
 
-  const BoundResearchBox = (props: any) => (
-    <ResearchBox 
-      {...props} 
-      isReading={isReading} 
-      handleReadOutLoud={handleReadOutLoud} 
-      handleSaveToVault={handleSaveToVault} 
-      handleGeneralDeepDive={handleGeneralDeepDive} 
-    />
-  );
+  const BoundResearchBox = (props: any) => {
+    const onResearch = props.onResearch || (() => handleGeneralDeepDive(props.title, props.content));
+    return (
+      <ResearchBox 
+        {...props} 
+        isReading={isReading} 
+        handleReadOutLoud={handleReadOutLoud} 
+        handleSaveToVault={handleSaveToVault} 
+        handleGeneralDeepDive={onResearch} 
+      />
+    );
+  };
 
   useEffect(() => {
     // Stop reading when switching tabs
@@ -1011,8 +1045,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
       <header className="flex justify-between items-center z-10 pointer-events-auto">
         <h1 className="text-3xl font-light text-white tracking-widest drop-shadow-lg flex items-center gap-3">
           <Hexagon style={{ color: themeColor }} />
-          ASTRAL MIND
+          HIGHER 🧠 MIND
         </h1>
+        <div className="text-[10px] text-white/50 uppercase tracking-[0.2em] font-mono">
+            Wednesday, May 13th, 2026 - 9:00 PM
+        </div>
       </header>
 
       {/* Main Content Area */}
@@ -1078,7 +1115,9 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             <div className="flex border-b border-white/10 p-2 gap-2 overflow-x-auto no-scrollbar pr-14">
               <Tab active={activeTab === 'identity'} onClick={() => setActiveTab('identity')} icon={<UserIcon className="w-4 h-4"/>}>My Identity</Tab>
               <Tab active={activeTab === 'torus'} onClick={() => setActiveTab('torus')} icon={<Activity className="w-4 h-4"/>}>Soul Blueprint</Tab>
+              <Tab active={activeTab === 'brain'} onClick={() => setActiveTab('brain')} icon={<Brain className="w-4 h-4"/>}>Neural Core</Tab>
               <Tab active={activeTab === 'planets'} onClick={() => setActiveTab('planets')} icon={<Moon className="w-4 h-4"/>}>Astrology</Tab>
+              <Tab active={activeTab === 'celestial_dna'} onClick={() => setActiveTab('celestial_dna')} icon={<Hexagon className="w-4 h-4"/>}>Celestial DNA</Tab>
               <Tab active={activeTab === 'houses'} onClick={() => setActiveTab('houses')} icon={<Globe className="w-4 h-4"/>}>Houses</Tab>
               <Tab active={activeTab === 'numbers'} onClick={() => setActiveTab('numbers')} icon={<Fingerprint className="w-4 h-4"/>}>Numerology</Tab>
               <Tab active={activeTab === 'kabbalah'} onClick={() => setActiveTab('kabbalah')} icon={<Hexagon className="w-4 h-4"/>}>Mysticism</Tab>
@@ -1093,6 +1132,10 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'name'} onClick={() => setActiveTab('name')} icon={<Type className="w-4 h-4"/>}>Name Analysis</Tab>
               <Tab active={activeTab === 'akashic'} onClick={() => setActiveTab('akashic')} icon={<BookOpen className="w-4 h-4"/>}>Akashic Records</Tab>
               <Tab active={activeTab === 'patterns'} onClick={() => setActiveTab('patterns')} icon={<Fingerprint className="w-4 h-4"/>}>Synchronicities</Tab>
+              <Tab active={activeTab === 'angel_numbers'} onClick={() => setActiveTab('angel_numbers')} icon={<Sparkles className="w-4 h-4"/>}>Angel Numbers</Tab>
+              <Tab active={activeTab === 'vortex'} onClick={() => setActiveTab('vortex')} icon={<CirclePlay className="w-4 h-4 text-cyan-400"/>}>Vortex Sequencing</Tab>
+              <Tab active={activeTab === 'gematria_calc'} onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
+              <Tab active={activeTab === 'sandbox'} onClick={() => setActiveTab('sandbox')} icon={<Box className="w-4 h-4 text-emerald-400"/>}>Creative Sandbox</Tab>
               <Tab active={activeTab === 'findings'} onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
               <Tab active={activeTab === 'harmonics'} onClick={() => setActiveTab('harmonics')} icon={<BarChart2 className="w-4 h-4"/>}>Harmonics</Tab>
             </div>
@@ -2172,6 +2215,17 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     )}
                   </motion.div>
                 )}
+                {activeTab === 'celestial_dna' && (
+                  <motion.div key="celestial_dna" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                     <CelestialDNASection data={data} setActiveTab={setActiveTab} />
+                  </motion.div>
+                )}
+                {activeTab === 'brain' && (
+                  <motion.div key="brain" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                     <NeuralBrainSection data={data} setActiveTab={setActiveTab} />
+                  </motion.div>
+                )}
+
                 {activeTab === 'chakras' && (
                   <motion.div key="chakras" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <ChakraScene data={data} />
@@ -2180,6 +2234,30 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'compatibility' && (
                   <motion.div key="compatibility" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <CompatibilityMatrix data={data} />
+                  </motion.div>
+                )}
+                {activeTab === 'angel_numbers' && (
+                  <motion.div key="angel_numbers" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <AngelNumbersSection cosmicData={data} />
+                  </motion.div>
+                )}
+                {activeTab === 'vortex' && (
+                   <motion.div key="vortex" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="h-full min-h-[500px]">
+                      <VortexSequencingSection 
+                        cosmicData={data} 
+                        vortexMode={vortexMode} 
+                        setVortexMode={setVortexMode} 
+                      />
+                   </motion.div>
+                )}
+                {activeTab === 'gematria_calc' && (
+                  <motion.div key="gematria_calc" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <GematriaCalculatorSection />
+                  </motion.div>
+                )}
+                {activeTab === 'sandbox' && (
+                  <motion.div key="sandbox" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <SandboxSection />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -2221,12 +2299,8 @@ const AstrologyCharts = ({ planets }: { planets: any[] }) => {
   const ELEMENT_COLORS: any = { Fire: '#f87171', Earth: '#fbbf24', Air: '#60a5fa', Water: '#34d399' };
 
   const radarData = planets.map(p => {
-    // Strength based on house
-    let strength = 0;
     const house = parseInt(p.house);
-    if ([1, 4, 7, 10].includes(house)) strength = 10;
-    else if ([2, 5, 8, 11].includes(house)) strength = 7;
-    else strength = 4;
+    const strength = [1, 4, 7, 10].includes(house) ? 10 : ([2, 5, 8, 11].includes(house) ? 7 : 4);
 
     let color = '#a855f7';
     if (fireSigns.includes(p.sign)) color = ELEMENT_COLORS.Fire;

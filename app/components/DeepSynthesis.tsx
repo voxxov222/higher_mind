@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Zap, Monitor, Share2, Download, BookOpen, PieChart, Network, 
-  PlayCircle, Eye, ChevronRight, DownloadCloud, Layers, Target, 
+  CirclePlay, Eye, ChevronRight, DownloadCloud, Layers, Target, 
   Star, Activity, Moon, Sun, Globe, User, Fingerprint, Volume2,
   Trash2, Plus, Edit3, Save, X, Sparkles, RefreshCw, MousePointer2
 } from 'lucide-react';
@@ -312,7 +312,7 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
             { id: 'infographic', label: 'Infographic', icon: Monitor },
             { id: 'mindmap', label: 'Mind Map', icon: Network },
             { id: '3d', label: '3D Journey', icon: Layers },
-            { id: 'video', label: 'Cinematic', icon: PlayCircle }
+            { id: 'video', label: 'Cinematic', icon: CirclePlay }
           ].map(m => (
             <button
               key={m.id}
@@ -803,7 +803,7 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
                     onClick={() => setIsAutoPlaying(!isAutoPlaying)} 
                     className="p-3 bg-purple-600 rounded-full text-white shadow-lg shadow-purple-900/40"
                   >
-                    {isAutoPlaying ? <Monitor size={20} /> : <PlayCircle size={20} />}
+                    {isAutoPlaying ? <Monitor size={20} /> : <CirclePlay size={20} />}
                   </button>
                   <button onClick={() => setVideoStep(prev => (prev + 1) % 5)} className="text-stone-500 hover:text-white transition-colors"><ChevronRight /></button>
                   <div className="flex gap-1 ml-4">

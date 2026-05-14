@@ -5,18 +5,26 @@ import {
   User, Settings, Share2, Plus, Layout as LayoutIcon, 
   Palette, Grid, Globe, Twitter, Instagram, 
   Github, Music, Video, Star, Zap, Info, MessageSquare, 
-  Moon, Sun, Compass, Sparkles, Edit3, X, Save
+  Moon, Sun, Compass, Sparkles, Edit3, X, Save,
+  Users, Users2, MessageCircle
 } from 'lucide-react';
 import StarField from './StarField';
 import HolographicPanel from './HolographicPanel';
 import { SoulAvatar } from './SoulAvatar';
 import { useProfileStore } from '../../services/profileService';
 import { UserProfileConfig, CosmicWidget } from '../../types';
+import CommunityFeed from '../social/CommunityFeed';
+import LiveMessenger from '../social/LiveMessenger';
+import { Wall } from '../social/Wall';
+import ProfileEditor from './ProfileEditor';
 import clsx from 'clsx';
 
 const CosmicProfile = ({ initialConfig }: { initialConfig?: UserProfileConfig }) => {
   const { config, isEditing, setConfig, setEditing, updateWidget, addWidget, removeWidget, updateTheme, saveProfile } = useProfileStore();
   const [activeLayout, setActiveLayout] = useState<'bento' | 'free' | 'column'>('bento');
+  const [currentView, setCurrentView] = useState<'profile' | 'community' | 'messages'>('profile');
+  const [showEditor, setShowEditor] = useState(false);
+  const [activeChat, setActiveChat] = useState<{ id: string; profile: UserProfileConfig } | null>(null);
 
   useEffect(() => {
     if (initialConfig) {
@@ -91,14 +99,32 @@ const CosmicProfile = ({ initialConfig }: { initialConfig?: UserProfileConfig })
         </div>
 
         <div className="flex items-center gap-4">
+          <div className="flex bg-white/5 rounded-full p-1 border border-white/10 backdrop-blur-md">
+            {[
+              { id: 'profile', icon: <User className="w-4 h-4" />, label: 'My Space' },
+              { id: 'community', icon: <Globe className="w-4 h-4" />, label: 'Community' },
+              { id: 'messages', icon: <MessageCircle className="w-4 h-4" />, label: 'Messages' }
+            ].map((v) => (
+              <button
+                key={v.id}
+                onClick={() => setCurrentView(v.id as any)}
+                className={clsx(
+                  "flex items-center gap-2 px-6 py-2 rounded-full transition-all",
+                  currentView === v.id ? "bg-white/10 text-white font-bold" : "text-white/40 hover:text-white"
+                )}
+              >
+                {v.icon}
+                <span className="text-[10px] font-bold uppercase tracking-widest hidden md:inline">{v.label}</span>
+              </button>
+            ))}
+          </div>
+
           <button 
-            onClick={() => setEditing(!isEditing)}
-            className={`flex items-center gap-2 px-6 py-2 rounded-full border transition-all ${
-              isEditing ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.5)]' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:border-white/20'
-            }`}
+            onClick={() => setShowEditor(true)}
+            className="flex items-center gap-2 px-6 py-2 rounded-full border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:border-white/20 transition-all"
           >
-            {isEditing ? <Save className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
-            <span className="text-[10px] font-bold uppercase tracking-widest">{isEditing ? 'Sync Changes' : 'Design Space'}</span>
+            <Edit3 className="w-4 h-4" />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Refine Profile</span>
           </button>
           
           <button className="p-3 rounded-full bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white transition-all">
@@ -110,59 +136,108 @@ const CosmicProfile = ({ initialConfig }: { initialConfig?: UserProfileConfig })
       {/* Main Content Area */}
       <main className="pt-32 pb-20 px-6 max-w-7xl mx-auto relative z-10">
         
-        {/* Profile Header Block */}
-        <section className="mb-12 relative group">
-          <div className="relative h-[300px] rounded-[40px] overflow-hidden border border-white/10 group">
-             <img 
-               src={config.bannerUrl} 
-               alt="Banner" 
-               className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-1000 scale-105 group-hover:scale-100"
-             />
-             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-             
-             {/* Floating UI Elements over banner */}
-             <div className="absolute bottom-8 left-8 flex items-end gap-8">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-purple-500 blur-[30px] opacity-40 animate-pulse" />
-                  <div className="w-32 h-32 rounded-3xl border-2 border-white/20 p-1 bg-black/40 backdrop-blur-md relative z-10 overflow-hidden transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                    <img src={config.avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-2xl" />
-                  </div>
-                </div>
-                
-                <div className="mb-2">
-                   <div className="flex items-center gap-3 mb-1">
-                      <h1 className="text-4xl font-bold tracking-tight text-white">{config.displayName}</h1>
-                      <div className="px-2 py-0.5 rounded bg-white/10 border border-white/10 text-[10px] uppercase font-bold tracking-widest text-white/50">Verified Soul</div>
+        <AnimatePresence mode="wait">
+          {currentView === 'profile' && (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              {/* Profile Header Block */}
+              <section className="mb-12 relative group">
+                <div className="relative h-[300px] rounded-[40px] overflow-hidden border border-white/10 group">
+                   <img 
+                     src={config.bannerUrl} 
+                     alt="Banner" 
+                     className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-1000 scale-105 group-hover:scale-100"
+                   />
+                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                   
+                   {/* Floating UI Elements over banner */}
+                   <div className="absolute bottom-8 left-8 flex items-end gap-8">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-purple-500 blur-[30px] opacity-40 animate-pulse" />
+                        <div className="w-32 h-32 rounded-3xl border-2 border-white/20 p-1 bg-black/40 backdrop-blur-md relative z-10 overflow-hidden transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                          <img src={config.avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-2xl" />
+                        </div>
+                      </div>
+                      
+                      <div className="mb-2">
+                         <div className="flex items-center gap-3 mb-1">
+                            <h1 className="text-4xl font-bold tracking-tight text-white">{config.displayName}</h1>
+                            <div className="px-2 py-0.5 rounded bg-white/10 border border-white/10 text-[10px] uppercase font-bold tracking-widest text-white/50">Verified Soul</div>
+                         </div>
+                         <p className="text-white/60 font-light flex items-center gap-2">
+                           <span className="text-purple-400">@</span>{config.username}
+                           <span className="w-1 h-1 rounded-full bg-white/20" />
+                           <span className="italic text-white/40">{config.bio.moodStatus}</span>
+                         </p>
+                      </div>
                    </div>
-                   <p className="text-white/60 font-light flex items-center gap-2">
-                     <span className="text-purple-400">@</span>{config.username}
-                     <span className="w-1 h-1 rounded-full bg-white/20" />
-                     <span className="italic text-white/40">{config.bio.moodStatus}</span>
-                   </p>
                 </div>
-             </div>
-          </div>
-        </section>
+              </section>
 
-        {/* Dynamic Grid System */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           {config.layout.widgets.map((widget) => (
-             <WidgetRenderer key={widget.id} widget={widget} config={config} />
-           ))}
-           
-           {isEditing && (
-             <motion.button
-               whileHover={{ scale: 1.02 }}
-               whileTap={{ scale: 0.98 }}
-               className="flex flex-col items-center justify-center p-12 rounded-[40px] border-2 border-dashed border-white/10 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all text-white/30 hover:text-purple-400 group"
-             >
-                <Plus className="w-8 h-8 mb-4 group-hover:rotate-90 transition-transform duration-500" />
-                <span className="text-xs font-bold uppercase tracking-widest">Add Module</span>
-             </motion.button>
-           )}
-        </div>
+              {/* Dynamic Grid System */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                 {config.layout.widgets.map((widget) => (
+                   <WidgetRenderer key={widget.id} widget={widget} config={config} />
+                 ))}
+                 
+                 {isEditing && (
+                   <motion.button
+                     whileHover={{ scale: 1.02 }}
+                     whileTap={{ scale: 0.98 }}
+                     className="flex flex-col items-center justify-center p-12 rounded-[40px] border-2 border-dashed border-white/10 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all text-white/30 hover:text-purple-400 group"
+                   >
+                      <Plus className="w-8 h-8 mb-4 group-hover:rotate-90 transition-transform duration-500" />
+                      <span className="text-xs font-bold uppercase tracking-widest">Add Module</span>
+                   </motion.button>
+                 )}
+              </div>
+              
+              {/* Wall Section */}
+              <div className="w-full">
+                 <Wall profileId={config.userId} readOnly={false} />
+              </div>
+            </motion.div>
+          )}
+
+          {currentView === 'community' && (
+            <motion.div
+              key="community"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full"
+            >
+              <CommunityFeed />
+            </motion.div>
+          )}
+
+          {currentView === 'messages' && (
+            <motion.div
+              key="messages"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="w-full max-w-5xl mx-auto"
+            >
+              <LiveMessenger 
+                recipientId={activeChat?.id} 
+                recipientProfile={activeChat?.profile}
+                onClose={() => setActiveChat(null)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       </main>
+
+      {/* Profile Editor Modal */}
+      <AnimatePresence>
+        {showEditor && <ProfileEditor onClose={() => setShowEditor(false)} />}
+      </AnimatePresence>
 
       {/* Editor Sidebar/Panel (Conditional) */}
       <AnimatePresence>

@@ -4,6 +4,8 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Sphere, Text } from '@react-three/drei';
 
+import { useHigherMind } from './HigherMindProvider';
+
 export type ThinkingMode = 'idle' | 'planetary' | 'emotional' | 'numerology' | 'transit' | 'insight' | 'transcendent' | 'synergetic' | 'kabbalistic' | 'analyzing';
 
 const modeColors: Record<ThinkingMode, string> = {
@@ -272,7 +274,7 @@ function generatePathways(positions: Float32Array, connectionCount: number) {
         let idx2 = Math.floor(Math.random() * pointsCount);
         
         let attempts = 0;
-        let p1x = positions[idx1 * 3], p1y = positions[idx1 * 3 + 1], p1z = positions[idx1 * 3 + 2];
+        const p1x = positions[idx1 * 3], p1y = positions[idx1 * 3 + 1], p1z = positions[idx1 * 3 + 2];
         let p2x = positions[idx2 * 3], p2y = positions[idx2 * 3 + 1], p2z = positions[idx2 * 3 + 2];
         let dist = Math.sqrt((p1x-p2x)**2 + (p1y-p2y)**2 + (p1z-p2z)**2);
         
@@ -342,12 +344,12 @@ const NeuralBrain = ({ mode }: { mode: ThinkingMode }) => {
   const pixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
   
   // High detail volume structures
-  const { positions, colors, sizes, randoms } = useMemo(() => generateBrainVolume(50000), []);
-  const { lines, vertexRandoms } = useMemo(() => generatePathways(positions, 12000), [positions]);
+  const { positions, colors, sizes, randoms } = useMemo(() => generateBrainVolume(30000), []);
+  const { lines, vertexRandoms } = useMemo(() => generatePathways(positions, 8000), [positions]);
   
   // Ghost shell over the brain
   const cortexGeo = useMemo(() => {
-     const geo = new THREE.IcosahedronGeometry(1.0, 48); // High detail smooth shell
+     const geo = new THREE.IcosahedronGeometry(1.0, 32); // Reduced detail from 48
      deformToBrain(geo);
      return geo;
   }, []);
@@ -391,6 +393,7 @@ const NeuralBrain = ({ mode }: { mode: ThinkingMode }) => {
   
   const mousePos = useMemo(() => new THREE.Vector3(0,0,10), []);
   const targetColor = useMemo(() => new THREE.Color(), []);
+  const { coherence, alignment, feelings } = useHigherMind();
   
   useFrame((state) => {
       const t = state.clock.getElapsedTime();
@@ -400,9 +403,16 @@ const NeuralBrain = ({ mode }: { mode: ThinkingMode }) => {
       particlesMaterial.uniforms.uMouse.value.lerp(mousePos, 0.1);
       
       // Process color transitions based on thought modes
-      targetColor.set(modeColors[mode] || modeColors.idle);
-      const isIdle = mode === 'idle';
-      const targetIntensity = isIdle ? 0.0 : 1.0;
+      const latestFeeling = feelings[feelings.length - 1];
+      if (latestFeeling) {
+        // Map frequency to color if in emotional mode
+        // For now, let's stick to modeColors but mix in the frequency-based color logic
+        targetColor.set(modeColors[mode] || modeColors.idle);
+      } else {
+        targetColor.set(modeColors[mode] || modeColors.idle);
+      }
+      
+      const targetIntensity = mode === 'idle' ? 0.0 : 1.0;
       
       particlesMaterial.uniforms.uTime.value = t;
       particlesMaterial.uniforms.uModeColor.value.lerp(targetColor, 0.05);
@@ -410,11 +420,11 @@ const NeuralBrain = ({ mode }: { mode: ThinkingMode }) => {
       
       linesMaterial.uniforms.uTime.value = t;
       linesMaterial.uniforms.uColor.value.lerp(targetColor, 0.05);
-      linesMaterial.uniforms.uModeIntensity.value = particlesMaterial.uniforms.uModeIntensity.value;
+      linesMaterial.uniforms.uModeIntensity.value = THREE.MathUtils.lerp(linesMaterial.uniforms.uModeIntensity.value, coherence, 0.1);
       
       shellMaterial.uniforms.uTime.value = t;
       shellMaterial.uniforms.uColor.value.lerp(targetColor, 0.05);
-      shellMaterial.uniforms.uModeIntensity.value = particlesMaterial.uniforms.uModeIntensity.value;
+      shellMaterial.uniforms.uModeIntensity.value = THREE.MathUtils.lerp(shellMaterial.uniforms.uModeIntensity.value, alignment, 0.1);
   });
   
   return (
@@ -438,7 +448,7 @@ const NeuralBrain = ({ mode }: { mode: ThinkingMode }) => {
   );
 }
 
-const AstrologyGlyphs = ({ radius, speed }: { radius: number, speed: number }) => {
+const AstrologyGlyphs = ({ radius }: { radius: number, speed: number }) => {
   const glyphs = useMemo(() => {
     const symbols = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
     return symbols.map((symbol, i) => {

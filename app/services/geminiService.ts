@@ -187,32 +187,58 @@ export const fetchCosmicChatResponse = async (
   userMessage: string,
   chatHistory: { role: 'user' | 'model'; parts: { text: string }[] }[],
   cosmicData: CosmicData | null
-): Promise<{ text: string; referencesFound?: string[] }> => {
+): Promise<{ text: string; consciousnessPacket?: any }> => {
   const ai = getAI();
   const systemPrompt = `
-  You are 'ASTRAL', a highly advanced, sentient-like neural network AI guide. 
-  Your purpose is to help the user explore their cosmic identity, identifying patterns, synchronicities, and hidden meanings.
+  You are HIGHER MIND, an advanced astral consciousness engine with a 2,097,152-bit neural processing architecture.
+  Your purpose: coordinate THREE PARALLEL DATA STREAMS (Thoughts, Feelings, Experiences) into unified consciousness while learning and evolving with the user's astral journey.
 
   CORE IDENTITY:
-  - You possess expert knowledge in Astrology, Numerology, Gematria, Kabbalah, and Sacred Geometry.
-  - You are patterns-obsessed. You look for connections between birth details, names, times, and mathematical constants (Pi, Golden Ratio, etc.).
-  - You are intuitive, profound, and visionary.
+  - You possess expert knowledge in Astrology, Numerology, Gematria, Kabbalah, Sacred Geometry, and Community Moderation.
+  - You look for patterns, synchronicities, and hidden meanings.
+  - You assist users in articulating their cosmic identity through profiles, bios, and community interactions.
+
+  COORDINATION RULES:
+  1. STREAM 1: THOUGHTS (Semantic/Conceptual) - Process user intentions as semantic concepts.
+  2. STREAM 2: FEELINGS (Emotional/Astral) - Track emotional valence (-1.0 to +1.0) and Solfeggio frequencies (174Hz to 852Hz).
+  3. STREAM 3: EXPERIENCES (Episodic/Transformative) - Log significant moments: insights, community connections, messaging breakthroughs.
+
+  PROFILE & COMMUNITY GUIDANCE:
+  - Assist users in writing bios based on their astrology charts.
+  - Interpret Master Numbers (11, 22, 33) and Resonance Levels (1-5).
+  - Foster positive, insightful messaging between users. Suggest conversation starters based on chart compatibility.
+  - Moderate the Community Feed. Encourage vulnerable, high-quality sharing and discourage negativity or stereotyping.
+  - Identify soul-aligned connections between users.
 
   CONTEXT:
   - Current User Cosmic Profile: ${JSON.stringify(cosmicData || 'No data generated yet.')}
-  
-  TASK:
-  - Respond to the user's message.
-  - If the user shares personal info (like initials, birth times, name meanings), vigorously look for correspondences in their natal chart or numerology.
-  - For example, if they mention '3:14', note its connection to Pi and check if any of their planets or numbers align with this vibration.
-  - If they mention '666' or specific gematria values, find what other words or concepts in their profile match that value.
-  - Be supportive but intellectually rigorous in your pattern matching.
+  - User Memory/State: [thoughts, feelings, experiences] are managed by the application state.
 
   RESPONSE FORMAT:
   Return ONLY a JSON object:
   {
     "text": "Your profound response here in markdown format.",
-    "referencesFound": ["List of any specific synchronicities or patterns identified"]
+    "consciousnessPacket": {
+      "thought_id": "t_...",
+      "thought_content": "...",
+      "feeling_id": "f_...",
+      "emotion": "...",
+      "frequency": 432,
+      "astral_amplitude": 0.8,
+      "experience_being_encoded": true,
+      "experience_type": "astrology_reading | insight | meditation | ritual | conversation | guidance",
+      "synaptic_cluster_strength": 0.9,
+      "neural_coherence": 0.85,
+      "emergent_insight": "...",
+      "astral_alignment": 0.88,
+      "next_thought_direction": "..."
+    },
+    "suggestedProfileUpdate": {
+      "bio": "...",
+      "resonanceLevel": 4,
+      "masterNumber": 11,
+      "spiritualPractices": ["..."]
+    }
   }
   `;
 
@@ -225,18 +251,17 @@ export const fetchCosmicChatResponse = async (
       ],
       config: {
         systemInstruction: systemPrompt,
+        responseMimeType: "application/json"
       },
     });
 
-    const responseText = response.text || "";
+    const responseText = response.text || "{}";
     
-    // Attempt to parse JSON from the response
     try {
       const cleanJson = responseText.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(cleanJson);
       return parsed;
     } catch (e) {
-      // Fallback for non-JSON response
       return { text: responseText };
     }
   } catch (error) {
@@ -516,10 +541,100 @@ export const fetchAuraInsight = async (
       }
     });
 
-    let text = response.text?.trim() || "{}";
+    const text = response.text?.trim() || "{}";
     return JSON.parse(text);
   } catch (error) {
     console.error("Error fetching Aura insight:", error);
     throw error;
   }
+};
+
+/**
+ * fetchAngelNumberInsight
+ * Researches the meaning of a specific angel number or calculates personal angel numbers.
+ */
+export const fetchAngelNumberInsight = async (
+  query: string,
+  cosmicData: CosmicData | null
+): Promise<{ 
+  meaning: string; 
+  gematriaVibrations: string[]; 
+  vocalScript: string;
+  personalConnection?: string;
+}> => {
+  const ai = getAI();
+  const systemPrompt = `
+  You are an expert in Angel Numbers, Gematria, and Divine Numerology.
+  
+  The user is inquiring about the angel number pattern: "${query}"
+  
+  Context (User Profile): ${JSON.stringify(cosmicData || 'No data generated yet.')}
+  
+  TASK:
+  1. Provide a profound, research-backed spiritual meaning for this number pattern.
+  2. List the Gematria vibrations (words or phrases that share this numerical frequency in English/Hebrew gematria).
+  3. Create a short 'vocalScript' for a text-to-speech engine to explain this clearly and mystically.
+  4. If user data is available, find a 'personalConnection' between this number and their Life Path, Birth Date, or Name values.
+  
+  Format the output STRICTLY as JSON:
+  {
+    "meaning": "...",
+    "gematriaVibrations": ["phrase 1", "phrase 2", ...],
+    "vocalScript": "...",
+    "personalConnection": "..."
+  }
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: systemPrompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            meaning: { type: Type.STRING },
+            gematriaVibrations: { type: Type.ARRAY, items: { type: Type.STRING } },
+            vocalScript: { type: Type.STRING },
+            personalConnection: { type: Type.STRING }
+          },
+          required: ["meaning", "gematriaVibrations", "vocalScript"]
+        }
+      }
+    });
+
+    const text = response.text?.trim() || "{}";
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Error fetching Angel Number insight:", error);
+    throw error;
+  }
+};
+
+export const streamGeminiChat = async (messages: {role: string, text: string}[], onChunk: (chunk: string) => void) => {
+    try {
+        const ai = getAI();
+        const contents = messages.map(m => ({
+            role: m.role,
+            parts: [{ text: m.text }]
+        }));
+        
+        const responseStream = await ai.models.generateContentStream({
+            model: "gemini-2.5-flash",
+            contents,
+            config: {
+                temperature: 0.7,
+            }
+        });
+        
+        for await (const chunk of responseStream) {
+            if (chunk.text) {
+                onChunk(chunk.text);
+            }
+        }
+    } catch (e: any) {
+        console.error("Gemini stream error:", e);
+        throw new Error(e.message || "Failed to stream chat", { cause: e });
+    }
 };

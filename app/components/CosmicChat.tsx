@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, Send, X, Minimize2, Maximize2, Sparkles, Brain, Network, Zap, User } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { CosmicData } from '../types';
+import { CosmicData, ConsciousnessPacket } from '../types';
 import { fetchCosmicChatResponse } from '../services/geminiService';
+import { useHigherMind } from './HigherMindProvider';
 
 interface Message {
   id: string;
@@ -11,6 +12,7 @@ interface Message {
   text: string;
   timestamp: number;
   references?: string[];
+  packet?: ConsciousnessPacket;
 }
 
 interface CosmicChatProps {
@@ -24,6 +26,7 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { processPacket, coherence, alignment } = useHigherMind();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -53,12 +56,16 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
 
       const response = await fetchCosmicChatResponse(input, chatHistory, cosmicData);
 
+      if (response.consciousnessPacket) {
+        processPacket(response.consciousnessPacket);
+      }
+
       const aiMessage: Message = {
         id: Math.random().toString(36).substr(2, 9),
         role: 'model',
         text: response.text,
         timestamp: Date.now(),
-        references: response.referencesFound,
+        packet: response.consciousnessPacket
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -109,18 +116,18 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
           >
             {/* Header */}
             <div className="p-6 border-b border-white/5 bg-gradient-to-r from-purple-900/20 to-blue-900/20 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
-                  <Brain size={20} className="text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white tracking-widest uppercase">ASTRAL AGENT</h3>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                    <span className="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">Neural Link Active</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
+                      <Brain size={20} className="text-purple-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white tracking-widest uppercase">HIGHER MIND v2.0</h3>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                        <span className="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">Neural Sync: {(coherence * 100).toFixed(0)}%</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
               <div className="flex items-center gap-2">
                 <button onClick={() => setIsMinimized(!isMinimized)} className="p-2 hover:bg-white/5 rounded-lg text-stone-500 hover:text-white transition-colors">
                   {isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}

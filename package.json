@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "remix vite:dev",
-    "build": "remix vite:build && rm -rf dist && cp -r build/client dist",
-    "lint": "eslint app --ext .ts,.tsx"
+    "build": "remix vite:build",
+    "lint": "eslint app"
   },
   "dependencies": {
     "@google/genai": "^1.52.0",
@@ -42,11 +42,14 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@firebase/eslint-plugin-security-rules": "^0.0.2",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "eslint": "^10.3.0",
+    "globals": "^17.6.0",
     "typescript": "~5.8.2",
+    "typescript-eslint": "^8.59.3",
     "vite": "^6.2.0"
   }
 }

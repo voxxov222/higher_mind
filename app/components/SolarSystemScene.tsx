@@ -11,7 +11,7 @@ import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration } from '@re
 import { BlendFunction } from 'postprocessing';
 
 import { NatalChartAdvanced } from './NatalChartAdvanced';
-import { CelestialSolarCore, CelestialDNAHelix, PlanetaryGravityNetwork } from './CelestialSolarCore';
+import { CelestialSolarCore, PlanetaryGravityNetwork } from './CelestialSolarCore';
 
 interface AuraVisualNode {
   id: string;
@@ -670,7 +670,6 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
           <AstrologicalHouses data={data} onHouseHover={setHoveredHouse} />
           <AspectLines data={data} onAspectClick={setSelectedAspect} />
           <PlanetaryGravityNetwork planets={mappedPlanetsForGravity} />
-          <CelestialDNAHelix />
           
           {/* Grid Floor for Futuristic Feel */}
           <Grid 

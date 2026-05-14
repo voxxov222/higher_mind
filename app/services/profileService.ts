@@ -58,7 +58,13 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     set({ config: { ...config, theme: { ...config.theme, ...updates } } });
   },
   saveProfile: async () => {
-    // Implementation for Firebase save will go here
-    console.log('Saving profile...', get().config);
+    const config = get().config;
+    if (!config) return;
+    try {
+      const { saveAstralProfile } = await import('./socialService');
+      await saveAstralProfile(config.userId, config);
+    } catch (error) {
+      console.error('Failed to save profile', error);
+    }
   },
 }));

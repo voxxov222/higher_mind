@@ -10,7 +10,8 @@ import * as THREE from 'three';
 import { CosmicData } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { AstralMind, ThinkingMode } from './AstralMind';
-import { X, Minus, Lock, Unlock, Play, Square, Palette, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity, Magnet, Shuffle, Waves } from 'lucide-react';
+import { VortexScene } from './VortexSequencingSection';
+import { X, Minus, Lock, Unlock, Play, Square, Palette, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity as InfinityIcon, Magnet, Shuffle, Waves } from 'lucide-react';
 
 /**
  * Procedural Animation Types for Scene Objects
@@ -35,6 +36,7 @@ interface CosmicSceneProps {
   onPlanetClick?: (title: string, content: string) => void;
   isPresentationActive?: boolean;
   mode?: ThinkingMode;
+  vortexMode?: 'material' | 'spirit' | 'sync';
 }
 
 // --- GLOBAL OBJECT REGISTRY (VOLATILE) ---
@@ -70,7 +72,7 @@ const HolographicMenu = ({ state, onUpdate, onClose }: { state: InteractionState
     { type: 'slide', icon: ArrowLeftRight, label: 'Slide' },
     { type: 'vortex', icon: Wind, label: 'Vortex' },
     { type: 'quantum', icon: Cpu, label: 'Quantum' },
-    { type: 'infinity', icon: Infinity, label: 'Infinity' },
+    { type: 'infinity', icon: InfinityIcon, label: 'Infinity' },
     { type: 'attractor', icon: Magnet, label: 'Attractor' },
     { type: 'chaos', icon: Shuffle, label: 'Chaos' },
     { type: 'pendulum', icon: Waves, label: 'Pendulum' },
@@ -213,10 +215,11 @@ const InteractiveObject = ({ id, children, initialColor, onSelect }: any) => {
       case 'zigzag':
         meshRef.current.position.x = originalPos.current.x + Math.sin(t * 2) * 3;
         break;
-      case 'flash':
+      case 'flash': {
         const s = 1 + Math.sin(t * 10) * 0.1;
         meshRef.current.scale.set(s, s, s);
         break;
+      }
       case 'jump':
         meshRef.current.position.y = originalPos.current.y + Math.abs(Math.sin(t * 5)) * 4;
         break;
@@ -224,10 +227,11 @@ const InteractiveObject = ({ id, children, initialColor, onSelect }: any) => {
         meshRef.current.position.x = originalPos.current.x + Math.cos(t * 1.5) * 5;
         meshRef.current.position.z = originalPos.current.z + Math.sin(t * 1.5) * 5;
         break;
-      case 'pulse':
+      case 'pulse': {
         const pScale = 1 + Math.sin(t * 3) * 0.25;
         meshRef.current.scale.set(pScale, pScale, pScale);
         break;
+      }
       case 'shake':
         meshRef.current.position.x = originalPos.current.x + (Math.random() - 0.5) * 0.3;
         meshRef.current.position.y = originalPos.current.y + (Math.random() - 0.5) * 0.3;
@@ -260,12 +264,13 @@ const InteractiveObject = ({ id, children, initialColor, onSelect }: any) => {
         meshRef.current.position.x = originalPos.current.x + Math.sin(t) * 8;
         meshRef.current.position.y = originalPos.current.y + Math.sin(t * 2) * 3;
         break;
-      case 'attractor':
+      case 'attractor': {
         const rAttr = 6 + Math.sin(t * 0.5) * 4;
         meshRef.current.position.x = originalPos.current.x + Math.cos(t) * rAttr;
         meshRef.current.position.z = originalPos.current.z + Math.sin(t * 1.3) * rAttr;
         break;
-      case 'chaos':
+      }
+      case 'chaos': {
         const cScale = 1 + (Math.random() - 0.5) * 0.4;
         meshRef.current.scale.lerp(new THREE.Vector3(cScale, cScale, cScale), 0.1);
         meshRef.current.position.x += (Math.random() - 0.5) * 0.1;
@@ -275,12 +280,14 @@ const InteractiveObject = ({ id, children, initialColor, onSelect }: any) => {
           meshRef.current.position.lerp(originalPos.current, 0.05);
         }
         break;
-      case 'pendulum':
+      }
+      case 'pendulum': {
         const pAngle = Math.sin(t * 2) * 0.8;
         meshRef.current.rotation.z = pAngle;
         meshRef.current.position.x = originalPos.current.x + Math.sin(pAngle) * 5;
         meshRef.current.position.y = originalPos.current.y - (1 - Math.cos(pAngle)) * 5;
         break;
+      }
     }
   });
 
@@ -941,23 +948,27 @@ const NameMindMap = ({ analysis, onNodeClick, name }: { analysis: any, onNodeCli
   
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.2) * 0.2;
+      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.1) * 0.1;
     }
   });
 
-  const nodes = useMemo(() => {
+  const { items, connections } = useMemo(() => {
     const items: any[] = [];
+    const connections: any[] = [];
     const nameParts = [
       { key: 'first', data: analysis.first, angle: 0, color: '#38bdf8' },
       { key: 'middle', data: analysis.middle, angle: (Math.PI * 2) / 3, color: '#818cf8' },
       { key: 'last', data: analysis.last, angle: (Math.PI * 4) / 3, color: '#c084fc' }
     ].filter(p => p.data?.name);
 
-    nameParts.forEach((part, i) => {
+    nameParts.forEach((part) => {
       const radius = 6;
       const x = Math.cos(part.angle) * radius;
       const z = Math.sin(part.angle) * radius;
       const partPos = [x, 0, z];
+
+      // Connection to central identity
+      connections.push({ start: [0, 0, 0], end: partPos, color: part.color, type: 'identity' });
 
       // Main Part Node
       items.push({
@@ -969,15 +980,14 @@ const NameMindMap = ({ analysis, onNodeClick, name }: { analysis: any, onNodeCli
         radius: 0.8
       });
 
-      // Sub-nodes (Origin, Meaning, Impact)
-      const subRadius = 3;
+      // Sub-nodes
       const subNodes = [
         { label: 'Origin', content: part.data.origin, offset: [-1, 2, 1] },
         { label: 'Meaning', content: part.data.meaning, offset: [1, -1, 2] },
         { label: 'Impact', content: part.data.impact, offset: [2, 1, -1] }
       ];
 
-      subNodes.forEach((sub, j) => {
+      subNodes.forEach((sub) => {
         const subPos = [
           partPos[0] + sub.offset[0] * 1.5,
           partPos[1] + sub.offset[1] * 1.5,
@@ -985,17 +995,17 @@ const NameMindMap = ({ analysis, onNodeClick, name }: { analysis: any, onNodeCli
         ];
         items.push({
           type: 'sub',
-          parentPos: partPos,
           label: sub.label,
           content: `${part.data.name} ${sub.label}: ${sub.content}`,
           pos: subPos,
           color: part.color,
           radius: 0.4
         });
+        connections.push({ start: partPos, end: subPos, color: part.color, type: 'sub' });
       });
     });
 
-    return items;
+    return { items, connections };
   }, [analysis]);
 
   return (
@@ -1010,45 +1020,38 @@ const NameMindMap = ({ analysis, onNodeClick, name }: { analysis: any, onNodeCli
         onSelect={onNodeClick}
       />
       
-      {nodes.map((node, i) => (
-        <group key={i}>
-          {node.parentPos && (
-            <Line 
-              points={[node.parentPos, node.pos]} 
-              color={node.color} 
-              opacity={0.3} 
-              transparent 
-              lineWidth={1}
-            />
-          )}
-          {!node.parentPos && (
-             <Line 
-               points={[[0, 0, 0], node.pos]} 
-               color={node.color} 
-               opacity={0.5} 
-               transparent 
-               lineWidth={2}
-               dashed
-               dashScale={2}
-             />
-          )}
-          <NameNode 
-            position={node.pos} 
-            label={node.label} 
-            content={node.content} 
-            color={node.color} 
-            radius={node.radius} 
-            onSelect={onNodeClick}
-          />
-        </group>
+      {/* Optimized Connections */}
+      {connections.map((conn, i) => (
+        <Line 
+          key={i}
+          points={[conn.start, conn.end]}
+          color={conn.color}
+          opacity={conn.type === 'identity' ? 0.5 : 0.2}
+          transparent
+          lineWidth={conn.type === 'identity' ? 2 : 1}
+          dashed={conn.type === 'identity'}
+          dashScale={2}
+        />
       ))}
 
-      {/* Energy Rings */}
-      <Ring args={[5, 5.1, 64]} rotation={[Math.PI / 2, 0, 0]}>
-        <meshBasicMaterial color="#38bdf8" transparent opacity={0.1} />
+      {items.map((node, i) => (
+        <NameNode 
+          key={`node-${i}`}
+          position={node.pos} 
+          label={node.label} 
+          content={node.content} 
+          color={node.color} 
+          radius={node.radius} 
+          onSelect={onNodeClick}
+        />
+      ))}
+
+      {/* Energy Rings - Low Detail for Core */}
+      <Ring args={[5, 5.02, 32]} rotation={[Math.PI / 2, 0, 0]}>
+        <meshBasicMaterial color="#38bdf8" transparent opacity={0.05} />
       </Ring>
-      <Ring args={[8, 8.1, 64]} rotation={[Math.PI / 2, 0.2, 0]}>
-        <meshBasicMaterial color="#818cf8" transparent opacity={0.05} />
+      <Ring args={[8, 8.02, 32]} rotation={[Math.PI / 2, 0.2, 0]}>
+        <meshBasicMaterial color="#818cf8" transparent opacity={0.03} />
       </Ring>
     </group>
   );
@@ -1074,15 +1077,16 @@ const CameraController = ({ isPresentationActive, activeTab, data }: { isPresent
   useFrame((state) => {
     if (isPresentationActive) {
       const t = state.clock.getElapsedTime();
-      state.camera.position.x = Math.sin(t * 0.2) * 25;
-      state.camera.position.z = Math.cos(t * 0.2) * 25;
-      state.camera.position.y = 15 + Math.sin(t * 0.1) * 8;
+      state.camera.position.x = Math.sin(t * 0.15) * 25;
+      state.camera.position.z = Math.cos(t * 0.15) * 25;
+      state.camera.position.y = 15 + Math.sin(t * 0.08) * 8;
       state.camera.lookAt(0, 0, 0);
       return;
     }
 
     if (!isAutoFollowing) return;
-
+    
+    // Throttle camera logic for performance if needed, but smooth lerp is usually fine
     const targetPos = new THREE.Vector3(0, 15, 20);
     const lookAtTarget = new THREE.Vector3(0, 0, 0);
 
@@ -1128,6 +1132,9 @@ const CameraController = ({ isPresentationActive, activeTab, data }: { isPresent
     } else if (activeTab === 'patterns') {
       targetPos.set(20, 15, -20);
       lookAtTarget.set(15, 0, -15);
+    } else if (activeTab === 'vortex') {
+      targetPos.set(0, 10, -55);
+      lookAtTarget.set(0, -5, -40);
     }
     
     const distance = state.camera.position.distanceTo(targetPos);
@@ -1234,23 +1241,16 @@ const NumerologyGeometria = ({ data, onSelect }: { data: CosmicData, onSelect: (
                   </CosmicText>
                 </InteractiveObject>
                 
-                {/* Geometria web lines */}
-                {letters.map((_, nextI) => {
-                   if (nextI === i) return null;
-                   const nextAngle = (nextI / letters.length) * Math.PI * 2;
-                   const nextX = Math.cos(nextAngle) * r;
-                   const nextY = Math.sin(nextAngle) * r;
-                   return (
-                     <Line 
-                       key={`web-${nextI}`}
-                       points={[[0,0,0], [nextX - x, nextY - y, 0]]}
-                       color="#1e3a8a"
-                       lineWidth={0.5}
-                       transparent
-                       opacity={0.1}
-                     />
-                   );
-                })}
+                {/* Geometria web lines - Optimized rendering */}
+                {i % 2 === 0 && (
+                   <Line 
+                    points={[[0,0,0], [-x, -y, 0]]}
+                    color="#1e3a8a"
+                    lineWidth={0.5}
+                    transparent
+                    opacity={0.05}
+                   />
+                )}
               </group>
             )
           })}
@@ -1304,10 +1304,22 @@ const NumerologyGeometria = ({ data, onSelect }: { data: CosmicData, onSelect: (
  * The primary 3D rendering context using React Three Fiber.
  * Integrates geometry, lighting, effects, and camera management.
  */
-export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive, mode }: CosmicSceneProps) => {
+export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive, mode, vortexMode }: CosmicSceneProps) => {
+
+  const userNumbers = useMemo(() => {
+    const counts = data?.archetype?.distribution || {};
+    const nums = Object.entries(counts)
+      .map(([num]) => parseInt(num))
+      .filter(n => n > 0 && n <= 9);
+    
+    if (nums.length === 0) {
+      return [1, 2, 4, 8, 7, 5, 3, 6, 9];
+    }
+    return nums;
+  }, [data]);
 
   return (
-    <Canvas id="cosmic-canvas" camera={{ position: [0, 15, 20], fov: 60 }} className="w-full h-full absolute inset-0 bg-black">
+    <Canvas id="cosmic-canvas" dpr={[1, 1.5]} gl={{ powerPreference: "high-performance", alpha: false, stencil: false, antialias: false }} camera={{ position: [0, 15, 20], fov: 60 }} className="w-full h-full absolute inset-0 bg-black">
       {/* --- SCENE INFRASTRUCTURE --- */}
       <CameraController isPresentationActive={isPresentationActive} activeTab={activeTab} data={data} />
       <fog attach="fog" args={['#000', 5, 50]} />
@@ -1337,6 +1349,15 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
           <NavNode position={[0, -15, -20]} title="Name Analysis" active={activeTab === 'name'} onClick={() => setActiveTab('name')} color="#38bdf8" />
           <NavNode position={[-15, 0, -15]} title="Akashic Records" active={activeTab === 'akashic'} onClick={() => setActiveTab('akashic')} color="#818cf8" />
           <NavNode position={[15, 0, -15]} title="Synchronicities" active={activeTab === 'patterns'} onClick={() => setActiveTab('patterns')} color="#2dd4bf" />
+          <NavNode position={[0, -5, -40]} title="Vortex Sequencing" active={activeTab === 'vortex'} onClick={() => setActiveTab('vortex')} color="#22d3ee" />
+
+          {/* VORTEX 3D SPACE */}
+          {activeTab === 'vortex' && (
+            <group position={[0, -10, -40]}>
+              <VortexScene mode={vortexMode || 'sync'} userNumbers={userNumbers} />
+              <pointLight color="#22d3ee" intensity={5} distance={50} />
+            </group>
+          )}
         </group>
       )}
 

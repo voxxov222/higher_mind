@@ -3,8 +3,41 @@ import { useFrame } from '@react-three/fiber';
 import { Line, Text, Html, Sphere, Ring, Trail, Sparkles, Float } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
+import { HolographicInfoCard } from './HolographicInfoCard';
 
 const SIGN_NAMES = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+
+const PLANET_MEANINGS: Record<string, string> = {
+  'Sun': 'Your core essence and ego. The "I AM" that drives your purpose and vitality.',
+  'Moon': 'Your emotional landscape and subconscious needs. How you respond and nurture.',
+  'Mercury': 'Your mind and communication style. How you process information and logic.',
+  'Venus': 'What you love and value. Governs relationships, beauty, and social harmony.',
+  'Mars': 'Your drive and assertion. How you take action, compete, and go after what you want.',
+  'Jupiter': 'Expansion and abundance. Where you find growth, luck, and your higher philosophy.',
+  'Saturn': 'Karma and structure. Your lessons, boundaries, responsibilities, and discipline.',
+  'Uranus': 'Innovation and liberation. Where you seek uniqueness and sudden transformation.',
+  'Neptune': 'Spirituality and dreams. Governs intuition, creativity, and the dissolution of boundaries.',
+  'Pluto': 'Power and rebirth. Where you experience deep psychological transformation and intensity.',
+  'North Node': 'Your soul\'s mission. The direction of growth and destiny in this lifetime.',
+  'South Node': 'Karmic background. Talents and habits brought from past experiences.',
+  'Chiron': 'The "Wounded Healer." Represents our deepest pain and our capacity to transform it into wisdom.',
+  'Lilith': 'The Shadow Self. Represents repressed desires and raw, unpolluted feminine power.'
+};
+
+const HOUSE_FALLBACKS: Record<number, { name: string, description: string }> = {
+  1: { name: 'Self & Appearance', description: 'The "Front Door" of your personality. How you present yourself and your initial approach to life.' },
+  2: { name: 'Values & Resources', description: 'What you value, your material possessions, and your sense of self-worth and security.' },
+  3: { name: 'Communication & Learning', description: 'Your everyday mind, sibling relationships, and how you process and share information.' },
+  4: { name: 'Home & Roots', description: 'Foundations, family heritage, your inner world, and where you feel most safe.' },
+  5: { name: 'Creativity & Joy', description: 'Self-expression, romance, fun, children, and the things that make your heart sing.' },
+  6: { name: 'Work & Wellness', description: 'Daily routines, health, service, and how you manage the practical details of life.' },
+  7: { name: 'Partnerships', description: 'One-on-one relationships, marriage, and how you mirror yourself through others.' },
+  8: { name: 'Transformation', description: 'Deep bonds, shared resources, mystery, sex, and the process of rebirth.' },
+  9: { name: 'Expansion & Philosophy', description: 'Higher learning, travel, spirituality, and your quest for meaning and Truth.' },
+  10: { name: 'Career & Legacy', description: 'Your public reputation, status, and what you aim to achieve in the world.' },
+  11: { name: 'Community & Hopes', description: 'Friends, networks, social causes, and your visions for the future.' },
+  12: { name: 'Subconscious & Spirit', description: 'The "Invisible" world. Dreams, intuition, solitude, and universal connection.' }
+};
 const SIGN_COLORS: Record<string, string> = {
   'Aries': '#ef4444', 'Taurus': '#10b981', 'Gemini': '#fbbf24', 'Cancer': '#94a3b8',
   'Leo': '#f59e0b', 'Virgo': '#84cc16', 'Libra': '#f472b6', 'Scorpio': '#8b5cf6',
@@ -136,7 +169,7 @@ const getPlanetRadius = (name: string) => {
   return radii[name] || 45;
 };
 
-const AdvancedPlanet = ({ name, degree, sign, house, selected, onClick }: any) => {
+const AdvancedPlanet = ({ name, degree, sign, house, selected, onClick, planet }: any) => {
   const groupRef = useRef<THREE.Group>(null);
   const config = PLANET_CONFIG[name] || { color: '#ffffff', type: 'basic' };
   
@@ -161,6 +194,8 @@ const AdvancedPlanet = ({ name, degree, sign, house, selected, onClick }: any) =
     }
   });
 
+  const meaning = planet?.meaning || PLANET_MEANINGS[name] || 'A celestial influence in your unique astral blueprint.';
+
   return (
     <group position={pos}>
       <Trail width={2} length={20} color={config.color} attenuation={(t) => t * t}>
@@ -178,10 +213,16 @@ const AdvancedPlanet = ({ name, degree, sign, house, selected, onClick }: any) =
           
           {(hovered || selected) && (
             <Html center distanceFactor={20} zIndexRange={[100, 0]}>
-              <div className="bg-black/80 backdrop-blur-md border border-white/20 p-3 rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.1)] translate-x-8 -translate-y-8 pointer-events-none whitespace-nowrap">
-                <div className="text-[10px] uppercase tracking-widest" style={{ color: config.color }}>{name}</div>
-                <div className="text-white font-mono text-sm">{Math.floor(degree)}° {sign}</div>
-                <div className="text-stone-400 text-[10px]">House {house}</div>
+              <div className="translate-x-32 -translate-y-32">
+                <HolographicInfoCard
+                  title={name}
+                  subtitle={`${Math.floor(degree)}° ${sign} • House ${house}`}
+                  description={PLANET_MEANINGS[name] || 'A key player in your celestial drama.'}
+                  meaning={meaning}
+                  color={config.color}
+                  type="planet"
+                  visible={true}
+                />
               </div>
             </Html>
           )}
@@ -197,6 +238,91 @@ const AdvancedPlanet = ({ name, degree, sign, house, selected, onClick }: any) =
         transparent 
         opacity={0.1} 
       />
+    </group>
+  );
+};
+
+const HouseWedges = ({ houses }: { houses?: any[] }) => {
+  const [hoveredHouse, setHoveredHouse] = useState<number | null>(null);
+
+  const houseData = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => {
+      const num = i + 1;
+      const dataHouse = houses?.find(h => h.houseNumber === num);
+      const fallback = HOUSE_FALLBACKS[num];
+      return {
+        houseNumber: num,
+        realmName: dataHouse?.realmName || fallback.name,
+        description: dataHouse?.description || fallback.description
+      };
+    });
+  }, [houses]);
+
+  return (
+    <group>
+      {houseData.map((house, i) => {
+        const startAngle = (i * 30) * Math.PI / 180;
+        const midAngle = (i * 30 + 15) * Math.PI / 180;
+        
+        return (
+          <group key={house.houseNumber}>
+            {/* House segment line */}
+            <mesh rotation={[0, -startAngle, 0]} position={[50, -0.4, 0]}>
+              <boxGeometry args={[100, 0.1, 0.2]} />
+              <meshBasicMaterial color="#ffffff" transparent opacity={0.2} />
+            </mesh>
+
+            {/* Hoverable Area */}
+            <mesh 
+              rotation={[-Math.PI / 2, 0, 0]} 
+              position={[0, -0.5, 0]}
+              onPointerEnter={() => setHoveredHouse(house.houseNumber)}
+              onPointerLeave={() => setHoveredHouse(null)}
+            >
+              <ringGeometry args={[10, 75, 32, 1, startAngle, 30 * Math.PI / 180]} />
+              <meshBasicMaterial 
+                color="#ffffff" 
+                transparent 
+                opacity={hoveredHouse === house.houseNumber ? 0.05 : 0} 
+                side={THREE.DoubleSide} 
+              />
+            </mesh>
+
+            {/* House Number Label */}
+            <Text
+              position={[Math.cos(midAngle) * 40, 0.1, Math.sin(midAngle) * 40]}
+              rotation={[-Math.PI / 2, 0, -midAngle + Math.PI / 2]}
+              fontSize={2.5}
+              color={hoveredHouse === house.houseNumber ? "#ffffff" : "#666666"}
+              anchorX="center"
+              anchorY="middle"
+              fillOpacity={0.5}
+            >
+              {house.houseNumber}
+            </Text>
+
+            {/* House Info Card */}
+            {hoveredHouse === house.houseNumber && (
+              <Html 
+                position={[Math.cos(midAngle) * 45, 2, Math.sin(midAngle) * 45]}
+                center
+                distanceFactor={20}
+              >
+                <div className="translate-y-[-100%]">
+                  <HolographicInfoCard
+                    title={`House ${house.houseNumber}`}
+                    subtitle={house.realmName}
+                    description={house.description}
+                    color="#8b5cf6"
+                    type="house"
+                    visible={true}
+                  />
+                </div>
+              </Html>
+            )}
+          </group>
+        );
+      })}
     </group>
   );
 };
@@ -228,6 +354,7 @@ export const NatalChartAdvanced = ({ data, selectedPlanet, onPlanetClick }: any)
       
       <group ref={chartRef}>
         <ZodiacRing />
+        <HouseWedges houses={data?.houses} />
         
         {/* Planets and Points */}
         {allBodies.map((planet: any) => (
@@ -237,6 +364,7 @@ export const NatalChartAdvanced = ({ data, selectedPlanet, onPlanetClick }: any)
             degree={planet.degree}
             sign={planet.sign}
             house={planet.house}
+            planet={planet}
             selected={selectedPlanet?.name === planet.name}
             onClick={() => onPlanetClick(planet)}
           />

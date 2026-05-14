@@ -23,7 +23,10 @@ export type GematriaCipher =
   | 'Primes' 
   | 'Trigonal' 
   | 'Squares' 
-  | 'Fibonacci';
+  | 'Fibonacci'
+  | 'Pythagorean'
+  | 'Hebrew'
+  | 'ASCII';
 
 export interface GematriaResult {
   cipher: GematriaCipher;
@@ -92,6 +95,20 @@ export const reduceNumber = (num: number, masterNumbers: number[] = [11, 22, 33]
 
 export const calculateGematriaValue = (text: string, cipher: GematriaCipher): number => {
   const cleanText = text;
+
+  if (cipher === 'ASCII') {
+    return cleanText.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  }
+
+  if (cipher === 'Hebrew') {
+    const hebrewMap: Record<string, number> = {
+      'א': 1, 'ב': 2, 'ג': 3, 'ד': 4, 'ה': 5, 'ו': 6, 'ז': 7, 'ח': 8, 'ט': 9,
+      'י': 10, 'כ': 20, 'ל': 30, 'מ': 40, 'נ': 50, 'ס': 60, 'ע': 70, 'פ': 80, 'צ': 90,
+      'ק': 100, 'ר': 200, 'ש': 300, 'ת': 400,
+      'ך': 500, 'ם': 600, 'ן': 700, 'ף': 800, 'ץ': 900
+    };
+    return cleanText.split('').reduce((acc, char) => acc + (hebrewMap[char] || 0), 0);
+  }
   
   return cleanText.split('').reduce((acc, char) => {
     const lowerChar = char.toLowerCase();
@@ -104,6 +121,7 @@ export const calculateGematriaValue = (text: string, cipher: GematriaCipher): nu
       case 'Ordinal':
         return acc + (idx + 1);
       case 'Reduction':
+      case 'Pythagorean':
         return acc + (((idx + 0) % 9) + 1);
       case 'Reverse':
         return acc + (revIdx + 1);
@@ -157,7 +175,8 @@ export const calculateAllCiphers = (text: string): GematriaResult[] => {
     'Jewish', 'Francis Bacon',
     'Standard', 'Latin', 'Sumerian', 'Reverse Sumerian', 
     'Satanic', 'Reverse Satanic', 'Chaldean', 'Septenary', 
-    'Keypad', 'Primes', 'Trigonal', 'Squares', 'Fibonacci'
+    'Keypad', 'Primes', 'Trigonal', 'Squares', 'Fibonacci',
+    'Pythagorean', 'Hebrew', 'ASCII'
   ];
 
   return ciphers.map(cipher => ({

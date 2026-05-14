@@ -58,8 +58,25 @@ export const GematriaCalculatorSection = () => {
     'Jewish', 'Francis Bacon',
     'Standard', 'Latin', 'Sumerian', 'Reverse Sumerian', 
     'Satanic', 'Reverse Satanic', 'Chaldean', 'Septenary', 
-    'Keypad', 'Primes', 'Trigonal', 'Squares', 'Fibonacci'
+    'Keypad', 'Primes', 'Trigonal', 'Squares', 'Fibonacci',
+    'Pythagorean', 'Hebrew', 'ASCII'
   ];
+
+  type CipherSystem = 'Default Base' | 'Classical / Pythagorean' | 'Hebrew & Jewish' | 'Esoteric & Magic' | 'Mathematical Sequences' | 'Digital & ASCII' | 'All Systems';
+
+  const systemPresets: Record<CipherSystem, GematriaCipher[]> = {
+    'Default Base': ['Ordinal', 'Reduction', 'Reverse', 'Reverse Reduction'],
+    'Classical / Pythagorean': ['Pythagorean', 'Chaldean', 'Septenary', 'Standard'],
+    'Hebrew & Jewish': ['Hebrew', 'Jewish'],
+    'Esoteric & Magic': ['Satanic', 'Reverse Satanic', 'Francis Bacon', 'Latin', 'Sumerian', 'Reverse Sumerian'],
+    'Mathematical Sequences': ['Primes', 'Trigonal', 'Squares', 'Fibonacci'],
+    'Digital & ASCII': ['ASCII', 'Keypad'],
+    'All Systems': allAvailableCiphers
+  };
+
+  const handleSystemSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setActiveCiphers(systemPresets[e.target.value as CipherSystem]);
+  };
 
   const toggleCipher = (cipher: GematriaCipher) => {
     setActiveCiphers(prev => 
@@ -92,9 +109,19 @@ export const GematriaCalculatorSection = () => {
             </div>
 
             <div className="space-y-6 relative z-10">
-              <div className="flex justify-between items-center px-2">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-2 gap-4">
                 <span className="text-[10px] text-stone-400 uppercase tracking-[0.3em] font-bold">Decoding Buffer</span>
-                <div className="flex gap-4">
+                <div className="flex flex-wrap items-center gap-4">
+                    <select 
+                        onChange={handleSystemSelect}
+                        className="bg-transparent border border-white/10 rounded-md text-[10px] text-stone-300 uppercase tracking-widest px-2 py-1 outline-none focus:border-blue-400 cursor-pointer"
+                    >
+                        {Object.keys(systemPresets).map(preset => (
+                            <option key={preset} value={preset} className="bg-stone-900 text-stone-300">
+                                {preset}
+                            </option>
+                        ))}
+                    </select>
                     <button 
                         onClick={() => setIsOptionsOpen(!isOptionsOpen)}
                         className="flex items-center gap-2 text-[10px] text-stone-500 hover:text-white uppercase tracking-widest transition-colors font-bold"

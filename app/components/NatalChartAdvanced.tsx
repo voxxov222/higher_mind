@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Line, Text, Html, Sphere, Ring, Trail, Sparkles, Float } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
+import { Compass } from 'lucide-react';
 import { HolographicInfoCard } from './HolographicInfoCard';
 
 const SIGN_NAMES = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
@@ -61,9 +62,148 @@ const PLANET_CONFIG: Record<string, { color: string, type: string }> = {
   'Lilith': { color: '#000000', type: 'void' }
 };
 
-const ZodiacRing = () => {
+const ZODIAC_DATA: Record<string, { element: string, ruler: string, archetype: string, description: string, constellation: string, architect: string }> = {
+  'Aries': { element: 'Fire', ruler: 'Mars', archetype: 'The Pioneer', architect: 'Primal Spark', description: 'Initiation, courage, and the spark of creation.', constellation: 'Aries' },
+  'Taurus': { element: 'Earth', ruler: 'Venus', archetype: 'The Builder', architect: 'Stable Foundation', description: 'Stability, sensuality, and material mastery.', constellation: 'Taurus' },
+  'Gemini': { element: 'Air', ruler: 'Mercury', archetype: 'The Messenger', architect: 'Dual Logic', description: 'Curiosity, communication, and duality.', constellation: 'Gemini' },
+  'Cancer': { element: 'Water', ruler: 'Moon', archetype: 'The Nurturer', architect: 'Mother of Soul', description: 'Emotion, intuition, and protective instincts.', constellation: 'Cancer' },
+  'Leo': { element: 'Fire', ruler: 'Sun', archetype: 'The Sovereign', architect: 'Solar Heart', description: 'Creativity, pride, and radiant self-expression.', constellation: 'Leo' },
+  'Virgo': { element: 'Earth', ruler: 'Mercury', archetype: 'The Healer', architect: 'Precision Craft', description: 'Analysis, service, and practical perfection.', constellation: 'Virgo' },
+  'Libra': { element: 'Air', ruler: 'Venus', archetype: 'The Diplomat', architect: 'Harmonic Bridge', description: 'Balance, harmony, and relational aesthetics.', constellation: 'Libra' },
+  'Scorpio': { element: 'Water', ruler: 'Pluto/Mars', archetype: 'The Alchemist', architect: 'Deep Diver', description: 'Transformation, intensity, and hidden power.', constellation: 'Scorpius' },
+  'Sagittarius': { element: 'Fire', ruler: 'Jupiter', archetype: 'The Explorer', architect: 'Higher Truth', description: 'Philosophy, expansion, and the quest for truth.', constellation: 'Sagittarius' },
+  'Capricorn': { element: 'Earth', ruler: 'Saturn', archetype: 'The Architect', architect: 'Elder Pillar', description: 'Discipline, structure, and worldly ambition.', constellation: 'Capricornus' },
+  'Aquarius': { element: 'Air', ruler: 'Uranus/Saturn', archetype: 'The Visionary', architect: 'Cosmic Genius', description: 'Innovation, rebellion, and collective consciousness.', constellation: 'Aquarius' },
+  'Pisces': { element: 'Water', ruler: 'Neptune/Jupiter', archetype: 'The Mystic', architect: 'Oceanic Oneness', description: 'Compassion, imagination, and universal dissolution.', constellation: 'Pisces' }
+};
+
+const ZodiacSign = ({ sign, index, selected, onSelect, onResearch, onSave }: any) => {
+  const [hovered, setHovered] = useState(false);
+  const angle = (index * 30) * Math.PI / 180;
+  const midAngle = (index * 30 + 15) * Math.PI / 180;
+  const color = SIGN_COLORS[sign] || '#ffffff';
+  const data = ZODIAC_DATA[sign];
+  const groupRef = useRef<THREE.Group>(null);
+  const ringRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      if (hovered || selected) {
+        groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, Math.sin(state.clock.elapsedTime * 3) * 2 + 1, 0.1);
+        groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, 1.1, 0.1));
+      } else {
+        groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, 0, 0.1);
+        groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, 1, 0.1));
+      }
+    }
+  });
+
   return (
     <group>
+      {/* Divider Line */}
+      <mesh rotation={[0, -angle, 0]} position={[50, 0, 0]}>
+        <boxGeometry args={[100, 0.1, 0.1]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.1} />
+      </mesh>
+
+      {/* Interactive wedge */}
+      <mesh 
+        ref={ringRef}
+        rotation={[-Math.PI/2, 0, 0]} 
+        position={[0, -0.2, 0]}
+        onClick={(e) => { e.stopPropagation(); onSelect(selected ? null : sign); }}
+        onPointerEnter={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
+        onPointerLeave={(e) => { e.stopPropagation(); setHovered(false); document.body.style.cursor = 'auto'; }}
+      >
+        <ringGeometry args={[75, 105, 32, 1, angle, 30 * Math.PI / 180]} />
+        <meshBasicMaterial color={color} transparent opacity={selected ? 0.2 : hovered ? 0.1 : 0.03} side={THREE.DoubleSide} />
+      </mesh>
+
+      <group ref={groupRef}>
+        {/* Sign Label */}
+        <Text
+          position={[Math.cos(midAngle) * 88, 0, Math.sin(midAngle) * 88]}
+          rotation={[-Math.PI/2, 0, -midAngle + Math.PI/2]}
+          fontSize={3}
+          color={color}
+          anchorX="center"
+          anchorY="middle"
+          fillOpacity={selected || hovered ? 1 : 0.6}
+        >
+          {sign.toUpperCase()}
+        </Text>
+
+        {hovered && !selected && (
+           <Sparkles 
+             position={[Math.cos(midAngle) * 88, 1, Math.sin(midAngle) * 88]}
+             count={30} 
+             scale={15} 
+             size={4} 
+             color={color} 
+             speed={0.5} 
+           />
+        )}
+
+        {selected && (
+          <Html 
+            position={[Math.cos(midAngle) * 115, 10, Math.sin(midAngle) * 115]}
+            center
+            distanceFactor={20}
+            zIndexRange={[100, 0]}
+          >
+            <div className="translate-x-12 -translate-y-12">
+              <HolographicInfoCard
+                title={sign.toUpperCase()}
+                subtitle={`${data.element} • Ruler: ${data.ruler}`}
+                description={`Architect: ${data.architect}\nArchetype: ${data.archetype}\nConstellation: ${data.constellation}\n\n${data.description}`}
+                color={color}
+                type="sign"
+                visible={true}
+                onResearch={onResearch}
+              />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mt-4 p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl relative overflow-hidden"
+                style={{ borderLeftColor: color, borderLeftWidth: '4px' }}
+              >
+                 <div className="absolute top-0 right-0 p-2 opacity-20">
+                    <Sparkles size={16} style={{ color }} />
+                 </div>
+                 <h5 className="text-[10px] uppercase tracking-widest text-stone-400 mb-2">Celestial Blueprint</h5>
+                 <div className="grid grid-cols-2 gap-4">
+                    <div>
+                       <span className="text-[8px] text-stone-500 uppercase block">Element</span>
+                       <span className="text-xs text-white" style={{ color }}>{data.element}</span>
+                    </div>
+                    <div>
+                       <span className="text-[8px] text-stone-500 uppercase block">Modality</span>
+                       <span className="text-xs text-white">{index % 3 === 0 ? 'Cardinal' : index % 3 === 1 ? 'Fixed' : 'Mutable'}</span>
+                    </div>
+                 </div>
+              </motion.div>
+            </div>
+          </Html>
+        )}
+      </group>
+    </group>
+  );
+};
+
+const ZodiacRing = ({ onResearch, onSave }: any) => {
+  const [selectedSign, setSelectedSign] = useState<string | null>(null);
+  const ringGroupRef = useRef<THREE.Group>(null);
+
+  useFrame((state, delta) => {
+    if (ringGroupRef.current) {
+      // Rotate the entire zodiac ring gently around the center
+      // This represents the progression of time and cosmic cycles
+      ringGroupRef.current.rotation.y -= delta * 0.02; 
+    }
+  });
+
+  return (
+    <group ref={ringGroupRef}>
       {/* Outer Glow Ring */}
       <mesh rotation={[-Math.PI/2, 0, 0]}>
         <ringGeometry args={[100, 102, 128]} />
@@ -71,40 +211,17 @@ const ZodiacRing = () => {
       </mesh>
       
       {/* Sign Divisions */}
-      {SIGN_NAMES.map((sign, i) => {
-        const angle = (i * 30) * Math.PI / 180;
-        const midAngle = (i * 30 + 15) * Math.PI / 180;
-        const color = SIGN_COLORS[sign] || '#ffffff';
-        
-        return (
-          <group key={sign}>
-            {/* Divider Line */}
-            <mesh rotation={[0, -angle, 0]} position={[50, 0, 0]}>
-              <boxGeometry args={[100, 0.1, 0.1]} />
-              <meshBasicMaterial color="#ffffff" transparent opacity={0.1} />
-            </mesh>
-
-            {/* Constellation Subtle Background */}
-            <mesh rotation={[-Math.PI/2, 0, 0]} position={[0, -0.2, 0]}>
-              <ringGeometry args={[75, 100, 32, 1, angle, 30 * Math.PI / 180]} />
-              <meshBasicMaterial color={color} transparent opacity={0.03} side={THREE.DoubleSide} />
-            </mesh>
-
-            {/* Sign Label */}
-            <Text
-              position={[Math.cos(midAngle) * 88, 0, Math.sin(midAngle) * 88]}
-              rotation={[-Math.PI/2, 0, -midAngle + Math.PI/2]}
-              fontSize={3}
-              color={color}
-              anchorX="center"
-              anchorY="middle"
-              fillOpacity={0.8}
-            >
-              {sign.toUpperCase()}
-            </Text>
-          </group>
-        );
-      })}
+      {SIGN_NAMES.map((sign, i) => (
+        <ZodiacSign 
+          key={sign} 
+          sign={sign} 
+          index={i} 
+          selected={selectedSign === sign} 
+          onSelect={setSelectedSign} 
+          onResearch={onResearch}
+          onSave={onSave}
+        />
+      ))}
     </group>
   );
 };
@@ -169,7 +286,7 @@ const getPlanetRadius = (name: string) => {
   return radii[name] || 45;
 };
 
-const AdvancedPlanet = ({ name, degree, sign, house, selected, onClick, planet }: any) => {
+const AdvancedPlanet = ({ name, degree, sign, house, selected, onClick, planet, onResearch, onSave }: any) => {
   const groupRef = useRef<THREE.Group>(null);
   const config = PLANET_CONFIG[name] || { color: '#ffffff', type: 'basic' };
   
@@ -222,6 +339,7 @@ const AdvancedPlanet = ({ name, degree, sign, house, selected, onClick, planet }
                   color={config.color}
                   type="planet"
                   visible={true}
+                  onResearch={onResearch}
                 />
               </div>
             </Html>
@@ -242,7 +360,85 @@ const AdvancedPlanet = ({ name, degree, sign, house, selected, onClick, planet }
   );
 };
 
-const HouseWedges = ({ houses }: { houses?: any[] }) => {
+const HouseMarker = ({ house, index, hoveredHouse, setHoveredHouse, relevance = 1, onResearch, onSave }: any) => {
+  const markerRef = useRef<THREE.Group>(null);
+  const startAngle = (index * 30) * Math.PI / 180;
+  const midAngle = (index * 30 + 15) * Math.PI / 180;
+
+  useFrame((state) => {
+    if (markerRef.current) {
+      // Subtle float/pulse for active/hovered houses
+      // Energetic relevance drives the speed and scale of the pulse
+      const pulse = Math.sin(state.clock.elapsedTime * (1.5 * relevance) + index) * (0.05 * relevance);
+      markerRef.current.position.y = pulse;
+      
+      const targetScale = hoveredHouse === house.houseNumber ? 1.05 + Math.sin(state.clock.elapsedTime * 8) * 0.02 : 1;
+      markerRef.current.scale.setScalar(THREE.MathUtils.lerp(markerRef.current.scale.x, targetScale, 0.1));
+    }
+  });
+
+  return (
+    <group ref={markerRef}>
+      {/* House segment line */}
+      <mesh rotation={[0, -startAngle, 0]} position={[50, -0.4, 0]}>
+        <boxGeometry args={[100, 0.1, 0.2]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.15 + (relevance * 0.1)} />
+      </mesh>
+
+      {/* Hoverable Area */}
+      <mesh 
+        rotation={[-Math.PI / 2, 0, 0]} 
+        position={[0, -0.5, 0]}
+        onPointerEnter={() => setHoveredHouse(house.houseNumber)}
+        onPointerLeave={() => setHoveredHouse(null)}
+      >
+        <ringGeometry args={[10, 75, 32, 1, startAngle, 30 * Math.PI / 180]} />
+        <meshBasicMaterial 
+          color="#ffffff" 
+          transparent 
+          opacity={hoveredHouse === house.houseNumber ? 0.05 : 0} 
+          side={THREE.DoubleSide} 
+        />
+      </mesh>
+
+      {/* House Number Label */}
+      <Text
+        position={[Math.cos(midAngle) * 40, 0.1, Math.sin(midAngle) * 40]}
+        rotation={[-Math.PI / 2, 0, -midAngle + Math.PI / 2]}
+        fontSize={2.5}
+        color={hoveredHouse === house.houseNumber ? "#ffffff" : "#666666"}
+        anchorX="center"
+        anchorY="middle"
+        fillOpacity={0.5}
+      >
+        {house.houseNumber}
+      </Text>
+
+      {/* House Info Card */}
+      {hoveredHouse === house.houseNumber && (
+        <Html 
+          position={[Math.cos(midAngle) * 45, 2, Math.sin(midAngle) * 45]}
+          center
+          distanceFactor={20}
+        >
+          <div className="translate-y-[-100%]">
+            <HolographicInfoCard
+              title={`House ${house.houseNumber}`}
+              subtitle={house.realmName}
+              description={house.description}
+              color="#8b5cf6"
+              type="house"
+              visible={true}
+              onResearch={onResearch}
+            />
+          </div>
+        </Html>
+      )}
+    </group>
+  );
+};
+
+const HouseWedges = ({ houses, planets, onResearch, onSave }: { houses?: any[], planets?: any[], onResearch?: any, onSave?: any }) => {
   const [hoveredHouse, setHoveredHouse] = useState<number | null>(null);
 
   const houseData = useMemo(() => {
@@ -250,84 +446,140 @@ const HouseWedges = ({ houses }: { houses?: any[] }) => {
       const num = i + 1;
       const dataHouse = houses?.find(h => h.houseNumber === num);
       const fallback = HOUSE_FALLBACKS[num];
+      
+      // Calculate relevance based on occupied planets
+      const planetCount = planets?.filter(p => p.house === num).length || 0;
+      const relevance = 1 + (planetCount * 0.5);
+
       return {
         houseNumber: num,
         realmName: dataHouse?.realmName || fallback.name,
-        description: dataHouse?.description || fallback.description
+        description: dataHouse?.description || fallback.description,
+        relevance
       };
     });
-  }, [houses]);
+  }, [houses, planets]);
 
   return (
     <group>
-      {houseData.map((house, i) => {
-        const startAngle = (i * 30) * Math.PI / 180;
-        const midAngle = (i * 30 + 15) * Math.PI / 180;
-        
-        return (
-          <group key={house.houseNumber}>
-            {/* House segment line */}
-            <mesh rotation={[0, -startAngle, 0]} position={[50, -0.4, 0]}>
-              <boxGeometry args={[100, 0.1, 0.2]} />
-              <meshBasicMaterial color="#ffffff" transparent opacity={0.2} />
-            </mesh>
-
-            {/* Hoverable Area */}
-            <mesh 
-              rotation={[-Math.PI / 2, 0, 0]} 
-              position={[0, -0.5, 0]}
-              onPointerEnter={() => setHoveredHouse(house.houseNumber)}
-              onPointerLeave={() => setHoveredHouse(null)}
-            >
-              <ringGeometry args={[10, 75, 32, 1, startAngle, 30 * Math.PI / 180]} />
-              <meshBasicMaterial 
-                color="#ffffff" 
-                transparent 
-                opacity={hoveredHouse === house.houseNumber ? 0.05 : 0} 
-                side={THREE.DoubleSide} 
-              />
-            </mesh>
-
-            {/* House Number Label */}
-            <Text
-              position={[Math.cos(midAngle) * 40, 0.1, Math.sin(midAngle) * 40]}
-              rotation={[-Math.PI / 2, 0, -midAngle + Math.PI / 2]}
-              fontSize={2.5}
-              color={hoveredHouse === house.houseNumber ? "#ffffff" : "#666666"}
-              anchorX="center"
-              anchorY="middle"
-              fillOpacity={0.5}
-            >
-              {house.houseNumber}
-            </Text>
-
-            {/* House Info Card */}
-            {hoveredHouse === house.houseNumber && (
-              <Html 
-                position={[Math.cos(midAngle) * 45, 2, Math.sin(midAngle) * 45]}
-                center
-                distanceFactor={20}
-              >
-                <div className="translate-y-[-100%]">
-                  <HolographicInfoCard
-                    title={`House ${house.houseNumber}`}
-                    subtitle={house.realmName}
-                    description={house.description}
-                    color="#8b5cf6"
-                    type="house"
-                    visible={true}
-                  />
-                </div>
-              </Html>
-            )}
-          </group>
-        );
-      })}
+      {houseData.map((house, i) => (
+        <HouseMarker 
+          key={house.houseNumber} 
+          house={house} 
+          index={i} 
+          hoveredHouse={hoveredHouse} 
+          setHoveredHouse={setHoveredHouse}
+          relevance={house.relevance}
+          onResearch={onResearch}
+          onSave={onSave}
+        />
+      ))}
     </group>
   );
 };
 
-export const NatalChartAdvanced = ({ data, selectedPlanet, onPlanetClick }: any) => {
+const ChartLegend = () => {
+  const [show, setShow] = useState(false);
+  
+  const planets = Object.keys(PLANET_CONFIG).map(p => ({ name: p, color: PLANET_CONFIG[p].color }));
+  const aspects = [
+    { name: 'Conjunction', color: '#fcd34d', desc: '0° - Unity, focus, intensity' },
+    { name: 'Opposition', color: '#fb7185', desc: '180° - Conflict, balance, awareness' },
+    { name: 'Trine', color: '#34d399', desc: '120° - Flow, talent, ease' },
+    { name: 'Square', color: '#f87171', desc: '90° - Tension, friction, growth' },
+    { name: 'Sextile', color: '#60a5fa', desc: '60° - Opportunity, connection' },
+  ];
+  
+  const signs = [
+    { name: 'Aries', element: 'Fire', modality: 'Cardinal' },
+    { name: 'Taurus', element: 'Earth', modality: 'Fixed' },
+    { name: 'Gemini', element: 'Air', modality: 'Mutable' },
+    { name: 'Cancer', element: 'Water', modality: 'Cardinal' },
+    { name: 'Leo', element: 'Fire', modality: 'Fixed' },
+    { name: 'Virgo', element: 'Earth', modality: 'Mutable' },
+    { name: 'Libra', element: 'Air', modality: 'Cardinal' },
+    { name: 'Scorpio', element: 'Water', modality: 'Fixed' },
+    { name: 'Sagittarius', element: 'Fire', modality: 'Mutable' },
+    { name: 'Capricorn', element: 'Earth', modality: 'Cardinal' },
+    { name: 'Aquarius', element: 'Air', modality: 'Fixed' },
+    { name: 'Pisces', element: 'Water', modality: 'Mutable' },
+  ];
+
+  return (
+    <Html position={[-140, 60, 0]} center>
+      <div className="pointer-events-auto">
+        <motion.button
+          onClick={() => setShow(!show)}
+          className="bg-black/80 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-full text-[10px] text-white uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center gap-2"
+        >
+          {show ? 'Close Cosmic Legend' : 'Open Cosmic Legend'}
+          <Compass size={12} className={show ? 'rotate-180 transition-transform' : 'transition-transform'} />
+        </motion.button>
+        
+        <AnimatePresence>
+          {show && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="mt-4 bg-black/80 backdrop-blur-xl border border-white/10 p-6 rounded-3xl w-72 shadow-2xl space-y-6"
+            >
+              <div>
+                <h4 className="text-[10px] uppercase tracking-widest text-stone-500 mb-4 font-bold">Planetary Bodies</h4>
+                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                  {planets.map(p => (
+                    <div key={p.name} className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: p.color }}></div>
+                      <span className="text-[9px] text-stone-300">{p.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="text-[10px] uppercase tracking-widest text-stone-500 mb-4 font-bold">Aspect Matrix</h4>
+                <div className="space-y-3">
+                  {aspects.map(a => (
+                    <div key={a.name} className="space-y-0.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-medium text-white">{a.name}</span>
+                        <div className="h-0.5 w-12" style={{ backgroundColor: a.color }}></div>
+                      </div>
+                      <p className="text-[8px] text-stone-500 italic">{a.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-[10px] uppercase tracking-widest text-stone-500 mb-4 font-bold">Zodiac Archetypes</h4>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10">
+                  {signs.map(s => (
+                    <div key={s.name} className="p-2 bg-white/5 rounded-lg border border-white/5">
+                      <div className="text-[9px] font-bold text-white mb-0.5">{s.name}</div>
+                      <div className="flex gap-1 text-[7px] uppercase tracking-tighter">
+                        <span className="text-orange-400">{s.element}</span>
+                        <span className="text-sky-400">{s.modality}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="pt-4 border-t border-white/10">
+                 <p className="text-[8px] text-stone-600 leading-relaxed">
+                   The chart visualizes cosmic resonance between celestial bodies and your unique soul frequency.
+                 </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </Html>
+  );
+};
+
+export const NatalChartAdvanced = ({ data, selectedPlanet, onPlanetClick, onResearch, onSave }: any) => {
   const chartRef = useRef<THREE.Group>(null);
   
   useFrame(() => {
@@ -352,9 +604,11 @@ export const NatalChartAdvanced = ({ data, selectedPlanet, onPlanetClick }: any)
       {/* Ambient Cosmic Core */}
       <pointLight color="#3b82f6" intensity={2} distance={100} />
       
+      <ChartLegend />
+      
       <group ref={chartRef}>
-        <ZodiacRing />
-        <HouseWedges houses={data?.houses} />
+        <ZodiacRing onResearch={onResearch} onSave={onSave} />
+        <HouseWedges houses={data?.houses} planets={allBodies} onResearch={onResearch} onSave={onSave} />
         
         {/* Planets and Points */}
         {allBodies.map((planet: any) => (
@@ -367,6 +621,8 @@ export const NatalChartAdvanced = ({ data, selectedPlanet, onPlanetClick }: any)
             planet={planet}
             selected={selectedPlanet?.name === planet.name}
             onClick={() => onPlanetClick(planet)}
+            onResearch={onResearch}
+            onSave={onSave}
           />
         ))}
 

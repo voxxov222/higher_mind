@@ -12,7 +12,6 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       remix({
-        ssr: false,
         future: {
           v3_fetcherPersist: true,
           v3_relativeSplatPath: true,
@@ -24,9 +23,9 @@ export default defineConfig(({ mode }) => {
       tsconfigPaths(),
       tailwindcss(),
     ],
-    define: {
-      "process.env.API_KEY": JSON.stringify(env.GEMINI_API_KEY),
-      "process.env.GEMINI_API_KEY": JSON.stringify(env.GEMINI_API_KEY),
+    
+    build: {
+      minify: false,
     },
   };
 });

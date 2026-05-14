@@ -507,6 +507,8 @@ interface SolarSystemSceneProps {
   data: CosmicData | null;
   onPlanetClick?: (title: string, content: string) => void;
   isBirthChartMode?: boolean;
+  onResearch?: (query: string) => void;
+  onSave?: (data: any) => void;
 }
 
 const HOUSE_DESCRIPTIONS: Record<number, string> = {
@@ -524,7 +526,7 @@ const HOUSE_DESCRIPTIONS: Record<number, string> = {
   12: 'Subconscious, secrets, spiritual retreat, and karmic endings.',
 };
 
-export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps) => {
+export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: SolarSystemSceneProps) => {
   const [selectedPlanet, setSelectedPlanet] = useState<PlanetData | null>(null);
   const [sunHovered, setSunHovered] = useState(false);
   const [hoveredHouse, setHoveredHouse] = useState<any>(null);
@@ -664,7 +666,13 @@ export const SolarSystemScene = ({ data, onPlanetClick }: SolarSystemSceneProps)
       <pointLight position={[100, 100, 100]} intensity={1} color="#ffffff" />
       
       {viewMode === 'chart' ? (
-        <NatalChartAdvanced data={data} selectedPlanet={selectedPlanet} onPlanetClick={setSelectedPlanet} />
+        <NatalChartAdvanced 
+          data={data} 
+          selectedPlanet={selectedPlanet} 
+          onPlanetClick={setSelectedPlanet} 
+          onResearch={onResearch}
+          onSave={onSave}
+        />
       ) : (
         <>
           <AstrologicalHouses data={data} onHouseHover={setHoveredHouse} />

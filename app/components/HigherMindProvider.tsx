@@ -10,6 +10,8 @@ interface HigherMindContextType {
   alignment: number;
   processPacket: (packet: ConsciousnessPacket) => void;
   clearState: () => void;
+  savedMessages: { id: string; title: string; content: string; type: string }[];
+  saveToChat: (title: string, content: string, type: string) => void;
 }
 
 const HigherMindContext = createContext<HigherMindContextType | undefined>(undefined);
@@ -21,6 +23,11 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [clusters, setClusters] = useState<SynapticCluster[]>([]);
   const [coherence, setCoherence] = useState(0.5);
   const [alignment, setAlignment] = useState(0.7);
+  const [savedMessages, setSavedMessages] = useState<{ id: string; title: string; content: string; type: string }[]>([]);
+
+  const saveToChat = useCallback((title: string, content: string, type: string) => {
+    setSavedMessages(prev => [...prev, { id: `save_${Date.now()}`, title, content, type }]);
+  }, []);
 
   const processPacket = useCallback((packet: ConsciousnessPacket) => {
     // 1. Update Thoughts
@@ -83,6 +90,7 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setClusters([]);
     setCoherence(0.5);
     setAlignment(0.7);
+    setSavedMessages([]);
   };
 
   return (
@@ -94,7 +102,9 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       coherence,
       alignment,
       processPacket,
-      clearState
+      clearState,
+      savedMessages,
+      saveToChat
     }}>
       {children}
     </HigherMindContext.Provider>

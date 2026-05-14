@@ -26,7 +26,23 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { processPacket, coherence, alignment } = useHigherMind();
+  const { processPacket, coherence, alignment, savedMessages } = useHigherMind();
+
+  useEffect(() => {
+    // Add newly saved messages to the chat if they aren't already there
+    const newItems = savedMessages.filter(item => !messages.find(m => m.id === item.id));
+    if (newItems.length > 0) {
+      const chatItems: Message[] = newItems.map(item => ({
+        id: item.id,
+        role: 'model',
+        text: `**SAVED RESULT: ${item.title}**\n\n${item.content}\n\n*Type: ${item.type}*`,
+        timestamp: Date.now(),
+        references: [item.type]
+      }));
+      setMessages(prev => [...prev, ...chatItems]);
+      if (!isOpen) setIsOpen(true); // Open chat if it was closed to show saved item
+    }
+  }, [savedMessages]);
 
   useEffect(() => {
     if (scrollRef.current) {

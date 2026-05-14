@@ -3,7 +3,8 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html, Sphere, Trail, Sparkles, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Network, Fingerprint, Star, ArrowLeft } from 'lucide-react';
+import { X, Network, Fingerprint, Star, ArrowLeft, MessageCircle } from 'lucide-react';
+import { useHigherMind } from './HigherMindProvider';
 
 const DnaPair = ({ 
     index, 
@@ -205,6 +206,7 @@ const DnaHelixCore = ({ data, setSelection }: any) => {
 
 export const CelestialDNASection = ({ data, setActiveTab }: { data: any, setActiveTab?: (tab: any) => void }) => {
     const [selectedNode, setSelectedNode] = useState<any>(null);
+    const { saveToChat } = useHigherMind();
 
     const karmicOverview = useMemo(() => {
        if (!data) return { ancestral: 75, friction: 45, optimization: 85 };
@@ -307,19 +309,28 @@ export const CelestialDNASection = ({ data, setActiveTab }: { data: any, setActi
                             </div>
                         </div>
                         
-                        <button 
-                            onClick={() => {
-                                const btn = document.getElementById('extract-btn');
-                                if (btn) {
-                                    btn.innerText = 'Extracting...';
-                                    setTimeout(() => btn.innerText = 'Pattern Saved to Archive', 2000);
-                                }
-                            }}
-                            id="extract-btn"
-                            className="w-full mt-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] uppercase tracking-widest text-white transition-all flex justify-center items-center gap-2 pointer-events-auto"
-                        >
-                            <Star size={14} /> Extract Memory Pattern
-                        </button>
+                        <div className="flex gap-2 mt-8">
+                            <button 
+                                onClick={() => {
+                                    const btn = document.getElementById('extract-btn');
+                                    if (btn) {
+                                        btn.innerText = 'Extracting...';
+                                        setTimeout(() => btn.innerText = 'Pattern Saved to Archive', 2000);
+                                    }
+                                }}
+                                id="extract-btn"
+                                className="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] uppercase tracking-widest text-white transition-all flex justify-center items-center gap-2 pointer-events-auto"
+                            >
+                                <Star size={14} /> Extract Pattern
+                            </button>
+                            <button 
+                                onClick={() => saveToChat(`DNA Pattern: ${selectedNode.title}`, `Celestial DNA Pattern Analysis: ${selectedNode.description}. Type: ${selectedNode.type}. Activation: ${selectedNode.activation?.toFixed(1)}%.`, 'Celestial DNA')}
+                                className="p-3 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30 rounded-xl transition-all pointer-events-auto"
+                                title="Save to Chat"
+                            >
+                                <MessageCircle size={16} />
+                            </button>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

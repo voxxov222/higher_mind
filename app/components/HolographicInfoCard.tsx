@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Info, Brain, Zap, Wand2, Star } from 'lucide-react';
+import { Sparkles, Info, Brain, Zap, Wand2, Star, MessageCircle } from 'lucide-react';
+import { useHigherMind } from './HigherMindProvider';
 
 interface HolographicInfoCardProps {
   title: string;
@@ -12,6 +13,7 @@ interface HolographicInfoCardProps {
   icon?: React.ReactNode;
   visible: boolean;
   onClose?: () => void;
+  onResearch?: (query: string) => void;
 }
 
 export const HolographicInfoCard: React.FC<HolographicInfoCardProps> = ({
@@ -23,7 +25,19 @@ export const HolographicInfoCard: React.FC<HolographicInfoCardProps> = ({
   type = 'planet',
   icon,
   visible,
+  onResearch,
 }) => {
+  const { saveToChat } = useHigherMind();
+
+  const handleSaveToChat = () => {
+    saveToChat({
+      id: `info-${Date.now()}`,
+      title: `${title} - Analysis`,
+      content: `${subtitle ? subtitle + '\n\n' : ''}${description}${meaning ? '\n\nInterpretation: ' + meaning : ''}`,
+      type: 'insight'
+    });
+  };
+
   return (
     <AnimatePresence>
       {visible && (
@@ -90,6 +104,23 @@ export const HolographicInfoCard: React.FC<HolographicInfoCardProps> = ({
                   </p>
                 </div>
               )}
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-2 mt-4 relative z-20">
+                 <button 
+                  onClick={handleSaveToChat}
+                  className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white/5 border border-white/10 text-[10px] text-stone-300 hover:bg-white/10 transition-colors uppercase tracking-widest"
+                 >
+                   <MessageCircle size={10} />
+                   Save to Chat
+                 </button>
+                 <button 
+                  onClick={() => onResearch?.(title)}
+                  className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-indigo-500/20 border border-indigo-500/30 text-[10px] text-indigo-300 hover:bg-indigo-500/40 transition-colors uppercase tracking-widest"
+                 >
+                   Research AI
+                 </button>
+              </div>
 
               {/* Holographic Accents */}
               <div className="flex items-center justify-between pt-2 border-t border-white/5">

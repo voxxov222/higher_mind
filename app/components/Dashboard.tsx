@@ -27,11 +27,17 @@ import { NeuralBrainSection } from './NeuralBrainSection';
 import { AngelNumbersSection } from './AngelNumbersSection';
 import { GematriaCalculatorSection } from './GematriaCalculatorSection';
 import { VortexSequencingSection } from './VortexSequencingSection';
+import { GoldenRatioSection } from './GoldenRatioSection';
+import { SkyMapSection } from './SkyMapSection';
+import { SoulPathSection } from './SoulPathSection';
 import CommunityFeed from './social/CommunityFeed';
 import LiveMessenger from './social/LiveMessenger';
+import { useHigherMind } from './HigherMindProvider';
 import { getAstralProfile } from '../services/socialService';
 import BirthChartGuide from './BirthChartGuide';
 import { SandboxSection } from './sandbox/SandboxSection';
+import { VoiceCommander } from './VoiceCommander';
+import { TetragrammatonHUD } from './TetragrammatonHUD';
 
 /**
  * Interface for DashboardProps
@@ -41,8 +47,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'community' | 'messages' | 'sandbox';
-  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'community' | 'messages' | 'sandbox') => void;
+  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton';
+  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -315,7 +321,7 @@ const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedI
                         <div className={`absolute top-0 left-0 w-1 h-full ${item.category === 'Astrology' ? 'bg-purple-500' : item.category === 'Numerology' ? 'bg-blue-500' : 'bg-emerald-500'}`}></div>
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] uppercase tracking-widest text-stone-500">{item.category} • {new Date(item.timestamp).toLocaleDateString()}</span>
+                            <span className="text-[10px] uppercase tracking-widest text-stone-500" suppressHydrationWarning>{item.category} • {new Date(item.timestamp).toLocaleDateString('en-US')}</span>
                             {item.tags && item.tags.length > 0 && item.tags.map(tag => (
                               <span key={tag} className="text-[8px] uppercase tracking-[0.2em] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded border border-purple-500/20">{tag}</span>
                             ))}
@@ -702,37 +708,48 @@ const ResearchBox = ({ title, content, children, className = "", category = "Mis
   handleReadOutLoud: (text: string) => void,
   handleSaveToVault: (title: string, content: string, category: string) => void,
   handleGeneralDeepDive: (title: string, content: string) => void
-}) => (
-  <div className={`group relative bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-white/20 transition-all ${className}`}>
-    <div className="flex justify-end gap-2 mb-2 z-30 relative opacity-40 group-hover:opacity-100 transition-opacity pointer-events-auto">
-      <button 
-        onClick={() => handleReadOutLoud(content)}
-        className={`px-3 py-2 rounded-lg transition-all border border-white/10 shadow-lg flex items-center gap-2 text-[9px] uppercase tracking-widest font-bold ${isReading ? 'bg-purple-600 text-white animate-pulse' : 'bg-stone-800/80 text-stone-300 hover:bg-stone-700 hover:text-white'}`}
-        title="Listen"
-      >
-        <Volume2 className="w-3 h-3" />
-        {isReading ? 'Reading...' : 'Listen'}
-      </button>
-      <button 
-        onClick={() => handleSaveToVault(title, content, category)}
-        className="bg-stone-800/80 hover:bg-emerald-700 p-2 rounded-lg text-stone-300 hover:text-white transition-all border border-white/10 shadow-lg"
-        title="Save"
-      >
-        <Bookmark className="w-3 h-3" />
-      </button>
-      <button 
-        onClick={() => handleGeneralDeepDive(title, content)}
-        className="bg-stone-800/80 hover:bg-stone-700 p-2 rounded-lg text-stone-300 hover:text-white flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold border border-white/10 shadow-lg"
-      >
-        <Search className="w-3 h-3" />
-        Research
-      </button>
+}) => {
+  const { saveToChat } = useHigherMind();
+  
+  return (
+    <div className={`group relative bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-white/20 transition-all ${className}`}>
+      <div className="flex justify-end gap-2 mb-2 z-30 relative opacity-40 group-hover:opacity-100 transition-opacity pointer-events-auto">
+        <button 
+          onClick={() => handleReadOutLoud(content)}
+          className={`px-3 py-2 rounded-lg transition-all border border-white/10 shadow-lg flex items-center gap-2 text-[9px] uppercase tracking-widest font-bold ${isReading ? 'bg-purple-600 text-white animate-pulse' : 'bg-stone-800/80 text-stone-300 hover:bg-stone-700 hover:text-white'}`}
+          title="Listen"
+        >
+          <Volume2 className="w-3 h-3" />
+          {isReading ? 'Reading...' : 'Listen'}
+        </button>
+        <button 
+          onClick={() => handleSaveToVault(title, content, category)}
+          className="bg-stone-800/80 hover:bg-emerald-700 p-2 rounded-lg text-stone-300 hover:text-white transition-all border border-white/10 shadow-lg"
+          title="Save to Vault"
+        >
+          <Bookmark className="w-3 h-3" />
+        </button>
+        <button 
+          onClick={() => saveToChat(title, content, category)}
+          className="bg-stone-800/80 hover:bg-purple-600 p-2 rounded-lg text-stone-300 hover:text-white transition-all border border-white/10 shadow-lg"
+          title="Save to Higher Mind Chat"
+        >
+          <MessageCircle size={12} />
+        </button>
+        <button 
+          onClick={() => handleGeneralDeepDive(title, content)}
+          className="bg-stone-800/80 hover:bg-stone-700 p-2 rounded-lg text-stone-300 hover:text-white flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold border border-white/10 shadow-lg"
+        >
+          <Search className="w-3 h-3" />
+          Research
+        </button>
+      </div>
+      <div className="relative z-10 w-full">
+        {children}
+      </div>
     </div>
-    <div className="relative z-10 w-full">
-      {children}
-    </div>
-  </div>
-);
+  );
+};
 
 const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handleReadOutLoud, isReading, isDeepDiveLoading, handleDeepDiveNext, data }: {
   deepDiveData: any,
@@ -823,6 +840,58 @@ const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handl
   );
 };
 
+// --- NEW MOCK OPASTRO TERMINAL ---
+const MockOpastroTerminal = ({ sign = "Aries", period = "daily" }: { sign?: string, period?: string }) => {
+  const [lines, setLines] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const output = [
+      `$ opastro horoscope --period ${period} --sign ${sign}`,
+      `[INFO] Connecting to dakidarts/opastro compute engine...`,
+      `[SUCCESS] Ephemeris data synced for 2024-05-14`,
+      `[COMPUTING] Calculating transits for ${sign}...`,
+      `[RESULT] Found 3 major aspects affecting current house arrangement.`,
+      `------------------------------------------------------------`,
+      `SYNTHESIS: Your communicative flow is heighted by a Mercury trine.`,
+      `ALERT: Solar intensity at 8.4 GEV. Dynamic shielding recommended.`,
+      `------------------------------------------------------------`,
+      `READY.`
+    ];
+    
+    let currentLine = 0;
+    const interval = setInterval(() => {
+      if (currentLine < output.length) {
+        setLines(prev => [...prev, output[currentLine]]);
+        currentLine++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 100);
+    
+    return () => clearInterval(interval);
+  }, [sign, period]);
+
+  return (
+    <div className="bg-black border border-emerald-500/30 rounded-2xl p-6 font-mono text-[10px] text-emerald-400/80 shadow-[0_0_40px_rgba(16,185,129,0.1)] mb-8 overflow-hidden relative">
+      <div className="absolute top-3 right-4 flex gap-1.5">
+        <div className="w-2 h-2 rounded-full bg-red-500/40" />
+        <div className="w-2 h-2 rounded-full bg-yellow-500/40" />
+        <div className="w-2 h-2 rounded-full bg-emerald-500/40" />
+      </div>
+      <div className="space-y-1.5">
+        {lines.map((line, i) => (
+          <div key={i} className="flex gap-3">
+            <span className="opacity-30">{i+1}</span>
+            <span>{line}</span>
+          </div>
+        ))}
+        {lines.length < 10 && <div className="w-2 h-3 bg-emerald-400 animate-pulse ml-6" />}
+      </div>
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-emerald-500/5 to-transparent opacity-20" />
+    </div>
+  );
+};
+
 export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab, user, onSignIn, onSignOut, loadedInputs, profileConfig, onUpdateProfile, onPresentationRequest, externalDeepDive, onClearExternalDeepDive, vortexMode, setVortexMode }: DashboardProps) => {
   // --- LOCAL COMPONENT STATE ---
   const [name, setName] = useState('');
@@ -845,6 +914,14 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
   const [isReading, setIsReading] = useState(false);
   const [selectedRecipientId, setSelectedRecipientId] = useState<string | undefined>();
   const [selectedRecipientProfile, setSelectedRecipientProfile] = useState<UserProfileConfig | undefined>();
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleSelectUser = async (userId: string) => {
     setSelectedRecipientId(userId);
@@ -1040,6 +1117,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
         onToggleMinimize={() => setIsMinimized(!isMinimized)}
       />
       <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} profileConfig={profileConfig || {} as UserProfileConfig} onUpdateProfile={onUpdateProfile} loadedInputs={loadedInputs} isReading={isReading} handleReadOutLoud={handleReadOutLoud} />
+      <VoiceCommander setActiveTab={setActiveTab} />
 
       {/* Brand Header */}
       <header className="flex justify-between items-center z-10 pointer-events-auto">
@@ -1047,8 +1125,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
           <Hexagon style={{ color: themeColor }} />
           HIGHER 🧠 MIND
         </h1>
-        <div className="text-[10px] text-white/50 uppercase tracking-[0.2em] font-mono">
-            Wednesday, May 13th, 2026 - 9:00 PM
+        <div className="text-[10px] text-white/50 uppercase tracking-[0.2em] font-mono" suppressHydrationWarning>
+            {currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} - {currentTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
         </div>
       </header>
 
@@ -1115,6 +1193,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             <div className="flex border-b border-white/10 p-2 gap-2 overflow-x-auto no-scrollbar pr-14">
               <Tab active={activeTab === 'identity'} onClick={() => setActiveTab('identity')} icon={<UserIcon className="w-4 h-4"/>}>My Identity</Tab>
               <Tab active={activeTab === 'torus'} onClick={() => setActiveTab('torus')} icon={<Activity className="w-4 h-4"/>}>Soul Blueprint</Tab>
+              <Tab active={activeTab === 'soul_path'} onClick={() => setActiveTab('soul_path')} icon={<Compass className="w-4 h-4"/>}>Soul Path</Tab>
               <Tab active={activeTab === 'brain'} onClick={() => setActiveTab('brain')} icon={<Brain className="w-4 h-4"/>}>Neural Core</Tab>
               <Tab active={activeTab === 'planets'} onClick={() => setActiveTab('planets')} icon={<Moon className="w-4 h-4"/>}>Astrology</Tab>
               <Tab active={activeTab === 'celestial_dna'} onClick={() => setActiveTab('celestial_dna')} icon={<Hexagon className="w-4 h-4"/>}>Celestial DNA</Tab>
@@ -1135,6 +1214,9 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'angel_numbers'} onClick={() => setActiveTab('angel_numbers')} icon={<Sparkles className="w-4 h-4"/>}>Angel Numbers</Tab>
               <Tab active={activeTab === 'vortex'} onClick={() => setActiveTab('vortex')} icon={<CirclePlay className="w-4 h-4 text-cyan-400"/>}>Vortex Sequencing</Tab>
               <Tab active={activeTab === 'gematria_calc'} onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
+              <Tab active={activeTab === 'golden_ratio'} onClick={() => setActiveTab('golden_ratio')} icon={<Grid className="w-4 h-4 text-amber-500" />}>Kathara Grid</Tab>
+              <Tab active={activeTab === 'sky_map'} onClick={() => setActiveTab('sky_map')} icon={<Compass className="w-4 h-4 text-indigo-400"/>}>Atlas Sky Map</Tab>
+              <Tab active={activeTab === 'tetragrammaton'} onClick={() => setActiveTab('tetragrammaton')} icon={<Hexagon className="w-4 h-4 text-fbbf24"/>}>YHVH HUD</Tab>
               <Tab active={activeTab === 'sandbox'} onClick={() => setActiveTab('sandbox')} icon={<Box className="w-4 h-4 text-emerald-400"/>}>Creative Sandbox</Tab>
               <Tab active={activeTab === 'findings'} onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
               <Tab active={activeTab === 'harmonics'} onClick={() => setActiveTab('harmonics')} icon={<BarChart2 className="w-4 h-4"/>}>Harmonics</Tab>
@@ -1577,6 +1659,25 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                                   <p className="text-sm text-stone-400 leading-relaxed italic">"{event.houseSignificance}"</p>
                                 </motion.div>
 
+                                {event.highlight.toLowerCase().includes("awakening") && (
+                                  <motion.div layout className="mt-4">
+                                     <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleGeneralDeepDive(
+                                            `Synchronicity: The Great Awakening & Your Angel Number`,
+                                            `Research the potential synchronicity between the user experiencing the timeline event '${event.highlight}' at age ${event.age} (${event.year}) and their core numerology/angel number frequencies. Focus on energetic shifts, soul completion, and cosmic alignment.`
+                                          );
+                                        }}
+                                        className="w-full p-4 bg-gradient-to-r from-purple-900/20 to-rose-900/20 border border-purple-500/30 rounded-2xl flex items-center justify-center gap-3 hover:from-purple-900/40 hover:to-rose-900/40 border-dashed text-purple-300 transition-all shadow-inner font-bold text-[10px] uppercase tracking-widest relative overflow-hidden group"
+                                      >
+                                        <div className="absolute inset-0 bg-purple-400/10 w-0 group-hover:w-full transition-all duration-700 ease-out"></div>
+                                        <Sparkles className="w-4 h-4 text-purple-400" />
+                                        <span className="relative z-10 w-full text-center">Research Angel Number Synchronicity</span>
+                                      </button>
+                                  </motion.div>
+                                )}
+
                                 {isSelected && (
                                   <motion.div 
                                     initial={{ opacity: 0, scale: 0.9 }} 
@@ -1802,6 +1903,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                           <h3 className="text-xl font-light text-white flex items-center gap-2"><Sun className="w-5 h-5 text-yellow-400" /> Daily Insight</h3>
                           <span className="text-xs tracking-widest text-stone-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">{data.dailyInsight.date}</span>
                         </div>
+
+                        <MockOpastroTerminal sign={data.celestialDna?.sunSign || "Aries"} />
 
                         <div className="space-y-4 mb-8">
                           <BoundResearchBox title="Daily Horoscope Research" content={data.dailyInsight.horoscope}>
@@ -2255,9 +2358,30 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <GematriaCalculatorSection />
                   </motion.div>
                 )}
+
+                {activeTab === 'golden_ratio' && (
+                  <motion.div key="golden_ratio" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <GoldenRatioSection userIndex={144000} />
+                  </motion.div>
+                )}
+                {activeTab === 'sky_map' && (
+                  <motion.div key="sky_map" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <SkyMapSection />
+                  </motion.div>
+                )}
+                {activeTab === 'soul_path' && (
+                  <motion.div key="soul_path" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <SoulPathSection data={data} />
+                  </motion.div>
+                )}
                 {activeTab === 'sandbox' && (
                   <motion.div key="sandbox" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <SandboxSection />
+                  </motion.div>
+                )}
+                {activeTab === 'tetragrammaton' && (
+                  <motion.div key="tetragrammaton" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
+                    <TetragrammatonHUD activeTab={activeTab} data={data} />
                   </motion.div>
                 )}
               </AnimatePresence>

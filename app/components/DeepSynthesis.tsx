@@ -35,6 +35,7 @@ import {
 import { CosmicData, MindMapNode } from '../types';
 import { fetchGeneralDeepDive } from '../services/geminiService';
 import { useProfileStore } from '../services/profileService';
+import { useHigherMind } from './HigherMindProvider';
 
 import { CosmicSummary } from './CosmicSummary';
 
@@ -110,7 +111,9 @@ type SynthesisMode = 'overview' | 'infographic' | 'mindmap' | '3d' | 'video' | '
 export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicData | null, onPresentationRequest: () => void }) => {
   // --- COMPONENT STATE & VIEW REFS ---
   const [mode, setMode] = useState<SynthesisMode>('summary');
+  const [infographicType, setInfographicType] = useState<'identity' | 'path' | 'karmic' | 'resonance'>('identity');
   const [videoStep, setVideoStep] = useState(0);
+  const { saveToChat } = useHigherMind();
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const [isReading, setIsReading] = useState(false);
 
@@ -427,65 +430,255 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="h-full bg-white/5 rounded-[3rem] border border-white/10 p-10 overflow-y-auto scrollbar-thin overflow-x-hidden relative"
+              className="h-full bg-white/5 rounded-[3rem] border border-white/10 p-6 md:p-10 overflow-y-auto scrollbar-thin overflow-x-hidden relative flex flex-col"
             >
-              <div className="max-w-4xl mx-auto space-y-16 py-10">
-                <div className="text-center space-y-4">
-                  <div className="text-fuchsia-500 text-xs font-bold uppercase tracking-[0.4em]">Universal Hologram Map</div>
-                  <h1 className="text-5xl md:text-7xl font-light text-white tracking-tight">Identity Report</h1>
-                  <div className="h-px w-32 bg-gradient-to-r from-transparent via-stone-500 to-transparent mx-auto"></div>
+              {/* Infographic Options Navigation */}
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-10 shrink-0">
+                <div className="flex gap-2 p-1.5 bg-black/40 backdrop-blur-xl rounded-2xl border border-white/5 overflow-x-auto no-scrollbar">
+                  {[
+                    { id: 'identity', label: 'Identity Blueprint' },
+                    { id: 'path', label: 'Life Path Journey' },
+                    { id: 'karmic', label: 'Karmic & Akashic' },
+                    { id: 'resonance', label: 'Torus Resonance' }
+                  ].map(opt => (
+                    <button
+                      key={opt.id}
+                      onClick={() => setInfographicType(opt.id as any)}
+                      className={`px-6 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${infographicType === opt.id ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]' : 'text-stone-400 hover:bg-white/5 hover:text-white'}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-12 items-center">
-                  <div className="space-y-8">
-                     <section>
-                       <h3 className="text-xs uppercase tracking-widest text-stone-500 mb-4 font-bold border-b border-white/5 pb-2">Astrological Landscape</h3>
-                       <div className="space-y-4">
-                         {data.planets?.slice(0, 3).map((p, i) => (
-                           <div key={i} className="flex gap-4">
-                             <div className="text-2xl text-white font-light w-12">{p.sign?.slice(0, 2)}</div>
-                             <div>
-                               <div className="text-sm text-stone-200 font-medium">{p.name} in {p.sign}</div>
-                               <p className="text-xs text-stone-500 leading-relaxed font-light">{p.interpretation?.slice(0, 100)}...</p>
-                             </div>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => saveToChat(`Cosmic Infographic: ${infographicType}`, `Infographic breakdown of ${infographicType} for cosmic profile synthesis.`, 'Infographic')}
+                    className="px-6 py-3 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/30 rounded-2xl text-[9px] font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-2"
+                  >
+                    <Save size={14} />
+                    Save result to Chat
+                  </button>
+                  <button className="p-3 bg-white/5 hover:bg-white/10 text-white/50 hover:text-white border border-white/10 rounded-2xl transition-all">
+                    <DownloadCloud size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Infographic Content Wrapper */}
+              <div className="flex-1 min-h-0 bg-stone-900/40 rounded-[2rem] border border-white/5 p-6 md:p-10 relative overflow-hidden backdrop-blur-sm">
+                <AnimatePresence mode="wait">
+                  {infographicType === 'identity' && (
+                    <motion.div key="identity" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-12 max-w-4xl mx-auto h-full overflow-y-auto scrollbar-thin pr-2">
+                       <div className="text-center space-y-4">
+                         <div className="text-fuchsia-500 text-xs font-bold uppercase tracking-[0.4em]">Universal Hologram Map</div>
+                         <h1 className="text-5xl md:text-7xl font-light text-white tracking-tight">Identity Report</h1>
+                         <div className="h-px w-32 bg-gradient-to-r from-transparent via-stone-500 to-transparent mx-auto"></div>
+                       </div>
+
+                       <div className="grid md:grid-cols-2 gap-12 items-center">
+                         <div className="space-y-8">
+                            <section>
+                              <h3 className="text-xs uppercase tracking-widest text-stone-500 mb-4 font-bold border-b border-white/5 pb-2">Astrological Landscape</h3>
+                              <div className="space-y-4">
+                                {data.planets?.slice(0, 3).map((p, i) => (
+                                  <div key={i} className="flex gap-4">
+                                    <div className="text-2xl text-white font-light w-12">{p.sign?.slice(0, 2)}</div>
+                                    <div>
+                                      <div className="text-sm text-stone-200 font-medium">{p.name} in {p.sign}</div>
+                                      <p className="text-xs text-stone-500 leading-relaxed font-light">{p.interpretation?.slice(0, 100)}...</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </section>
+                            <section>
+                              <h3 className="text-xs uppercase tracking-widest text-stone-500 mb-4 font-bold border-b border-white/5 pb-2">Vibrational Values</h3>
+                              <div className="grid grid-cols-2 gap-4">
+                                 {data.numerology.coreNumbers?.slice(0, 4).map((n, i) => (
+                                   <div key={i} className="p-3 bg-black/20 rounded-xl border border-white/5">
+                                      <div className="text-[10px] text-stone-600 uppercase tracking-widest">{n.name}</div>
+                                      <div className="text-2xl text-sky-400 font-light">{n.value}</div>
+                                   </div>
+                                 ))}
+                              </div>
+                            </section>
+                         </div>
+                         <div className="bg-black/40 p-8 rounded-[3rem] border border-white/10 shadow-2xl relative overflow-hidden">
+                           <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/10 blur-[80px]"></div>
+                           <h3 className="text-xl font-light text-white mb-6 flex items-center gap-2">
+                              <PieChart className="w-5 h-5 text-purple-400" />
+                              Attribute Mapping
+                           </h3>
+                           <div className="h-64">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={infographicData}>
+                                   <PolarGrid stroke="#444" />
+                                   <PolarAngleAxis dataKey="subject" tick={{ fill: '#888', fontSize: 10 }} />
+                                   <Radar name="Value" dataKey="A" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} />
+                                </RadarChart>
+                              </ResponsiveContainer>
                            </div>
-                         ))}
+                         </div>
                        </div>
-                     </section>
-                     <section>
-                       <h3 className="text-xs uppercase tracking-widest text-stone-500 mb-4 font-bold border-b border-white/5 pb-2">Vibrational Values</h3>
-                       <div className="grid grid-cols-2 gap-4">
-                          {data.numerology.coreNumbers?.slice(0, 4).map((n, i) => (
-                            <div key={i} className="p-3 bg-black/20 rounded-xl border border-white/5">
-                               <div className="text-[10px] text-stone-600 uppercase tracking-widest">{n.name}</div>
-                               <div className="text-2xl text-sky-400 font-light">{n.value}</div>
-                            </div>
-                          ))}
-                       </div>
-                     </section>
-                  </div>
-                  <div className="bg-black/40 p-8 rounded-[3rem] border border-white/10 shadow-2xl relative overflow-hidden">
-                    <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/10 blur-[80px]"></div>
-                    <h3 className="text-xl font-light text-white mb-6 flex items-center gap-2">
-                       <PieChart className="w-5 h-5 text-purple-400" />
-                       Attribute Mapping
-                    </h3>
-                    <div className="h-64">
-                       <ResponsiveContainer width="100%" height="100%">
-                         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={infographicData}>
-                            <PolarGrid stroke="#444" />
-                            <PolarAngleAxis dataKey="subject" tick={{ fill: '#888', fontSize: 10 }} />
-                            <Radar name="Value" dataKey="A" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} />
-                         </RadarChart>
-                       </ResponsiveContainer>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="bg-stone-900/50 p-10 rounded-[3rem] border border-white/10 text-center">
-                   <h3 className="text-2xl font-light text-white mb-4">Master Synthesis Statement</h3>
-                   <p className="text-xl font-light text-stone-400 leading-relaxed italic max-w-2xl mx-auto">"{data.synthesis}"</p>
-                </div>
+                       <div className="bg-black/40 p-10 rounded-[3rem] border border-white/10 text-center">
+                          <h3 className="text-2xl font-light text-white mb-4">Master Synthesis Statement</h3>
+                          <p className="text-xl font-light text-stone-400 leading-relaxed italic max-w-2xl mx-auto">"{data.synthesis}"</p>
+                       </div>
+                    </motion.div>
+                  )}
+
+                  {infographicType === 'path' && (
+                    <motion.div key="path" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-12 max-w-4xl mx-auto h-full overflow-y-auto scrollbar-thin pr-2">
+                      <div className="text-center space-y-4">
+                        <div className="text-sky-500 text-xs font-bold uppercase tracking-[0.4em]">Destiny Arc & Trajectory</div>
+                        <h1 className="text-5xl md:text-7xl font-light text-white tracking-tight">Life Path Evolution</h1>
+                        <div className="h-px w-32 bg-gradient-to-r from-transparent via-sky-500 to-transparent mx-auto"></div>
+                      </div>
+
+                      <div className="grid md:grid-cols-3 gap-8">
+                        <div className="md:col-span-1 bg-sky-900/20 border border-sky-500/30 p-8 rounded-3xl flex flex-col items-center justify-center text-center">
+                          <div className="text-sky-400 text-xs uppercase tracking-widest font-bold mb-4">Core Path</div>
+                          <div className="text-8xl font-light text-white mb-4">{data.numerology.lifePath}</div>
+                          <p className="text-sm font-light text-sky-200/80 italic">{data.numerology.lifePathMeaning?.slice(0, 150) || 'A journey of profound inner transformation.'}...</p>
+                        </div>
+                        
+                        <div className="md:col-span-2 space-y-4">
+                          <h3 className="text-xs uppercase tracking-widest text-stone-500 mb-4 font-bold border-b border-white/5 pb-2">Destiny Timeline Points</h3>
+                          {data.timeline && data.timeline.length > 0 ? data.timeline.slice(0, 3).map((t, i) => (
+                            <div key={i} className="flex gap-6 items-center p-6 bg-black/40 rounded-2xl border border-white/5 relative">
+                               <div className="shrink-0 w-16 text-right">
+                                  <div className="text-xl font-light text-white">{t.year}</div>
+                                  <div className="text-[10px] text-stone-500 uppercase tracking-widest">Age {t.age}</div>
+                               </div>
+                               <div className="w-px h-12 bg-white/10 relative">
+                                  <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 rounded-full bg-sky-500/50 border-2 border-white/20"></div>
+                               </div>
+                               <div>
+                                  <div className="text-sm text-stone-200">{t.highlight}</div>
+                                  <div className="text-[10px] text-sky-400/80 uppercase tracking-wider mt-1">{t.houseSignificance}</div>
+                               </div>
+                            </div>
+                          )) : (
+                            <div className="p-8 text-center text-stone-500 italic text-sm">Timeline data synchronizing...</div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gradient-to-r from-sky-900/20 to-black p-8 rounded-[2rem] border border-sky-500/20 mt-8">
+                        <h3 className="text-sky-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-4 text-center">Life Strategy & Forward Momentum</h3>
+                        <p className="text-sm text-stone-300 leading-relaxed font-light text-center max-w-3xl mx-auto italic">
+                          "{data.lifeStrategy?.goalPlan || data.patterns?.coreTheme || 'Aligning actions with cosmic intent creates frictionless manifestation.'}"
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {infographicType === 'karmic' && (
+                    <motion.div key="karmic" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-12 max-w-4xl mx-auto h-full overflow-y-auto scrollbar-thin pr-2">
+                       <div className="text-center space-y-4">
+                         <div className="text-amber-500 text-xs font-bold uppercase tracking-[0.4em]">Soul Ledger & Incarnation</div>
+                         <h1 className="text-5xl md:text-7xl font-light text-white tracking-tight">Akashic Blueprint</h1>
+                         <div className="h-px w-32 bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto"></div>
+                       </div>
+
+                       <div className="relative p-10 bg-[radial-gradient(ellipse_at_center,rgba(245,158,11,0.05),transparent_70%)] border border-amber-900/30 rounded-[3rem]">
+                         <div className="grid md:grid-cols-2 gap-12 relative z-10">
+                           <div className="space-y-8">
+                              <div className="space-y-2">
+                                <div className="text-[10px] text-amber-500/80 uppercase font-bold tracking-[0.3em]">Soul Origin</div>
+                                <div className="text-2xl font-light text-white">{data.akashic?.soulOrigin || 'Earth / Lyran Ascendant'}</div>
+                              </div>
+                              
+                              <div className="space-y-4">
+                                <div className="text-[10px] text-stone-500 uppercase font-bold tracking-[0.3em] border-b border-white/5 pb-2">Past Life Themes</div>
+                                <p className="text-sm font-light text-stone-300 italic leading-relaxed">
+                                  "{data.akashic?.pastLifeThemes || data.torusAnalysis?.karmicTheme || 'Echoes of ancient wisdom resolving in the present.'}"
+                                </p>
+                              </div>
+                              
+                              <div className="space-y-4">
+                                <div className="text-[10px] text-stone-500 uppercase font-bold tracking-[0.3em] border-b border-white/5 pb-2">Karmic Debts & Lessons</div>
+                                <div className="p-4 bg-red-900/10 border border-red-500/20 rounded-2xl">
+                                  <p className="text-xs font-light text-red-200/80 leading-relaxed">{data.akashic?.karmicDebts || 'No significant outstanding debts. Focus is on mastery and service.'}</p>
+                                </div>
+                              </div>
+                           </div>
+                           
+                           <div className="flex flex-col items-center justify-center space-y-8 relative">
+                              <div className="w-48 h-48 rounded-full border border-amber-500/30 flex items-center justify-center relative shadow-[0_0_50px_rgba(245,158,11,0.1)]">
+                                 <div className="w-32 h-32 rounded-full border border-amber-500/50 flex items-center justify-center animate-[spin_60s_linear_infinite]">
+                                   <div className="w-20 h-20 rounded-full bg-amber-500/20 blur-md"></div>
+                                 </div>
+                                 <Fingerprint className="w-12 h-12 text-amber-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-50" />
+                              </div>
+                              
+                              <div className="text-center">
+                                <div className="text-[10px] text-amber-500/80 uppercase font-bold tracking-[0.3em] mb-2">Soul Gifts</div>
+                                <p className="text-xs text-stone-400 italic max-w-xs">{data.akashic?.soulGifts || 'Innate healing, structural manifestation, intuitive leadership.'}</p>
+                              </div>
+                           </div>
+                         </div>
+                       </div>
+                    </motion.div>
+                  )}
+
+                  {infographicType === 'resonance' && (
+                    <motion.div key="resonance" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-12 max-w-4xl mx-auto h-full overflow-y-auto scrollbar-thin pr-2">
+                       <div className="text-center space-y-4">
+                         <div className="text-emerald-500 text-xs font-bold uppercase tracking-[0.4em]">Energy Flow & Geometry</div>
+                         <h1 className="text-5xl md:text-7xl font-light text-white tracking-tight">Torus Resonance</h1>
+                         <div className="h-px w-32 bg-gradient-to-r from-transparent via-emerald-500 to-transparent mx-auto"></div>
+                       </div>
+
+                       <div className="space-y-8">
+                         <div className="grid md:grid-cols-2 gap-8">
+                            <div className="bg-emerald-900/10 border border-emerald-500/20 rounded-[2rem] p-8 space-y-6">
+                              <h3 className="text-xs uppercase font-bold tracking-widest text-emerald-400 text-center">Energy Centers (Chakras)</h3>
+                              <div className="space-y-4">
+                                {data.chakras?.slice(0, 5).map((c, i) => (
+                                  <div key={i} className="flex items-center gap-4">
+                                    <div className="w-8 h-8 rounded-full flex items-center justify-center opacity-80 shrink-0 shadow-[0_0_10px_currentColor]" style={{ backgroundColor: c.color, color: c.color }}>
+                                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="flex justify-between items-end mb-1">
+                                        <span className="text-xs font-bold text-stone-200 uppercase tracking-widest">{c.name}</span>
+                                        <span className="text-[10px] text-emerald-400">{c.score}%</span>
+                                      </div>
+                                      <div className="h-1 bg-black/40 rounded-full overflow-hidden">
+                                        <div className="h-full bg-emerald-500" style={{ width: `${c.score}%` }}></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                                {(!data.chakras || data.chakras.length === 0) && (
+                                  <div className="text-stone-500 text-sm text-center italic py-4">Chakra data aligning...</div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="space-y-6">
+                              <div className="bg-black/40 border border-white/5 p-6 rounded-3xl">
+                                <div className="text-[10px] text-emerald-500 uppercase font-bold tracking-[0.3em] mb-2">Body & Earth Flow</div>
+                                <p className="text-sm font-light text-stone-300 italic leading-relaxed">"{data.torusAnalysis?.bodyAndFlow || 'Strong grounding vectors drawing current upwards from the core.'}"</p>
+                              </div>
+                              <div className="bg-black/40 border border-white/5 p-6 rounded-3xl">
+                                <div className="text-[10px] text-purple-500 uppercase font-bold tracking-[0.3em] mb-2">Mind & Cosmic Flow</div>
+                                <p className="text-sm font-light text-stone-300 italic leading-relaxed">"{data.torusAnalysis?.mindAndSpiritual || 'Expanded crown aperture receiving high levels of abstraction.'}"</p>
+                              </div>
+                            </div>
+                         </div>
+                         
+                         <div className="bg-black/40 p-8 rounded-[2rem] border border-emerald-500/20 text-center">
+                           <div className="text-emerald-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-4">Overall Biometric Geometry</div>
+                           <p className="text-lg font-light text-white italic max-w-2xl mx-auto">"{data.torusAnalysis?.overallAnalogy || 'The energetic structure resembles a steady, balanced sphere with clear pathways for intuition and logic.'}"</p>
+                         </div>
+                       </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           )}

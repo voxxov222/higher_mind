@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { UserProfileConfig, CosmicWidget } from '../types';
+import { saveAstralProfile } from './socialService';
 
 interface ProfileStore {
   config: UserProfileConfig | null;
@@ -61,7 +62,6 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     const config = get().config;
     if (!config) return;
     try {
-      const { saveAstralProfile } = await import('./socialService');
       await saveAstralProfile(config.userId, config);
     } catch (error) {
       console.error('Failed to save profile', error);

@@ -11,7 +11,8 @@ import { CosmicData } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { AstralMind, ThinkingMode } from './AstralMind';
 import { VortexScene } from './VortexSequencingSection';
-import { X, Minus, Lock, Unlock, Play, Square, Palette, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity as InfinityIcon, Magnet, Shuffle, Waves } from 'lucide-react';
+import { X, Minus, Lock, Unlock, Play, Square, Palette, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity as InfinityIcon, Magnet, Shuffle, Waves, Terminal } from 'lucide-react';
+import { TerminalOverlay } from './profile/TerminalOverlay';
 
 /**
  * Procedural Animation Types for Scene Objects
@@ -671,8 +672,8 @@ const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, on
 
         {/* Aspects */}
         {data.aspects && data.aspects.map((aspect, i) => {
-          const p1 = data.planets.find(p => p.name === aspect.planet1);
-          const p2 = data.planets.find(p => p.name === aspect.planet2);
+          const p1 = data.planets?.find(p => p.name === aspect.planet1);
+          const p2 = data.planets?.find(p => p.name === aspect.planet2);
           if (!p1 || !p2) return null;
           
           const radius1 = 11 + (data.planets.indexOf(p1) % 3) * 1.2;
@@ -748,10 +749,16 @@ const BlueprintGrid = () => {
  * CentralCore Component
  * Represents the central living intelligence core.
  */
-const CentralCore = ({ mode = 'idle' }: { mode?: ThinkingMode }) => {
+const CentralCore = ({ mode = 'idle', onPointerDown, onPointerMove, onPointerUp, onContextMenu, onPointerLeave }: { mode?: ThinkingMode, onPointerDown?: any, onPointerMove?: any, onPointerUp?: any, onContextMenu?: any, onPointerLeave?: any }) => {
   return (
     <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
-      <group>
+      <group 
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerOut={onPointerLeave}
+        onContextMenu={onContextMenu}
+      >
         <AstralMind mode={mode} />
       </group>
     </Float>
@@ -1306,6 +1313,45 @@ const NumerologyGeometria = ({ data, onSelect }: { data: CosmicData, onSelect: (
  */
 export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive, mode, vortexMode }: CosmicSceneProps) => {
 
+  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+  const [showBrainMenu, setShowBrainMenu] = useState<{x: number, y: number} | null>(null);
+  const touchTimer = useRef<NodeJS.Timeout | null>(null);
+  const startPos = useRef<{x: number, y: number}>({x: 0, y: 0});
+
+  const handlePointerDown = (e: any) => {
+    e.stopPropagation();
+    const x = e.clientX;
+    const y = e.clientY;
+    startPos.current = { x, y };
+    touchTimer.current = setTimeout(() => {
+        setShowBrainMenu({ x, y });
+    }, 600); // 600ms long press
+  };
+
+  const handlePointerMove = (e: any) => {
+    if (touchTimer.current) {
+        const dx = e.clientX - startPos.current.x;
+        const dy = e.clientY - startPos.current.y;
+        if (dx * dx + dy * dy > 100) {
+            clearTimeout(touchTimer.current);
+            touchTimer.current = null;
+        }
+    }
+  };
+
+  const handlePointerUp = () => {
+    if (touchTimer.current) {
+        clearTimeout(touchTimer.current);
+        touchTimer.current = null;
+    }
+  };
+
+  const handleContextMenu = (e: any) => {
+    e.stopPropagation();
+    if (e.nativeEvent) e.nativeEvent.preventDefault();
+    setShowBrainMenu({ x: e.clientX, y: e.clientY });
+  };
+
   const userNumbers = useMemo(() => {
     const counts = data?.archetype?.distribution || {};
     const nums = Object.entries(counts)
@@ -1319,6 +1365,7 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
   }, [data]);
 
   return (
+    <>
     <Canvas id="cosmic-canvas" dpr={[1, 1.5]} gl={{ powerPreference: "high-performance", alpha: false, stencil: false, antialias: false }} camera={{ position: [0, 15, 20], fov: 60 }} className="w-full h-full absolute inset-0 bg-black">
       {/* --- SCENE INFRASTRUCTURE --- */}
       <CameraController isPresentationActive={isPresentationActive} activeTab={activeTab} data={data} />
@@ -1330,7 +1377,14 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
       <Stars radius={100} depth={50} count={150} factor={4} saturation={0} fade />
 
       {/* --- CENTRAL BLUEPRINT GEOMETRY --- */}
-      <CentralCore mode={mode} />
+      <CentralCore 
+        mode={mode} 
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+        onContextMenu={handleContextMenu}
+      />
       {activeTab === 'torus' && <BlueprintGrid />}
       
       {/* --- MODULE NODES (NAVIGATION) --- */}
@@ -1625,5 +1679,40 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
         <Vignette eskil={false} offset={0.1} darkness={1.1} />
       </EffectComposer>
     </Canvas>
+
+    {/* Brain Popup Menu */}
+    <AnimatePresence>
+        {showBrainMenu && (
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.1 }}
+                style={{
+                    position: 'fixed',
+                    top: Math.min(showBrainMenu.y, typeof window !== 'undefined' ? window.innerHeight - 200 : 0),
+                    left: Math.min(showBrainMenu.x, typeof window !== 'undefined' ? window.innerWidth - 200 : 0),
+                }}
+                className="z-[100] bg-black/90 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-2 w-48 shadow-2xl flex flex-col pointer-events-auto"
+                onMouseLeave={() => setShowBrainMenu(null)}
+            >
+                <div className="px-3 py-2 text-[10px] text-emerald-500/70 uppercase tracking-widest font-bold border-b border-emerald-500/20 mb-1">
+                    Neural Core Actions
+                </div>
+                <button 
+                    onClick={(e) => { e.stopPropagation(); setShowBrainMenu(null); setIsTerminalOpen(true); }}
+                    className="flex items-center gap-3 px-3 py-2 hover:bg-emerald-500/20 rounded-lg text-white/80 hover:text-white transition-colors text-xs uppercase tracking-wider"
+                >
+                    <Terminal size={14} className="text-emerald-400" /> Open Terminal
+                </button>
+            </motion.div>
+        )}
+    </AnimatePresence>
+
+    {/* Terminal Overlay */}
+    <AnimatePresence>
+        {isTerminalOpen && <TerminalOverlay onClose={() => setIsTerminalOpen(false)} />}
+    </AnimatePresence>
+    </>
   );
 };

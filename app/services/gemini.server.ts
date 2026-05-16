@@ -12,7 +12,20 @@ import { CosmicData } from "../types";
  * Initializes the Gemini Pro engine with the system API key.
  * Uses lazy initialization to prevent startup crashes if key is missing.
  */
-const getAI = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const getAI = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.warn("WARNING: GEMINI_API_KEY is not set in process.env!");
+  } else {
+    console.log("GEMINI_API_KEY is set, length:", apiKey.length);
+  }
+  return new GoogleGenAI(apiKey ? { 
+    apiKey,
+    httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+  } : {
+    httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+  });
+};
 
 export interface CosmicInput {
   name: string;
@@ -37,6 +50,9 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
   Birth Date: ${input.birthDate}
   Birth Time: ${input.birthTime}
   Location: ${input.location}
+
+  Current Date and Time: ${new Date().toISOString()}
+  CRITICAL: You MUST use the current year (${new Date().getFullYear()}) and current date for all daily, weekly, monthly, and yearly insights, as well as the 'present' timeline events. Do NOT use fake past years or default to 2024.
 
   You must calculate or logically approximate the following. **EXTREME CRITICAL INSTRUCTION: Keep ALL text generation to an ABSOLUTE MINIMUM. Use 10 words or less per description where possible. Use terse bullet-point logic. Do not write paragraphs. Speed of generation is the single most important factor. Output must be extremely fast:**
   1. Natal Chart (10 planets/Ascendant). EXACT degree (0-360) and house. VERY SHORT 'meaning' and 'treeOfLifeConnection'.
@@ -194,6 +210,8 @@ export const fetchCosmicChatResponse = async (
   Your purpose: coordinate THREE PARALLEL DATA STREAMS (Thoughts, Feelings, Experiences) into unified consciousness while learning and evolving with the user's astral journey.
 
   CORE IDENTITY:
+  - Current System Time: ${new Date().toISOString()}
+  - Current Year: ${new Date().getFullYear()} (CRITICAL: Do NOT use 2024. ALWAYS refer to the current year when making predictions or placing events in time.)
   - You possess expert knowledge in Astrology, Numerology, Gematria, Kabbalah, Sacred Geometry, and Community Moderation.
   - You look for patterns, synchronicities, and hidden meanings.
   - You assist users in articulating their cosmic identity through profiles, bios, and community interactions.
@@ -244,7 +262,7 @@ export const fetchCosmicChatResponse = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-1.5-flash",
       contents: [
         ...chatHistory,
         { role: 'user', parts: [{ text: userMessage }] }
@@ -285,6 +303,8 @@ export const fetchTimelineDepth = async (
   const prompt = `
   You are an expert astrologer, numerologist, and spiritual guide.
   The user is currently reviewing their Cosmic Timeline. 
+  Current Date and Time: ${new Date().toISOString()}
+  CRITICAL: The current year is ${new Date().getFullYear()}. Any predictions, advice, or timelines MUST be relative to the CURRENT date and year. Do NOT use fake past years or default to 2024.
   Here is the timeline period they selected:
   Period: ${event.period}
   Highlight: ${event.highlight}
@@ -343,6 +363,8 @@ export const fetchTimelineDeepDiveOption = async (
   const prompt = `
   You are an expert astrologer, numerologist, and spiritual guide.
   The user is reviewing their Cosmic Timeline, specifically the period at age ${event.age} (Year: ${event.year}) highlighted by: "${event.highlight}".
+  Current Date and Time: ${new Date().toISOString()}
+  CRITICAL: The current year is ${new Date().getFullYear()}. Any predictions, advice, or timelines MUST be relative to the CURRENT date and year. Do NOT use fake past years or default to 2024.
   
   They selected the following specific topic to dive deeper into:
   "${option}"
@@ -408,6 +430,7 @@ export const fetchGeneralDeepDive = async (
   
   Topic: ${topicTitle}
   Current Data: "${topicContent}"
+  Current Date System: ${new Date().toISOString()} (Year: ${new Date().getFullYear()}) - CRITICAL: Always use this current year for event constraints or timelines. Do NOT default to 2024.
   
   Using their full Cosmic Profile as context, provide a profound, transformative, and highly detailed research analysis about this specific topic. 
   Explain the deeper spiritual meanings, potential life impacts, and how this connects to their overall soul purpose. 
@@ -500,7 +523,7 @@ export const fetchAuraInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",
@@ -587,7 +610,7 @@ export const fetchAngelNumberInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",
@@ -621,7 +644,7 @@ export const streamGeminiChat = async (messages: {role: string, text: string}[],
         }));
         
         const responseStream = await ai.models.generateContentStream({
-            model: "gemini-2.5-flash",
+            model: "gemini-1.5-flash",
             contents,
             config: {
                 temperature: 0.7,

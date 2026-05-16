@@ -84,7 +84,7 @@ export const AngelNumbersSection = ({ cosmicData }: AngelNumbersSectionProps) =>
   const wordGematria = calculateGematria(gematriaInput, gematriaSystem);
 
   const addToHistory = (word: string, value: number) => {
-    if (!word || history.find(h => h.word === word && h.system === gematriaSystem)) return;
+    if (!word || history?.find(h => h.word === word && h.system === gematriaSystem)) return;
     setHistory(prev => [{ word, value, system: gematriaSystem }, ...prev].slice(0, 15));
   };
 

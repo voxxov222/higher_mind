@@ -166,24 +166,41 @@ const HumanSilhouette = () => {
 
 const CosmicVortex = () => {
     const vortexRef = useRef<THREE.Points>(null!);
-    const count = 20000;
+    const count = 30000;
     
     const positions = useMemo(() => {
         const pos = new Float32Array(count * 3);
+        const radius = 6.0;
+        const tube = 2.5;
+        
         for(let i=0; i<count; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const r = 2.0 + Math.random() * 8.0;
-            const h = (Math.random() - 0.5) * 15.0;
-            pos[i*3] = Math.cos(angle) * r;
-            pos[i*3+1] = h;
-            pos[i*3+2] = Math.sin(angle) * r;
+            // Torus distribution
+            const u = Math.random() * Math.PI * 2;
+            const v = Math.random() * Math.PI * 2;
+            
+            // Random displacement within the tube
+            const targetTube = tube * Math.pow(Math.random(), 0.5);
+            
+            const x = (radius + targetTube * Math.cos(v)) * Math.cos(u);
+            const y = targetTube * Math.sin(v);
+            const z = (radius + targetTube * Math.cos(v)) * Math.sin(u);
+            
+            pos[i*3] = x;
+            pos[i*3+1] = y;
+            pos[i*3+2] = z;
         }
         return pos;
     }, []);
 
     useFrame((state) => {
         if(vortexRef.current) {
-            vortexRef.current.rotation.y = state.clock.getElapsedTime() * 0.05;
+            vortexRef.current.rotation.y = state.clock.getElapsedTime() * 0.1;
+            vortexRef.current.rotation.x = Math.sin(state.clock.getElapsedTime() * 0.05) * 0.2;
+            vortexRef.current.rotation.z = Math.cos(state.clock.getElapsedTime() * 0.05) * 0.2;
+            
+            // Pulse effect
+            const scale = 1.0 + Math.sin(state.clock.getElapsedTime() * 2.0) * 0.05;
+            vortexRef.current.scale.set(scale, scale, scale);
         }
     })
 
@@ -192,7 +209,7 @@ const CosmicVortex = () => {
             <bufferGeometry>
                 <bufferAttribute attach="attributes-position" args={[positions, 3]} />
             </bufferGeometry>
-            <pointsMaterial size={0.02} color="#818cf8" transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} />
+            <pointsMaterial size={0.05} color="#8b5cf6" transparent opacity={0.4} blending={THREE.AdditiveBlending} depthWrite={false} />
         </points>
     )
 }

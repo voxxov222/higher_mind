@@ -628,8 +628,8 @@ export const NatalChartAdvanced = ({ data, selectedPlanet, onPlanetClick, onRese
 
         {/* Aspects */}
         {data?.aspects?.map((aspect: any, i: number) => {
-          const p1 = allBodies.find((p: any) => p.name === aspect.planet1);
-          const p2 = allBodies.find((p: any) => p.name === aspect.planet2);
+          const p1 = allBodies?.find((p: any) => p.name === aspect.planet1);
+          const p2 = allBodies?.find((p: any) => p.name === aspect.planet2);
           if (!p1 || !p2) return null;
           
           const getPos = (p: any) => {

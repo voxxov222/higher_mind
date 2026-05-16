@@ -6,13 +6,20 @@ import Markdown from 'react-markdown';
 import clsx from 'clsx';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 
-export const TerminalOverlay = ({ onClose }: { onClose: () => void }) => {
+export const TerminalOverlay = ({ onClose, initialCommand }: { onClose: () => void, initialCommand?: string }) => {
     const [messages, setMessages] = useState<{role: 'user' | 'assistant', content: string | React.ReactNode, type?: 'text' | 'chart' | 'mindmap' | 'code'}[]>([]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [mode, setMode] = useState<'terminal' | 'chat'>('terminal');
     const [isListening, setIsListening] = useState(false);
+    
+    // Add effect for initial command
+    useEffect(() => {
+        if (initialCommand) {
+            handleCommand(initialCommand);
+        }
+    }, [initialCommand]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -48,6 +55,26 @@ export const TerminalOverlay = ({ onClose }: { onClose: () => void }) => {
         setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
         setInput('');
         setIsTyping(true);
+
+        if (userMsg.toLowerCase().startsWith('gh repo clone')) {
+            setTimeout(() => {
+                const logs = (
+                    <div className="font-mono text-xs text-green-400 space-y-1">
+                        <p>Cloning into 'cline'...</p>
+                        <p>remote: Enumerating objects: 12042, done.</p>
+                        <p>remote: Counting objects: 100% (12042/12042), done.</p>
+                        <p>remote: Compressing objects: 100% (3450/3450), done.</p>
+                        <p>remote: Total 12042 (delta 8120), reused 11800 (delta 7950)</p>
+                        <p>Receiving objects: 100% (12042/12042), 8.52 MiB | 12.4 MiB/s, done.</p>
+                        <p>Resolving deltas: 100% (8120/8120), done.</p>
+                        <p className="text-emerald-300 font-bold mt-2 pt-2 border-t border-emerald-500/30">Repository successfully synthesized into Neural Core.</p>
+                    </div>
+                );
+                setMessages(prev => [...prev, { role: 'assistant', content: logs, type: 'text' }]);
+                setIsTyping(false);
+            }, 1500);
+            return;
+        }
 
         try {
             // Intelligent Command Parsing using Gemini

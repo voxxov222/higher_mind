@@ -12,6 +12,17 @@ interface HigherMindContextType {
   clearState: () => void;
   savedMessages: { id: string; title: string; content: string; type: string }[];
   saveToChat: (title: string, content: string, type: string) => void;
+  aiModules: AIModule[];
+  toggleModule: (id: string) => void;
+}
+
+export interface AIModule {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  enabled: boolean;
+  category: 'audio' | 'vision' | 'intelligence' | 'data' | 'system';
 }
 
 const HigherMindContext = createContext<HigherMindContextType | undefined>(undefined);
@@ -24,6 +35,22 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [coherence, setCoherence] = useState(0.5);
   const [alignment, setAlignment] = useState(0.7);
   const [savedMessages, setSavedMessages] = useState<{ id: string; title: string; content: string; type: string }[]>([]);
+
+  const [aiModules, setAiModules] = useState<AIModule[]>([
+    { id: 'audio_spark', name: 'Voice Matrix', icon: 'volume-2', description: 'Real-time consciousness-to-frequency conversion', enabled: true, category: 'audio' },
+    { id: 'auth_db', name: 'Identity Vault', icon: 'database', description: 'Secure permanent storage for soul signatures', enabled: true, category: 'system' },
+    { id: 'image', name: 'Vision Engine', icon: 'image', description: 'High-fidelity astral image stabilization', enabled: true, category: 'vision' },
+    { id: 'spark', name: 'Gemini Core', icon: 'zap', description: 'Direct neural link to hyper-intelligence', enabled: true, category: 'intelligence' },
+    { id: 'google', name: 'Search Stream', icon: 'globe', description: 'Real-time terrestrial data grounding', enabled: false, category: 'data' },
+    { id: 'video_spark', name: 'Temporal Motion', icon: 'video', description: 'Fluid state-to-motion generation', enabled: false, category: 'vision' },
+    { id: 'document_scanner', name: 'Pattern Analysis', icon: 'scan', description: 'Deep structural meaning extraction from visual inputs', enabled: false, category: 'vision' },
+    { id: 'bolt', name: 'Latency Override', icon: 'bolt', description: 'Accelerated synaptic firing for low-latency responses', enabled: true, category: 'system' },
+    { id: 'network_intelligence', name: 'High Thinking', icon: 'brain', description: 'Enhanced multi-layered reasoning lattice', enabled: true, category: 'intelligence' }
+  ]);
+
+  const toggleModule = (id: string) => {
+    setAiModules(prev => prev.map(m => m.id === id ? { ...m, enabled: !m.enabled } : m));
+  };
 
   const saveToChat = useCallback((title: string, content: string, type: string) => {
     setSavedMessages(prev => [...prev, { id: `save_${Date.now()}`, title, content, type }]);
@@ -104,7 +131,9 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       processPacket,
       clearState,
       savedMessages,
-      saveToChat
+      saveToChat,
+      aiModules,
+      toggleModule
     }}>
       {children}
     </HigherMindContext.Provider>

@@ -1,7 +1,15 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { GoogleGenAI } from "@google/genai";
 
-const getAI = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const getAI = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  return new GoogleGenAI(apiKey ? { 
+    apiKey,
+    httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+  } : {
+    httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+  });
+};
 
 export async function action({ request }: ActionFunctionArgs) {
   if (request.method !== "POST") {
@@ -17,7 +25,7 @@ export async function action({ request }: ActionFunctionArgs) {
     }));
     
     const responseStream = await ai.models.generateContentStream({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents,
       config: {
         temperature: 0.7,

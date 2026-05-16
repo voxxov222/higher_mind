@@ -24,9 +24,11 @@ const DnaPair = ({
 }: any) => {
     const pairRef = useRef<THREE.Group>(null!);
     const memoryPacketRef = useRef<THREE.Mesh>(null!);
+    const leftNodeRef = useRef<THREE.Mesh>(null!);
+    const rightNodeRef = useRef<THREE.Mesh>(null!);
     
     const y = (index / numPairs) * heightSpread - heightSpread / 2;
-    const angle = (index / numPairs) * Math.PI * 8; // 4 full twists // 4 full twists
+    const angle = (index / numPairs) * Math.PI * 8; // 4 full twists
     
     const x1 = Math.cos(angle) * radius;
     const z1 = Math.sin(angle) * radius;
@@ -46,7 +48,6 @@ const DnaPair = ({
         if (memoryPacketRef.current) {
             // Animate memory packet along the bridge
             const t = (state.clock.elapsedTime * 0.5 + index * 0.1) % 1; // 0 to 1
-            // Smooth ping pong
             const pingPong = Math.sin(t * Math.PI); // 0 to 1 to 0
             
             memoryPacketRef.current.position.x = THREE.MathUtils.lerp(x1, x2, t);
@@ -56,30 +57,55 @@ const DnaPair = ({
             // Pulse scale
             memoryPacketRef.current.scale.setScalar(0.5 + pingPong * 0.5);
         }
+
+        // Pulsate nodes based on activation percentage (higher activation = faster pulse)
+        const pulseSpeed = (activationPercentage || 50) / 20; 
+        if (leftNodeRef.current) {
+            const scale = 1 + Math.sin(state.clock.elapsedTime * pulseSpeed + index) * 0.15;
+            leftNodeRef.current.scale.setScalar(scale);
+        }
+        if (rightNodeRef.current) {
+            const scale = 1 + Math.sin(state.clock.elapsedTime * pulseSpeed + index + Math.PI) * 0.15;
+            rightNodeRef.current.scale.setScalar(scale);
+        }
     });
 
     return (
         <group ref={pairRef}>
             {/* Strand 1 (Inherited / Ancestral) */}
             <mesh 
+                ref={leftNodeRef}
                 position={[x1, 0, z1]} 
-                onPointerEnter={(e) => { e.stopPropagation(); setHoveredLeft(true); onHover(traitLeft); }}
-                onPointerLeave={() => { setHoveredLeft(false); onHover(null); }}
+                onPointerEnter={(e) => { e.stopPropagation(); setHoveredLeft(true); onHover(traitLeft); document.body.style.cursor = 'pointer'; }}
+                onPointerLeave={() => { setHoveredLeft(false); onHover(null); document.body.style.cursor = 'auto'; }}
                 onClick={(e) => { e.stopPropagation(); onSelect({ title: traitLeft, description: descriptionLeft, color: colorLeft, type: 'Ancestral Pattern', activation: activationPercentage, integration: integrationPercentage }); }}
             >
-                <sphereGeometry args={[hoveredLeft ? 0.7 : 0.4, 32, 32]} />
-                <meshStandardMaterial color={colorLeft} emissive={colorLeft} emissiveIntensity={hoveredLeft ? 2 : 0.8} />
+                <sphereGeometry args={[0.5, 32, 32]} />
+                <meshStandardMaterial color={colorLeft} emissive={colorLeft} emissiveIntensity={hoveredLeft ? 3 : 1} transparent opacity={0.9} />
+                {hoveredLeft && (
+                    <mesh>
+                        <sphereGeometry args={[0.8, 32, 32]} />
+                        <meshBasicMaterial color={colorLeft} transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} />
+                    </mesh>
+                )}
             </mesh>
             
             {/* Strand 2 (Evolutionary / Karmic) */}
             <mesh 
+                ref={rightNodeRef}
                 position={[x2, 0, z2]}
-                onPointerEnter={(e) => { e.stopPropagation(); setHoveredRight(true); onHover(traitRight); }}
-                onPointerLeave={() => { setHoveredRight(false); onHover(null); }}
+                onPointerEnter={(e) => { e.stopPropagation(); setHoveredRight(true); onHover(traitRight); document.body.style.cursor = 'pointer'; }}
+                onPointerLeave={() => { setHoveredRight(false); onHover(null); document.body.style.cursor = 'auto'; }}
                 onClick={(e) => { e.stopPropagation(); onSelect({ title: traitRight, description: descriptionRight, color: colorRight, type: 'Karmic Evolution', activation: activationPercentage, integration: integrationPercentage }); }}
             >
-                <sphereGeometry args={[hoveredRight ? 0.7 : 0.4, 32, 32]} />
-                <meshStandardMaterial color={colorRight} emissive={colorRight} emissiveIntensity={hoveredRight ? 2 : 0.8} />
+                <sphereGeometry args={[0.5, 32, 32]} />
+                <meshStandardMaterial color={colorRight} emissive={colorRight} emissiveIntensity={hoveredRight ? 3 : 1} transparent opacity={0.9} />
+                {hoveredRight && (
+                    <mesh>
+                        <sphereGeometry args={[0.8, 32, 32]} />
+                        <meshBasicMaterial color={colorRight} transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} />
+                    </mesh>
+                )}
             </mesh>
 
             {/* Connection Bridge */}
@@ -99,16 +125,18 @@ const DnaPair = ({
             
             {/* Floating text labels when hovered */}
             {hoveredLeft && (
-                <Html position={[x1 * 1.5, 0, z1 * 1.5]} center className="pointer-events-none">
-                    <div className="bg-black/60 backdrop-blur-md border border-white/20 px-2 py-1 rounded text-white text-[10px] whitespace-nowrap" style={{ borderColor: colorLeft }}>
-                        {traitLeft}
+                <Html position={[x1 * 1.5, 0, z1 * 1.5]} center className="pointer-events-none z-50">
+                    <div className="bg-black/80 backdrop-blur-md border border-white/20 px-3 py-2 rounded-lg text-white text-[10px] whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]" style={{ borderColor: colorLeft }}>
+                        <div className="font-bold mb-1" style={{ color: colorLeft }}>{traitLeft}</div>
+                        <div className="text-white/60">Activation: {activationPercentage?.toFixed(1) || 50}%</div>
                     </div>
                 </Html>
             )}
             {hoveredRight && (
-                <Html position={[x2 * 1.5, 0, z2 * 1.5]} center className="pointer-events-none">
-                    <div className="bg-black/60 backdrop-blur-md border border-white/20 px-2 py-1 rounded text-white text-[10px] whitespace-nowrap" style={{ borderColor: colorRight }}>
-                        {traitRight}
+                <Html position={[x2 * 1.5, 0, z2 * 1.5]} center className="pointer-events-none z-50">
+                    <div className="bg-black/80 backdrop-blur-md border border-white/20 px-3 py-2 rounded-lg text-white text-[10px] whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]" style={{ borderColor: colorRight }}>
+                        <div className="font-bold mb-1" style={{ color: colorRight }}>{traitRight}</div>
+                        <div className="text-white/60">Activation: {activationPercentage?.toFixed(1) || 50}%</div>
                     </div>
                 </Html>
             )}

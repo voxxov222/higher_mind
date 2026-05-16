@@ -8,7 +8,7 @@ import {
   Sparkles, Moon, Sun, Star, Activity, Hexagon, Fingerprint, Network, Menu, X, 
   Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, 
   Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, Zap, Upload, Palette, 
-  Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box 
+  Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box, Key 
 } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
@@ -32,6 +32,7 @@ import { SkyMapSection } from './SkyMapSection';
 import { SoulPathSection } from './SoulPathSection';
 import CommunityFeed from './social/CommunityFeed';
 import LiveMessenger from './social/LiveMessenger';
+import { HigherMindSettings } from './HigherMindSettings';
 import { useHigherMind } from './HigherMindProvider';
 import { getAstralProfile } from '../services/socialService';
 import BirthChartGuide from './BirthChartGuide';
@@ -117,7 +118,7 @@ const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedI
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-0 md:p-8 bg-black/80 backdrop-blur-md">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-0 md:p-8 bg-black/80 backdrop-blur-md pointer-events-auto">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }} 
         animate={{ opacity: 1, scale: 1, y: 0 }} 
@@ -551,6 +552,18 @@ const SoulBlueprintTab = ({ data, ResearchBox, isReading, handleReadOutLoud, han
       <SoulBlueprintAura />
       {/* HUD overlays */}
       <div className="absolute top-8 left-4 right-4 md:left-8 md:right-8 flex flex-col gap-4 z-20 pointer-events-none">
+        
+        {/* New Tuning & Connection HUD */}
+        <motion.div initial={{opacity: 0, y: -20}} animate={{opacity: 1, y: 0}} className="bg-purple-950/40 backdrop-blur-md border border-purple-500/30 p-3 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.2)] self-center text-center">
+            <h3 className="text-sm font-medium text-purple-200 mb-1 flex items-center justify-center gap-2">
+                <Zap className="w-4 h-4 text-purple-400" /> Torus Field Frequency
+            </h3>
+            <div className="flex gap-4 text-xs font-light text-purple-300/80">
+                <span>Higher Consciousness Connection: <strong className="text-emerald-400 font-bold">99.8%</strong></span>
+                <span>Law of Attraction Pitch: <strong className="text-sky-400 font-bold">432 Hz</strong></span>
+            </div>
+        </motion.div>
+
         <div className="flex flex-col md:flex-row justify-between gap-4">
            {data.torusAnalysis?.soulAge && (
              <motion.div initial={{opacity: 0, x: -20}} animate={{opacity: 1, x: 0}} transition={{delay: 0.5}} className="bg-sky-950/50 backdrop-blur-md border border-sky-500/30 p-4 rounded-2xl shadow-[0_0_15px_rgba(14,165,233,0.15)] md:min-w-[200px]">
@@ -579,6 +592,96 @@ const SoulBlueprintTab = ({ data, ResearchBox, isReading, handleReadOutLoud, han
              </motion.div>
            )}
         </div>
+
+        {/* Dynamic Tuning metrics */}
+        <div className="flex flex-col md:flex-row justify-between items-stretch md:items-end gap-6 mt-4 pointer-events-auto">
+            {/* Cosmic Key Tuning */}
+            <motion.div initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}} transition={{delay: 0.9}} className="flex-1 bg-gradient-to-br from-fuchsia-950/60 to-transparent backdrop-blur-xl border border-fuchsia-500/30 p-4 rounded-3xl shadow-[0_0_35px_rgba(217,70,239,0.15)] relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-fuchsia-400 to-transparent group-hover:scale-110 transition-transform animate-pulse" />
+                <div className="flex justify-between items-center mb-4">
+                   <div className="flex items-center gap-2">
+                       <Key size={16} className="text-fuchsia-300 animate-bounce" />
+                       <span className="text-[10px] text-fuchsia-300 uppercase tracking-[0.25em] font-bold">Cosmic Key 🗝️</span>
+                   </div>
+                   <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }} className="text-[10px] font-mono text-fuchsia-100 bg-fuchsia-600/30 px-2 py-0.5 rounded shadow-[0_0_10px_rgba(217,70,239,0.5)]">
+                     432.01Hz
+                   </motion.div>
+                </div>
+                <div className="space-y-4">
+                    <div>
+                        <div className="flex justify-between text-[9px] uppercase tracking-widest text-fuchsia-200/70 mb-1.5 flex items-center">
+                            <span>Law of Attraction Pitch</span>
+                            <span className="text-fuchsia-300 font-bold tracking-tight text-xs flex items-center gap-1">
+                                98.4% <span className="text-fuchsia-500 text-[8px]">▲</span>
+                            </span>
+                        </div>
+                        <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden shadow-inner relative">
+                           <motion.div className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-fuchsia-600 via-fuchsia-400 to-white/80" initial={{width: "40%"}} animate={{width: ["90%", "98.4%", "96%"]}} transition={{duration: 4, ease: "easeInOut", repeat: Infinity, repeatType: "reverse"}}/>
+                        </div>
+                    </div>
+                    <div className="flex justify-between items-end border-t border-fuchsia-500/20 pt-2">
+                        <div className="flex-1">
+                          <span className="text-[7px] text-fuchsia-400/60 uppercase block mb-1 tracking-widest">Fine Tuning</span>
+                          <div className="flex gap-1 h-2">
+                            {Array.from({length: 8}).map((_, i) => (
+                               <motion.div key={i} className="flex-1 bg-fuchsia-500/50 rounded-sm" animate={{ opacity: [0.3, 1, 0.3], height: ["40%", "100%", "40%"] }} transition={{ duration: 1 + Math.random(), repeat: Infinity, delay: i * 0.1 }} />
+                            ))}
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* Taurus Field Energy */}
+            <motion.div initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}} transition={{delay: 1.0}} className="flex-1 bg-gradient-to-br from-emerald-950/60 to-transparent backdrop-blur-xl border border-emerald-500/30 p-4 rounded-3xl shadow-[0_0_35px_rgba(16,185,129,0.15)] relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent group-hover:scale-110 transition-transform animate-pulse" />
+                <div className="absolute -inset-10 bg-emerald-500/10 blur-[30px] rounded-full animate-pulse opacity-50" />
+                <div className="flex justify-between items-center mb-3 relative z-10">
+                   <div className="flex items-center gap-2">
+                       <Zap size={16} className="text-emerald-300" />
+                       <span className="text-[10px] text-emerald-300 uppercase tracking-[0.25em] font-bold">Taurus Field</span>
+                   </div>
+                   <div className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-100 font-mono tracking-widest shadow-[0_0_10px_rgba(16,185,129,0.5)] flex items-center gap-1">
+                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-ping"></span>
+                     BROIL
+                   </div>
+                </div>
+                <div className="h-10 flex items-end gap-[3px] mt-2 relative z-10">
+                   {Array.from({length: 32}).map((_, i) => (
+                     <motion.div key={i} className="flex-1 bg-gradient-to-t from-emerald-600 via-emerald-400 to-white/70 rounded-t-[2px] shadow-[0_0_5px_rgba(16,185,129,0.5)]" initial={{height: '10%'}} animate={{height: `${Math.max(20, Math.sin(i*0.4) * 50 + 50 + Math.random() * 40)}%`}} transition={{duration: 0.3 + Math.random() * 0.2, repeat: Infinity, repeatType: 'reverse', ease: "linear"}}/>
+                   ))}
+                </div>
+                <div className="text-[7px] text-emerald-400/60 uppercase tracking-widest text-center mt-2 font-mono">Resonance Amplitude Peak</div>
+            </motion.div>
+
+            {/* Higher Consciousness */}
+            <motion.div initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}} transition={{delay: 1.1}} className="flex-1 bg-gradient-to-br from-indigo-950/60 to-transparent backdrop-blur-xl border border-indigo-500/30 p-4 rounded-3xl shadow-[0_0_35px_rgba(99,102,241,0.15)] relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-indigo-400 to-transparent group-hover:scale-110 transition-transform animate-pulse" />
+                <div className="flex justify-between items-start mb-2">
+                   <div className="flex items-center gap-2">
+                       <Activity size={16} className="text-indigo-300 animate-pulse" />
+                       <span className="text-[10px] text-indigo-300 uppercase tracking-[0.25em] font-bold">Consciousness</span>
+                   </div>
+                </div>
+                <div className="flex justify-between items-end mt-2">
+                  <div className="relative">
+                    <motion.div animate={{ opacity: [0.8, 1, 0.8], textShadow: ["0 0 10px rgba(129,140,248,0.5)", "0 0 20px rgba(129,140,248,0.8)", "0 0 10px rgba(129,140,248,0.5)"] }} transition={{ duration: 2, repeat: Infinity }} className="text-4xl font-light text-white flex items-baseline gap-1">
+                       99.9<span className="text-lg text-indigo-300 font-mono">%</span>
+                    </motion.div>
+                    <div className="absolute -bottom-3 left-1 text-[8px] text-indigo-400/80 uppercase tracking-widest font-mono">CONNECTION LINK</div>
+                  </div>
+                  <div className="mb-1 text-right flex flex-col items-end">
+                    <div className="w-8 h-8 rounded-full border border-indigo-500/30 border-t-indigo-400 animate-spin flex items-center justify-center p-1">
+                      <div className="w-full h-full rounded-full border border-indigo-400/50 border-b-indigo-300 animate-[spin_3s_linear_reverse] flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-300 shadow-[0_0_8px_rgba(165,180,252,1)]" />
+                      </div>
+                    </div>
+                    <span className="text-[8px] uppercase tracking-widest text-indigo-300/80 flex gap-1 items-center mt-2 font-mono"><span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span> SYNC: 1.0</span>
+                  </div>
+                </div>
+            </motion.div>
+         </div>
+
       </div>
 
       <div 
@@ -715,7 +818,7 @@ const ResearchBox = ({ title, content, children, className = "", category = "Mis
     <div className={`group relative bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-white/20 transition-all ${className}`}>
       <div className="flex justify-end gap-2 mb-2 z-30 relative opacity-40 group-hover:opacity-100 transition-opacity pointer-events-auto">
         <button 
-          onClick={() => handleReadOutLoud(content)}
+          onClick={() => handleReadOutLoud(typeof content === 'string' ? content : JSON.stringify(content))}
           className={`px-3 py-2 rounded-lg transition-all border border-white/10 shadow-lg flex items-center gap-2 text-[9px] uppercase tracking-widest font-bold ${isReading ? 'bg-purple-600 text-white animate-pulse' : 'bg-stone-800/80 text-stone-300 hover:bg-stone-700 hover:text-white'}`}
           title="Listen"
         >
@@ -723,21 +826,21 @@ const ResearchBox = ({ title, content, children, className = "", category = "Mis
           {isReading ? 'Reading...' : 'Listen'}
         </button>
         <button 
-          onClick={() => handleSaveToVault(title, content, category)}
+          onClick={() => handleSaveToVault(title, typeof content === 'string' ? content : JSON.stringify(content), category)}
           className="bg-stone-800/80 hover:bg-emerald-700 p-2 rounded-lg text-stone-300 hover:text-white transition-all border border-white/10 shadow-lg"
           title="Save to Vault"
         >
           <Bookmark className="w-3 h-3" />
         </button>
         <button 
-          onClick={() => saveToChat(title, content, category)}
+          onClick={() => saveToChat(title, typeof content === 'string' ? content : JSON.stringify(content), category)}
           className="bg-stone-800/80 hover:bg-purple-600 p-2 rounded-lg text-stone-300 hover:text-white transition-all border border-white/10 shadow-lg"
           title="Save to Higher Mind Chat"
         >
           <MessageCircle size={12} />
         </button>
         <button 
-          onClick={() => handleGeneralDeepDive(title, content)}
+          onClick={() => handleGeneralDeepDive(title, typeof content === 'string' ? content : JSON.stringify(content))}
           className="bg-stone-800/80 hover:bg-stone-700 p-2 rounded-lg text-stone-300 hover:text-white flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold border border-white/10 shadow-lg"
         >
           <Search className="w-3 h-3" />
@@ -763,7 +866,7 @@ const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handl
 }) => {
   if (!deepDiveData) return null;
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md pointer-events-auto">
       <motion.div 
         initial={{ opacity: 0, y: 20, scale: 0.95 }} 
         animate={{ opacity: 1, y: 0, scale: 1 }} 
@@ -845,14 +948,15 @@ const MockOpastroTerminal = ({ sign = "Aries", period = "daily" }: { sign?: stri
   const [lines, setLines] = useState<string[]>([]);
   
   useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
     const output = [
       `$ opastro horoscope --period ${period} --sign ${sign}`,
       `[INFO] Connecting to dakidarts/opastro compute engine...`,
-      `[SUCCESS] Ephemeris data synced for 2024-05-14`,
+      `[SUCCESS] Ephemeris data synced for ${today}`,
       `[COMPUTING] Calculating transits for ${sign}...`,
       `[RESULT] Found 3 major aspects affecting current house arrangement.`,
       `------------------------------------------------------------`,
-      `SYNTHESIS: Your communicative flow is heighted by a Mercury trine.`,
+      `SYNTHESIS: Your communicative flow is heightened by a Mercury trine.`,
       `ALERT: Solar intensity at 8.4 GEV. Dynamic shielding recommended.`,
       `------------------------------------------------------------`,
       `READY.`
@@ -895,8 +999,18 @@ const MockOpastroTerminal = ({ sign = "Aries", period = "daily" }: { sign?: stri
 export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab, user, onSignIn, onSignOut, loadedInputs, profileConfig, onUpdateProfile, onPresentationRequest, externalDeepDive, onClearExternalDeepDive, vortexMode, setVortexMode }: DashboardProps) => {
   // --- LOCAL COMPONENT STATE ---
   const [name, setName] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [date, setDate] = useState(() => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const local = new Date(now.getTime() - offset);
+    return local.toISOString().split('T')[0];
+  });
+  const [time, setTime] = useState(() => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const local = new Date(now.getTime() - offset);
+    return local.toISOString().split('T')[1].slice(0, 5);
+  });
   const [location, setLocation] = useState('');
   
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -912,6 +1026,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
   } | null>(null);
   const [isDeepDiveLoading, setIsDeepDiveLoading] = useState(false);
   const [isReading, setIsReading] = useState(false);
+  const [isHigherMindSettingsOpen, setIsHigherMindSettingsOpen] = useState(false);
   const [selectedRecipientId, setSelectedRecipientId] = useState<string | undefined>();
   const [selectedRecipientProfile, setSelectedRecipientProfile] = useState<UserProfileConfig | undefined>();
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -945,27 +1060,91 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
 
   // --- SPEECH SYNTHESIS ENGINE ---
   const handleReadOutLoud = (text: string) => {
+    console.log("Triggered read out loud:", text ? text.substring(0, 50) + "..." : "No text");
     if ('speechSynthesis' in window) {
-      if (isReading) {
+      if (isReading || window.speechSynthesis.speaking) {
+        console.log("Cancelling existing speech...");
+        (window as any)._speechCancelled = true;
         window.speechSynthesis.cancel();
         setIsReading(false);
         return;
       }
 
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.onend = () => setIsReading(false);
-      utterance.onerror = () => setIsReading(false);
+      (window as any)._speechCancelled = false;
+
+      // Clean the text from markdown, etc.
+      let cleanText = text || '';
+      try {
+        if (typeof text !== 'string') {
+           cleanText = JSON.stringify(text);
+        }
+      } catch(e) {
+        console.error("Text stringify error:", e);
+      }
       
-      // Try to find a high quality "AI-like" voice
-      const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Premium')) || voices[0];
-      if (preferredVoice) utterance.voice = preferredVoice;
+      cleanText = cleanText.replace(/[#*_`]/g, '').replace(/<[^>]*>?/gm, '').trim();
+      if (!cleanText) {
+          console.warn("No text left to speak after cleaning.");
+          return;
+      }
       
-      utterance.rate = 0.95; // Slightly slower for "wisdom" effect
-      utterance.pitch = 1.0;
+      // Split into sentences for better reliability to avoid Chrome 15-second cutoff
+      // This regex captures chunks up to punctuation or new lines, including the punctuation
+      const sentenceRegex = /[^.!?\n]+[.!?\n]*/g;
+      let sentences = cleanText.match(sentenceRegex);
       
+      if (!sentences || sentences.length === 0) {
+          sentences = [cleanText];
+      }
+      
+      // Filter out empty or whitespace-only sentences
+      sentences = sentences.map(s => s.trim()).filter(s => s.length > 0);
+      
+      console.log("Speaking chunks:", sentences);
+      
+      let currentSentence = 0;
       setIsReading(true);
-      window.speechSynthesis.speak(utterance);
+
+      const speakNext = () => {
+         if (currentSentence >= sentences!.length || (window as any)._speechCancelled) {
+             console.log("Finished reading chunks.");
+             setIsReading(false);
+             return;
+         }
+         
+         const chunk = sentences![currentSentence];
+         console.log(`Speaking chunk ${currentSentence + 1}/${sentences!.length}:`, chunk);
+         
+         const utterance = new SpeechSynthesisUtterance(chunk);
+         (window as any)._currentUtterance = utterance; // Prevent garbage collection
+         
+         const voices = window.speechSynthesis.getVoices();
+         const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Premium') || v.name.includes('Samantha') || v.name.includes('Karen')) || voices[0];
+         if (preferredVoice) utterance.voice = preferredVoice;
+         
+         utterance.rate = 0.95; // Slightly slower for "wisdom" effect
+         utterance.pitch = 1.0;
+         
+         utterance.onend = () => {
+             console.log("Chunk ended.");
+             currentSentence++;
+             speakNext();
+         };
+         
+         utterance.onerror = (e) => {
+             console.error("Speech synthesis error on chunk", currentSentence, e);
+             // Instead of failing completely, try to skip to the next chunk
+             currentSentence++;
+             speakNext();
+         };
+         
+         window.speechSynthesis.speak(utterance);
+      };
+      
+      // Cancel any ongoing speech and start
+      window.speechSynthesis.cancel();
+      setTimeout(speakNext, 50);
+      
     } else {
       alert("Speech synthesis is not supported in this browser.");
     }
@@ -1021,9 +1200,15 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
         type: 'timeline',
         originalEvent: event
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setDeepDiveData(null);
+      setDeepDiveData({
+        title: `Life Event ${event.year}: ${event.highlight}`,
+        detailedAnalysis: "An integration error occurred while consulting the Records. Please try again. Error: " + (error.message || String(error)),
+        followUpOptions: [],
+        type: 'timeline',
+        originalEvent: event
+      });
     } finally {
       setIsDeepDiveLoading(false);
     }
@@ -1041,9 +1226,14 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
         followUpOptions: depthData.followUpOptions,
         type: 'general'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setDeepDiveData(null);
+      setDeepDiveData({
+        title,
+        detailedAnalysis: "An integration error occurred while consulting the Records. Please try again. Error: " + (error.message || String(error)),
+        followUpOptions: [],
+        type: 'general'
+      });
     } finally {
       setIsDeepDiveLoading(false);
     }
@@ -1125,18 +1315,27 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
           <Hexagon style={{ color: themeColor }} />
           HIGHER 🧠 MIND
         </h1>
-        <div className="text-[10px] text-white/50 uppercase tracking-[0.2em] font-mono" suppressHydrationWarning>
-            {currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} - {currentTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
+        <div className="flex items-center gap-6">
+          <button 
+            onClick={() => setIsHigherMindSettingsOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded-xl transition-all group"
+          >
+            <Zap className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+            <span className="text-[10px] uppercase tracking-widest text-purple-300 font-bold hidden sm:inline">AI Interface</span>
+          </button>
+          <div className="text-[10px] text-white/50 uppercase tracking-[0.2em] font-mono hidden md:block" suppressHydrationWarning>
+              {currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} - {currentTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
+          </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex items-center justify-start z-10 my-8">
+      <div className="flex-1 w-full z-10 my-2 md:my-8 pb-32 sm:pb-0 overflow-y-auto no-scrollbar pointer-events-none">
         {!data ? (
           <motion.div 
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 p-8 rounded-3xl w-full max-w-md shadow-2xl"
+            className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 p-5 md:p-8 rounded-3xl w-full max-w-md shadow-2xl shrink-0 mx-auto mt-4 sm:mt-10"
           >
             <h2 className="text-2xl text-white mb-2 font-medium tracking-wide flex items-center gap-2">
               <Star className="w-5 h-5 text-yellow-400" />
@@ -1173,7 +1372,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full p-3 shadow-2xl cursor-pointer hover:bg-white/10 transition-colors"
+            className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full p-3 shadow-2xl cursor-pointer hover:bg-white/10 transition-colors mx-auto sm:mx-0 sm:ml-0 w-max"
             onClick={() => setIsMinimized(false)}
           >
             <Maximize2 className="w-6 h-6 text-white" />
@@ -1182,7 +1381,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl w-full max-w-xl h-full max-h-[80vh] flex flex-col overflow-hidden shadow-2xl relative"
+            className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl w-full max-w-xl h-full max-h-[80vh] flex flex-col overflow-hidden shadow-2xl relative mx-auto sm:mx-0 sm:ml-0"
           >
             <button 
               onClick={() => setIsMinimized(true)}
@@ -1224,16 +1423,6 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             
             <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/20">
               <AnimatePresence mode="wait">
-      <DeepDiveModal 
-        deepDiveData={deepDiveData} 
-        setDeepDiveData={setDeepDiveData} 
-        handleSaveToVault={handleSaveToVault} 
-        handleReadOutLoud={handleReadOutLoud} 
-        isReading={isReading} 
-        isDeepDiveLoading={isDeepDiveLoading} 
-        handleDeepDiveNext={handleDeepDiveNext} 
-        data={data} 
-      />
                 {activeTab === 'identity' && (
                   <motion.div key="identity" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8 pb-32">
                     <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 shadow-2xl">
@@ -1329,13 +1518,13 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                       {profileConfig?.researchVault && profileConfig.researchVault.length > 0 ? (
                         <div className="grid gap-3">
                           {profileConfig?.researchVault?.slice(0, 3).map(item => (
-                            <ResearchBox key={item.id} title={item.title} content={item.content} category={item.category}>
+                            <BoundResearchBox key={item.id} title={item.title} content={item.content} category={item.category}>
                               <div className="flex justify-between items-start mb-2">
                                 <span className="text-[9px] uppercase tracking-widest text-stone-500 px-2 py-0.5 bg-white/5 rounded border border-white/5">{item.category}</span>
                               </div>
                               <h4 className="text-base text-white font-light mb-1">{item.title}</h4>
                               <p className="text-xs text-stone-400 line-clamp-2 italic font-light">"{item.content}"</p>
-                            </ResearchBox>
+                            </BoundResearchBox>
                           ))}
                           {profileConfig?.researchVault && profileConfig.researchVault.length > 3 && (
                             <button className="w-full py-4 text-xs uppercase tracking-[0.3em] text-stone-500 hover:text-white transition-colors bg-white/2 bg-white/2 hover:bg-white/5 rounded-2xl border border-dashed border-white/10">
@@ -1723,25 +1912,25 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                         </div>
                         
                         <div className="space-y-6">
-                          <ResearchBox title="Personal Universe Correlation" content={data.lifeStrategy.universeCorrelation}>
+                          <BoundResearchBox title="Personal Universe Correlation" content={data.lifeStrategy.universeCorrelation}>
                             <h4 className="text-xs uppercase tracking-widest text-teal-300 mb-3 block">Personal Universe Correlation</h4>
                             <p className="text-sm font-light leading-relaxed text-stone-200">{data.lifeStrategy.universeCorrelation}</p>
-                          </ResearchBox>
+                          </BoundResearchBox>
 
-                          <ResearchBox title="Kabbalah & Numerology Depth" content={data.lifeStrategy.kabbalahNumerologyDepth}>
+                          <BoundResearchBox title="Kabbalah & Numerology Depth" content={data.lifeStrategy.kabbalahNumerologyDepth}>
                             <h4 className="text-xs uppercase tracking-widest text-teal-300 mb-3 block">Kabbalah & Numerology Depth</h4>
                             <p className="text-sm font-light leading-relaxed text-stone-200">{data.lifeStrategy.kabbalahNumerologyDepth}</p>
-                          </ResearchBox>
+                          </BoundResearchBox>
 
-                          <ResearchBox title="Personal Goal Plan" content={data.lifeStrategy.goalPlan} className="bg-teal-900/10 border-teal-500/20">
+                          <BoundResearchBox title="Personal Goal Plan" content={data.lifeStrategy.goalPlan} className="bg-teal-900/10 border-teal-500/20">
                             <h4 className="text-xs uppercase tracking-widest text-teal-400 mb-3 block">Goal Plan</h4>
                             <p className="text-sm font-medium leading-relaxed text-stone-200">{data.lifeStrategy.goalPlan}</p>
-                          </ResearchBox>
+                          </BoundResearchBox>
 
-                          <ResearchBox title="Strategy: Moving Forward" content={data.lifeStrategy.movingForward} className="bg-black/30 border-white/5">
+                          <BoundResearchBox title="Strategy: Moving Forward" content={data.lifeStrategy.movingForward} className="bg-black/30 border-white/5">
                             <h4 className="text-xs uppercase tracking-widest text-stone-400 mb-3 block">Moving Forward</h4>
                             <p className="text-sm font-light leading-relaxed text-stone-300">{data.lifeStrategy.movingForward}</p>
-                          </ResearchBox>
+                          </BoundResearchBox>
                         </div>
                       </>
                     )}
@@ -1776,7 +1965,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                           <h3 className="text-xl font-light text-white">Pattern Synthesis</h3>
                         </div>
                                                <div className="space-y-4">
-                          <ResearchBox title="Morning & Evening Stars Significance" content={data.advancedCycles.morningEveningStars.meaning}>
+                          <BoundResearchBox title="Morning & Evening Stars Significance" content={data.advancedCycles.morningEveningStars.meaning}>
                             <h4 className="text-xs uppercase tracking-widest text-fuchsia-400 mb-4 flex items-center gap-2"><Star className="w-4 h-4"/> Morning & Evening Stars</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                               <div className="bg-black/30 p-4 rounded-xl border border-dashed border-white/10">
@@ -1789,9 +1978,9 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                               </div>
                             </div>
                             <p className="text-sm leading-relaxed text-stone-300 font-light">{data.advancedCycles.morningEveningStars.meaning}</p>
-                          </ResearchBox>
+                          </BoundResearchBox>
 
-                          <ResearchBox title="Arabic Lots Interpretation" content={data.advancedCycles.arabicLots.meaning}>
+                          <BoundResearchBox title="Arabic Lots Interpretation" content={data.advancedCycles.arabicLots.meaning}>
                             <h4 className="text-xs uppercase tracking-widest text-cyan-400 mb-4 flex items-center gap-2"><Activity className="w-4 h-4"/> Arabic Lots</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                               <div className="bg-cyan-900/10 p-4 rounded-xl border border-cyan-500/20">
@@ -1804,10 +1993,10 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                               </div>
                             </div>
                              <p className="text-sm leading-relaxed text-stone-300 font-light">{data.advancedCycles.arabicLots.meaning}</p>
-                          </ResearchBox>
+                          </BoundResearchBox>
 
                           {data.advancedCycles.planetPhases && (
-                            <ResearchBox title="Planetary Phases Analysis" content={data.advancedCycles.planetPhases.map(p => `${p.name}: ${p.phase}`).join(', ')}>
+                            <BoundResearchBox title="Planetary Phases Analysis" content={data.advancedCycles.planetPhases.map(p => `${p.name}: ${p.phase}`).join(', ')}>
                               <h4 className="text-xs uppercase tracking-widest text-emerald-400 mb-4 flex items-center gap-2"><Moon className="w-4 h-4"/> Planetary Phases</h4>
                               <div className="space-y-3">
                                 {data.advancedCycles.planetPhases.map((phase, i) => (
@@ -1820,7 +2009,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                                   </div>
                                 ))}
                               </div>
-                            </ResearchBox>
+                            </BoundResearchBox>
                           )}
 
                           {data.advancedCycles.soliArcs && (
@@ -2392,6 +2581,20 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
           </motion.div>
         )}
       </div>
+
+      <DeepDiveModal 
+        deepDiveData={deepDiveData} 
+        setDeepDiveData={setDeepDiveData} 
+        handleSaveToVault={handleSaveToVault} 
+        handleReadOutLoud={handleReadOutLoud} 
+        isReading={isReading} 
+        isDeepDiveLoading={isDeepDiveLoading} 
+        handleDeepDiveNext={handleDeepDiveNext} 
+        data={data} 
+      />
+
+      <HigherMindSettings isOpen={isHigherMindSettingsOpen} onClose={() => setIsHigherMindSettingsOpen(false)} />
+
     </div>
   );
 };

@@ -1,11 +1,12 @@
 // --- CORE IMPORTS ---
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Zap, Monitor, Share2, Download, BookOpen, PieChart, Network, 
   CirclePlay, Eye, ChevronRight, DownloadCloud, Layers, Target, 
   Star, Activity, Moon, Sun, Globe, User, Fingerprint, Volume2,
-  Trash2, Plus, Edit3, Save, X, Sparkles, RefreshCw, MousePointer2
+  Trash2, Plus, Edit3, Save, X, Sparkles, RefreshCw, MousePointer2,
+  Settings2, LayoutGrid, Type as TypeIcon
 } from 'lucide-react';
 import { 
   ReactFlow, 
@@ -38,6 +39,8 @@ import { useProfileStore } from '../services/profileService';
 import { useHigherMind } from './HigherMindProvider';
 
 import { CosmicSummary } from './CosmicSummary';
+import { SynthesisCore3D } from './SynthesisCore3D';
+import { InfographicExportMenu } from './InfographicExportMenu';
 
 const colorMap: Record<string, { main: string, text: string, bg: string, border: string, glow: string }> = {
   emerald: { main: 'emerald', text: 'text-emerald-400', bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', glow: 'shadow-[0_0_20px_rgba(16,185,129,0.2)]' },
@@ -116,6 +119,19 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
   const { saveToChat } = useHigherMind();
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const [isReading, setIsReading] = useState(false);
+  const [isAudioEnabled, setIsAudioEnabled] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // UI Controls
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [vizOptions, setVizOptions] = useState({
+    show3D: true,
+    showBloom: true,
+    showGrid: true,
+    showLabels: true,
+    interactive: true
+  });
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // --- MIND MAP (REACT FLOW) STATE ---
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -248,38 +264,90 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
     { id: 'stone', label: 'Stone' },
   ];
 
+  // --- AUDIO ENGINE ---
+  useEffect(() => {
+    if (isAudioEnabled) {
+      if (!audioRef.current) {
+        audioRef.current = new Audio('https://assets.mixkit.co/music/preview/mixkit-space-trip-loop-149.mp3');
+        audioRef.current.loop = true;
+        audioRef.current.volume = 0.2;
+      }
+      audioRef.current.play().catch(e => console.log("Audio play blocked", e));
+    } else {
+      audioRef.current?.pause();
+    }
+    return () => audioRef.current?.pause();
+  }, [isAudioEnabled]);
+
+  const playSFX = useCallback((type: 'transition' | 'click' | 'alert') => {
+    if (!isAudioEnabled) return;
+    const urls = {
+      transition: 'https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-appearing-interface-device-3200.mp3',
+      click: 'https://assets.mixkit.co/sfx/preview/mixkit-modern-technology-select-3124.mp3',
+      alert: 'https://assets.mixkit.co/sfx/preview/mixkit-hologram-appearing-1499.mp3'
+    };
+    const sfx = new Audio(urls[type]);
+    sfx.volume = 0.3;
+    sfx.play().catch(() => {});
+  }, [isAudioEnabled]);
+
   // --- NARRATIVE AUDIO ENGINE ---
-  const handleReadOutLoud = (text: string) => {
+  const handleReadOutLoud = useCallback((text: string, force = false) => {
     if ('speechSynthesis' in window) {
-      if (isReading) {
+      if (isReading && !force) {
         window.speechSynthesis.cancel();
         setIsReading(false);
         return;
       }
 
+      window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.onend = () => setIsReading(false);
       utterance.onerror = () => setIsReading(false);
       
       const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Premium')) || voices[0];
+      const preferredVoice = voices.find(v => (v.name.includes('Google') || v.name.includes('Premium') || v.name.includes('Natural')) && v.lang.startsWith('en')) || voices[0];
       if (preferredVoice) utterance.voice = preferredVoice;
       
-      utterance.rate = 0.95;
-      utterance.pitch = 1.1; // Slightly higher for "synthesis" vibe
+      utterance.rate = 0.85;
+      utterance.pitch = 1.0;
       
       setIsReading(true);
       window.speechSynthesis.speak(utterance);
-    } else {
-      alert("Speech synthesis is not supported in this browser.");
     }
-  };
+  }, [isReading]);
 
   useEffect(() => {
     return () => {
       window.speechSynthesis.cancel();
     };
   }, []);
+
+  // Trigger narration for video steps
+  useEffect(() => {
+    if (mode === 'video' && isAudioEnabled) {
+      let text = "";
+      switch(videoStep) {
+        case 0: text = "Chapter One. Arrival. The cosmic grid aligns as your singular consciousness enters the matrix threshold."; break;
+        case 1: text = `Chapter Two. Celestial Origin. Planetary currents and celestial weights define your geometric blueprint. Your dominant energy comes from ${data.planets?.[0]?.name} in ${data.planets?.[0]?.sign}.`; break;
+        case 2: text = `Chapter Three. Harmonic Essence. Your life path frequency is ${data.numerology.lifePath}. This vibrational archetype represents your soul's primary trajectory.`; break;
+        case 3: text = `Chapter Four. Total Synthesis. ${data.synthesis}`; break;
+        case 4: text = "Final Chapter. Transcendence. Node analysis complete. The journey continues beyond the threshold. You are ready to ascend."; break;
+      }
+      if (text) handleReadOutLoud(text, true);
+      playSFX('transition');
+    }
+  }, [videoStep, mode, isAudioEnabled, data, handleReadOutLoud, playSFX]);
+
+  useEffect(() => {
+    if (isAudioEnabled) {
+      playSFX('alert');
+      // Only welcome once per mode change
+      if (mode === 'summary') {
+        handleReadOutLoud(`Welcome back to your cosmic summary. ${data.synthesis.slice(0, 100)}`, true);
+      }
+    }
+  }, [mode, isAudioEnabled, data.synthesis, handleReadOutLoud, playSFX]);
 
   // --- ANIMATION & AUTO-PLAY LOGIC ---
   useEffect(() => {
@@ -305,9 +373,19 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
   ];
 
   return (
-    <div className="h-full flex flex-col space-y-6">
+    <div className="h-full flex flex-col space-y-6 relative overflow-hidden">
+      {/* Dynamic 3D Layer */}
+      {vizOptions.show3D && (
+        <div className="absolute inset-0 opacity-40 mix-blend-screen pointer-events-none">
+          <SynthesisCore3D 
+            color={infographicType === 'identity' ? '#a855f7' : infographicType === 'path' ? '#0ea5e9' : infographicType === 'karmic' ? '#f59e0b' : '#10b981'} 
+            isCinematic={mode === 'video' || mode === '3d'}
+          />
+        </div>
+      )}
+
       {/* --- TOP NAVIGATION BAR --- */}
-      <div className="flex bg-black/40 border border-white/5 p-2 rounded-2xl md:rounded-[2.5rem] items-center justify-between shrink-0 overflow-x-auto no-scrollbar">
+      <div className="flex bg-black/40 backdrop-blur-xl border border-white/5 p-2 rounded-2xl md:rounded-[2.5rem] items-center justify-between shrink-0 overflow-x-auto no-scrollbar relative z-30">
         <div className="flex gap-2 p-1">
           {[
             { id: 'summary', label: 'Summary', icon: BookOpen },
@@ -330,16 +408,70 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
         
         <div className="flex gap-2 pr-4">
            <button 
+             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+             className={`p-2 transition-all rounded-lg ${isSettingsOpen ? 'text-purple-400 bg-purple-500/10' : 'text-stone-500 hover:text-white'}`}
+             title="Visualization Options"
+           >
+             <Settings2 size={18} />
+           </button>
+           <button 
+             onClick={() => setIsAudioEnabled(!isAudioEnabled)}
+             className={`p-2 transition-all rounded-lg ${isAudioEnabled ? 'text-emerald-400 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'text-stone-500 hover:text-white'}`}
+             title={isAudioEnabled ? "Silence System" : "Activate Harmonic Frequencies"}
+           >
+             <Volume2 size={18} className={isAudioEnabled ? 'animate-pulse' : ''} />
+           </button>
+           <button 
              onClick={() => handleReadOutLoud(mode === 'overview' ? data.synthesis : mode === 'infographic' ? `Identity report for ${data.planets?.[0]?.name}. Master synthesis: ${data.synthesis}` : 'Cosmic deep synthesis data')}
              className={`p-2 transition-all rounded-lg ${isReading ? 'text-purple-400 bg-purple-500/10 animate-pulse' : 'text-stone-500 hover:text-white'}`}
              title="Read Out Loud (AI)"
            >
-             <Volume2 size={18} />
+             <Zap size={18} />
            </button>
-           <button className="p-2 text-stone-500 hover:text-white transition-colors"><Download size={18} /></button>
+           <button 
+             onClick={() => setShowExportMenu(!showExportMenu)}
+             className="p-2 text-stone-500 hover:text-white transition-colors"
+           >
+             <Download size={18} />
+           </button>
            <button className="p-2 text-stone-500 hover:text-white transition-colors"><Share2 size={18} /></button>
         </div>
       </div>
+
+      {/* Global Menus */}
+      <AnimatePresence>
+        {isSettingsOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-20 right-8 z-40 w-64 bg-zinc-900/90 border border-white/10 rounded-2xl p-4 backdrop-blur-2xl shadow-2xl"
+          >
+            <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Rendering Parameters</div>
+            <div className="space-y-3">
+              {Object.entries(vizOptions).map(([key, val]) => (
+                <div key={key} className="flex justify-between items-center">
+                  <span className="text-xs text-zinc-400 capitalize">{key.replace('show', '')}</span>
+                  <button 
+                    onClick={() => setVizOptions(v => ({ ...v, [key]: !v[key] }))}
+                    className={`w-10 h-5 rounded-full transition-colors relative ${val ? 'bg-purple-600' : 'bg-zinc-800'}`}
+                  >
+                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${val ? 'left-6' : 'left-1'}`} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+        
+        {showExportMenu && (
+          <InfographicExportMenu 
+            targetId="cosmic-infographic-root" 
+            fileName={`Cosmic_${mode}_${Date.now()}`}
+            onClose={() => setShowExportMenu(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Main Content Area */}
       <div className="flex-1 min-h-0 relative">
@@ -427,14 +559,15 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
           {mode === 'infographic' && (
             <motion.div 
               key="infographic"
+              id="cosmic-infographic-root"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="h-full bg-white/5 rounded-[3rem] border border-white/10 p-6 md:p-10 overflow-y-auto scrollbar-thin overflow-x-hidden relative flex flex-col"
+              className="h-full bg-zinc-950 rounded-[3rem] border border-white/10 p-6 md:p-10 overflow-y-auto scrollbar-thin overflow-x-hidden relative flex flex-col z-20"
             >
               {/* Infographic Options Navigation */}
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-10 shrink-0">
-                <div className="flex gap-2 p-1.5 bg-black/40 backdrop-blur-xl rounded-2xl border border-white/5 overflow-x-auto no-scrollbar">
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-10 shrink-0 relative z-30">
+                <div className="flex gap-2 p-1.5 bg-zinc-900/60 backdrop-blur-xl rounded-2xl border border-white/5 overflow-x-auto no-scrollbar">
                   {[
                     { id: 'identity', label: 'Identity Blueprint' },
                     { id: 'path', label: 'Life Path Journey' },
@@ -459,222 +592,460 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
                     <Save size={14} />
                     Save result to Chat
                   </button>
-                  <button className="p-3 bg-white/5 hover:bg-white/10 text-white/50 hover:text-white border border-white/10 rounded-2xl transition-all">
+                  <button 
+                    onClick={() => setShowExportMenu(!showExportMenu)}
+                    className="p-3 bg-white/5 hover:bg-white/10 text-white/50 hover:text-white border border-white/10 rounded-2xl transition-all"
+                  >
                     <DownloadCloud size={18} />
                   </button>
                 </div>
               </div>
 
               {/* Infographic Content Wrapper */}
-              <div className="flex-1 min-h-0 bg-stone-900/40 rounded-[2rem] border border-white/5 p-6 md:p-10 relative overflow-hidden backdrop-blur-sm">
+              <div className="flex-1 min-h-0 bg-transparent rounded-[2rem] border border-white/5 p-6 md:p-10 relative overflow-hidden backdrop-blur-sm">
+                {/* Dynamic Background Elements */}
+                <div className="absolute inset-0 pointer-events-none opacity-20">
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+                  <motion.div 
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 90, 180, 270, 360],
+                    }}
+                    transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+                    className="absolute -top-[20%] -left-[20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.03)_0%,transparent_70%)]"
+                  />
+                </div>
+
                 <AnimatePresence mode="wait">
                   {infographicType === 'identity' && (
-                    <motion.div key="identity" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-12 max-w-4xl mx-auto h-full overflow-y-auto scrollbar-thin pr-2">
-                       <div className="text-center space-y-4">
-                         <div className="text-fuchsia-500 text-xs font-bold uppercase tracking-[0.4em]">Universal Hologram Map</div>
-                         <h1 className="text-5xl md:text-7xl font-light text-white tracking-tight">Identity Report</h1>
-                         <div className="h-px w-32 bg-gradient-to-r from-transparent via-stone-500 to-transparent mx-auto"></div>
+                    <motion.div key="identity" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }} className="space-y-20 max-w-4xl mx-auto h-full overflow-y-auto scrollbar-thin pr-4 pb-20">
+                       <div className="text-center space-y-6">
+                         <motion.div 
+                           initial={{ opacity: 0, y: -20 }}
+                           animate={{ opacity: 1, y: 0 }}
+                           className="text-fuchsia-500 text-xs font-bold uppercase tracking-[0.8em] animate-pulse"
+                         >
+                           Universal Hologram Map • Quantum Edition
+                         </motion.div>
+                         <h1 className="text-5xl md:text-9xl font-black text-white tracking-tighter leading-none">IDENTITY<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-600">SIGNATURE</span></h1>
+                         <div className="h-0.5 w-64 bg-gradient-to-r from-transparent via-purple-500 to-transparent mx-auto"></div>
                        </div>
 
-                       <div className="grid md:grid-cols-2 gap-12 items-center">
-                         <div className="space-y-8">
-                            <section>
-                              <h3 className="text-xs uppercase tracking-widest text-stone-500 mb-4 font-bold border-b border-white/5 pb-2">Astrological Landscape</h3>
-                              <div className="space-y-4">
-                                {data.planets?.slice(0, 3).map((p, i) => (
-                                  <div key={i} className="flex gap-4">
-                                    <div className="text-2xl text-white font-light w-12">{p.sign?.slice(0, 2)}</div>
-                                    <div>
-                                      <div className="text-sm text-stone-200 font-medium">{p.name} in {p.sign}</div>
-                                      <p className="text-xs text-stone-500 leading-relaxed font-light">{p.interpretation?.slice(0, 100)}...</p>
+                       <div className="grid md:grid-cols-2 gap-16 items-start">
+                         <div className="space-y-12">
+                            <motion.section 
+                              initial={{ x: -30, opacity: 0 }}
+                              whileInView={{ x: 0, opacity: 1 }}
+                              className="bg-zinc-900/40 p-8 rounded-[3rem] border border-white/5 hover:border-purple-500/30 transition-all group relative overflow-hidden"
+                            >
+                              <div className="absolute -top-10 -left-10 w-32 h-32 bg-purple-500/10 blur-[50px]" />
+                              <h3 className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 mb-8 font-black flex items-center gap-3">
+                                <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.6)]" />
+                                ASTROLOGICAL CORE
+                              </h3>
+                              <div className="space-y-8">
+                                {data.planets?.slice(0, 4).map((p, i) => (
+                                  <div key={i} className="flex gap-8 group/item">
+                                    <div className="text-4xl text-zinc-100 font-black w-14 shrink-0 group-hover/item:text-purple-400 transition-colors uppercase tracking-tighter">{p.sign?.slice(0, 2)}</div>
+                                    <div className="border-l border-zinc-800 pl-8 space-y-1">
+                                      <div className="text-sm text-zinc-200 font-bold tracking-tight uppercase tracking-widest">{p.name} • {p.sign}</div>
+                                      <div className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">House {p.house || (i + 1)}</div>
+                                      <p className="text-xs text-zinc-500 leading-relaxed font-light mt-2 italic opacity-70 group-hover/item:opacity-100 transition-opacity">"{p.interpretation?.split('.')[0]}."</p>
                                     </div>
                                   </div>
                                 ))}
                               </div>
-                            </section>
-                            <section>
-                              <h3 className="text-xs uppercase tracking-widest text-stone-500 mb-4 font-bold border-b border-white/5 pb-2">Vibrational Values</h3>
+                            </motion.section>
+
+                            <motion.section 
+                              initial={{ x: -30, opacity: 0 }}
+                              whileInView={{ x: 0, opacity: 1 }}
+                              className="bg-zinc-900/40 p-8 rounded-[3rem] border border-white/5 hover:border-sky-500/30 transition-all group"
+                            >
+                              <h3 className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 mb-8 font-black flex items-center gap-3">
+                                <span className="w-2.5 h-2.5 rounded-full bg-sky-500 shadow-[0_0_15px_rgba(14,165,233,0.6)]" />
+                                VIBRATIONAL VALUES
+                              </h3>
                               <div className="grid grid-cols-2 gap-4">
                                  {data.numerology.coreNumbers?.slice(0, 4).map((n, i) => (
-                                   <div key={i} className="p-3 bg-black/20 rounded-xl border border-white/5">
-                                      <div className="text-[10px] text-stone-600 uppercase tracking-widest">{n.name}</div>
-                                      <div className="text-2xl text-sky-400 font-light">{n.value}</div>
+                                   <div key={i} className="p-6 bg-black/40 rounded-[2rem] border border-white/5 group hover:bg-white/5 transition-all hover:scale-[1.05]">
+                                      <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-black mb-2">{n.name}</div>
+                                      <div className="text-4xl text-sky-400 font-black tracking-tighter">{n.value}</div>
                                    </div>
                                  ))}
                               </div>
-                            </section>
+                            </motion.section>
                          </div>
-                         <div className="bg-black/40 p-8 rounded-[3rem] border border-white/10 shadow-2xl relative overflow-hidden">
-                           <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/10 blur-[80px]"></div>
-                           <h3 className="text-xl font-light text-white mb-6 flex items-center gap-2">
-                              <PieChart className="w-5 h-5 text-purple-400" />
-                              Attribute Mapping
-                           </h3>
-                           <div className="h-64">
-                              <ResponsiveContainer width="100%" height="100%">
-                                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={infographicData}>
-                                   <PolarGrid stroke="#444" />
-                                   <PolarAngleAxis dataKey="subject" tick={{ fill: '#888', fontSize: 10 }} />
-                                   <Radar name="Value" dataKey="A" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} />
-                                </RadarChart>
-                              </ResponsiveContainer>
-                           </div>
+
+                         <div className="sticky top-0 space-y-8">
+                            <motion.div 
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              whileInView={{ scale: 1, opacity: 1 }}
+                              className="bg-black/60 p-12 rounded-[4rem] border border-white/10 shadow-3xl relative overflow-hidden backdrop-blur-2xl group"
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                              <h3 className="text-xl font-black text-white mb-10 flex items-center gap-3 relative z-10 uppercase tracking-tighter">
+                                 <div className="w-1.5 h-6 bg-purple-600 rounded-full" />
+                                 ATTRIBUTE RADIUS
+                              </h3>
+                              <div className="h-80 relative z-10">
+                                 <ResponsiveContainer width="100%" height="100%">
+                                   <RadarChart cx="50%" cy="50%" outerRadius="80%" data={infographicData}>
+                                      <PolarGrid stroke="#222" />
+                                      <PolarAngleAxis dataKey="subject" tick={{ fill: '#444', fontSize: 10, fontWeight: 900, textTransform: 'uppercase' }} />
+                                      <Radar name="Value" dataKey="A" stroke="#a855f7" fill="#a855f7" fillOpacity={0.5} />
+                                   </RadarChart>
+                                 </ResponsiveContainer>
+                              </div>
+                              <div className="mt-10 text-center relative z-10">
+                                <div className="px-6 py-2 bg-purple-500/20 border border-purple-500/30 rounded-full inline-block">
+                                  <span className="text-[10px] text-purple-400 font-black tracking-[0.3em] uppercase">SYSTEM COHERENCE: HIGH</span>
+                                </div>
+                              </div>
+                            </motion.div>
+
+                            <motion.div 
+                              initial={{ y: 30, opacity: 0 }}
+                              whileInView={{ y: 0, opacity: 1 }}
+                              className="bg-zinc-900/40 p-8 rounded-[3rem] border border-white/5 relative overflow-hidden"
+                            >
+                               <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-4">Gematria Signature</div>
+                               <div className="flex items-center justify-between">
+                                 <div className="text-4xl text-zinc-200 font-light tracking-widest">{data.gematria.nameValue}</div>
+                                 <Fingerprint className="text-zinc-700" size={32} />
+                               </div>
+                               <p className="text-[10px] text-zinc-600 mt-4 italic">"Mathematical validation of identity frequency across alphanumeric grids."</p>
+                            </motion.div>
                          </div>
                        </div>
 
-                       <div className="bg-black/40 p-10 rounded-[3rem] border border-white/10 text-center">
-                          <h3 className="text-2xl font-light text-white mb-4">Master Synthesis Statement</h3>
-                          <p className="text-xl font-light text-stone-400 leading-relaxed italic max-w-2xl mx-auto">"{data.synthesis}"</p>
-                       </div>
-                    </motion.div>
+                       <motion.div 
+                         initial={{ y: 50, opacity: 0 }}
+                         whileInView={{ y: 0, opacity: 1 }}
+                         viewport={{ once: true }}
+                         className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-black p-16 rounded-[5rem] border border-white/10 text-center shadow-2xl relative overflow-hidden"
+                       >
+                          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
+                          <h3 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.8em] mb-10">CORE ESSENCE SYNTHESIS</h3>
+                          <p className="text-2xl md:text-4xl font-light text-zinc-200 leading-tight italic max-w-4xl mx-auto tracking-tight">"{data.synthesis}"</p>
+                          <div className="mt-12 flex justify-center gap-2">
+                             {[...Array(5)].map((_, i) => (
+                               <div key={i} className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+                             ))}
+                          </div>
+                        </motion.div>
+                     </motion.div>
                   )}
 
                   {infographicType === 'path' && (
-                    <motion.div key="path" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-12 max-w-4xl mx-auto h-full overflow-y-auto scrollbar-thin pr-2">
-                      <div className="text-center space-y-4">
-                        <div className="text-sky-500 text-xs font-bold uppercase tracking-[0.4em]">Destiny Arc & Trajectory</div>
-                        <h1 className="text-5xl md:text-7xl font-light text-white tracking-tight">Life Path Evolution</h1>
-                        <div className="h-px w-32 bg-gradient-to-r from-transparent via-sky-500 to-transparent mx-auto"></div>
+                    <motion.div key="path" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -30 }} className="space-y-16 max-w-5xl mx-auto h-full overflow-y-auto scrollbar-thin pr-4 pb-20">
+                      <div className="text-center space-y-6">
+                        <div className="text-sky-500 text-[10px] font-black uppercase tracking-[0.8em] animate-pulse">Destiny Arc & Quantum Trajectory</div>
+                        <h1 className="text-5xl md:text-9xl font-black text-white tracking-tighter leading-none">LIFE PATH<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-400 to-indigo-600">EVOLUTION</span></h1>
+                        <div className="h-px w-64 bg-gradient-to-r from-transparent via-sky-500 to-transparent mx-auto"></div>
                       </div>
 
-                      <div className="grid md:grid-cols-3 gap-8">
-                        <div className="md:col-span-1 bg-sky-900/20 border border-sky-500/30 p-8 rounded-3xl flex flex-col items-center justify-center text-center">
-                          <div className="text-sky-400 text-xs uppercase tracking-widest font-bold mb-4">Core Path</div>
-                          <div className="text-8xl font-light text-white mb-4">{data.numerology.lifePath}</div>
-                          <p className="text-sm font-light text-sky-200/80 italic">{data.numerology.lifePathMeaning?.slice(0, 150) || 'A journey of profound inner transformation.'}...</p>
-                        </div>
+                      <div className="grid lg:grid-cols-12 gap-12">
+                        <motion.div 
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          whileInView={{ scale: 1, opacity: 1 }}
+                          className="lg:col-span-12 xl:col-span-4 bg-gradient-to-br from-sky-500/20 via-zinc-950 to-zinc-950 border border-sky-500/30 p-12 rounded-[4rem] flex flex-col items-center justify-center text-center relative overflow-hidden group"
+                        >
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(14,165,233,0.15),transparent)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                          <div className="text-sky-400 text-[10px] uppercase tracking-[0.4em] font-black mb-8 relative z-10">Primary Archetype Frequency</div>
+                          <div className="text-[12rem] font-black text-white leading-none relative z-10 drop-shadow-[0_0_30px_rgba(14,165,233,0.4)] group-hover:scale-110 transition-transform duration-700">{data.numerology.lifePath}</div>
+                          <div className="mt-8 relative z-10 space-y-4">
+                             <div className="px-6 py-2 bg-white/5 border border-white/10 rounded-full inline-block backdrop-blur-md">
+                                <span className="text-[10px] text-zinc-400 font-bold tracking-widest uppercase">Destiny Vibration: Master</span>
+                             </div>
+                             <p className="text-sm font-light text-zinc-400 italic leading-relaxed max-w-sm mx-auto">"{data.numerology.lifePathMeaning || 'A journey of profound inner transformation and cosmic alignment.'}"</p>
+                          </div>
+                        </motion.div>
                         
-                        <div className="md:col-span-2 space-y-4">
-                          <h3 className="text-xs uppercase tracking-widest text-stone-500 mb-4 font-bold border-b border-white/5 pb-2">Destiny Timeline Points</h3>
-                          {data.timeline && data.timeline.length > 0 ? data.timeline.slice(0, 3).map((t, i) => (
-                            <div key={i} className="flex gap-6 items-center p-6 bg-black/40 rounded-2xl border border-white/5 relative">
-                               <div className="shrink-0 w-16 text-right">
-                                  <div className="text-xl font-light text-white">{t.year}</div>
-                                  <div className="text-[10px] text-stone-500 uppercase tracking-widest">Age {t.age}</div>
-                               </div>
-                               <div className="w-px h-12 bg-white/10 relative">
-                                  <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 rounded-full bg-sky-500/50 border-2 border-white/20"></div>
-                               </div>
-                               <div>
-                                  <div className="text-sm text-stone-200">{t.highlight}</div>
-                                  <div className="text-[10px] text-sky-400/80 uppercase tracking-wider mt-1">{t.houseSignificance}</div>
-                               </div>
+                        <div className="lg:col-span-12 xl:col-span-8 flex flex-col gap-8">
+                          <div className="flex items-center justify-between px-4">
+                            <h3 className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-black flex items-center gap-3">
+                               <Target className="w-5 h-5 text-sky-500" />
+                               DESTINY TIMELINE ENCODING
+                            </h3>
+                            <div className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest animate-pulse">Signal Strength: Optimal</div>
+                          </div>
+
+                          {data.timeline && data.timeline.length > 0 ? (
+                            <div className="grid grid-cols-1 gap-6">
+                              {data.timeline.slice(0, 4).map((t, i) => (
+                                <motion.div 
+                                  key={i}
+                                  initial={{ x: 50, opacity: 0 }}
+                                  whileInView={{ x: 0, opacity: 1 }}
+                                  transition={{ delay: i * 0.1 }}
+                                  className="flex gap-10 items-center p-10 bg-zinc-900/40 rounded-[3.5rem] border border-white/5 relative group hover:bg-zinc-800/60 transition-all hover:scale-[1.01] hover:border-sky-500/20"
+                                >
+                                   <div className="shrink-0 w-28 text-right space-y-1">
+                                      <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest group-hover:text-sky-500 transition-colors">Phase {i + 1}</div>
+                                      <div className="text-4xl font-black text-white group-hover:text-sky-400 transition-colors tracking-tighter">{t.year}</div>
+                                      <div className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.2em]">EPOCH {t.age}</div>
+                                   </div>
+                                   <div className="w-px h-20 bg-zinc-800 relative">
+                                      <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 rounded-full bg-sky-500 shadow-[0_0_15px_rgba(14,165,233,0.6)] group-hover:scale-150 transition-transform" />
+                                   </div>
+                                   <div className="flex-1 space-y-4">
+                                      <div className="text-xl text-zinc-200 font-black leading-none tracking-tight group-hover:text-white transition-colors">{t.highlight}</div>
+                                      <div className="flex flex-wrap gap-2">
+                                        <div className="text-[9px] bg-sky-500/10 text-sky-400 px-4 py-1.5 rounded-full font-black tracking-widest uppercase border border-sky-500/20">{t.houseSignificance}</div>
+                                        <div className="text-[9px] bg-white/5 text-zinc-500 px-4 py-1.5 rounded-full font-black tracking-widest uppercase border border-zinc-800">TEMPORAL NODES: ACTIVE</div>
+                                      </div>
+                                   </div>
+                                </motion.div>
+                              ))}
                             </div>
-                          )) : (
-                            <div className="p-8 text-center text-stone-500 italic text-sm">Timeline data synchronizing...</div>
+                          ) : (
+                            <div className="p-20 text-center bg-zinc-900/20 border border-white/5 border-dashed rounded-[4rem] text-zinc-600 italic text-sm font-light flex flex-col items-center gap-4">
+                               <RefreshCw className="animate-spin text-zinc-700" size={32} />
+                               <span>Synchronizing with temporal Akasha...</span>
+                            </div>
                           )}
                         </div>
                       </div>
                       
-                      <div className="bg-gradient-to-r from-sky-900/20 to-black p-8 rounded-[2rem] border border-sky-500/20 mt-8">
-                        <h3 className="text-sky-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-4 text-center">Life Strategy & Forward Momentum</h3>
-                        <p className="text-sm text-stone-300 leading-relaxed font-light text-center max-w-3xl mx-auto italic">
-                          "{data.lifeStrategy?.goalPlan || data.patterns?.coreTheme || 'Aligning actions with cosmic intent creates frictionless manifestation.'}"
-                        </p>
+                      <div className="grid md:grid-cols-2 gap-8">
+                        <motion.div 
+                          initial={{ y: 30, opacity: 0 }}
+                          whileInView={{ y: 0, opacity: 1 }}
+                          className="bg-zinc-900/40 p-12 rounded-[4rem] border border-white/5 relative overflow-hidden group"
+                        >
+                           <div className="text-[10px] text-sky-500/60 font-black uppercase tracking-[0.4em] mb-8">Evolutionary Intent</div>
+                           <p className="text-2xl font-light text-zinc-300 leading-tight italic line-clamp-3">
+                              "{data.lifeStrategy?.goalPlan || data.patterns?.coreTheme || 'Aligning actions with cosmic intent creates frictionless manifestation and spiritual speed.'}"
+                           </p>
+                           <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-10 transition-opacity">
+                              <Network size={64} className="text-sky-400" />
+                           </div>
+                        </motion.div>
+
+                        <motion.div 
+                          initial={{ y: 30, opacity: 0 }}
+                          whileInView={{ y: 0, opacity: 1 }}
+                          className="bg-gradient-to-br from-indigo-900/20 to-zinc-950 p-12 rounded-[4rem] border border-indigo-500/20 relative overflow-hidden"
+                        >
+                           <h4 className="text-[10px] text-indigo-400 font-black uppercase tracking-[0.4em] mb-8">Master Trajectory Map</h4>
+                           <div className="h-32 flex items-end gap-2">
+                              {[...Array(12)].map((_, i) => (
+                                <motion.div 
+                                  key={i} 
+                                  initial={{ height: 0 }}
+                                  whileInView={{ height: `${Math.random() * 100}%` }}
+                                  className="flex-1 bg-indigo-500/20 rounded-t-lg border-t border-indigo-500/40"
+                                />
+                              ))}
+                           </div>
+                           <p className="text-[10px] text-zinc-600 mt-6 font-bold uppercase tracking-widest">Temporal Density over 120-year cycle</p>
+                        </motion.div>
                       </div>
                     </motion.div>
                   )}
 
                   {infographicType === 'karmic' && (
-                    <motion.div key="karmic" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-12 max-w-4xl mx-auto h-full overflow-y-auto scrollbar-thin pr-2">
-                       <div className="text-center space-y-4">
-                         <div className="text-amber-500 text-xs font-bold uppercase tracking-[0.4em]">Soul Ledger & Incarnation</div>
-                         <h1 className="text-5xl md:text-7xl font-light text-white tracking-tight">Akashic Blueprint</h1>
-                         <div className="h-px w-32 bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto"></div>
-                       </div>
-
-                       <div className="relative p-10 bg-[radial-gradient(ellipse_at_center,rgba(245,158,11,0.05),transparent_70%)] border border-amber-900/30 rounded-[3rem]">
-                         <div className="grid md:grid-cols-2 gap-12 relative z-10">
-                           <div className="space-y-8">
-                              <div className="space-y-2">
-                                <div className="text-[10px] text-amber-500/80 uppercase font-bold tracking-[0.3em]">Soul Origin</div>
-                                <div className="text-2xl font-light text-white">{data.akashic?.soulOrigin || 'Earth / Lyran Ascendant'}</div>
-                              </div>
-                              
-                              <div className="space-y-4">
-                                <div className="text-[10px] text-stone-500 uppercase font-bold tracking-[0.3em] border-b border-white/5 pb-2">Past Life Themes</div>
-                                <p className="text-sm font-light text-stone-300 italic leading-relaxed">
-                                  "{data.akashic?.pastLifeThemes || data.torusAnalysis?.karmicTheme || 'Echoes of ancient wisdom resolving in the present.'}"
-                                </p>
-                              </div>
-                              
-                              <div className="space-y-4">
-                                <div className="text-[10px] text-stone-500 uppercase font-bold tracking-[0.3em] border-b border-white/5 pb-2">Karmic Debts & Lessons</div>
-                                <div className="p-4 bg-red-900/10 border border-red-500/20 rounded-2xl">
-                                  <p className="text-xs font-light text-red-200/80 leading-relaxed">{data.akashic?.karmicDebts || 'No significant outstanding debts. Focus is on mastery and service.'}</p>
-                                </div>
-                              </div>
-                           </div>
-                           
-                           <div className="flex flex-col items-center justify-center space-y-8 relative">
-                              <div className="w-48 h-48 rounded-full border border-amber-500/30 flex items-center justify-center relative shadow-[0_0_50px_rgba(245,158,11,0.1)]">
-                                 <div className="w-32 h-32 rounded-full border border-amber-500/50 flex items-center justify-center animate-[spin_60s_linear_infinite]">
-                                   <div className="w-20 h-20 rounded-full bg-amber-500/20 blur-md"></div>
-                                 </div>
-                                 <Fingerprint className="w-12 h-12 text-amber-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-50" />
-                              </div>
-                              
-                              <div className="text-center">
-                                <div className="text-[10px] text-amber-500/80 uppercase font-bold tracking-[0.3em] mb-2">Soul Gifts</div>
-                                <p className="text-xs text-stone-400 italic max-w-xs">{data.akashic?.soulGifts || 'Innate healing, structural manifestation, intuitive leadership.'}</p>
-                              </div>
-                           </div>
+                    <motion.div key="karmic" initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-16 max-w-5xl mx-auto h-full overflow-y-auto scrollbar-thin pr-4 pb-20">
+                       <div className="text-center space-y-6">
+                         <div className="text-amber-500 text-[10px] font-black uppercase tracking-[0.8em] animate-pulse">Soul Ledger & Akasha</div>
+                         <h1 className="text-7xl md:text-9xl font-black text-white tracking-tighter leading-none italic uppercase">Ancestral<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-red-600 not-italic">Blueprints</span></h1>
+                         <div className="h-0.5 w-64 bg-zinc-800 mx-auto relative overflow-hidden">
+                           <motion.div className="absolute inset-0 bg-amber-500" initial={{ left: "-100%" }} animate={{ left: "100%" }} transition={{ repeat: Infinity, duration: 3, ease: "linear" }} />
                          </div>
                        </div>
+
+                       <div className="grid md:grid-cols-2 gap-12">
+                          <section className="bg-zinc-900/60 p-10 rounded-[3.5rem] border border-white/5 relative overflow-hidden">
+                             <div className="absolute top-0 left-0 p-4 opacity-5"><Layers size={100} /></div>
+                             <h3 className="text-amber-500 text-xs font-black uppercase tracking-widest mb-8 flex items-center gap-2">
+                               <Sparkles size={16} />
+                               KARMA LOAD ANALYSIS
+                             </h3>
+                             <div className="space-y-8 relative z-10">
+                               {data.karma?.karmicDebts && data.karma.karmicDebts.length > 0 ? data.karma.karmicDebts.map((k, i) => (
+                                 <div key={i} className="group cursor-default">
+                                    <div className="flex justify-between items-end mb-2">
+                                       <div className="text-xl font-black text-zinc-100 group-hover:text-amber-400 transition-colors uppercase tracking-tighter">{k.title}</div>
+                                       <div className="text-[10px] text-zinc-500 pb-1">INTENSITY: {Math.floor(Math.random() * 40) + 60}%</div>
+                                    </div>
+                                    <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
+                                       <motion.div initial={{ width: 0 }} animate={{ width: `${60 + i * 15}%` }} className="h-full bg-amber-500" />
+                                    </div>
+                                    <p className="mt-4 text-sm text-zinc-400 font-light italic leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity">"{k.remedy || 'Balance this energy through intentional detachment and compassion.'}"</p>
+                                 </div>
+                               )) : (
+                                 <div className="p-8 text-center text-zinc-600 italic">No heavy karmic debts currently active. Mastery achieved.</div>
+                               )}
+                             </div>
+                          </section>
+
+                          <div className="space-y-8">
+                             <motion.section 
+                               initial={{ x: 30, opacity: 0 }}
+                               whileInView={{ x: 0, opacity: 1 }}
+                               className="bg-zinc-900/40 p-10 rounded-[3.5rem] border border-white/5 group hover:border-amber-500/30 transition-all"
+                             >
+                                <h3 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.4em] mb-8">SOUL ORIGIN STATION</h3>
+                                <div className="flex items-center gap-8">
+                                   <div className="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                                      <Globe className="text-amber-400" size={32} />
+                                   </div>
+                                   <div>
+                                      <div className="text-2xl font-black text-white tracking-tight uppercase leading-none">{data.karma?.soulAge || 'Ancient'} SOUL</div>
+                                      <div className="text-[10px] text-amber-600 font-bold uppercase tracking-widest mt-2">{data.akashic?.soulOrigin || 'Nova Station'} ORIGIN</div>
+                                   </div>
+                                </div>
+                             </motion.section>
+
+                             <section className="grid grid-cols-2 gap-6">
+                                <motion.div 
+                                  initial={{ y: 20, opacity: 0 }}
+                                  whileInView={{ y: 0, opacity: 1 }}
+                                  className="bg-black/60 p-10 rounded-[3rem] border border-white/5 flex flex-col justify-center items-center gap-2"
+                                >
+                                   <div className="text-[9px] text-zinc-600 font-black uppercase tracking-widest">DHARMA SCORE</div>
+                                   <div className="text-5xl font-black text-white tracking-tighter italic">8.4</div>
+                                </motion.div>
+                                <motion.div 
+                                  initial={{ y: 20, opacity: 0 }}
+                                  whileInView={{ y: 0, opacity: 1 }}
+                                  transition={{ delay: 0.1 }}
+                                  className="bg-black/60 p-10 rounded-[3rem] border border-white/5 flex flex-col justify-center items-center gap-2"
+                                >
+                                   <div className="text-[9px] text-zinc-600 font-black uppercase tracking-widest">SOUL MATURITY</div>
+                                   <div className="text-5xl font-black text-amber-500 tracking-tighter italic">A+</div>
+                                </motion.div>
+                             </section>
+
+                             <motion.section 
+                               initial={{ x: 30, opacity: 0 }}
+                               whileInView={{ x: 0, opacity: 1 }}
+                               transition={{ delay: 0.2 }}
+                               className="bg-zinc-950 p-10 rounded-[3.5rem] border border-white/10 relative overflow-hidden group"
+                             >
+                                <div className="absolute top-0 left-0 w-1 h-full bg-amber-500" />
+                                <h3 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.4em] mb-4">INCARNATION NODE</h3>
+                                <p className="text-sm font-light text-zinc-300 leading-relaxed italic pr-4">
+                                   "Your presence in this timeline is a calculated choice for the resolution of {data.karma?.karmicDebts?.[0]?.title?.toLowerCase() || 'ancestral growth'} cycles."
+                                </p>
+                             </motion.section>
+                          </div>
+                       </div>
+
+                       <motion.div 
+                         initial={{ y: 50, opacity: 0 }}
+                         whileInView={{ y: 0, opacity: 1 }}
+                         className="bg-zinc-950 p-16 rounded-[4rem] border border-white/5 text-center relative overflow-hidden mt-12"
+                       >
+                          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_50%_0%,rgba(245,158,11,0.05),transparent)]" />
+                          <h3 className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.8em] mb-10">AKASHIC DECODING</h3>
+                          <p className="text-2xl md:text-3xl font-light text-zinc-300 leading-tight italic max-w-4xl mx-auto tracking-tight">
+                             "{data.akashic?.missionStatement || 'Healing the ancestral line through conscious embodiment of the current fractal identity.'}"
+                          </p>
+                       </motion.div>
                     </motion.div>
                   )}
 
                   {infographicType === 'resonance' && (
-                    <motion.div key="resonance" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-12 max-w-4xl mx-auto h-full overflow-y-auto scrollbar-thin pr-2">
-                       <div className="text-center space-y-4">
-                         <div className="text-emerald-500 text-xs font-bold uppercase tracking-[0.4em]">Energy Flow & Geometry</div>
-                         <h1 className="text-5xl md:text-7xl font-light text-white tracking-tight">Torus Resonance</h1>
-                         <div className="h-px w-32 bg-gradient-to-r from-transparent via-emerald-500 to-transparent mx-auto"></div>
+                    <motion.div key="resonance" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }} className="space-y-16 max-w-5xl mx-auto h-full overflow-y-auto scrollbar-thin pr-4 pb-20">
+                       <div className="text-center space-y-6">
+                         <div className="text-emerald-500 text-[10px] font-black uppercase tracking-[0.8em] animate-pulse">Spectral Geometry & Frequency State</div>
+                         <h1 className="text-7xl md:text-9xl font-black text-white tracking-tighter leading-none italic uppercase">Torus<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-600 not-italic">Resonance</span></h1>
+                         <div className="h-0.5 w-64 bg-zinc-800 mx-auto relative overflow-hidden">
+                           <motion.div className="absolute inset-0 bg-emerald-500" initial={{ left: "-100%" }} animate={{ left: "100%" }} transition={{ repeat: Infinity, duration: 4, ease: "linear" }} />
+                         </div>
                        </div>
 
-                       <div className="space-y-8">
-                         <div className="grid md:grid-cols-2 gap-8">
-                            <div className="bg-emerald-900/10 border border-emerald-500/20 rounded-[2rem] p-8 space-y-6">
-                              <h3 className="text-xs uppercase font-bold tracking-widest text-emerald-400 text-center">Energy Centers (Chakras)</h3>
-                              <div className="space-y-4">
-                                {data.chakras?.slice(0, 5).map((c, i) => (
-                                  <div key={i} className="flex items-center gap-4">
-                                    <div className="w-8 h-8 rounded-full flex items-center justify-center opacity-80 shrink-0 shadow-[0_0_10px_currentColor]" style={{ backgroundColor: c.color, color: c.color }}>
-                                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                                    </div>
-                                    <div className="flex-1">
-                                      <div className="flex justify-between items-end mb-1">
-                                        <span className="text-xs font-bold text-stone-200 uppercase tracking-widest">{c.name}</span>
-                                        <span className="text-[10px] text-emerald-400">{c.score}%</span>
-                                      </div>
-                                      <div className="h-1 bg-black/40 rounded-full overflow-hidden">
-                                        <div className="h-full bg-emerald-500" style={{ width: `${c.score}%` }}></div>
-                                      </div>
-                                    </div>
-                                  </div>
+                       <div className="grid lg:grid-cols-12 gap-12">
+                          <section className="lg:col-span-12 bg-zinc-900/60 p-12 rounded-[5rem] border border-white/5 relative overflow-hidden group">
+                             <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-10 transition-opacity"><Activity size={180} /></div>
+                             <h3 className="text-emerald-500 text-[10px] font-black uppercase tracking-[0.4em] mb-12 flex items-center gap-3">
+                               <Sparkles size={18} className="text-emerald-400" />
+                               VIBRATIONAL CENTER (CHAKRA SPECTROMETRY)
+                             </h3>
+                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 relative z-10">
+                                {data.chakras?.slice(0, 6).map((c, i) => (
+                                  <motion.div 
+                                    key={i} 
+                                    initial={{ y: 20, opacity: 0 }}
+                                    whileInView={{ y: 0, opacity: 1 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    className="p-8 rounded-[3.5rem] bg-black/40 border border-white/5 group/chakra hover:border-emerald-500/30 transition-all flex flex-col gap-6"
+                                  >
+                                     <div className="flex justify-between items-start">
+                                        <div 
+                                          className="w-14 h-14 rounded-2xl flex items-center justify-center border border-white/5 shadow-2xl transition-transform group-hover/chakra:scale-110"
+                                          style={{ backgroundColor: `${c.color}15`, color: c.color }}
+                                        >
+                                           <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_15px_white]" />
+                                        </div>
+                                        <div className="text-[10px] font-black tracking-widest text-zinc-600 uppercase">NODE {i+1}</div>
+                                     </div>
+                                     <div className="space-y-4">
+                                        <div className="flex justify-between items-end">
+                                           <div className="text-xl font-black text-white italic uppercase tracking-tight">{c.name}</div>
+                                           <div className="text-[10px] font-black text-emerald-500 font-mono">{c.score}%</div>
+                                        </div>
+                                        <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
+                                           <motion.div 
+                                             initial={{ width: 0 }}
+                                             whileInView={{ width: `${c.score}%` }}
+                                             className="h-full"
+                                             style={{ backgroundColor: c.color }}
+                                           />
+                                        </div>
+                                        <div className="text-[10px] text-zinc-500 font-medium leading-relaxed italic opacity-60 group-hover/chakra:opacity-100 transition-opacity">
+                                           {c.description || 'Frequency aligning with universal geometric constants.'}
+                                        </div>
+                                     </div>
+                                  </motion.div>
                                 ))}
-                                {(!data.chakras || data.chakras.length === 0) && (
-                                  <div className="text-stone-500 text-sm text-center italic py-4">Chakra data aligning...</div>
-                                )}
-                              </div>
-                            </div>
+                             </div>
+                          </section>
 
-                            <div className="space-y-6">
-                              <div className="bg-black/40 border border-white/5 p-6 rounded-3xl">
-                                <div className="text-[10px] text-emerald-500 uppercase font-bold tracking-[0.3em] mb-2">Body & Earth Flow</div>
-                                <p className="text-sm font-light text-stone-300 italic leading-relaxed">"{data.torusAnalysis?.bodyAndFlow || 'Strong grounding vectors drawing current upwards from the core.'}"</p>
-                              </div>
-                              <div className="bg-black/40 border border-white/5 p-6 rounded-3xl">
-                                <div className="text-[10px] text-purple-500 uppercase font-bold tracking-[0.3em] mb-2">Mind & Cosmic Flow</div>
-                                <p className="text-sm font-light text-stone-300 italic leading-relaxed">"{data.torusAnalysis?.mindAndSpiritual || 'Expanded crown aperture receiving high levels of abstraction.'}"</p>
-                              </div>
-                            </div>
-                         </div>
-                         
-                         <div className="bg-black/40 p-8 rounded-[2rem] border border-emerald-500/20 text-center">
-                           <div className="text-emerald-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-4">Overall Biometric Geometry</div>
-                           <p className="text-lg font-light text-white italic max-w-2xl mx-auto">"{data.torusAnalysis?.overallAnalogy || 'The energetic structure resembles a steady, balanced sphere with clear pathways for intuition and logic.'}"</p>
-                         </div>
+                          <div className="lg:col-span-12 grid md:grid-cols-2 gap-8">
+                             <motion.section 
+                               initial={{ y: 30, opacity: 0 }}
+                               whileInView={{ y: 0, opacity: 1 }}
+                               className="bg-zinc-900/40 p-10 rounded-[4rem] border border-white/5 relative overflow-hidden group"
+                             >
+                                <div className="text-emerald-500 text-[10px] font-black uppercase tracking-[0.4em] mb-6 flex items-center gap-3">
+                                   <Globe size={16} />
+                                   BODY & EARTH ANCHOR
+                                </div>
+                                <p className="text-xl font-light text-zinc-300 leading-tight italic">
+                                   "{data.torusAnalysis?.bodyAndFlow || 'Strong grounding vectors detected, drawing current upwards from the core matrix.'}"
+                                </p>
+                             </motion.section>
+
+                             <motion.section 
+                               initial={{ y: 30, opacity: 0 }}
+                               whileInView={{ y: 0, opacity: 1 }}
+                               className="bg-zinc-900/40 p-10 rounded-[4rem] border border-white/5 relative overflow-hidden group"
+                             >
+                                <div className="text-cyan-500 text-[10px] font-black uppercase tracking-[0.4em] mb-6 flex items-center gap-3">
+                                   <Sparkles size={16} />
+                                   MIND & COSMIC RECEPTION
+                                </div>
+                                <p className="text-xl font-light text-zinc-300 leading-tight italic">
+                                   "{data.torusAnalysis?.mindAndSpiritual || 'Expanded crown aperture receiving high levels of abstraction and universal signal.'}"
+                                </p>
+                             </motion.section>
+                          </div>
+                          
+                          <motion.div 
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            whileInView={{ scale: 1, opacity: 1 }}
+                            className="lg:col-span-12 bg-zinc-950 p-16 rounded-[6rem] border border-emerald-500/10 text-center relative overflow-hidden group shadow-2xl"
+                          >
+                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.05),transparent)] pointer-events-none" />
+                             <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-20" />
+                             <div className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.8em] mb-10">SPECTRAL SYNTHESIS SUMMARY</div>
+                             <p className="text-3xl md:text-4xl font-extralight text-zinc-200 italic max-w-4xl mx-auto tracking-tight leading-tight">
+                                "{data.torusAnalysis?.overallAnalogy || 'The energetic structure resembles a steady, balanced sphere with clear pathways for intuition and logic.'}"
+                             </p>
+                          </motion.div>
                        </div>
                     </motion.div>
                   )}
@@ -924,73 +1295,132 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
                exit={{ opacity: 0 }}
-               className="h-full bg-black rounded-[3rem] border border-white/10 overflow-hidden relative group"
+               className="h-full bg-black rounded-[4rem] border border-white/5 overflow-hidden relative group perspective-1000"
             >
-               <div className="absolute inset-0 overflow-hidden opacity-30">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-900/50 to-blue-900/50 animate-pulse"></div>
+               {/* Cinematic Layers */}
+               <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.1),transparent)] animate-pulse" />
+                  <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] pointer-events-none" />
+                  <div className="absolute inset-0 bg-black/60" />
                </div>
 
-               <div className="absolute inset-0 flex items-center justify-center p-10">
+               {/* Cinematic Content Layer */}
+               <div className="absolute inset-0 flex items-center justify-center p-12 z-10">
                   <AnimatePresence mode="wait">
                     <motion.div 
                       key={videoStep}
-                      initial={{ opacity: 0, scale: 0.9, rotateX: 20 }}
-                      animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-                      exit={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }}
-                      transition={{ duration: 1 }}
-                      className="text-center space-y-6 max-w-2xl"
+                      initial={{ opacity: 0, scale: 0.8, rotateX: 30, y: 50, filter: 'blur(15px)' }}
+                      animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0, filter: 'blur(0px)' }}
+                      exit={{ opacity: 0, scale: 1.2, rotateX: -20, y: -50, filter: 'blur(15px)' }}
+                      transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                      className="text-center space-y-12 max-w-4xl"
                     >
-                      {videoStep === 0 && (
-                        <>
-                          <div className="text-stone-500 text-[10px] uppercase tracking-[0.6em] font-bold">Chapter One: The Awakening</div>
-                          <h2 className="text-6xl font-light text-white tracking-widest uppercase">Arrival</h2>
-                          <p className="text-2xl font-light text-stone-400 italic">"The cosmic grid aligns as your singular consciousness enters the matrix."</p>
-                        </>
-                      )}
-                      {videoStep === 1 && (
-                        <>
-                          <div className="text-stone-500 text-[10px] uppercase tracking-[0.6em] font-bold">Chapter Two: The Alignment</div>
-                          <h2 className="text-6xl font-light text-white tracking-widest uppercase">Origin</h2>
-                          <div className="flex justify-center gap-6">
-                             {data.planets?.slice(0, 3).map((p, i) => (
-                               <div key={i} className="text-center">
-                                 <div className="text-4xl text-purple-400 font-light">{p.sign?.slice(0, 2)}</div>
-                                 <div className="text-[10px] text-stone-600 mt-2">{p.name}</div>
-                               </div>
-                             ))}
-                          </div>
-                          <p className="text-xl font-light text-stone-400">Planetary currents and celestial weights define the initial geometry.</p>
-                        </>
-                      )}
-                      {videoStep === 2 && (
-                        <>
-                          <div className="text-stone-500 text-[10px] uppercase tracking-[0.6em] font-bold">Chapter Three: The Vibration</div>
-                          <h2 className="text-6xl font-light text-white tracking-widest uppercase">Essence</h2>
-                          <div className="text-8xl text-sky-500 font-light">{data.numerology.lifePath}</div>
-                          <p className="text-xl font-light text-stone-400">Your Life Path frequency: {data.numerology.lifePathMeaning?.slice(0, 100) || 'Universal calibration...'}...</p>
-                        </>
-                      )}
-                      {videoStep === 3 && (
-                        <>
-                          <div className="text-stone-500 text-[10px] uppercase tracking-[0.6em] font-bold">Chapter Four: The Synthesis</div>
-                          <h2 className="text-6xl font-light text-white tracking-widest uppercase">Unity</h2>
-                          <p className="text-2xl font-light text-stone-200 leading-relaxed italic">"{data.synthesis}"</p>
-                        </>
-                      )}
-                      {videoStep === 4 && (
-                        <>
-                          <div className="text-stone-500 text-[10px] uppercase tracking-[0.6em] font-bold">Final Chapter: The Future</div>
-                          <h2 className="text-6xl font-light text-white tracking-widest uppercase">Ascend</h2>
-                          <p className="text-xl font-light text-stone-500">Node analysis complete. The journey continues beyond the threshold.</p>
-                           <button onClick={() => setVideoStep(0)} className="px-8 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-[10px] font-bold uppercase tracking-widest text-white transition-all">Replay Experience</button>
-                        </>
-                      )}
+                       <motion.div 
+                         initial={{ opacity: 0, tracking: '0.2em' }}
+                         animate={{ opacity: 1, tracking: '0.8em' }}
+                         transition={{ delay: 0.5, duration: 1.5 }}
+                         className="text-zinc-500 text-[11px] uppercase font-black"
+                       >
+                         {videoStep === 0 && "CHAPTER ONE: INITIALIZATION"}
+                         {videoStep === 1 && "CHAPTER TWO: CELESTIAL ORIGIN"}
+                         {videoStep === 2 && "CHAPTER THREE: HARMONIC ESSENCE"}
+                         {videoStep === 3 && "CHAPTER FOUR: TOTAL SYNTHESIS"}
+                         {videoStep === 4 && "FINAL CHAPTER: TRANSCENDENCE"}
+                       </motion.div>
+
+                       <div className="relative">
+                          <motion.h2 
+                            className="text-7xl md:text-[10rem] font-black text-white tracking-tighter leading-none italic uppercase mix-blend-difference"
+                            initial={{ x: -100, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.2, type: 'spring', damping: 12 }}
+                          >
+                            {videoStep === 0 && "ARRIVAL"}
+                            {videoStep === 1 && "ORIGIN"}
+                            {videoStep === 2 && "VIBRATION"}
+                            {videoStep === 3 && "UNITY"}
+                            {videoStep === 4 && "ASCEND"}
+                          </motion.h2>
+                          <div className="absolute -inset-4 bg-white/5 blur-3xl rounded-full opacity-20 animate-pulse pointer-events-none" />
+                       </div>
+
+                       <motion.div 
+                         initial={{ opacity: 0, y: 20 }}
+                         animate={{ opacity: 1, y: 0 }}
+                         transition={{ delay: 0.8 }}
+                         className="space-y-8"
+                       >
+                         {videoStep === 0 && (
+                           <p className="text-2xl md:text-4xl font-light text-zinc-300 italic tracking-tight leading-tight">
+                              "The cosmic grid aligns as your singular consciousness enters the matrix threshold."
+                           </p>
+                         )}
+                         {videoStep === 1 && (
+                           <div className="space-y-8">
+                             <div className="flex justify-center gap-12">
+                                {data.planets?.slice(0, 3).map((p, i) => (
+                                  <motion.div 
+                                    key={i} 
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ delay: 1 + i * 0.2 }}
+                                    className="text-center group"
+                                  >
+                                    <div className="text-6xl text-purple-400 font-black tracking-tighter mb-4 group-hover:scale-110 transition-transform">{p.sign?.slice(0, 2)}</div>
+                                    <div className="text-[10px] text-zinc-500 font-black tracking-widest">{p.name.toUpperCase()}</div>
+                                  </motion.div>
+                                ))}
+                             </div>
+                             <p className="text-xl text-zinc-400 font-light italic">Planetary currents and celestial weights define your geometric blueprint.</p>
+                           </div>
+                         )}
+                         {videoStep === 2 && (
+                           <div className="space-y-8">
+                             <motion.div 
+                               initial={{ scale: 0.5, rotateY: 180 }}
+                               animate={{ scale: 1.5, rotateY: 0 }}
+                               className="text-9xl text-sky-500 font-black italic tracking-tighter"
+                             >
+                                {data.numerology.lifePath}
+                             </motion.div>
+                             <p className="text-xl text-zinc-400 font-light italic mt-12">Your Life Path frequency: {data.numerology.lifePathMeaning?.slice(0, 100)}...</p>
+                           </div>
+                         )}
+                         {videoStep === 3 && (
+                           <p className="text-3xl md:text-5xl font-light text-white leading-tight italic max-w-3xl mx-auto border-l-4 border-purple-500 pl-12 py-4">
+                              "{data.synthesis}"
+                           </p>
+                         )}
+                         {videoStep === 4 && (
+                           <div className="space-y-12">
+                             <p className="text-2xl text-zinc-500 font-light italic">Node analysis complete. The journey continues beyond the observable threshold.</p>
+                             <div className="flex justify-center gap-6">
+                                <button onClick={() => setVideoStep(0)} className="px-10 py-5 bg-white text-black font-black uppercase text-[11px] tracking-[0.2em] rounded-[2rem] hover:scale-105 transition-all active:scale-95 shadow-2xl shadow-white/10">Replay Sequence</button>
+                                <button onClick={() => setMode('summary')} className="px-10 py-5 bg-zinc-900 text-white font-black uppercase text-[11px] tracking-[0.2em] border border-white/5 rounded-[2rem] hover:bg-zinc-800 transition-all">Exit Matrix</button>
+                             </div>
+                           </div>
+                         )}
+                       </motion.div>
                     </motion.div>
                   </AnimatePresence>
                </div>
 
-               {/* Video Controls Overlay */}
-               <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 px-10 py-4 bg-black/40 backdrop-blur-md rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
+               {/* Cinematic UI Overlays */}
+               <div className="absolute top-12 left-12 z-20 pointer-events-none">
+                  <div className="flex gap-4 items-center mb-6">
+                     <div className="w-4 h-4 bg-rose-500/80 animate-ping rounded-full" />
+                     <div className="text-[10px] text-zinc-400 font-black tracking-[0.5em] uppercase">REC LIVE // SYNTHESIS</div>
+                  </div>
+                  <div className="p-6 border border-white/5 bg-black/40 backdrop-blur-md rounded-3xl">
+                     <div className="text-[9px] text-zinc-600 font-black tracking-widest mb-2">SIGNAL STRENGTH</div>
+                     <div className="flex gap-1 h-1 w-24">
+                        {[...Array(8)].map((_, i) => <div key={i} className={`flex-1 ${i < 6 ? 'bg-emerald-500' : 'bg-zinc-800'}`} />)}
+                     </div>
+                  </div>
+               </div>
+
+               {/* Playback Controls */}
+               <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 px-10 py-4 bg-black/40 backdrop-blur-md rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity z-40">
                   <button onClick={() => setVideoStep(prev => (prev - 1 + 5) % 5)} className="text-stone-500 hover:text-white transition-colors"><ChevronRight className="rotate-180" /></button>
                   <button 
                     onClick={() => setIsAutoPlaying(!isAutoPlaying)} 
@@ -1001,7 +1431,7 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
                   <button onClick={() => setVideoStep(prev => (prev + 1) % 5)} className="text-stone-500 hover:text-white transition-colors"><ChevronRight /></button>
                   <div className="flex gap-1 ml-4">
                      {[0, 1, 2, 3, 4].map(s => (
-                       <div key={s} className={`h-1 rounded-full transition-all ${videoStep === s ? 'w-8 bg-purple-500' : 'w-2 bg-white/10'}`}></div>
+                       <button key={s} onClick={() => setVideoStep(s)} className={`h-1 rounded-full transition-all ${videoStep === s ? 'w-8 bg-purple-500' : 'w-2 bg-white/10'}`} />
                      ))}
                   </div>
                </div>

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "NODE_OPTIONS=--max-old-space-size=6144 remix vite:build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "build": "remix vite:build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "lint": "eslint app"
   },
@@ -29,7 +29,9 @@
     "date-fns": "^4.1.0",
     "firebase": "^12.13.0",
     "gifenc": "1.0.3",
+    "html-to-image": "^1.11.13",
     "isbot": "^5.1.40",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.557.0",
     "motion": "^12.38.0",
     "react": "^18.3.1",

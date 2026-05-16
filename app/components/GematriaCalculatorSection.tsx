@@ -38,7 +38,7 @@ export const GematriaCalculatorSection = () => {
   }, [input, activeCiphers]);
 
   const addToHistory = (phrase: string) => {
-    if (!phrase || history.find(h => h.phrase === phrase)) return;
+    if (!phrase || history?.find(h => h.phrase === phrase)) return;
     const newHistory = [{ phrase, timestamp: Date.now() }, ...history].slice(0, 20);
     setHistory(newHistory);
     localStorage.setItem('gematria_calc_history', JSON.stringify(newHistory));

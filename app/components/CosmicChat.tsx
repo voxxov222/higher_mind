@@ -30,7 +30,7 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
 
   useEffect(() => {
     // Add newly saved messages to the chat if they aren't already there
-    const newItems = savedMessages.filter(item => !messages.find(m => m.id === item.id));
+    const newItems = savedMessages.filter(item => !messages?.find(m => m.id === item.id));
     if (newItems.length > 0) {
       const chatItems: Message[] = newItems.map(item => ({
         id: item.id,

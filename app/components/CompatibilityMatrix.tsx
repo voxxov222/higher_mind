@@ -17,7 +17,7 @@ export const CompatibilityMatrix = ({ data }: { data: CosmicData }) => {
   const [selectedSign, setSelectedSign] = useState<string | null>(null);
 
   const activeInteraction = selectedSign 
-    ? interactions.find(i => i.sign === selectedSign) 
+    ? interactions?.find(i => i.sign === selectedSign) 
     : null;
 
   // Generate some radar data based on lengths of strengths/weaknesses to make it look cool, or hardcode categories

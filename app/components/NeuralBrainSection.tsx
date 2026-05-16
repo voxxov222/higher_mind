@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
-import { Brain as BrainIcon, Activity, Zap, Waves, Network, Lock, Sliders, Search, Eye, ArrowLeft, Code, Minimize2, Power, Palette, Fingerprint, Terminal } from 'lucide-react';
+import { Brain as BrainIcon, Activity, Zap, Waves, Network, Lock, Sliders, Search, Eye, ArrowLeft, Code, Minimize2, Power, Palette, Fingerprint, Terminal, Box } from 'lucide-react';
 import { TerminalOverlay } from './profile/TerminalOverlay';
 
 // Brain Point Cloud Component with Shader Optimization
@@ -277,6 +277,7 @@ export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?:
     const [hapticMode, setHapticMode] = useState(false);
     const [visMode, setVisMode] = useState<'solid' | 'ghost' | 'wire'>('solid');
     const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+    const [initialTerminalCommand, setInitialTerminalCommand] = useState<string | undefined>(undefined);
 
     // Save to localStorage on change
     useEffect(() => {
@@ -326,13 +327,26 @@ export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?:
     const [showBrainMenu, setShowBrainMenu] = useState<{x: number, y: number} | null>(null);
 
     const touchTimer = useRef<NodeJS.Timeout | null>(null);
+    const startPos = useRef<{x: number, y: number}>({x: 0, y: 0});
 
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
         const x = e.clientX;
         const y = e.clientY;
+        startPos.current = { x, y };
         touchTimer.current = setTimeout(() => {
             setShowBrainMenu({ x, y });
-        }, 800); // 800ms long press
+        }, 600); // 600ms long press
+    };
+
+    const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (touchTimer.current) {
+            const dx = e.clientX - startPos.current.x;
+            const dy = e.clientY - startPos.current.y;
+            if (dx * dx + dy * dy > 100) { // 10px threshold
+                clearTimeout(touchTimer.current);
+                touchTimer.current = null;
+            }
+        }
     };
 
     const handlePointerUp = () => {
@@ -349,10 +363,12 @@ export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?:
 
     return (
         <div 
-            className="h-[80vh] rounded-[3rem] overflow-hidden border border-white/10 bg-black relative font-mono"
-            onPointerDown={handlePointerDown}
-            onPointerUp={handlePointerUp}
+            className="h-[80vh] rounded-[3rem] overflow-hidden border border-white/10 bg-black relative font-mono select-none"
+            onPointerDownCapture={handlePointerDown}
+            onPointerMoveCapture={handlePointerMove}
+            onPointerUpCapture={handlePointerUp}
             onPointerLeave={handlePointerUp}
+            onContextMenuCapture={handleContextMenu}
         >
             {/* 3D Canvas */}
             <Canvas camera={{ position: [0, 0, 15], fov: 45 }}>
@@ -404,7 +420,7 @@ export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?:
                 
                 {emotiveSynth && <Sparkles count={800} scale={15} color={currentTheme.accent} speed={2} opacity={0.5} />}
                 
-                <OrbitControls enablePan={false} maxPolarAngle={Math.PI} minPolarAngle={0} enableZoom={true} />
+                <OrbitControls enablePan={true} maxPolarAngle={Math.PI} minPolarAngle={0} enableZoom={true} />
             </Canvas>
 
             {/* Brain Popup Menu */}
@@ -431,6 +447,12 @@ export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?:
                             className="flex items-center gap-3 px-3 py-2 hover:bg-emerald-500/20 rounded-lg text-white/80 hover:text-white transition-colors text-xs uppercase tracking-wider"
                         >
                             <Terminal size={14} className="text-emerald-400" /> Open Terminal
+                        </button>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); setShowBrainMenu(null); setInitialTerminalCommand("gh repo clone cline/cline"); setIsTerminalOpen(true); }}
+                            className="flex items-center gap-3 px-3 py-2 hover:bg-emerald-500/20 rounded-lg text-white/80 hover:text-white transition-colors text-xs uppercase tracking-wider"
+                        >
+                            <Code size={14} className="text-blue-400" /> Clone Cline Repo
                         </button>
                         <button 
                             onClick={(e) => { e.stopPropagation(); setShowBrainMenu(null); if (setActiveTab) setActiveTab('sandbox'); }}
@@ -616,7 +638,7 @@ export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?:
 
             {/* Terminal Overlay */}
             <AnimatePresence>
-                {isTerminalOpen && <TerminalOverlay onClose={() => setIsTerminalOpen(false)} />}
+                {isTerminalOpen && <TerminalOverlay onClose={() => { setIsTerminalOpen(false); setInitialTerminalCommand(undefined); }} initialCommand={initialTerminalCommand} />}
             </AnimatePresence>
         </div>
     );

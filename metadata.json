@@ -2,5 +2,5 @@
   "name": "HIGHER 🧠 MIND ",
   "description": "Immersive 3D interactive cosmos OS with advanced Gematria decoding, neural synaptic visualizations, and high-performance holographic astrological analysis.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

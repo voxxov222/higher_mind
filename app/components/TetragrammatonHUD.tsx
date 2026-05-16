@@ -40,7 +40,7 @@ const InteractiveNode = ({ node, index, type, activeNode, setActiveNode, setHove
       {isActive && (
         <mesh ref={glowRef}>
           <sphereGeometry args={[1.5, 32, 32]} />
-          <meshBasicMaterial color={node.color} transparent opacity={0.2} blending={THREE.AdditiveBlending} depthWrite={false} />
+          <meshStandardMaterial color={node.color} emissive={node.color} emissiveIntensity={1} transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} />
         </mesh>
       )}
 
@@ -62,6 +62,58 @@ const InteractiveNode = ({ node, index, type, activeNode, setActiveNode, setHove
           </div>
         </Html>
       )}
+    </group>
+  );
+};
+
+const GridRings = ({ activeNode, radius }: any) => {
+  const innerRingRef = useRef<THREE.Mesh>(null);
+  const outerRingRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    
+    if (innerRingRef.current) {
+        if (activeNode?.type === 'yhvh') {
+            const scale = 1 + Math.sin(time * 5) * 0.05;
+            innerRingRef.current.scale.set(scale, scale, 1);
+            if(innerRingRef.current.material) {
+                (innerRingRef.current.material as THREE.MeshBasicMaterial).opacity = Math.min(0.5, 0.3 + Math.sin(time * 5) * 0.1);
+            }
+        } else {
+            innerRingRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
+            if(innerRingRef.current.material) {
+                (innerRingRef.current.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp((innerRingRef.current.material as THREE.MeshBasicMaterial).opacity, 0.1, 0.1);
+            }
+        }
+    }
+    
+    if (outerRingRef.current) {
+        if (activeNode?.type === 'alephtav') {
+            const scale = 1 + Math.sin(time * 3) * 0.05;
+            outerRingRef.current.scale.set(scale, scale, 1);
+            if (outerRingRef.current.material) {
+                (outerRingRef.current.material as THREE.MeshBasicMaterial).opacity = Math.min(0.4, 0.2 + Math.sin(time * 3) * 0.1);
+            }
+        } else {
+            outerRingRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
+            if (outerRingRef.current.material) {
+                (outerRingRef.current.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp((outerRingRef.current.material as THREE.MeshBasicMaterial).opacity, 0.05, 0.1);
+            }
+        }
+    }
+  });
+
+  return (
+    <group>
+      <mesh ref={innerRingRef} rotation={[Math.PI/2, 0, 0]}>
+        <ringGeometry args={[radius - 0.1, radius, 64]} />
+        <meshBasicMaterial color="#38bdf8" transparent opacity={0.1} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh ref={outerRingRef} rotation={[Math.PI/2, 0, 0]}>
+        <ringGeometry args={[radius * 1.5 - 0.1, radius * 1.5, 64]} />
+        <meshBasicMaterial color="#c084fc" transparent opacity={0.05} side={THREE.DoubleSide} />
+      </mesh>
     </group>
   );
 };
@@ -146,14 +198,7 @@ const TetragrammatonNodes = ({ isHovered, setHovered, activeNode, setActiveNode 
       ))}
 
       {/* Grid rings */}
-      <mesh rotation={[Math.PI/2, 0, 0]}>
-        <ringGeometry args={[radius - 0.1, radius, 64]} />
-        <meshBasicMaterial color="#38bdf8" transparent opacity={0.1} side={THREE.DoubleSide} />
-      </mesh>
-      <mesh rotation={[Math.PI/2, 0, 0]}>
-        <ringGeometry args={[radius * 1.5 - 0.1, radius * 1.5, 64]} />
-        <meshBasicMaterial color="#c084fc" transparent opacity={0.05} side={THREE.DoubleSide} />
-      </mesh>
+      <GridRings activeNode={activeNode} radius={radius} />
     </group>
   );
 };
@@ -169,6 +214,16 @@ const AlephTavIndexHUD = ({ activeNode }: { activeNode: { type: string, index: n
         }));
     }, []);
 
+    const sortedIndices = useMemo(() => {
+        if (!activeNode) return indices;
+        const seed = activeNode.type === 'yhvh' ? activeNode.index + 1 : activeNode.index + 7;
+        return [...indices].sort((a, b) => {
+            const aVal = (a.id * seed) % 22;
+            const bVal = (b.id * seed) % 22;
+            return aVal - bVal;
+        });
+    }, [indices, activeNode]);
+
     return (
         <div className="absolute top-4 left-4 w-64 pointer-events-none">
             <div className="bg-slate-950/80 border border-emerald-500/30 backdrop-blur-md p-4 rounded-xl text-xs font-mono shadow-[0_0_20px_rgba(16,185,129,0.1)]">
@@ -181,8 +236,8 @@ const AlephTavIndexHUD = ({ activeNode }: { activeNode: { type: string, index: n
                 </div>
                 <div className="h-px bg-emerald-500/30 mb-3 w-full"></div>
                 
-                <div className="grid grid-cols-4 gap-1.5">
-                    {indices.map((idx, i) => {
+                <div className="grid grid-cols-4 gap-1.5 min-h-[200px]">
+                    {sortedIndices.map((idx, i) => {
                         const isFocused = activeNode !== null;
                         const activeIndex = activeNode?.index || 0;
                         const valueString = isFocused 
@@ -191,6 +246,7 @@ const AlephTavIndexHUD = ({ activeNode }: { activeNode: { type: string, index: n
                         
                         return (
                             <motion.div 
+                                layout
                                 key={idx.id} 
                                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                                 animate={{ 
@@ -199,23 +255,22 @@ const AlephTavIndexHUD = ({ activeNode }: { activeNode: { type: string, index: n
                                     y: 0,
                                     backgroundColor: isFocused && idx.state === 'ACTIVE' 
                                         ? 'rgba(16, 185, 129, 0.2)' 
-                                        : idx.state === 'ACTIVE' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(0, 0, 0, 0.2)',
+                                        : idx.state === 'ACTIVE' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(0, 0, 0, 0.4)',
                                     borderColor: isFocused && idx.state === 'ACTIVE'
                                         ? 'rgba(16, 185, 129, 0.8)'
-                                        : isFocused ? 'rgba(148, 163, 184, 0.4)' : idx.state === 'ACTIVE' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(30, 41, 59, 0.8)'
+                                        : isFocused ? 'rgba(148, 163, 184, 0.2)' : idx.state === 'ACTIVE' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(30, 41, 59, 0.4)'
                                 }}
                                 transition={{ 
-                                    duration: 0.4, 
-                                    delay: isFocused ? i * 0.015 : 0, 
-                                    type: "spring", 
-                                    stiffness: 150 
+                                    opacity: { duration: 0.4 },
+                                    layout: { type: "spring", stiffness: 200, damping: 20 },
+                                    default: { duration: 0.4 }
                                 }}
                                 className={`p-1.5 border rounded-md flex flex-col items-center justify-center relative overflow-hidden`}
                             >
                                 {isFocused && idx.state === 'ACTIVE' && (
                                     <motion.div 
                                         className="absolute inset-0 bg-emerald-400/20"
-                                        animate={{ opacity: [0, 0.5, 0] }}
+                                        animate={{ opacity: [0, 0.6, 0] }}
                                         transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse", delay: Math.random() * 2 }}
                                     />
                                 )}

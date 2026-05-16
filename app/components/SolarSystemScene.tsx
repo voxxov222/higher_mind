@@ -10,8 +10,8 @@ import { fetchAuraInsight } from '../services/geminiService';
 import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 
-import { NatalChartAdvanced } from './NatalChartAdvanced';
-import { CelestialSolarCore, PlanetaryGravityNetwork } from './CelestialSolarCore';
+import { ClassicBirthChart } from './ClassicBirthChart';
+import { CelestialSolarCore, PlanetaryGravityNetwork, CelestialDNAHelix } from './CelestialSolarCore';
 
 interface AuraVisualNode {
   id: string;
@@ -242,13 +242,13 @@ const AspectLines = ({ data, onAspectClick }: { data: CosmicData | null; onAspec
   return (
     <group>
       {data.aspects.map((aspect, i) => {
-        const p1 = data.planets.find(p => p.name === aspect.planet1);
-        const p2 = data.planets.find(p => p.name === aspect.planet2);
+        const p1 = data.planets?.find(p => p.name === aspect.planet1);
+        const p2 = data.planets?.find(p => p.name === aspect.planet2);
         
         if (!p1 || !p2) return null;
 
         const getDistance = (name: string) => {
-          const planet = planets.find(p => p.name === name);
+          const planet = planets?.find(p => p.name === name);
           if (planet) return planet.distance;
           const special = SPECIAL_POINTS.find(p => p.name === name);
           if (special) return special.distance;
@@ -582,9 +582,9 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
     if (name === 'South Node') return data.nodes?.south;
     if (name === 'Chiron') return data.points?.chiron;
     if (name === 'Lilith') return data.points?.blackMoonLilith;
-    if (name === 'Sun') return data.planets.find(p => p.name.toLowerCase() === 'sun');
+    if (name === 'Sun') return data.planets?.find(p => p.name.toLowerCase() === 'sun');
     if (name === 'Earth') return { name: 'Earth', sign: 'N/A', degree: 0, house: 0, meaning: 'Center of observation' };
-    return data.planets.find(p => p.name.toLowerCase() === name.toLowerCase());
+    return data.planets?.find(p => p.name.toLowerCase() === name.toLowerCase());
   };
 
   const getPlanetPos = (planet: PlanetData) => {
@@ -666,18 +666,21 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
       <pointLight position={[100, 100, 100]} intensity={1} color="#ffffff" />
       
       {viewMode === 'chart' ? (
-        <NatalChartAdvanced 
-          data={data} 
-          selectedPlanet={selectedPlanet} 
-          onPlanetClick={setSelectedPlanet} 
-          onResearch={onResearch}
-          onSave={onSave}
-        />
+        <Html fullscreen center zIndexRange={[100, 0]}>
+          <div className="w-full h-[600px] flex items-center justify-center p-4">
+            <ClassicBirthChart 
+              data={data} 
+              selectedPlanet={selectedPlanet} 
+              onPlanetClick={setSelectedPlanet} 
+            />
+          </div>
+        </Html>
       ) : (
         <>
           <AstrologicalHouses data={data} onHouseHover={setHoveredHouse} />
           <AspectLines data={data} onAspectClick={setSelectedAspect} />
           <PlanetaryGravityNetwork planets={mappedPlanetsForGravity} />
+          <CelestialDNAHelix />
           
           {/* Grid Floor for Futuristic Feel */}
           <Grid 
@@ -816,7 +819,7 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
                 astro={astro}
                 isStatic={isStatic}
                 isBirthChartMode={false}
-                onSelect={(p) => setSelectedPlanet(p ? planets.find(item => item.name === p.name) || p : null)} 
+                onSelect={(p) => setSelectedPlanet(p ? planets?.find(item => item.name === p.name) || p : null)} 
               />
             );
           })}
@@ -1318,7 +1321,7 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
                         <div className="space-y-4">
                            <div>
                              <span className="text-[10px] text-stone-500 block mb-1 uppercase">Primal Identity (Sun)</span>
-                             <p className="text-sm text-stone-200">{data.planets.find(p => p.name === 'Sun')?.meaning || 'The solar frequency is active.'}</p>
+                             <p className="text-sm text-stone-200">{data.planets?.find(p => p.name === 'Sun')?.meaning || 'The solar frequency is active.'}</p>
                            </div>
                            <div>
                              <span className="text-[10px] text-stone-500 block mb-1 uppercase">Directional Intent</span>

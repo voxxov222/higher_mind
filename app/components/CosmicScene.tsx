@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { useRef, useMemo, useState, useEffect, createContext, useContext } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Line, Ring, Sparkles, Stars, Text, Trail, OrbitControls, Html, PerspectiveCamera } from '@react-three/drei';
+import { Float, Line, Ring, Sparkles, Stars, Text, Trail, OrbitControls, Html, PerspectiveCamera, Points, PointMaterial } from '@react-three/drei';
 // --- POST-PROCESSING EFFX ---
 import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
@@ -11,6 +11,7 @@ import { CosmicData } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { AstralMind, ThinkingMode } from './AstralMind';
 import { VortexScene } from './VortexSequencingSection';
+import { CelestialSolarCore, PlanetaryGravityNetwork } from './CelestialSolarCore';
 import { X, Minus, Lock, Unlock, Play, Square, Palette, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity as InfinityIcon, Magnet, Shuffle, Waves, Terminal } from 'lucide-react';
 import { TerminalOverlay } from './profile/TerminalOverlay';
 
@@ -29,6 +30,73 @@ interface InteractionState {
   isMinimized: boolean;
   glowIntensity: number;
 }
+
+// --- COSMIC BACKGROUND PHENOMENA ---
+const CosmicPhenomena = () => {
+  const pointsRef = useRef<THREE.Points>(null);
+  const particleCount = 2000;
+  
+  const [positions, rotations] = useMemo(() => {
+    const pos = new Float32Array(particleCount * 3);
+    const rot = new Float32Array(particleCount);
+    for (let i = 0; i < particleCount; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(Math.random() * 2 - 1);
+      const radius = 200 + Math.random() * 300;
+      
+      pos[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+      pos[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      pos[i * 3 + 2] = radius * Math.cos(phi);
+      rot[i] = Math.random() * Math.PI;
+    }
+    return [pos, rot];
+  }, []);
+
+  useFrame((state) => {
+    if (pointsRef.current) {
+      pointsRef.current.rotation.y += 0.0001;
+      pointsRef.current.rotation.z += 0.00005;
+      
+      // Subtle pulsing of all background particles
+      const scale = 1 + Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
+      pointsRef.current.scale.setScalar(scale);
+    }
+  });
+
+  return (
+    <group>
+      <Points ref={pointsRef} positions={positions}>
+        <PointMaterial
+          transparent
+          color="#8b5cf6"
+          size={0.8}
+          sizeAttenuation={true}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          opacity={0.4}
+        />
+      </Points>
+      {/* Distant Nebula clouds */}
+      {[...Array(5)].map((_, i) => (
+        <Float key={i} speed={1} rotationIntensity={2} floatIntensity={1}>
+          <Sparkles
+            count={50}
+            scale={100}
+            size={6}
+            speed={0.3}
+            opacity={0.2}
+            color={i % 2 === 0 ? "#4f46e5" : "#7c3aed"}
+            position={[
+              Math.sin(i) * 200,
+              Math.cos(i) * 150,
+              (Math.random() - 0.5) * 300
+            ]}
+          />
+        </Float>
+      ))}
+    </group>
+  );
+};
 
 interface CosmicSceneProps {
   data: CosmicData | null;
@@ -382,36 +450,47 @@ const ZODIAC_SIGNS = [
   { name: 'Pisces', symbol: '♓', color: '#6366f1', element: 'Water', description: 'Compassionate, artistic, and gentle.' },
 ];
 
-const PlanetNode = ({ degree, name, color, size, radius, active, onClick }: { degree: number, name: string, color: string, size: number, radius: number, active?: boolean, onClick?: () => void }) => {
+const spectralTypes: Record<string, string> = {
+  Sun: 'G2V (Yellow Dwarf)',
+  Moon: 'Spectral class: Rocky Luna',
+  Mercury: 'Spectral class: Iron Silicate',
+  Venus: 'Spectral class: Greenhouse Alpha',
+  Mars: 'Spectral class: Ferric Ore',
+  Jupiter: 'Spectral class: Gas Giant (Gas-M)',
+  Saturn: 'Spectral class: Ringed Giant (Gas-S)',
+  Uranus: 'Spectral class: Ice Giant (Ice-U)',
+  Neptune: 'Spectral class: Ice Giant (Ice-N)',
+  Pluto: 'Spectral class: Binary Dwarf (TNO)',
+  Ascendant: 'Point: Ascending Horizon'
+};
+
+const PlanetNode = ({ degree, name, color, size, radius, active, onClick, meaning }: { degree: number, name: string, color: string, size: number, radius: number, active?: boolean, onClick?: () => void, meaning?: string }) => {
   const ref = useRef<THREE.Mesh>(null);
   const textRef = useRef<any>(null);
   const [hovered, setHovered] = useState(false);
+  const groupRef = useRef<THREE.Group>(null);
   
   // Calculate position based on astrological degree
   const angle = (degree) * (Math.PI / 180);
   const x = Math.cos(angle) * radius;
   const z = Math.sin(angle) * radius;
 
+  const spectral = spectralTypes[name] || 'Unknown Spectral Type';
+
   useFrame(({ clock }) => {
-    if (ref.current) {
+    if (groupRef.current) {
       // Gentle orbit revolution
       const t = clock.getElapsedTime() * 0.1;
-      ref.current.position.x = Math.cos(angle + t) * radius;
-      ref.current.position.z = Math.sin(angle + t) * radius;
-      
-      if (textRef.current) {
-        textRef.current.position.x = ref.current.position.x;
-        textRef.current.position.z = ref.current.position.z + size + 0.8;
-      }
+      groupRef.current.position.x = Math.cos(angle + t) * radius;
+      groupRef.current.position.z = Math.sin(angle + t) * radius;
     }
   });
 
   return (
-    <group>
+    <group ref={groupRef} position={[x, 0, z]}>
       <Trail width={1.5} color={color} length={15} attenuation={(t) => t * t}>
         <mesh 
           ref={ref} 
-          position={[x, 0, z]}
           onClick={(e) => { e.stopPropagation(); onClick?.(); }}
           onPointerOver={() => setHovered(true)}
           onPointerOut={() => setHovered(false)}
@@ -421,7 +500,7 @@ const PlanetNode = ({ degree, name, color, size, radius, active, onClick }: { de
           <meshStandardMaterial 
             color={active ? "#ffffff" : color} 
             emissive={active ? "#ffffff" : color} 
-            emissiveIntensity={active ? 2 : (hovered ? 1 : 0.5)} 
+            emissiveIntensity={active ? 2 : (hovered ? 1.2 : 0.5)} 
             roughness={0.2} 
             metalness={0.8} 
           />
@@ -429,9 +508,9 @@ const PlanetNode = ({ degree, name, color, size, radius, active, onClick }: { de
       </Trail>
       <Text
         ref={textRef}
-        position={[x, size + 0.5, z]}
+        position={[0, size + 0.5, 0]}
         fontSize={0.5}
-        color={active ? "#ffffff" : "white"}
+        color={active ? "#ffffff" : (hovered ? color : "white")}
         anchorX="center"
         anchorY="middle"
         outlineWidth={0.02}
@@ -439,6 +518,23 @@ const PlanetNode = ({ degree, name, color, size, radius, active, onClick }: { de
       >
         {name}
       </Text>
+
+      {hovered && (
+        <Html distanceFactor={15} position={[0, size + 2, 0]}>
+          <motion.div 
+            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className="px-3 py-2 bg-black/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.5)] whitespace-nowrap pointer-events-none"
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+              <span className="text-xs font-bold text-white tracking-widest uppercase">{name}</span>
+            </div>
+            <div className="text-[9px] text-stone-400 font-mono uppercase tracking-[0.2em]">{spectral}</div>
+            <div className="text-[8px] text-rose-400/80 mt-1 uppercase tracking-tighter">Click for Research</div>
+          </motion.div>
+        </Html>
+      )}
     </group>
   );
 };
@@ -515,9 +611,124 @@ const HouseNode = ({ houseNumber, angle, houseInfo, onClick }: { houseNumber: nu
   );
 };
 
+/**
+ * HolographicResearchPanel Component
+ * Displays focused astronomical data for the selected planetary body.
+ */
+const HolographicResearchPanel = ({ 
+  planet, 
+  onClose,
+  data
+}: { 
+  planet: { name: string, degree: number, house: string, meaning: string, color: string }, 
+  onClose: () => void,
+  data: CosmicData
+}) => {
+  const spectral = spectralTypes[planet.name] || 'O-Class Resonance';
+  const signInfo = ZODIAC_SIGNS[Math.floor(planet.degree / 30)];
+
+  return (
+    <Html center distanceFactor={20} position={[0, 0, 5]}>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.8, x: 40 }}
+        animate={{ opacity: 1, scale: 1, x: 0 }}
+        exit={{ opacity: 0, scale: 0.8, x: 20 }}
+        className="w-80 bg-stone-950/95 backdrop-blur-3xl border border-white/10 rounded-[2rem] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)] pointer-events-auto ring-1 ring-white/5"
+      >
+        {/* Spectral Header */}
+        <div className="h-24 relative overflow-hidden bg-gradient-to-b from-white/5 to-transparent">
+          <div 
+            className="absolute top-0 right-0 w-32 h-32 blur-3xl opacity-20 -mr-10 -mt-10"
+            style={{ backgroundColor: planet.color }}
+          />
+          <div className="p-6 flex justify-between items-start">
+            <div>
+              <h3 className="text-2xl font-light text-white tracking-[0.2em]">{planet.name.toUpperCase()}</h3>
+              <p className="text-[10px] text-stone-500 uppercase tracking-widest font-mono mt-1">{spectral}</p>
+            </div>
+            <button 
+              onClick={onClose}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors text-stone-500 hover:text-white"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* Data Grid */}
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <span className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">Orbital Coordinate</span>
+              <p className="text-[13px] text-white font-mono">{planet.degree.toFixed(2)}° Arc</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">House Locus</span>
+              <p className="text-[13px] text-white font-mono">House {planet.house}</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">Sign Alignment</span>
+              <p className="text-[13px] text-white font-mono">{signInfo.name} ({signInfo.symbol})</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">Elemental Tone</span>
+              <p className="text-[13px] text-white font-mono">{signInfo.element}</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Cpu size={12} className="text-rose-500" />
+              <span className="text-[8px] uppercase tracking-widest text-rose-500 font-bold">Axiomatic Interpretation</span>
+            </div>
+            <p className="text-[11px] text-stone-300 leading-relaxed font-light italic">
+              "{planet.meaning}"
+            </p>
+          </div>
+
+          {/* Research Progress Visualization */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-[8px] uppercase tracking-widest text-stone-500">Sync Depth</span>
+              <span className="text-[8px] font-mono text-white">{(Math.random() * 20 + 75).toFixed(1)}%</span>
+            </div>
+            <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: '85%' }}
+                className="h-full bg-gradient-to-r from-rose-500 to-amber-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="p-4 bg-white/5 border-t border-white/5 flex gap-2">
+          <button 
+            className="flex-1 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-xl text-[9px] uppercase tracking-widest text-rose-400 font-bold transition-all"
+            onClick={() => {
+              // Trigger a "Deep Dive" in the main UI via the existing callback
+              onClose();
+            }}
+          >
+            Initiate Deep Scan
+          </button>
+          <button 
+             className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-stone-500 hover:text-white transition-all"
+             title="Synchronize Data"
+          >
+            <RefreshCw size={14} />
+          </button>
+        </div>
+      </motion.div>
+    </Html>
+  );
+};
+
 const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, onPlanetClick: (title: string, content: string) => void, setActiveTab: (tab: any) => void }) => {
   const ref = useRef<THREE.Group>(null);
   const [activePlanet, setActivePlanet] = useState<string | null>(null);
+  const [selectedPlanetData, setSelectedPlanetData] = useState<any | null>(null);
   
   useFrame((state) => {
     if (ref.current) {
@@ -542,6 +753,14 @@ const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, on
   return (
     <group ref={ref}>
       <Float speed={1} rotationIntensity={0.1} floatIntensity={0.5}>
+        {/* Central Solar Core */}
+        <group scale={0.4}>
+          <CelestialSolarCore />
+        </group>
+        
+        {/* Gravity Network Tethers */}
+        <PlanetaryGravityNetwork planets={data.planets.map(p => ({ ...p, color: getPlanetColor(p.name), size: 0.4, distance: 11 + (data.planets.indexOf(p) % 3) * 1.5 }))} />
+
         {/* Astrolabe Rings */}
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[14.5, 15, 64]} />
@@ -663,12 +882,24 @@ const Astrolabe = ({ data, onPlanetClick, setActiveTab }: { data: CosmicData, on
               active={activePlanet === p.name}
               onClick={() => { 
                 setActivePlanet(p.name);
+                setSelectedPlanetData({ ...p, color });
                 setActiveTab('planets'); 
                 onPlanetClick(p.name, `In House ${p.house}. ${p.meaning}`); 
               }} 
             />
           );
         })}
+
+        {/* Selected Planet Detail Panel */}
+        <AnimatePresence>
+          {selectedPlanetData && (
+            <HolographicResearchPanel 
+              planet={selectedPlanetData} 
+              data={data}
+              onClose={() => setSelectedPlanetData(null)}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Aspects */}
         {data.aspects && data.aspects.map((aspect, i) => {
@@ -1375,6 +1606,8 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
       
       {/* Lightened particle fields for mobile performance */}
       <Stars radius={100} depth={50} count={150} factor={4} saturation={0} fade />
+      <CosmicPhenomena />
+      <Sparkles count={100} scale={150} size={2} speed={0.2} opacity={0.3} />
 
       {/* --- CENTRAL BLUEPRINT GEOMETRY --- */}
       <CentralCore 

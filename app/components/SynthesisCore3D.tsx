@@ -213,7 +213,7 @@ const HolographicStructure = ({ color = "#a855f7", isCinematic = false }: SceneP
 export const SynthesisCore3D = ({ color = "#a855f7", isCinematic = false }: SceneProps) => {
   return (
     <div className="absolute inset-0 pointer-events-none z-0">
-      <Canvas alpha dpr={[1, 2]}>
+      <Canvas gl={{ alpha: true }} dpr={[1, 2]}>
         <PerspectiveCamera makeDefault position={[0, 0, isCinematic ? 24 : 18]} fov={45} />
         <Environment preset="night" />
         <ambientLight intensity={0.2} />

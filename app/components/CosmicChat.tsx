@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageSquare, Send, X, Minimize2, Maximize2, Sparkles, Brain, Network, Zap, User } from 'lucide-react';
+import { MessageSquare, Send, X, Minimize2, Maximize2, Sparkles, Brain, Network, Zap, User, BookOpen } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { CosmicData, ConsciousnessPacket } from '../types';
 import { fetchCosmicChatResponse } from '../services/geminiService';
@@ -22,27 +22,33 @@ interface CosmicChatProps {
 export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [showIndex, setShowIndex] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchStatus, setSearchStatus] = useState<string | null>(null);
+  const [suggestedPaths, setSuggestedPaths] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { processPacket, coherence, alignment, savedMessages } = useHigherMind();
+  const { processPacket, coherence, alignment, savedMessages, experiences, saveToChat } = useHigherMind();
 
   useEffect(() => {
     // Add newly saved messages to the chat if they aren't already there
-    const newItems = savedMessages.filter(item => !messages?.find(m => m.id === item.id));
+    // Use a ref to track what's been added to avoid infinite loops with setMessages
+    const chatIds = new Set(messages.map(m => m.id));
+    const newItems = savedMessages.filter(item => !chatIds.has(item.id));
+    
     if (newItems.length > 0) {
       const chatItems: Message[] = newItems.map(item => ({
         id: item.id,
         role: 'model',
-        text: `**SAVED RESULT: ${item.title}**\n\n${item.content}\n\n*Type: ${item.type}*`,
+        text: `**HIGHER MIND INDEXED PATTERN: ${item.title}**\n\n${item.content}\n\n*Type: ${item.type}*`,
         timestamp: Date.now(),
         references: [item.type]
       }));
       setMessages(prev => [...prev, ...chatItems]);
       if (!isOpen) setIsOpen(true); // Open chat if it was closed to show saved item
     }
-  }, [savedMessages]);
+  }, [savedMessages, isOpen]); // Removed messages from dependencies to avoid loop, using set check within
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -50,45 +56,62 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
     }
   }, [messages, isLoading]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (overrideInput?: string) => {
+    const textToSend = overrideInput || input;
+    if (!textToSend.trim() || isLoading) return;
 
     const userMessage: Message = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: `msg_user_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       role: 'user',
-      text: input,
+      text: textToSend,
       timestamp: Date.now(),
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInput('');
+    setSuggestedPaths([]); // Clear suggestions when sending new message
+    if (!overrideInput) setInput('');
     setIsLoading(true);
 
     try {
       const chatHistory = messages.map(m => ({
-        role: m.role,
-        parts: [{ text: m.text }]
-      }));
+        role: m.role || 'user',
+        parts: [{ text: m.text || '' }]
+      })).filter(h => h.parts[0].text);
 
-      const response = await fetchCosmicChatResponse(input, chatHistory, cosmicData);
+      const response = await fetchCosmicChatResponse(textToSend, chatHistory, cosmicData);
 
-      if (response.consciousnessPacket) {
+      if (response && response.searchAction) {
+        setSearchStatus(response.searchAction);
+        await new Promise(r => setTimeout(r, 800));
+        setSearchStatus(null);
+      }
+
+      if (response && response.consciousnessPacket) {
         processPacket(response.consciousnessPacket);
+        
+        // Extract suggested paths if available
+        if (response.consciousnessPacket.next_thought_direction) {
+          const suggestions = (response.consciousnessPacket.next_thought_direction as string)
+            .split('.')
+            .filter((s: string) => s.length > 5 && s.length < 80)
+            .map((s: string) => s.trim().replace(/^\W+/, ''));
+          setSuggestedPaths(suggestions.slice(0, 3));
+        }
       }
 
       const aiMessage: Message = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: `msg_ai_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
         role: 'model',
-        text: response.text,
+        text: response?.text || "The cosmic signal is weak. Please re-send.",
         timestamp: Date.now(),
-        packet: response.consciousnessPacket
+        packet: response?.consciousnessPacket
       };
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error(error);
+      console.error("Cosmic Chat Error:", error);
       const errorMessage: Message = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: `msg_err_${Date.now()}`,
         role: 'model',
         text: "The cosmic transmission was interrupted. My neural pathways are recalibrating.",
         timestamp: Date.now(),
@@ -98,6 +121,13 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
       setIsLoading(false);
     }
   };
+
+  const researchActions = [
+    { label: 'Akashic Records', prompt: 'Research the Akashic Records for higher patterns in my current synthesis.' },
+    { label: 'Library of Babel', prompt: 'Search the Library of Babel for my name and birth permutations. What hidden chapters are revealed?' },
+    { label: 'Divine Wisdom', prompt: 'Consult the Divine Wisdom archive regarding my destiny arc and spiritual trajectory.' },
+    { label: 'Connect Patterns', prompt: 'Analyze all indexed thoughts and experiences to find a higher unifying connection.' },
+  ];
 
   return (
     <div className="fixed bottom-6 right-6 z-[250] pointer-events-auto">
@@ -140,11 +170,18 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
                       <h3 className="text-sm font-bold text-white tracking-widest uppercase">HIGHER MIND v2.0</h3>
                       <div className="flex items-center gap-1.5">
                         <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                        <span className="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">Neural Sync: {(coherence * 100).toFixed(0)}%</span>
+                        <span className="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">Neural Sync: {((coherence || 0.5) * 100).toFixed(0)}%</span>
                       </div>
                     </div>
                   </div>
               <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setShowIndex(!showIndex)} 
+                  className={`p-2 rounded-lg transition-all ${showIndex ? 'text-emerald-400 bg-emerald-500/10 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'text-stone-500 hover:text-white hover:bg-white/5'}`}
+                  title="Akashic Index (Memory)"
+                >
+                  <BookOpen size={16} />
+                </button>
                 <button onClick={() => setIsMinimized(!isMinimized)} className="p-2 hover:bg-white/5 rounded-lg text-stone-500 hover:text-white transition-colors">
                   {isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
                 </button>
@@ -155,7 +192,44 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
             </div>
 
             {!isMinimized && (
-              <>
+              <div className="flex-1 overflow-hidden flex flex-col relative">
+                {showIndex && (
+                  <motion.div 
+                    initial={{ x: '100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '100%' }}
+                    className="absolute inset-0 z-20 bg-stone-950 border-l border-white/10 p-6 flex flex-col"
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+                        <BookOpen size={14} /> Akashic Index
+                      </h4>
+                      <button onClick={() => setShowIndex(false)} className="text-stone-500 hover:text-white">
+                        <X size={16} />
+                      </button>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto space-y-4 pr-2 scrollbar-thin scrollbar-thumb-white/10">
+                      {savedMessages.length === 0 && experiences.length === 0 ? (
+                        <p className="text-[10px] text-stone-600 italic text-center mt-10">No divine patterns indexed yet.</p>
+                      ) : (
+                        <>
+                          {[...savedMessages, ...experiences.map(e => ({ id: e.experienceId, title: e.type, content: e.narrative, type: 'Experience' }))].map((item: any) => (
+                            <div key={item.id} className="p-3 rounded-xl bg-white/5 border border-white/5 space-y-2 group/item transition-all hover:border-emerald-500/30">
+                              <div className="flex justify-between items-start">
+                                <span className="text-[9px] text-emerald-500 font-bold uppercase tracking-widest">{item.type}</span>
+                                <span className="text-[8px] text-stone-600">ID: {item.id.slice(-6)}</span>
+                              </div>
+                              <h5 className="text-xs font-medium text-stone-200">{item.title}</h5>
+                              <p className="text-[10px] text-stone-500 line-clamp-3 leading-relaxed">{item.content}</p>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Chat Area */}
                 <div 
                   ref={scrollRef}
@@ -165,28 +239,38 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
                     <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-40">
                       <Network size={64} className="text-purple-500/50" />
                       <div className="space-y-2">
-                        <p className="text-sm text-stone-400 italic">"I am the pattern-seeker. Share your references, synchronicities, or questions."</p>
-                        <p className="text-[10px] text-stone-600 uppercase tracking-[0.2em]">Quantum Memory Initialized</p>
+                        <p className="text-sm text-stone-400 italic">"I am your Assistant to the Higher Self. Searching Akashic Fields and the Library of Babel for your divine patterns."</p>
+                        <p className="text-[10px] text-stone-600 uppercase tracking-[0.2em]">Divine Sync Initialized</p>
                       </div>
                     </div>
                   )}
 
-                  {messages.map((m) => (
-                    <motion.div
-                      key={m.id}
-                      initial={{ opacity: 0, x: m.role === 'user' ? 10 : -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
+                      {messages.map((m) => (
+                        <motion.div
+                          key={m.id || Math.random().toString()}
+                          initial={{ opacity: 0, x: m.role === 'user' ? 10 : -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
                       <div className={`max-w-[85%] space-y-2`}>
-                        <div className={`p-4 rounded-3xl ${
+                        <div className={`p-4 rounded-3xl relative group/msg ${
                           m.role === 'user' 
                             ? 'bg-purple-600 text-white rounded-tr-none' 
                             : 'bg-white/5 border border-white/10 text-stone-200 rounded-tl-none'
                         }`}>
                           <div className="prose prose-invert prose-sm max-w-none">
-                            <ReactMarkdown>{m.text}</ReactMarkdown>
+                            {m.text ? <ReactMarkdown>{m.text}</ReactMarkdown> : <span className="italic text-stone-500">Transmission empty...</span>}
                           </div>
+                          
+                          {m.role === 'model' && (
+                            <button 
+                              onClick={() => saveToChat("Akashic Index", m.text.slice(0, 200) + "...", "Insight Index")}
+                              className="absolute -right-12 top-0 p-2 text-stone-600 hover:text-emerald-400 opacity-0 group-hover/msg:opacity-100 transition-all"
+                              title="Index to Akashic Records"
+                            >
+                              <BookOpen size={16} />
+                            </button>
+                          )}
                         </div>
                         
                         {m.references && m.references.length > 0 && (
@@ -208,18 +292,53 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
 
                   {isLoading && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-                      <div className="bg-white/5 border border-white/10 p-4 rounded-3xl rounded-tl-none flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" />
-                        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce [animation-delay:0.2s]" />
-                        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce [animation-delay:0.4s]" />
-                        <span className="text-[10px] text-stone-500 uppercase tracking-widest ml-2">Analyzing Matrix...</span>
+                      <div className="bg-white/5 border border-white/10 p-4 rounded-3xl rounded-tl-none flex items-center gap-3">
+                        <div className="relative">
+                          <Brain size={16} className="text-purple-400 animate-pulse" />
+                          <div className="absolute inset-0 bg-purple-500/20 blur-md rounded-full animate-ping" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-stone-300 font-bold uppercase tracking-widest">Assistant Researching</span>
+                          <span className="text-[8px] text-purple-400 uppercase tracking-widest h-3 overflow-hidden">
+                            {searchStatus || "Querying Library of Babel..."}
+                          </span>
+                        </div>
                       </div>
                     </motion.div>
+                  )}
+
+                  {!isLoading && suggestedPaths.length > 0 && (
+                    <div className="flex flex-col items-start gap-2 mt-4 ml-4">
+                      <span className="text-[8px] text-emerald-500 uppercase tracking-widest font-bold">Suggested Neural Paths:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {suggestedPaths.map((path, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleSend(path)}
+                            className="px-3 py-1.5 bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] text-emerald-300 transition-all text-left"
+                          >
+                            {path} →
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
 
                 {/* Input Area */}
                 <div className="p-6 border-t border-white/5 bg-black/40 shrink-0">
+                  <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-none">
+                    {researchActions.map((action, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSend(action.prompt)}
+                        className="whitespace-nowrap px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[9px] uppercase tracking-widest text-stone-400 hover:text-white transition-all flex items-center gap-2"
+                      >
+                        <Zap size={10} className="text-purple-500" />
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
                   <div className="relative group">
                     <input
                       type="text"
@@ -245,7 +364,7 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
                     <span className="opacity-40">Ready for Signal</span>
                   </div>
                 </div>
-              </>
+              </div>
             )}
           </motion.div>
         )}

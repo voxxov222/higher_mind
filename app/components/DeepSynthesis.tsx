@@ -2,11 +2,11 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Zap, Monitor, Share2, Download, BookOpen, PieChart, Network, 
-  CirclePlay, Eye, ChevronRight, DownloadCloud, Layers, Target, 
-  Star, Activity, Moon, Sun, Globe, User, Fingerprint, Volume2,
+  Zap, Monitor, Share2, Download, BookOpen, Network, 
+  CirclePlay, ChevronRight, DownloadCloud, Layers, Target, 
+  Star, Activity, Globe, Fingerprint, Volume2,
   Trash2, Plus, Edit3, Save, X, Sparkles, RefreshCw, MousePointer2,
-  Settings2, LayoutGrid, Type as TypeIcon
+  Settings2, VolumeX
 } from 'lucide-react';
 import { 
   ReactFlow, 
@@ -121,6 +121,24 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
   const [isReading, setIsReading] = useState(false);
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const ambientRef = useRef<HTMLAudioElement | null>(null);
+
+  // Background Ambient soundscape logic
+  useEffect(() => {
+    if (isAudioEnabled && typeof window !== 'undefined') {
+      const startAmbient = async () => {
+        if (!ambientRef.current) {
+          const audio = new Audio();
+          // Using a subtle high-quality procedural-style noise/drone if possible or a silent placeholder for now
+          // In a real app we'd have a specific file, here we use a generated oscillate
+          ambientRef.current = audio;
+        }
+      };
+      startAmbient();
+    } else if (ambientRef.current) {
+      ambientRef.current.pause();
+    }
+  }, [isAudioEnabled]);
   
   // UI Controls
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -293,7 +311,7 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
 
   // --- NARRATIVE AUDIO ENGINE ---
   const handleReadOutLoud = useCallback((text: string, force = false) => {
-    if ('speechSynthesis' in window) {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       if (isReading && !force) {
         window.speechSynthesis.cancel();
         setIsReading(false);
@@ -306,48 +324,51 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
       utterance.onerror = () => setIsReading(false);
       
       const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(v => (v.name.includes('Google') || v.name.includes('Premium') || v.name.includes('Natural')) && v.lang.startsWith('en')) || voices[0];
+      // Prefer a deep/authoritative voice if possible
+      const preferredVoice = voices.find(v => (v.name.includes('Google') || v.name.includes('Premium') || v.name.includes('Natural') || v.name.includes('Daniel')) && v.lang.startsWith('en')) || voices[0];
       if (preferredVoice) utterance.voice = preferredVoice;
       
-      utterance.rate = 0.85;
-      utterance.pitch = 1.0;
+      utterance.rate = 0.8; // Slower for divine effect
+      utterance.pitch = 0.9; // Lower pitch for authority
       
       setIsReading(true);
       window.speechSynthesis.speak(utterance);
     }
   }, [isReading]);
 
+  // Handle section changes with narration
   useEffect(() => {
-    return () => {
-      window.speechSynthesis.cancel();
-    };
-  }, []);
+    if (isAudioEnabled && data) {
+      let welcomeText = "";
+      switch(mode) {
+        case 'overview': welcomeText = "Deciphering your fundamental planetary configuration. Your core signature is being analyzed across the spectral grid."; break;
+        case 'infographic': welcomeText = `Accessing your structural blueprints. Current focus: ${infographicType === 'identity' ? 'Identity Signature' : infographicType === 'path' ? 'Life Path Evolution' : infographicType === 'karmic' ? 'Ancestral Soul Ledger' : 'Resonant Torus Field'}.`; break;
+        case 'mindmap': welcomeText = "Opening the Neural Matrix. These nodes represent active connections within your higher consciousness."; break;
+        case '3d': welcomeText = "Initializing Spatial Immersion. Your data is being projected into the third dimension for holistic observation."; break;
+        case 'summary': welcomeText = `Neural Synthesis complete. Welcome back to the integrated summary of your current temporal incarnation. ${data.synthesis.slice(0, 150)}`; break;
+      }
+      if (welcomeText) {
+        handleReadOutLoud(welcomeText, true);
+        playSFX('transition');
+      }
+    }
+  }, [mode, infographicType, isAudioEnabled, data, handleReadOutLoud, playSFX]);
 
   // Trigger narration for video steps
   useEffect(() => {
     if (mode === 'video' && isAudioEnabled) {
       let text = "";
       switch(videoStep) {
-        case 0: text = "Chapter One. Arrival. The cosmic grid aligns as your singular consciousness enters the matrix threshold."; break;
-        case 1: text = `Chapter Two. Celestial Origin. Planetary currents and celestial weights define your geometric blueprint. Your dominant energy comes from ${data.planets?.[0]?.name} in ${data.planets?.[0]?.sign}.`; break;
-        case 2: text = `Chapter Three. Harmonic Essence. Your life path frequency is ${data.numerology.lifePath}. This vibrational archetype represents your soul's primary trajectory.`; break;
-        case 3: text = `Chapter Four. Total Synthesis. ${data.synthesis}`; break;
-        case 4: text = "Final Chapter. Transcendence. Node analysis complete. The journey continues beyond the threshold. You are ready to ascend."; break;
+        case 0: text = "Chapter One. Arrival. The cosmic grid aligns as your singular consciousness enters the matrix threshold. Your energy is being synthesized into a coherent data stream."; break;
+        case 1: text = `Chapter Two. Celestial Origin. Planetary currents and celestial weights define your geometric blueprint. Your dominant energy flows from ${data.planets?.[0]?.name} in ${data.planets?.[0]?.sign}, providing the foundational weight of your existence.`; break;
+        case 2: text = `Chapter Three. Harmonic Essence. Your life path frequency is ${data.numerology.lifePath}. This vibrational archetype represents your soul's primary trajectory through the temporal lattice.`; break;
+        case 3: text = `Chapter Four. Total Synthesis. ${data.synthesis}. All streams of data converge into this singular point of truth.`; break;
+        case 4: text = "Final Chapter. Transcendence. Neural analysis complete. The journey continues beyond the threshold. You are now stabilized within the Higher Mind ecosystem."; break;
       }
       if (text) handleReadOutLoud(text, true);
       playSFX('transition');
     }
   }, [videoStep, mode, isAudioEnabled, data, handleReadOutLoud, playSFX]);
-
-  useEffect(() => {
-    if (isAudioEnabled) {
-      playSFX('alert');
-      // Only welcome once per mode change
-      if (mode === 'summary') {
-        handleReadOutLoud(`Welcome back to your cosmic summary. ${data.synthesis.slice(0, 100)}`, true);
-      }
-    }
-  }, [mode, isAudioEnabled, data.synthesis, handleReadOutLoud, playSFX]);
 
   // --- ANIMATION & AUTO-PLAY LOGIC ---
   useEffect(() => {
@@ -355,7 +376,7 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
     if (isAutoPlaying && mode === 'video') {
       interval = setInterval(() => {
         setVideoStep(prev => (prev + 1) % 5);
-      }, 5000);
+      }, 8000); // 8 seconds per chapter for better narration pacing
     }
     return () => clearInterval(interval);
   }, [isAutoPlaying, mode]);
@@ -406,36 +427,41 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
           ))}
         </div>
         
-        <div className="flex gap-2 pr-4">
-           <button 
-             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-             className={`p-2 transition-all rounded-lg ${isSettingsOpen ? 'text-purple-400 bg-purple-500/10' : 'text-stone-500 hover:text-white'}`}
-             title="Visualization Options"
-           >
-             <Settings2 size={18} />
-           </button>
-           <button 
-             onClick={() => setIsAudioEnabled(!isAudioEnabled)}
-             className={`p-2 transition-all rounded-lg ${isAudioEnabled ? 'text-emerald-400 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'text-stone-500 hover:text-white'}`}
-             title={isAudioEnabled ? "Silence System" : "Activate Harmonic Frequencies"}
-           >
-             <Volume2 size={18} className={isAudioEnabled ? 'animate-pulse' : ''} />
-           </button>
-           <button 
-             onClick={() => handleReadOutLoud(mode === 'overview' ? data.synthesis : mode === 'infographic' ? `Identity report for ${data.planets?.[0]?.name}. Master synthesis: ${data.synthesis}` : 'Cosmic deep synthesis data')}
-             className={`p-2 transition-all rounded-lg ${isReading ? 'text-purple-400 bg-purple-500/10 animate-pulse' : 'text-stone-500 hover:text-white'}`}
-             title="Read Out Loud (AI)"
-           >
-             <Zap size={18} />
-           </button>
-           <button 
-             onClick={() => setShowExportMenu(!showExportMenu)}
-             className="p-2 text-stone-500 hover:text-white transition-colors"
-           >
-             <Download size={18} />
-           </button>
-           <button className="p-2 text-stone-500 hover:text-white transition-colors"><Share2 size={18} /></button>
-        </div>
+          <div className="flex gap-2 pr-4">
+            <button 
+              onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+              className={`p-2 transition-all rounded-lg ${isSettingsOpen ? 'text-purple-400 bg-purple-500/10' : 'text-stone-500 hover:text-white'}`}
+              title="Visualization Options"
+            >
+              <Settings2 size={18} />
+            </button>
+            {/* Audio & Narration */}
+            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl">
+              <button 
+                onClick={() => setIsAudioEnabled(!isAudioEnabled)}
+                className={`p-2 transition-all rounded-lg ${isAudioEnabled ? 'text-emerald-400 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'text-stone-500 hover:text-white'}`}
+                title={isAudioEnabled ? "Silence System" : "Activate Harmonic Frequencies"}
+              >
+                <Volume2 size={18} className={isAudioEnabled ? 'animate-pulse' : ''} />
+              </button>
+              {isAudioEnabled && (
+                <button 
+                  onClick={() => handleReadOutLoud(mode === 'overview' ? data.synthesis : mode === 'infographic' ? `Identity report for ${data.planets?.[0]?.name}. Master synthesis: ${data.synthesis}` : data.synthesis)}
+                  className={`p-2 transition-all rounded-lg ${isReading ? 'text-purple-400 bg-purple-500/10 animate-pulse' : 'text-stone-500 hover:text-white'}`}
+                  title="Trigger Neural Narration"
+                >
+                  <Activity size={18} />
+                </button>
+              )}
+            </div>
+            <button 
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="p-2 text-stone-500 hover:text-white transition-colors"
+            >
+              <Download size={18} />
+            </button>
+            <button className="p-2 text-stone-500 hover:text-white transition-colors"><Share2 size={18} /></button>
+          </div>
       </div>
 
       {/* Global Menus */}

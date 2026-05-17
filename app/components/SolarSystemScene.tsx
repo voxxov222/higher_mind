@@ -112,6 +112,20 @@ const SIGN_NAMES = [
   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
 ];
 
+const spectralTypes: Record<string, string> = {
+  Sun: 'G2V (Yellow Dwarf)',
+  Moon: 'Spectral class: Rocky Luna',
+  Mercury: 'Spectral class: Iron Silicate',
+  Venus: 'Spectral class: Greenhouse Alpha',
+  Mars: 'Spectral class: Ferric Ore',
+  Jupiter: 'Spectral class: Gas Giant (Gas-M)',
+  Saturn: 'Spectral class: Ringed Giant (Gas-S)',
+  Uranus: 'Spectral class: Ice Giant (Ice-U)',
+  Neptune: 'Spectral class: Ice Giant (Ice-N)',
+  Pluto: 'Spectral class: Binary Dwarf (TNO)',
+  Ascendant: 'Point: Ascending Horizon'
+};
+
 const ZodiacLabels = ({ radius }: { radius: number }) => {
   return (
     <group>
@@ -308,6 +322,7 @@ const SIGN_ELEMENTS: Record<string, { type: string; color: string }> = {
 
 interface PlanetProps extends PlanetData {
   onSelect: (p: PlanetData) => void;
+  onPlanetClick?: (title: string, content: string) => void;
   active?: boolean;
   astro?: any;
   isStatic?: boolean;
@@ -319,7 +334,7 @@ const SIGN_ANGLES: Record<string, number> = {
   'Libra': 180, 'Scorpio': 210, 'Sagittarius': 240, 'Capricorn': 270, 'Aquarius': 300, 'Pisces': 330
 };
 
-const Planet = ({ name, color, size, distance, speed, onSelect, active, astro, isStatic, isBirthChartMode }: PlanetProps) => {
+const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, active, astro, isStatic, isBirthChartMode }: PlanetProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
@@ -358,6 +373,9 @@ const Planet = ({ name, color, size, distance, speed, onSelect, active, astro, i
             onClick={(e) => {
               e.stopPropagation();
               onSelect({ name, color, size, distance, speed, description: '' });
+              if (onPlanetClick && astro) {
+                onPlanetClick(name, `In House ${astro.house}. ${astro.sign} alignment.`);
+              }
             }}
             scale={active ? 1.3 : (hovered ? 1.2 : 1)}
           >
@@ -462,7 +480,7 @@ const Planet = ({ name, color, size, distance, speed, onSelect, active, astro, i
         {hovered && !active && (
           <group position={[0, size + 1.2, 0]}>
             <Text
-              fontSize={0.6}
+              fontSize={0.8}
               color="#ffffff"
               anchorX="center"
               anchorY="bottom"
@@ -473,17 +491,29 @@ const Planet = ({ name, color, size, distance, speed, onSelect, active, astro, i
             {astro && (
               <group position={[0, -0.2, 0]}>
                 <Text
-                  fontSize={0.35}
+                  fontSize={0.4}
                   color={color}
                   anchorX="center"
                   anchorY="top"
                   fillOpacity={0.9}
                   letterSpacing={0.1}
+                  position={[0, 0, 0]}
                 >
                   {`${astro.sign.toUpperCase()} ${Math.floor(astro.degree)}° • H${astro.house}`}
                 </Text>
+                <Text
+                  fontSize={0.25}
+                  color="#a8a29e"
+                  anchorX="center"
+                  anchorY="top"
+                  fillOpacity={0.6}
+                  letterSpacing={0.15}
+                  position={[0, -0.6, 0]}
+                >
+                  {spectralTypes[name] || 'O-CLASS RESONANCE'}
+                </Text>
                 {elementInfo && (
-                   <mesh position={[0, -0.4, 0]} rotation={[-Math.PI/2, 0, 0]}>
+                   <mesh position={[0, -1, 0]} rotation={[-Math.PI/2, 0, 0]}>
                       <circleGeometry args={[0.07, 32]} />
                       <meshBasicMaterial color={elementInfo.color} />
                    </mesh>
@@ -820,6 +850,7 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
                 isStatic={isStatic}
                 isBirthChartMode={false}
                 onSelect={(p) => setSelectedPlanet(p ? planets?.find(item => item.name === p.name) || p : null)} 
+                onPlanetClick={onPlanetClick}
               />
             );
           })}
@@ -835,6 +866,7 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
                 isStatic={isStatic}
                 isBirthChartMode={false}
                 onSelect={(p) => setSelectedPlanet(p ? (SPECIAL_POINTS.find(item => item.name === p.name) as any) || p : null)} 
+                onPlanetClick={onPlanetClick}
               />
             );
           })}

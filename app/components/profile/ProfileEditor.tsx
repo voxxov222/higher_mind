@@ -176,6 +176,25 @@ const ProfileEditor = ({ onClose }: { onClose: () => void }) => {
                         onChange={(v) => handleUpdate('displayName', v)} 
                        />
                     </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-white/5">
+                       <Input 
+                        label="Banner Image URL" 
+                        value={localConfig.bannerUrl || ''} 
+                        onChange={(v) => handleUpdate('bannerUrl', v)} 
+                       />
+                       <div className="space-y-3">
+                          <label className="text-[10px] uppercase font-bold tracking-widest text-white/40 block">Preferred Color</label>
+                          <div className="flex gap-4 items-center">
+                             <input 
+                               type="color" 
+                               value={localConfig.theme.primaryColor || '#9333ea'} 
+                               onChange={(e) => handleUpdate('theme.primaryColor', e.target.value)}
+                               className="w-12 h-12 rounded-xl bg-transparent border border-white/10 p-1 cursor-pointer"
+                             />
+                             <span className="text-xs opacity-40 font-mono uppercase tracking-widest">{localConfig.theme.primaryColor || '#9333ea'}</span>
+                          </div>
+                       </div>
+                    </div>
                     <div className="space-y-4">
                        <label className="text-[10px] uppercase font-bold tracking-widest text-white/40 block">Resonance Level</label>
                        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">

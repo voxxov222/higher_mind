@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Thought, Feeling, Experience, SynapticCluster, ConsciousnessPacket } from '../types';
+import { Thought, Feeling, Experience, SynapticCluster, ConsciousnessPacket, UserProfileConfig } from '../types';
 
 interface HigherMindContextType {
   thoughts: Thought[];
@@ -12,8 +12,11 @@ interface HigherMindContextType {
   clearState: () => void;
   savedMessages: { id: string; title: string; content: string; type: string }[];
   saveToChat: (title: string, content: string, type: string) => void;
+  saveToVault: (title: string, content: string, category: string, tags?: string[]) => void;
   aiModules: AIModule[];
   toggleModule: (id: string) => void;
+  userData: UserProfileConfig | null;
+  setUserData: (data: UserProfileConfig) => void;
 }
 
 export interface AIModule {
@@ -35,6 +38,7 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [coherence, setCoherence] = useState(0.5);
   const [alignment, setAlignment] = useState(0.7);
   const [savedMessages, setSavedMessages] = useState<{ id: string; title: string; content: string; type: string }[]>([]);
+  const [userData, setUserData] = useState<UserProfileConfig | null>(null);
 
   const [aiModules, setAiModules] = useState<AIModule[]>([
     { id: 'audio_spark', name: 'Voice Matrix', icon: 'volume-2', description: 'Real-time consciousness-to-frequency conversion', enabled: true, category: 'audio' },
@@ -55,6 +59,23 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const saveToChat = useCallback((title: string, content: string, type: string) => {
     setSavedMessages(prev => [...prev, { id: `save_${Date.now()}`, title, content, type }]);
   }, []);
+
+  const saveToVault = useCallback((title: string, content: string, category: string, tags: string[] = []) => {
+    if (!userData) return;
+    const newItem = {
+      id: `vault_${Date.now()}`,
+      title,
+      content,
+      category,
+      timestamp: Date.now(),
+      tags
+    };
+    const updatedUser = {
+      ...userData,
+      researchVault: [...(userData.researchVault || []), newItem]
+    };
+    setUserData(updatedUser);
+  }, [userData]);
 
   const processPacket = useCallback((packet: ConsciousnessPacket) => {
     // 1. Update Thoughts
@@ -132,8 +153,11 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       clearState,
       savedMessages,
       saveToChat,
+      saveToVault,
       aiModules,
-      toggleModule
+      toggleModule,
+      userData,
+      setUserData
     }}>
       {children}
     </HigherMindContext.Provider>

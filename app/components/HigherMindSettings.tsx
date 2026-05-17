@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Volume2, Database, Image as ImageIcon, Zap, Globe, Video, Scan, Bolt, Brain, Activity, Settings2 } from 'lucide-react';
 import { useHigherMind, AIModule } from './HigherMindProvider';
+import { soundEngine } from '../lib/soundEffects';
 
 interface HigherMindSettingsProps {
   isOpen: boolean;
@@ -64,7 +65,8 @@ export const HigherMindSettings: React.FC<HigherMindSettingsProps> = ({ isOpen, 
                   </div>
                 </div>
                 <button 
-                  onClick={onClose}
+                  onClick={() => { soundEngine.close(); onClose(); }}
+                  onMouseEnter={() => soundEngine.hover()}
                   className="p-3 hover:bg-white/5 rounded-full text-stone-500 hover:text-white transition-colors"
                 >
                   <X />
@@ -90,7 +92,8 @@ export const HigherMindSettings: React.FC<HigherMindSettingsProps> = ({ isOpen, 
                               key={module.id}
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
-                              onClick={() => toggleModule(module.id)}
+                              onClick={() => { soundEngine.click(); toggleModule(module.id); }}
+                              onMouseEnter={() => soundEngine.hover()}
                               className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 flex items-center gap-4 ${
                                 module.enabled 
                                   ? 'bg-white/5 border-purple-500/30 shadow-lg shadow-purple-500/5' 

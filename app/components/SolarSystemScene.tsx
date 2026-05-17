@@ -9,6 +9,7 @@ import { CosmicData } from '../types';
 import { fetchAuraInsight } from '../services/geminiService';
 import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
+import { soundEngine } from '../lib/soundEffects';
 
 import { ClassicBirthChart } from './ClassicBirthChart';
 import { CelestialSolarCore, PlanetaryGravityNetwork, CelestialDNAHelix } from './CelestialSolarCore';
@@ -54,9 +55,9 @@ const AuraNode = ({ node, onSelect }: { node: AuraVisualNode; onSelect: (node: A
         <Sphere 
           ref={meshRef}
           args={[2, 16, 16]}
-          onPointerOver={() => setHovered(true)}
+          onPointerOver={() => { soundEngine.hover(); setHovered(true); }}
           onPointerOut={() => setHovered(false)}
-          onClick={(e) => { e.stopPropagation(); onSelect(node); }}
+          onClick={(e) => { e.stopPropagation(); soundEngine.select(); onSelect(node); }}
         >
           <meshStandardMaterial 
             color={colors[node.color] || '#ffffff'} 
@@ -173,16 +174,19 @@ const AstrologicalHouses = ({ data, onHouseHover }: { data: CosmicData | null; o
         return (
           <group key={i}>
             {/* Divider Line */}
-            <mesh rotation={[0, -angle, 0]} position={[75, 0, 0]}>
-               <boxGeometry args={[150, 0.02, 0.02]} />
-               <meshBasicMaterial color="white" transparent opacity={0.1} />
-            </mesh>
+            <group rotation={[0, angle, 0]}>
+              <mesh position={[75, 0, 0]}>
+                 <boxGeometry args={[150, 0.02, 0.02]} />
+                 <meshBasicMaterial color="white" transparent opacity={0.15} />
+              </mesh>
+            </group>
 
             {/* House Interactive Zone */}
             <group 
               position={[Math.cos(midAngle) * 110, 0.1, Math.sin(midAngle) * 110]}
               onPointerOver={(e) => {
                 e.stopPropagation();
+                soundEngine.hover();
                 onHouseHover(houseData || { 
                   houseNumber: houseNum, 
                   realmName: 'Sector of Experience', 
@@ -273,8 +277,13 @@ const AspectLines = ({ data, onAspectClick }: { data: CosmicData | null; onAspec
         const d1 = getDistance(aspect.planet1);
         const d2 = getDistance(aspect.planet2);
         
-        const angle1 = (p1.degree * Math.PI) / 180;
-        const angle2 = (p2.degree * Math.PI) / 180;
+        const getAngle = (p: any) => {
+          const baseAngle = SIGN_ANGLES[p.sign] || 0;
+          return ((baseAngle + (p.degree || 0)) * Math.PI) / 180;
+        };
+
+        const angle1 = getAngle(p1);
+        const angle2 = getAngle(p2);
 
         const start = new THREE.Vector3(Math.cos(angle1) * d1, 0, Math.sin(angle1) * d1);
         const end = new THREE.Vector3(Math.cos(angle2) * d2, 0, Math.sin(angle2) * d2);
@@ -289,9 +298,11 @@ const AspectLines = ({ data, onAspectClick }: { data: CosmicData | null; onAspec
               transparent 
               onClick={(e) => {
                 e.stopPropagation();
+                soundEngine.select();
                 onAspectClick?.(aspect);
               }}
               onPointerOver={(e) => {
+                soundEngine.hover();
                 (e.object as any).material.opacity = 0.8;
               }}
               onPointerOut={(e) => {
@@ -337,6 +348,8 @@ const SIGN_ANGLES: Record<string, number> = {
 const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, active, astro, isStatic, isBirthChartMode }: PlanetProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
+  const cloudsRef = useRef<THREE.Mesh>(null);
+  const particlesGroupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
 
   const elementInfo = astro?.sign ? SIGN_ELEMENTS[astro.sign] : null;
@@ -345,8 +358,6 @@ const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, a
     let t;
     if (isBirthChartMode && astro?.sign) {
       const baseAngle = SIGN_ANGLES[astro.sign] || 0;
-      // Subtracting 90 degrees (Math.PI/2) common in astro charts for Aries at 9 o'clock or 0 degrees at top
-      // Here we map 0 to angle 0 (right/Aries)
       t = ((baseAngle + (astro.degree || 0)) * Math.PI) / 180;
     } else {
       const startAngle = astro?.degree ? (astro.degree * Math.PI) / 180 : 0;
@@ -354,24 +365,49 @@ const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, a
     }
 
     if (groupRef.current) {
-      groupRef.current.rotation.y = -t; // Negative for counter-clockwise zodiac flow
+      groupRef.current.rotation.y = -t;
     }
     if (meshRef.current) {
       meshRef.current.rotation.y += 0.01;
     }
+    if (cloudsRef.current) {
+      cloudsRef.current.rotation.y += 0.015;
+      cloudsRef.current.rotation.z += 0.002;
+    }
+    if (particlesGroupRef.current) {
+      const time = clock.getElapsedTime();
+      const significance = (name === 'Sun' || name === 'Moon') ? 1.5 : 1.0;
+      const pulse = 1 + Math.sin(time * 2 + distance) * 0.15 * significance;
+      particlesGroupRef.current.scale.set(pulse, pulse, pulse);
+    }
   });
+
+  const isLuminary = name === 'Sun' || name === 'Moon';
+  const particleCount = isLuminary ? 120 : 40;
 
   return (
     <group ref={groupRef}>
       <group position={[distance, 0, 0]}>
+        <group ref={particlesGroupRef}>
+          <Sparkles 
+            count={particleCount}
+            scale={size * 3}
+            size={isLuminary ? size * 5 : size * 3}
+            speed={0.4}
+            opacity={0.6}
+            color={active ? '#ffffff' : color}
+            noise={0.1}
+          />
+        </group>
         <Trail width={1.5} length={25} color={color} attenuation={(t) => t * t}>
           <Sphere 
             ref={meshRef} 
             args={[size, 64, 64]} 
-            onPointerOver={() => setHovered(true)}
+            onPointerOver={() => { soundEngine.hover(); setHovered(true); }}
             onPointerOut={() => setHovered(false)}
             onClick={(e) => {
               e.stopPropagation();
+              soundEngine.select();
               onSelect({ name, color, size, distance, speed, description: '' });
               if (onPlanetClick && astro) {
                 onPlanetClick(name, `In House ${astro.house}. ${astro.sign} alignment.`);
@@ -393,6 +429,13 @@ const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, a
           <mesh rotation={[Math.PI / 2.5, 0, 0]}>
             <ringGeometry args={[size * 1.5, size * 2.5, 64]} />
             <meshStandardMaterial color={color} transparent opacity={0.5} side={THREE.DoubleSide} />
+          </mesh>
+        )}
+
+        {name === 'Earth' && (
+          <mesh ref={cloudsRef}>
+            <sphereGeometry args={[size * 1.05, 64, 64]} />
+            <meshStandardMaterial color="#ffffff" transparent opacity={0.2} roughness={0.1} />
           </mesh>
         )}
 
@@ -563,7 +606,7 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
   const [selectedAspect, setSelectedAspect] = useState<any>(null);
   const [isStatic, setIsStatic] = useState(false);
   const [viewMode, setViewMode] = useState<'solar' | 'chart'>('chart');
-  const [rotationPerspective, setRotationPerspective] = useState<'top' | 'isometric' | 'orbit'>('isometric');
+  const [rotationPerspective, setRotationPerspective] = useState<'top' | 'isometric' | 'orbit' | 'free'>('free');
   const [showHouseGuide, setShowHouseGuide] = useState(false);
   const [sceneMode, setSceneMode] = useState<'cosmic' | 'quantum' | 'verdant' | 'void'>('cosmic');
   const [isLatticeActive, setIsLatticeActive] = useState(true);
@@ -731,10 +774,11 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
 
           {/* The Center Point (Sun in Solar) */}
           <group 
-            onPointerOver={() => setSunHovered(true)}
+            onPointerOver={() => { soundEngine.hover(); setSunHovered(true); }}
             onPointerOut={() => setSunHovered(false)}
             onClick={() => {
               if (viewMode === 'solar') {
+                soundEngine.select();
                 const sunData = getAstrologicalData('Sun');
                 if (sunData) {
                   setSelectedPlanet({
@@ -999,12 +1043,13 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
                       {[
                         { id: 'top', icon: Globe, label: 'Flat' },
                         { id: 'isometric', icon: Compass, label: '3D' },
-                        { id: 'orbit', icon: Activity, label: 'Spin' }
+                        { id: 'orbit', icon: Activity, label: 'Spin' },
+                        { id: 'free', icon: Eye, label: 'Free' }
                       ].map(opt => (
                         <button
                           key={opt.id}
                           onClick={() => setRotationPerspective(opt.id as any)}
-                          className={`p-2 rounded-full transition-all ${rotationPerspective === opt.id ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white'}`}
+                          className={`p-2 rounded-full transition-all ${rotationPerspective === opt.id ? 'bg-white/10 text-white shadow-[0_0_10px_rgba(255,255,255,0.2)]' : 'text-white/30 hover:text-white hover:bg-white/5'}`}
                           title={opt.label}
                         >
                           <opt.icon size={14} />

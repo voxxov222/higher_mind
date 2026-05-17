@@ -33,6 +33,36 @@ const ASPECT_COLORS: Record<string, string> = {
   'sextile': '#60a5fa'
 };
 
+const SIGN_MEANINGS: Record<string, string> = {
+  'Aries': 'The pioneer of the zodiac. Represents individual courage, sudden bursts of energy, and absolute directness. Aries is fire in its most primal, initiatory form.',
+  'Taurus': 'The steadfast builder. Represents earthly endurance, grounded pleasure, and material security. Taurus brings abstract concepts into tangible reality.',
+  'Gemini': 'The curious messenger. Governs communication, mutable intellect, and the gathering of diverse information. Gemini bridges disparate concepts and ideas.',
+  'Cancer': 'The psychic emotional core. Represents the origin point of safety, deep emotional memory, and maternal nurturing. It is the sanctuary of the soul.',
+  'Leo': 'The radiant sovereign. Governs self-expression, joyous creativity, and heart-centered leadership. Leo shines its individual light into the collective.',
+  'Virgo': 'The analytical servant. Represents process optimization, purity, and the integration of spirit through daily physical routines and helpfulness.',
+  'Libra': 'The mirror of relationship. Seeks absolute equilibrium, aesthetic harmony, and intellectual bridging. Libra learns the self through the reflection of the other.',
+  'Scorpio': 'The alchemical transformer. Rules deep psychological truth, the mysteries of birth and death, and intense emotional bonding. Scorpio deals with power and rebirth.',
+  'Sagittarius': 'The seeker of wisdom. Represents the outward expansion of the mind, long journeys, higher philosophy, and the arrow of truth aimed at the divine.',
+  'Capricorn': 'The mountain climber. Governs structure, time, karmic legacy, and immense discipline. Capricorn achieves mastery through patient, sustained effort.',
+  'Aquarius': 'The cosmic visionary. Represents the collective future, sudden awakening, networks, and rebellious liberation from outdated structures.',
+  'Pisces': 'The cosmic ocean. Dissolves all boundaries representing universal empathy, mysticism, and the point where the finite self merges with the infinite.'
+};
+
+const HOUSE_MEANINGS: Record<number, string> = {
+  1: 'Identity, physical appearance, first impressions, and the self you project to the world. It is the ascendant point of physical incarnation.',
+  2: 'Personal values, material possessions, personal finances, and the foundational sense of self-worth.',
+  3: 'Immediate environment, siblings, short journeys, early education, and the initial gathering and sharing of information.',
+  4: 'Roots, family psyche, inner emotional security, the home, and the deep past. It represents the foundation of the subjective self.',
+  5: 'Joy, romance, personal creativity, children, and spontaneous self-expression. The spark of creation for the sake of play.',
+  6: 'Daily routines, physical health, service to others, pets, and the refinement of skills. Where spirit meets the reality of labor.',
+  7: 'One-on-one partnerships, marriage, contracts, and known enemies. The descent into learning yourself via an equal counterpart.',
+  8: 'Shared resources, intimacy, death, psychological transformation, and the occult. Where boundaries merge and power dynamics occur.',
+  9: 'Higher learning, belief systems, long-distance travel, and the expansion of the conceptual horizon toward meaning.',
+  10: 'Career, public reputation, authority, and life achievements. The highest visible point revealing how you function in society.',
+  11: 'Friendships, networks, future hopes, group affiliations, and the realization of collective, humanitarian ideals.',
+  12: 'The unconscious, isolation, hidden karma, hospitals, and spiritual dissolution. The final stage before returning to the womb of existence.'
+};
+
 const PLANET_MEANINGS: Record<string, string> = {
   'Sun': 'Your core essence and ego. The "I AM" that drives your purpose and vitality.',
   'Moon': 'Your emotional landscape and subconscious needs. How you respond and nurture.',
@@ -158,46 +188,84 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
   };
 
   return (
-    <div className="w-full h-full flex items-center justify-center bg-[#fdfbf6] text-[#333] font-serif p-4 rounded-[2.5rem] relative overflow-hidden">
+    <div className="w-full h-full flex items-center justify-center bg-[#fdfbf6] text-[#333] font-serif p-0 md:p-8 rounded-none md:rounded-[2.5rem] relative overflow-hidden group">
+      {/* Decorative stars / static texture background */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]" />
       
-      <svg width="800" height="800" viewBox="0 0 800 800" className="max-w-full max-h-full drop-shadow-xl" style={{ filter: 'sepia(0.2)' }}>
+      <svg width="800" height="800" viewBox="0 0 800 800" className="max-w-full max-h-full drop-shadow-xl z-10" style={{ filter: 'sepia(0.1)' }}>
         <defs>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
           <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#fef08a" stopOpacity="1" />
+            <stop offset="0%" stopColor="#fef08a" stopOpacity="0.4" />
             <stop offset="100%" stopColor="#fef08a" stopOpacity="0" />
           </radialGradient>
         </defs>
 
         {/* Outer Wheel background */}
-        <circle cx={centerX} cy={centerY} r={radiusOuter} fill="#fff" stroke="#333" strokeWidth="2" />
-        <circle cx={centerX} cy={centerY} r={radiusInner} fill="none" stroke="#333" strokeWidth="2" />
-        <circle cx={centerX} cy={centerY} r={radiusHouses} fill="#faf8f2" stroke="#333" strokeWidth="2" />
-        <circle cx={centerX} cy={centerY} r={60} fill="none" stroke="#ccc" strokeWidth="1" strokeDasharray="4 4" />
-
-        {/* Zodiac Signs */}
+        <motion.circle 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          cx={centerX} cy={centerY} r={radiusOuter} fill="#fff" stroke="#d6cfbc" strokeWidth="1" 
+        />
+        <circle cx={centerX} cy={centerY} r={radiusInner} fill="none" stroke="#d6cfbc" strokeWidth="1" />
+        <motion.circle 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          cx={centerX} cy={centerY} r={radiusHouses} fill="#faf8f2" stroke="#d6cfbc" strokeWidth="1" 
+        />
+        
+        {/* Zodiac Signs with colored segments */}
         {SIGN_NAMES.map((sign, i) => {
           const startDegree = i * 30;
+          const endDegree = (i + 1) * 30;
           const midDegree = startDegree + 15;
-          const startPosOuter = getPos(radiusOuter, startDegree);
-          const startPosInner = getPos(radiusInner, startDegree);
+          const isActive = activeInfo?.type === 'sign' && activeInfo?.name === sign;
+          
+          // Path for segment
+          const startAngle = getAngleForDegree(startDegree);
+          const endAngle = getAngleForDegree(endDegree);
+          const x1 = centerX + Math.cos(startAngle) * radiusOuter;
+          const y1 = centerY + Math.sin(startAngle) * radiusOuter;
+          const x2 = centerX + Math.cos(endAngle) * radiusOuter;
+          const y2 = centerY + Math.sin(endAngle) * radiusOuter;
+          const x3 = centerX + Math.cos(endAngle) * radiusInner;
+          const y3 = centerY + Math.sin(endAngle) * radiusInner;
+          const x4 = centerX + Math.cos(startAngle) * radiusInner;
+          const y4 = centerY + Math.sin(startAngle) * radiusInner;
+          
+          const path = `M ${x1} ${y1} A ${radiusOuter} ${radiusOuter} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${radiusInner} ${radiusInner} 0 0 0 ${x4} ${y4} Z`;
+          
           const midPos = getPos(radiusOuter - 30, midDegree);
           
           return (
             <g key={sign}>
-              <line x1={startPosInner.x} y1={startPosInner.y} x2={startPosOuter.x} y2={startPosOuter.y} stroke="#333" strokeWidth="1" />
-              <g 
-                className="cursor-pointer transition-all hover:opacity-70"
+              <motion.path 
+                d={path}
+                fill={isActive ? '#faf1d3' : 'transparent'}
+                stroke="#d6cfbc"
+                strokeWidth="0.5"
+                whileHover={{ fill: 'rgba(217, 119, 6, 0.05)' }}
                 onClick={() => handleInteractiveClick('sign', { name: sign, index: i })}
+                className="cursor-pointer transition-colors"
                 onMouseEnter={() => setHoveredElement({ type: 'sign', name: sign })}
                 onMouseLeave={() => setHoveredElement(null)}
+              />
+              <g 
+                className="pointer-events-none"
               >
                 <text 
                   x={midPos.x} 
                   y={midPos.y} 
                   fontSize="28" 
-                  fill={hoveredElement?.name === sign ? '#d97706' : '#555'} 
+                  fill={isActive || hoveredElement?.name === sign ? '#d97706' : '#887c63'} 
                   textAnchor="middle" 
                   dominantBaseline="middle"
+                  className="transition-colors duration-300 select-none"
                 >
                   {SIGN_SYMBOLS[sign]}
                 </text>
@@ -206,33 +274,43 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
           );
         })}
 
-        {/* Degree markers */}
-        {Array.from({ length: 360 }).map((_, i) => {
-          const isTenth = i % 10 === 0;
-          const r1 = radiusOuter;
-          const r2 = isTenth ? radiusOuter - 10 : radiusOuter - 5;
-          const pos1 = getPos(r1, i);
-          const pos2 = getPos(r2, i);
-          return <line key={`tick-${i}`} x1={pos1.x} y1={pos1.y} x2={pos2.x} y2={pos2.y} stroke="#999" strokeWidth={isTenth ? "2" : "1"} />;
-        })}
-
-        {/* Houses (Simplified as equal 30 degree blocks aligned with signs for now, or true houses if available) */}
+        {/* Houses with Highlighted boundaries */}
         {Array.from({ length: 12 }).map((_, i) => {
           const startDegree = i * 30;
+          const endDegree = (i + 1) * 30;
           const midDegree = startDegree + 15;
-          const startPosHouses = getPos(radiusHouses, startDegree);
-          const startPosCenter = getPos(60, startDegree);
+          const startPosInnerRing = getPos(radiusInner, startDegree);
+          const startPosCenter = getPos(80, startDegree);
           const midPos = getPos(radiusHouses - 15, midDegree);
           const isAscDesc = i === 0 || i === 6;
           const isMcIc = i === 3 || i === 9;
+          const isActive = activeInfo?.type === 'house' && activeInfo?.number === (i + 1);
+
+          // Boundaries for highlighting
+          const startA = getAngleForDegree(startDegree);
+          const endA = getAngleForDegree(endDegree);
+          const rH = radiusHouses;
+          const hX1 = centerX + Math.cos(startA) * rH;
+          const hY1 = centerY + Math.sin(startA) * rH;
+          const hX2 = centerX + Math.cos(endA) * rH;
+          const hY2 = centerY + Math.sin(endA) * rH;
+          const hPath = `M ${centerX} ${centerY} L ${hX1} ${hY1} A ${rH} ${rH} 0 0 1 ${hX2} ${hY2} Z`;
           
           return (
             <g key={`house-${i}`}>
-              <line 
+              <motion.path 
+                d={hPath}
+                fill={isActive ? 'rgba(217, 119, 6, 0.03)' : 'transparent'}
+                onClick={() => handleInteractiveClick('house', { number: i + 1 })}
+                className="cursor-pointer transition-colors"
+              />
+              <motion.line 
                 x1={startPosCenter.x} y1={startPosCenter.y} 
-                x2={startPosHouses.x} y2={startPosHouses.y} 
-                stroke={isAscDesc || isMcIc ? "#d97706" : "#ddd"} 
-                strokeWidth={isAscDesc || isMcIc ? "2" : "1"} 
+                x2={startPosInnerRing.x} y2={startPosInnerRing.y} 
+                stroke={isAscDesc || isMcIc ? "#d97706" : "#e6e1d3"} 
+                strokeWidth={isAscDesc || isMcIc ? "2" : "0.5"} 
+                strokeDasharray={!(isAscDesc || isMcIc) ? "4 4" : "none"}
+                animate={{ opacity: isActive ? 1 : (isAscDesc || isMcIc ? 0.8 : 0.4) }}
               />
               <g 
                 className="cursor-pointer"
@@ -240,8 +318,10 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
               >
                 <text 
                    x={midPos.x} y={midPos.y} 
-                   fontSize="14" fill="#888" 
+                   fontSize="12" fill={isActive ? "#d97706" : "#a39b89"} 
+                   fontWeight={isActive ? "bold" : "normal"}
                    textAnchor="middle" dominantBaseline="middle"
+                   className="transition-colors font-sans"
                 >
                   {i + 1}
                 </text>
@@ -250,88 +330,132 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
           );
         })}
 
-        {/* Aspects (Lines) */}
+        {/* Aspects (Lines) with motion */}
         {chartAspects.map((aspect: any, idx: number) => {
           const p1 = allBodies?.find((p: any) => p.name === aspect.planet1);
           const p2 = allBodies?.find((p: any) => p.name === aspect.planet2);
           if (!p1 || !p2) return null;
           
-          const getPlanetAbsDegree = (p: any) => SIGN_NAMES.indexOf(p.sign) * 30 + p.degree;
-          const deg1 = getPlanetAbsDegree(p1);
-          const deg2 = getPlanetAbsDegree(p2);
+          const pos1 = getPos(radiusHouses, SIGN_NAMES.indexOf(p1.sign) * 30 + p1.degree);
+          const pos2 = getPos(radiusHouses, SIGN_NAMES.indexOf(p2.sign) * 30 + p2.degree);
           
-          const pos1 = getPos(radiusHouses, deg1);
-          const pos2 = getPos(radiusHouses, deg2);
+          const isRelated = hoveredElement?.name === p1.name || hoveredElement?.name === p2.name || 
+                           activeInfo?.name === p1.name || activeInfo?.name === p2.name;
           
           return (
-            <line 
-              key={`aspect-${idx}`}
-              x1={pos1.x} y1={pos1.y}
-              x2={pos2.x} y2={pos2.y}
-              stroke={ASPECT_COLORS[aspect.type] || '#ccc'}
-              strokeWidth={hoveredElement?.name === p1.name || hoveredElement?.name === p2.name ? "3" : "1"}
-              strokeOpacity="0.8"
-              strokeDasharray={aspect.type === 'opposition' || aspect.type === 'square' ? '4 2' : 'none'}
-            />
+            <motion.g key={`aspect-group-${idx}`}>
+              <motion.line 
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ 
+                  pathLength: 1, 
+                  opacity: isRelated ? 0.8 : 0.2,
+                  strokeWidth: isRelated ? 3 : 0.4
+                }}
+                transition={{ duration: 1.5, ease: "easeInOut" }}
+                x1={pos1.x} y1={pos1.y}
+                x2={pos2.x} y2={pos2.y}
+                stroke={ASPECT_COLORS[aspect.type] || '#ccc'}
+                strokeDasharray={aspect.type === 'opposition' || aspect.type === 'square' ? '6 3' : 'none'}
+                style={{ filter: isRelated ? 'url(#glow)' : 'none' }}
+              />
+              {isRelated && (
+                <motion.circle
+                  animate={{ offset: [0, 1] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  r="2"
+                  fill={ASPECT_COLORS[aspect.type] || '#ccc'}
+                >
+                  <animateMotion 
+                    path={`M ${pos1.x} ${pos1.y} L ${pos2.x} ${pos2.y}`}
+                    dur="3s"
+                    repeatCount="indefinite"
+                  />
+                </motion.circle>
+              )}
+            </motion.g>
           );
         })}
 
         {/* Planets */}
-        {allBodies.map((planet: any, i: number) => {
-          const absoluteDegree = SIGN_NAMES.indexOf(planet.sign) * 30 + planet.degree;
-          // Offset distance from center based on planet to avoid overlap, or simple stagger
-          const planetRadius = radiusInner - 25 - (i % 2 === 0 ? 0 : 25); 
-          const pos = getPos(planetRadius, absoluteDegree);
-          const lineTarget = getPos(radiusInner, absoluteDegree);
-          
-          const isHovered = hoveredElement?.name === planet.name;
-          const isActive = activeInfo?.name === planet.name;
+        <AnimatePresence>
+          {allBodies.map((planet: any, i: number) => {
+            const absoluteDegree = SIGN_NAMES.indexOf(planet.sign) * 30 + planet.degree;
+            const planetRadius = radiusInner - 25 - (i % 2 === 0 ? 0 : 25); 
+            const pos = getPos(planetRadius, absoluteDegree);
+            const lineTarget = getPos(radiusInner, absoluteDegree);
+            
+            const isHovered = hoveredElement?.name === planet.name;
+            const isActive = activeInfo?.name === planet.name;
 
-          return (
-            <g key={planet.name}>
-              {/* Pointer line to exact degree */}
-              <line x1={pos.x} y1={pos.y} x2={lineTarget.x} y2={lineTarget.y} stroke={PLANET_COLORS[planet.name] || '#666'} strokeWidth="1" strokeDasharray="2 2" />
-              
-              <g 
-                className="cursor-pointer transition-transform duration-300"
-                style={{ transformOrigin: `${pos.x}px ${pos.y}px`, transform: isHovered || isActive ? 'scale(1.4)' : 'scale(1)' }}
-                onMouseEnter={() => setHoveredElement(planet)}
-                onMouseLeave={() => setHoveredElement(null)}
-                onClick={() => handleInteractiveClick('planet', planet)}
+            return (
+              <motion.g 
+                key={planet.name}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1 + i * 0.05 }}
               >
-                <circle cx={pos.x} cy={pos.y} r="14" fill="#fff" stroke={PLANET_COLORS[planet.name] || '#333'} strokeWidth="1" />
-                <text 
-                  x={pos.x} y={pos.y + 1} 
-                  fontSize="16" 
-                  fill={PLANET_COLORS[planet.name] || '#333'} 
-                  textAnchor="middle" 
-                  dominantBaseline="middle"
-                  className="font-bold"
+                <line x1={pos.x} y1={pos.y} x2={lineTarget.x} y2={lineTarget.y} stroke={PLANET_COLORS[planet.name] || '#999'} strokeWidth="0.5" strokeDasharray="2 2" />
+                
+                <g 
+                  className="cursor-pointer transition-transform duration-300"
+                  onMouseEnter={() => setHoveredElement(planet)}
+                  onMouseLeave={() => setHoveredElement(null)}
+                  onClick={() => handleInteractiveClick('planet', planet)}
                 >
-                  {PLANET_SYMBOLS[planet.name] || '?'}
-                </text>
-              </g>
+                  <motion.circle 
+                    animate={{ 
+                      r: isHovered || isActive ? 18 : 14,
+                      strokeWidth: isHovered || isActive ? 2 : 1 
+                    }}
+                    cx={pos.x} cy={pos.y} fill="#fff" stroke={PLANET_COLORS[planet.name] || '#333'} 
+                    style={{ boxPadding: '4px' }}
+                  />
+                  <text 
+                    x={pos.x} y={pos.y + 1} 
+                    fontSize={isHovered || isActive ? "20" : "16"} 
+                    fill={PLANET_COLORS[planet.name] || '#333'} 
+                    textAnchor="middle" 
+                    dominantBaseline="middle"
+                    className="font-bold transition-all duration-300 select-none"
+                  >
+                    {PLANET_SYMBOLS[planet.name] || '?'}
+                  </text>
+                </g>
 
-              {/* Mini degree text */}
-              {(isHovered || isActive) && (
-                <text 
-                  x={pos.x + 20} y={pos.y - 15} 
-                  fontSize="12" fill="#333" 
-                  className="font-sans font-bold bg-white"
-                >
-                  {Math.floor(planet.degree)}° {planet.sign}
-                </text>
-              )}
-            </g>
-          );
-        })}
+                {(isHovered || isActive) && (
+                  <motion.text 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    x={pos.x + 20} y={pos.y - 15} 
+                    fontSize="12" fill="#333" 
+                    className="font-sans font-bold select-none pointer-events-none"
+                  >
+                    {Math.floor(planet.degree)}° {planet.sign}
+                  </motion.text>
+                )}
+              </motion.g>
+            );
+          })}
+        </AnimatePresence>
 
-        {/* ASC / DESC text */}
-        <text x={centerX - radiusOuter - 20} y={centerY} fontSize="18" fill="#d97706" textAnchor="end" dominantBaseline="middle" className="font-bold tracking-widest">AC</text>
-        <text x={centerX + radiusOuter + 20} y={centerY} fontSize="18" fill="#d97706" textAnchor="start" dominantBaseline="middle" className="font-bold tracking-widest">DC</text>
-        <text x={centerX} y={centerY - radiusOuter - 20} fontSize="18" fill="#d97706" textAnchor="middle" dominantBaseline="auto" className="font-bold tracking-widest">MC</text>
-        <text x={centerX} y={centerY + radiusOuter + 20} fontSize="18" fill="#d97706" textAnchor="middle" dominantBaseline="hanging" className="font-bold tracking-widest">IC</text>
-
+        {/* Axis Labels */}
+        {[
+          { text: 'AC', x: centerX - radiusOuter - 25, y: centerY, anchor: 'end' },
+          { text: 'DC', x: centerX + radiusOuter + 25, y: centerY, anchor: 'start' },
+          { text: 'MC', x: centerX, y: centerY - radiusOuter - 25, anchor: 'middle', pos: 'auto' },
+          { text: 'IC', x: centerX, y: centerY + radiusOuter + 25, anchor: 'middle', pos: 'hanging' }
+        ].map(label => (
+          <text 
+            key={label.text}
+            x={label.x} y={label.y} 
+            fontSize="18" fill="#d97706" 
+            textAnchor={label.anchor as any} 
+            dominantBaseline={label.pos as any || 'middle'} 
+            className="font-bold tracking-widest select-none"
+          >
+            {label.text}
+          </text>
+        ))}
       </svg>
 
       {/* Information Panel */}
@@ -409,7 +533,7 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
                 </div>
                 <div className="prose prose-stone prose-sm">
                   <p className="leading-relaxed text-stone-700 bg-stone-100 p-4 rounded-lg">
-                    {activeInfo.name} represents a specific archetypal energy in the cosmos. It rules particular themes, modalities, and elements of the human experience.
+                    {SIGN_MEANINGS[activeInfo.name] || `${activeInfo.name} represents a specific archetypal energy in the cosmos. It rules particular themes, modalities, and elements of the human experience.`}
                   </p>
                 </div>
               </div>
@@ -428,7 +552,7 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
                 </div>
                 <div className="prose prose-stone prose-sm">
                   <p className="leading-relaxed text-stone-700 bg-stone-100 p-4 rounded-lg">
-                    The {activeInfo.number}{activeInfo.number === 1 ? 'st' : activeInfo.number === 2 ? 'nd' : activeInfo.number === 3 ? 'rd' : 'th'} House governs a specific area of life, showing WHERE the planetary energies play out.
+                    {HOUSE_MEANINGS[activeInfo.number] || `The ${activeInfo.number}${activeInfo.number === 1 ? 'st' : activeInfo.number === 2 ? 'nd' : activeInfo.number === 3 ? 'rd' : 'th'} House governs a specific area of life, showing WHERE the planetary energies play out.`}
                   </p>
                   {/* List planets in this house */}
                   <h4 className="text-sm font-bold uppercase tracking-widest text-[#d97706] mt-6 mb-2">Occupants</h4>

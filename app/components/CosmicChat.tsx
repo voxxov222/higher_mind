@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageSquare, Send, X, Minimize2, Maximize2, Sparkles, Brain, Network, Zap, User, BookOpen } from 'lucide-react';
+import { MessageSquare, Send, X, Minimize2, Maximize2, Sparkles, Brain, Network, Zap, User, BookOpen, Archive } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { CosmicData, ConsciousnessPacket } from '../types';
 import { fetchCosmicChatResponse } from '../services/geminiService';
 import { useHigherMind } from './HigherMindProvider';
+import { soundEngine } from '../lib/soundEffects';
 
 interface Message {
   id: string;
@@ -28,8 +29,39 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchStatus, setSearchStatus] = useState<string | null>(null);
   const [suggestedPaths, setSuggestedPaths] = useState<string[]>([]);
+  const [suggestionBubble, setSuggestionBubble] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { processPacket, coherence, alignment, savedMessages, experiences, saveToChat } = useHigherMind();
+  const { processPacket, coherence, alignment, savedMessages, experiences, saveToChat, saveToVault } = useHigherMind();
+
+  useEffect(() => {
+    if (!isOpen) {
+      const suggestions = [
+        "What does my birth chart say about my destiny?",
+        "Can you explain the meaning of my Gematria?",
+        "How do my Sephirot align with the planets?",
+        "What transits are affecting me today?",
+        "Show me the akashic records of my soul.",
+        "What are my highest frequency alignment aspects?"
+      ];
+      
+      const timer = setInterval(() => {
+        setSuggestionBubble(suggestions[Math.floor(Math.random() * suggestions.length)]);
+        setTimeout(() => setSuggestionBubble(null), 8000);
+      }, 20000);
+
+      const initialTimer = setTimeout(() => {
+        setSuggestionBubble(suggestions[Math.floor(Math.random() * suggestions.length)]);
+        setTimeout(() => setSuggestionBubble(null), 8000);
+      }, 5000);
+
+      return () => {
+        clearInterval(timer);
+        clearTimeout(initialTimer);
+      };
+    } else {
+      setSuggestionBubble(null);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     // Add newly saved messages to the chat if they aren't already there
@@ -132,12 +164,36 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
   return (
     <div className="fixed bottom-6 right-6 z-[250] pointer-events-auto">
       <AnimatePresence>
+        {!isOpen && suggestionBubble && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+            className="absolute bottom-20 right-0 w-[260px] bg-stone-950/90 backdrop-blur-xl border border-purple-500/30 p-4 rounded-3xl rounded-br-none shadow-[0_0_30px_rgba(168,85,247,0.3)] cursor-pointer hover:bg-stone-900 group"
+            onMouseEnter={() => soundEngine.hover()}
+            onClick={() => {
+              soundEngine.open();
+              setIsOpen(true);
+              setTimeout(() => handleSend(suggestionBubble), 300);
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Brain size={14} className="text-purple-400 group-hover:animate-pulse" />
+              <span className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Suggested Path</span>
+            </div>
+            <p className="text-sm text-stone-200 leading-snug">{suggestionBubble}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {!isOpen && (
           <motion.button
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            onClick={() => setIsOpen(true)}
+            onMouseEnter={() => soundEngine.hover()}
+            onClick={() => { soundEngine.open(); setIsOpen(true); }}
             className="w-16 h-16 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl shadow-[0_0_30px_rgba(168,85,247,0.5)] flex items-center justify-center transition-all group"
           >
             <MessageSquare size={24} className="group-hover:scale-110 transition-transform" />
@@ -176,16 +232,25 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
                   </div>
               <div className="flex items-center gap-2">
                 <button 
-                  onClick={() => setShowIndex(!showIndex)} 
+                  onClick={() => { soundEngine.click(); setShowIndex(!showIndex); }} 
+                  onMouseEnter={() => soundEngine.hover()}
                   className={`p-2 rounded-lg transition-all ${showIndex ? 'text-emerald-400 bg-emerald-500/10 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'text-stone-500 hover:text-white hover:bg-white/5'}`}
                   title="Akashic Index (Memory)"
                 >
                   <BookOpen size={16} />
                 </button>
-                <button onClick={() => setIsMinimized(!isMinimized)} className="p-2 hover:bg-white/5 rounded-lg text-stone-500 hover:text-white transition-colors">
+                <button 
+                  onClick={() => { soundEngine.click(); setIsMinimized(!isMinimized); }} 
+                  onMouseEnter={() => soundEngine.hover()}
+                  className="p-2 hover:bg-white/5 rounded-lg text-stone-500 hover:text-white transition-colors"
+                >
                   {isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
                 </button>
-                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/5 rounded-lg text-stone-500 hover:text-white transition-colors">
+                <button 
+                  onClick={() => { soundEngine.close(); setIsOpen(false); }} 
+                  onMouseEnter={() => soundEngine.hover()}
+                  className="p-2 hover:bg-white/5 rounded-lg text-stone-500 hover:text-white transition-colors"
+                >
                   <X size={20} />
                 </button>
               </div>
@@ -262,15 +327,30 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
                             {m.text ? <ReactMarkdown>{m.text}</ReactMarkdown> : <span className="italic text-stone-500">Transmission empty...</span>}
                           </div>
                           
-                          {m.role === 'model' && (
-                            <button 
-                              onClick={() => saveToChat("Akashic Index", m.text.slice(0, 200) + "...", "Insight Index")}
-                              className="absolute -right-12 top-0 p-2 text-stone-600 hover:text-emerald-400 opacity-0 group-hover/msg:opacity-100 transition-all"
-                              title="Index to Akashic Records"
-                            >
-                              <BookOpen size={16} />
-                            </button>
-                          )}
+                           {m.role === 'model' && (
+                             <div className="absolute -right-12 top-0 flex flex-col gap-1 opacity-0 group-hover/msg:opacity-100 transition-all">
+                                <button 
+                                  onClick={() => {
+                                    soundEngine.neuralClick();
+                                    saveToChat("Akashic Index", m.text.slice(0, 200) + "...", "Insight Index");
+                                  }}
+                                  className="p-2 text-stone-600 hover:text-emerald-400"
+                                  title="Index to Akashic Records"
+                                >
+                                  <BookOpen size={16} />
+                                </button>
+                                <button 
+                                  onClick={() => {
+                                    soundEngine.neuralClick();
+                                    saveToVault("Cosmic Insight", m.text, "Chat Analysis", ["AI", "Gemini"]);
+                                  }}
+                                  className="p-2 text-stone-600 hover:text-purple-400"
+                                  title="Save to Research Vault"
+                                >
+                                  <Archive size={16} />
+                                </button>
+                             </div>
+                           )}
                         </div>
                         
                         {m.references && m.references.length > 0 && (
@@ -314,7 +394,8 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
                         {suggestedPaths.map((path, idx) => (
                           <button
                             key={idx}
-                            onClick={() => handleSend(path)}
+                            onClick={() => { soundEngine.scan(); handleSend(path); }}
+                            onMouseEnter={() => soundEngine.hover()}
                             className="px-3 py-1.5 bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] text-emerald-300 transition-all text-left"
                           >
                             {path} →
@@ -331,7 +412,8 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
                     {researchActions.map((action, idx) => (
                       <button
                         key={idx}
-                        onClick={() => handleSend(action.prompt)}
+                        onClick={() => { soundEngine.open(); handleSend(action.prompt); }}
+                        onMouseEnter={() => soundEngine.hover()}
                         className="whitespace-nowrap px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[9px] uppercase tracking-widest text-stone-400 hover:text-white transition-all flex items-center gap-2"
                       >
                         <Zap size={10} className="text-purple-500" />
@@ -349,7 +431,8 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
                       className="w-full bg-white/5 border border-white/10 rounded-2xl pl-6 pr-14 py-4 text-white placeholder:text-stone-600 focus:outline-none focus:border-purple-500/50 transition-all font-light"
                     />
                     <button
-                      onClick={handleSend}
+                      onClick={() => { soundEngine.scan(); handleSend(); }}
+                      onMouseEnter={() => soundEngine.hover()}
                       disabled={!input.trim() || isLoading}
                       className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-purple-600 hover:bg-purple-500 disabled:bg-stone-800 disabled:text-stone-600 text-white rounded-xl flex items-center justify-center transition-all shadow-lg"
                     >

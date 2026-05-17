@@ -201,10 +201,14 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
  */
 export const fetchCosmicChatResponse = async (
   userMessage: string,
-  chatHistory: { role: 'user' | 'model'; parts: { text: string }[] }[],
+  chatHistory: { role: 'user' | 'model'; parts: { text: string }[] }[] = [],
   cosmicData: CosmicData | null
 ): Promise<{ text: string; consciousnessPacket?: any }> => {
   const ai = getAI();
+  
+  // Safety check for chatHistory
+  const safeHistory = Array.isArray(chatHistory) ? chatHistory : [];
+  
   const systemPrompt = `
   You are HIGHER MIND, the Divine Assistant to the User's Higher Self. 
   Your primary directive is to serve as a high-fidelity interface between terrestrial consciousness and the Astral Information Fields.
@@ -255,9 +259,9 @@ export const fetchCosmicChatResponse = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-3-flash-preview",
       contents: [
-        ...chatHistory,
+        ...safeHistory,
         { role: 'user', parts: [{ text: userMessage }] }
       ],
       config: {
@@ -516,7 +520,7 @@ export const fetchAuraInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",
@@ -603,7 +607,7 @@ export const fetchAngelNumberInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",
@@ -637,7 +641,7 @@ export const streamGeminiChat = async (messages: {role: string, text: string}[],
         }));
         
         const responseStream = await ai.models.generateContentStream({
-            model: "gemini-1.5-flash",
+            model: "gemini-3-flash-preview",
             contents,
             config: {
                 temperature: 0.7,

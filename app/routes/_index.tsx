@@ -12,6 +12,7 @@ import { auth, signIn, signOut, getCosmicProfile, saveCosmicProfile, updateProfi
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { UserProfileConfig } from '../types';
 import { Stars, Navigation, Globe } from 'lucide-react';
+import { useHigherMind } from '../components/HigherMindProvider';
 
 export default function Index() {
   const [data, setData] = useState<CosmicData | null>(null);
@@ -84,6 +85,13 @@ export default function Index() {
     setProfileConfig(config);
     if (user) await updateProfileConfig(user.uid, config);
   };
+
+  const { setUserData } = useHigherMind();
+  useEffect(() => {
+    if (profileConfig) {
+      setUserData(profileConfig);
+    }
+  }, [profileConfig, setUserData]);
 
   const handleSpeak = (title: string, content: string) => {
     setExternalDeepDive({ title, content });

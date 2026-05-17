@@ -12,6 +12,7 @@ interface ProfileStore {
   addWidget: (widget: CosmicWidget) => void;
   removeWidget: (widgetId: string) => void;
   updateTheme: (updates: Partial<UserProfileConfig['theme']>) => void;
+  addToVault: (title: string, content: string, category: string, tags?: string[]) => void;
   saveProfile: () => Promise<void>;
 }
 
@@ -20,6 +21,19 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
   isEditing: false,
   setConfig: (config) => set({ config }),
   setEditing: (isEditing) => set({ isEditing }),
+  addToVault: (title, content, category, tags = []) => {
+    const config = get().config;
+    if (!config) return;
+    const newItem = {
+      id: Math.random().toString(36).substring(7),
+      title,
+      content,
+      category,
+      timestamp: Date.now(),
+      tags
+    };
+    set({ config: { ...config, researchVault: [...config.researchVault, newItem] } });
+  },
   updateMindMap: (mindMap) => {
     const config = get().config;
     if (!config) return;

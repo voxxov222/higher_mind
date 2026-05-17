@@ -101,10 +101,12 @@ const ZodiacSign = ({ sign, index, selected, onSelect, onResearch, onSave }: any
   return (
     <group>
       {/* Divider Line */}
-      <mesh rotation={[0, -angle, 0]} position={[50, 0, 0]}>
-        <boxGeometry args={[100, 0.1, 0.1]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.1} />
-      </mesh>
+      <group rotation={[0, angle, 0]}>
+        <mesh position={[50, 0, 0]}>
+          <boxGeometry args={[100, 0.1, 0.1]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.15} />
+        </mesh>
+      </group>
 
       {/* Interactive wedge */}
       <mesh 
@@ -228,35 +230,26 @@ const ZodiacRing = ({ onResearch, onSave }: any) => {
 
 // Animated Aspect Lines
 const AspectLine = ({ start, end, type }: { start: THREE.Vector3, end: THREE.Vector3, type: string }) => {
-  const lineRef = useRef<THREE.Line>(null);
+  const lineRef = useRef<any>(null);
   
   let color = '#ffffff';
-  let dashSize = 1;
+  let dashSize = 2;
   let gapSize = 0;
   
-  if (type === 'trine') { color = '#34d399'; dashSize = 2; gapSize = 1; }
-  else if (type === 'square') { color = '#f87171'; dashSize = 0.5; gapSize = 1; }
-  else if (type === 'opposition') { color = '#fb7185'; dashSize = 3; gapSize = 3; }
-  else if (type === 'sextile') { color = '#60a5fa'; dashSize = 1; gapSize = 1; }
-  else if (type === 'conjunction') { color = '#fcd34d'; dashSize = 100; gapSize = 0; }
+  if (type === 'trine') { color = '#34d399'; dashSize = 5; gapSize = 2; }
+  else if (type === 'square') { color = '#f87171'; dashSize = 2; gapSize = 2; }
+  else if (type === 'opposition') { color = '#fb7185'; dashSize = 8; gapSize = 4; }
+  else if (type === 'sextile') { color = '#60a5fa'; dashSize = 3; gapSize = 2; }
+  else if (type === 'conjunction') { color = '#fcd34d'; dashSize = 10; gapSize = 0; }
   
-  const geometry = useMemo(() => {
-    const geo = new THREE.BufferGeometry().setFromPoints([start, end]);
-    // Required for dashed lines to work in Three.js
-    const lineDistances = new Float32Array([0, start.distanceTo(end)]);
-    geo.setAttribute('lineDistance', new THREE.BufferAttribute(lineDistances, 1));
-    return geo;
-  }, [start, end]);
-
   useFrame((state) => {
-    if (lineRef.current && lineRef.current.material instanceof THREE.LineDashedMaterial) {
+    if (lineRef.current && lineRef.current.material) {
       if (type === 'trine') {
         lineRef.current.material.dashOffset -= 0.05; // Flowing energy
       } else if (type === 'square') {
         lineRef.current.material.dashOffset += Math.sin(state.clock.elapsedTime * 10) * 0.05; // Vibrating
       } else if (type === 'opposition') {
         lineRef.current.material.dashOffset -= 0.02; 
-        lineRef.current.material.opacity = 0.3 + Math.sin(state.clock.elapsedTime * 5) * 0.2; // Pulsing
       } else {
         lineRef.current.material.dashOffset -= 0.01;
       }
@@ -264,16 +257,18 @@ const AspectLine = ({ start, end, type }: { start: THREE.Vector3, end: THREE.Vec
   });
 
   return (
-    <line ref={lineRef} geometry={geometry}>
-      <lineDashedMaterial 
-        color={color} 
-        dashSize={dashSize} 
-        gapSize={gapSize} 
-        transparent 
-        opacity={0.4} 
-        linewidth={2} 
-      />
-    </line>
+    <Line 
+      ref={lineRef} 
+      points={[start, end]}
+      color={color}
+      dashed={type !== 'conjunction'}
+      dashScale={1}
+      dashSize={dashSize}
+      gapSize={gapSize}
+      transparent 
+      opacity={0.4} 
+      lineWidth={1.5} 
+    />
   );
 };
 
@@ -349,12 +344,13 @@ const AdvancedPlanet = ({ name, degree, sign, house, selected, onClick, planet, 
         </group>
       </Trail>
       
-      {/* Anchor Line to edge */}
+      {/* Anchor Line to center */}
       <Line 
-        points={[[0,0,0], [Math.cos(angle) * (100 - r), 0, Math.sin(angle) * (100 - r)]]} 
+        points={[[0,0,0], [-Math.cos(angle) * (r - 10), 0, -Math.sin(angle) * (r - 10)]]} 
         color={config.color} 
         transparent 
-        opacity={0.1} 
+        opacity={0.25} 
+        lineWidth={1}
       />
     </group>
   );
@@ -380,10 +376,12 @@ const HouseMarker = ({ house, index, hoveredHouse, setHoveredHouse, relevance = 
   return (
     <group ref={markerRef}>
       {/* House segment line */}
-      <mesh rotation={[0, -startAngle, 0]} position={[50, -0.4, 0]}>
-        <boxGeometry args={[100, 0.1, 0.2]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.15 + (relevance * 0.1)} />
-      </mesh>
+      <group rotation={[0, startAngle, 0]}>
+        <mesh position={[50, -0.4, 0]}>
+          <boxGeometry args={[100, 0.1, 0.2]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.15 + (relevance * 0.1)} />
+        </mesh>
+      </group>
 
       {/* Hoverable Area */}
       <mesh 

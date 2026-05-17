@@ -8,7 +8,7 @@ import {
   Sparkles, Moon, Sun, Star, Activity, Hexagon, Fingerprint, Network, Menu, X, 
   Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, 
   Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, Zap, Upload, Palette, 
-  Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box, Key 
+  Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box, Key, Cpu 
 } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
@@ -17,6 +17,7 @@ import {
 // --- SERVICE INTEGRATIONS ---
 import { fetchTimelineDepth, fetchTimelineDeepDiveOption, fetchGeneralDeepDive } from '../services/geminiService';
 import { User } from 'firebase/auth';
+import { AstrologyDashboard } from './AstrologyDashboard';
 import { DeepSynthesis } from './DeepSynthesis';
 import { HarmonicVisualizer } from './HarmonicVisualizer';
 import { ChakraScene } from './ChakraScene';
@@ -24,6 +25,9 @@ import { CompatibilityMatrix } from './CompatibilityMatrix';
 import { SoulBlueprintAura } from './SoulBlueprintAura';
 import { CelestialDNASection } from './CelestialDNASection';
 import { NeuralBrainSection } from './NeuralBrainSection';
+import { CosmicCodex } from './CosmicCodex';
+import { AIEvolutionStream } from './AIEvolutionStream';
+import { ObsidianReleaseIntegration } from './ObsidianReleaseIntegration';
 import { AngelNumbersSection } from './AngelNumbersSection';
 import { GematriaCalculatorSection } from './GematriaCalculatorSection';
 import { VortexSequencingSection } from './VortexSequencingSection';
@@ -39,6 +43,10 @@ import BirthChartGuide from './BirthChartGuide';
 import { SandboxSection } from './sandbox/SandboxSection';
 import { VoiceCommander } from './VoiceCommander';
 import { TetragrammatonHUD } from './TetragrammatonHUD';
+import { soundEngine } from '../lib/soundEffects';
+
+import { QuantumEvolutionSection } from './QuantumEvolutionSection';
+import { ObsidianVaultSection } from './ObsidianVaultSection';
 
 /**
  * Interface for DashboardProps
@@ -72,6 +80,7 @@ const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedI
   const [activeSettingsTab, setActiveSettingsTab] = useState<'identity' | 'style' | 'vault'>('identity');
   const [vaultSearch, setVaultSearch] = useState('');
   const [vaultCategory, setVaultCategory] = useState('All');
+  const [isAIAssisting, setIsAIAssisting] = useState(false);
   
   const [displayName, setDisplayName] = useState(profileConfig?.displayName || '');
   const [bioText, setBioText] = useState(profileConfig?.bio?.text || '');
@@ -94,6 +103,42 @@ const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedI
   }, [profileConfig]);
 
   if (!isOpen) return null;
+
+  const handleAIStylist = async () => {
+    setIsAIAssisting(true);
+    soundEngine.scan();
+    try {
+      const prompt = `Based on my current cosmic identity (Name: ${displayName}, Bio: ${bioText}), suggest a more profound, 2-sentence bio and a hex color code that reflects my soul frequency. Respond in JSON format: { "bio": "...", "color": "#HEX" }`;
+      const response = await fetchCosmicChatResponse(prompt, [], null);
+      let text = response.text || "";
+      // Strip potential markdown
+      text = text.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(text);
+      if (parsed.bio) setBioText(parsed.bio);
+      if (parsed.color) setPrimaryColor(parsed.color);
+      soundEngine.neuralClick();
+    } catch (e) {
+      console.error("AI Stylist failed:", e);
+    } finally {
+      setIsAIAssisting(false);
+    }
+  };
+
+  const AVATAR_PRESETS = [
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200&h=200',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200&h=200',
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200',
+    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200&h=200',
+    'https://images.unsplash.com/photo-1531123897727-8f129e16fd3c?auto=format&fit=crop&q=80&w=200&h=200'
+  ];
+
+  const BANNER_PRESETS = [
+    'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&q=80&w=1200&h=400',
+    'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?auto=format&fit=crop&q=80&w=1200&h=400',
+    'https://images.unsplash.com/photo-1506318137071-a8e063b4bcc0?auto=format&fit=crop&q=80&w=1200&h=400',
+    'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&q=80&w=1200&h=400',
+    'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?auto=format&fit=crop&q=80&w=1200&h=400'
+  ];
 
   const handleSave = () => {
     if (!profileConfig) return;
@@ -171,7 +216,8 @@ const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedI
           ].map(tab => (
             <button 
               key={tab.id}
-              onClick={() => setActiveSettingsTab(tab.id as any)}
+              onClick={() => { soundEngine.mechClick(); setActiveSettingsTab(tab.id as any); }}
+              onMouseEnter={() => soundEngine.mechHover()}
               className={`flex items-center gap-2 px-6 py-4 text-xs uppercase tracking-[0.2em] transition-all border-b-2 ${activeSettingsTab === tab.id ? 'border-purple-500 text-white' : 'border-transparent text-stone-500 hover:text-stone-300'}`}
             >
               <tab.icon size={16} className={activeSettingsTab === tab.id ? 'text-purple-400' : ''} />
@@ -197,25 +243,44 @@ const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedI
                      />
                      <p className="text-[10px] text-stone-600 italic">This name identifies your node in the global astral collective.</p>
                    </div>
-                   <div className="space-y-4">
-                     <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">Avatar Transporter</label>
-                     <div className="flex gap-2">
-                       <input 
-                         type="text" 
-                         value={avatarUrl} 
-                         onChange={e => setAvatarUrl(e.target.value)}
-                         className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-stone-300 focus:outline-none focus:border-purple-500/50 transition-all font-light text-sm"
-                         placeholder="Image URL (square preferred)"
-                       />
-                       <button className="bg-white/5 border border-white/10 p-3 rounded-2xl text-stone-400 hover:text-white transition-colors">
-                         <Upload size={18} />
-                       </button>
-                     </div>
-                   </div>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">Avatar Transporter</label>
+                        <div className="flex gap-1">
+                          {AVATAR_PRESETS.map((url, i) => (
+                            <button key={i} onClick={() => setAvatarUrl(url)} className="w-6 h-6 rounded-lg overflow-hidden border border-white/10 hover:border-purple-500 transition-colors">
+                              <img src={url} className="w-full h-full object-cover" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          value={avatarUrl} 
+                          onChange={e => setAvatarUrl(e.target.value)}
+                          className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-stone-300 focus:outline-none focus:border-purple-500/50 transition-all font-light text-sm"
+                          placeholder="Image URL (square preferred)"
+                        />
+                        <button className="bg-white/5 border border-white/10 p-3 rounded-2xl text-stone-400 hover:text-white transition-colors">
+                          <Upload size={18} />
+                        </button>
+                      </div>
+                    </div>
                 </div>
 
                 <div className="space-y-4">
-                  <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">Incarnation Biography</label>
+                  <div className="flex justify-between items-center">
+                    <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">Incarnation Biography</label>
+                    <button 
+                      onClick={handleAIStylist}
+                      disabled={isAIAssisting}
+                      className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-purple-400 hover:text-purple-300 transition-colors disabled:opacity-50"
+                    >
+                      <Sparkles className={`w-3 h-3 ${isAIAssisting ? 'animate-spin' : ''}`} />
+                      AI Scribe
+                    </button>
+                  </div>
                   <textarea 
                     value={bioText} 
                     onChange={e => setBioText(e.target.value)}
@@ -233,7 +298,16 @@ const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedI
             {activeSettingsTab === 'style' && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
                 <div className="space-y-4">
-                  <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">Atmospheric Resonance (Header)</label>
+                  <div className="flex justify-between items-center">
+                    <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">Atmospheric Resonance (Header)</label>
+                    <div className="flex gap-1">
+                      {BANNER_PRESETS.map((url, i) => (
+                        <button key={i} onClick={() => setBannerUrl(url)} className="w-8 h-6 rounded-md overflow-hidden border border-white/10 hover:border-purple-500 transition-colors">
+                          <img src={url} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <div className="flex gap-2">
                     <input 
                       type="text" 
@@ -549,7 +623,7 @@ const SoulBlueprintTab = ({ data, ResearchBox, isReading, handleReadOutLoud, han
   
   return (
     <div className="absolute inset-0 -mx-6 -my-6 overflow-hidden rounded-3xl group bg-black/40">
-      <SoulBlueprintAura />
+      <SoulBlueprintAura data={data} />
       {/* HUD overlays */}
       <div className="absolute top-8 left-4 right-4 md:left-8 md:right-8 flex flex-col gap-4 z-20 pointer-events-none">
         
@@ -818,7 +892,8 @@ const ResearchBox = ({ title, content, children, className = "", category = "Mis
     <div className={`group relative bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-white/20 transition-all ${className}`}>
       <div className="flex justify-end gap-2 mb-2 z-30 relative opacity-40 group-hover:opacity-100 transition-opacity pointer-events-auto">
         <button 
-          onClick={() => handleReadOutLoud(typeof content === 'string' ? content : JSON.stringify(content))}
+          onClick={() => { soundEngine.click(); handleReadOutLoud(typeof content === 'string' ? content : JSON.stringify(content)); }}
+          onMouseEnter={() => soundEngine.hover()}
           className={`px-3 py-2 rounded-lg transition-all border border-white/10 shadow-lg flex items-center gap-2 text-[9px] uppercase tracking-widest font-bold ${isReading ? 'bg-purple-600 text-white animate-pulse' : 'bg-stone-800/80 text-stone-300 hover:bg-stone-700 hover:text-white'}`}
           title="Listen"
         >
@@ -826,21 +901,24 @@ const ResearchBox = ({ title, content, children, className = "", category = "Mis
           {isReading ? 'Reading...' : 'Listen'}
         </button>
         <button 
-          onClick={() => handleSaveToVault(title, typeof content === 'string' ? content : JSON.stringify(content), category)}
+          onClick={() => { soundEngine.select(); handleSaveToVault(title, typeof content === 'string' ? content : JSON.stringify(content), category); }}
+          onMouseEnter={() => soundEngine.hover()}
           className="bg-stone-800/80 hover:bg-emerald-700 p-2 rounded-lg text-stone-300 hover:text-white transition-all border border-white/10 shadow-lg"
           title="Save to Vault"
         >
           <Bookmark className="w-3 h-3" />
         </button>
         <button 
-          onClick={() => saveToChat(title, typeof content === 'string' ? content : JSON.stringify(content), category)}
+          onClick={() => { soundEngine.hover(); saveToChat(title, typeof content === 'string' ? content : JSON.stringify(content), category); }}
+          onMouseEnter={() => soundEngine.hover()}
           className="bg-stone-800/80 hover:bg-purple-600 p-2 rounded-lg text-stone-300 hover:text-white transition-all border border-white/10 shadow-lg"
           title="Save to Higher Mind Chat"
         >
           <MessageCircle size={12} />
         </button>
         <button 
-          onClick={() => handleGeneralDeepDive(title, typeof content === 'string' ? content : JSON.stringify(content))}
+          onClick={() => { soundEngine.open(); handleGeneralDeepDive(title, typeof content === 'string' ? content : JSON.stringify(content)); }}
+          onMouseEnter={() => soundEngine.hover()}
           className="bg-stone-800/80 hover:bg-stone-700 p-2 rounded-lg text-stone-300 hover:text-white flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold border border-white/10 shadow-lg"
         >
           <Search className="w-3 h-3" />
@@ -873,7 +951,8 @@ const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handl
         className="bg-stone-900 border border-white/20 p-8 rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl relative scrollbar-thin scrollbar-thumb-white/20"
       >
         <button 
-          onClick={() => setDeepDiveData(null)} 
+          onClick={() => { soundEngine.close(); setDeepDiveData(null); }}
+          onMouseEnter={() => soundEngine.hover()}
           className="absolute top-6 right-6 text-stone-400 hover:text-white bg-white/5 p-2 rounded-full border border-white/10 transition-colors"
         >
           <X size={20} />
@@ -1343,7 +1422,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             </h2>
             <p className="text-stone-300 text-sm mb-8 leading-relaxed">Enter your birth details to generate your immersive cosmic consciousness chart, integrating astrology, numerology, and mathematically generated visual alignments.</p>
             
-            <form onSubmit={(e) => { e.preventDefault(); onGenerate(name, date, time, location); }} className="space-y-4">
+            <form onSubmit={(e) => { 
+  e.preventDefault(); 
+  soundEngine.scan();
+  onGenerate(name, date, time, location); 
+}} className="space-y-4">
               <div>
                 <label className="block text-xs uppercase tracking-widest text-stone-400 mb-1">Entity Name</label>
                 <input required type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-light" placeholder="e.g. John Doe" />
@@ -1390,35 +1473,38 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Minimize2 className="w-4 h-4" />
             </button>
             <div className="flex border-b border-white/10 p-2 gap-2 overflow-x-auto no-scrollbar pr-14">
-              <Tab active={activeTab === 'identity'} onClick={() => setActiveTab('identity')} icon={<UserIcon className="w-4 h-4"/>}>My Identity</Tab>
-              <Tab active={activeTab === 'torus'} onClick={() => setActiveTab('torus')} icon={<Activity className="w-4 h-4"/>}>Soul Blueprint</Tab>
-              <Tab active={activeTab === 'soul_path'} onClick={() => setActiveTab('soul_path')} icon={<Compass className="w-4 h-4"/>}>Soul Path</Tab>
-              <Tab active={activeTab === 'brain'} onClick={() => setActiveTab('brain')} icon={<Brain className="w-4 h-4"/>}>Neural Core</Tab>
-              <Tab active={activeTab === 'planets'} onClick={() => setActiveTab('planets')} icon={<Moon className="w-4 h-4"/>}>Astrology</Tab>
-              <Tab active={activeTab === 'celestial_dna'} onClick={() => setActiveTab('celestial_dna')} icon={<Hexagon className="w-4 h-4"/>}>Celestial DNA</Tab>
-              <Tab active={activeTab === 'houses'} onClick={() => setActiveTab('houses')} icon={<Globe className="w-4 h-4"/>}>Houses</Tab>
-              <Tab active={activeTab === 'numbers'} onClick={() => setActiveTab('numbers')} icon={<Fingerprint className="w-4 h-4"/>}>Numerology</Tab>
-              <Tab active={activeTab === 'kabbalah'} onClick={() => setActiveTab('kabbalah')} icon={<Hexagon className="w-4 h-4"/>}>Mysticism</Tab>
-              <Tab active={activeTab === 'kabbalistic_numerology'} onClick={() => setActiveTab('kabbalistic_numerology')} icon={<Network className="w-4 h-4"/>}>Kabbalistic Numerology</Tab>
-              <Tab active={activeTab === 'chakras'} onClick={() => setActiveTab('chakras')} icon={<Activity className="w-4 h-4"/>}>Pranic Energy</Tab>
-              <Tab active={activeTab === 'compatibility'} onClick={() => setActiveTab('compatibility')} icon={<Heart className="w-4 h-4"/>}>Compatibility</Tab>
-              <Tab active={activeTab === 'cycles'} onClick={() => setActiveTab('cycles')} icon={<Star className="w-4 h-4"/>}>Cycles</Tab>
-              <Tab active={activeTab === 'daily'} onClick={() => setActiveTab('daily')} icon={<Sun className="w-4 h-4"/>}>Forecasts</Tab>
-              <Tab active={activeTab === 'synthesis'} onClick={() => setActiveTab('synthesis')} icon={<Network className="w-4 h-4"/>}>Synthesis</Tab>
-              <Tab active={activeTab === 'strategy'} onClick={() => setActiveTab('strategy')} icon={<Compass className="w-4 h-4"/>}>Life Strategy</Tab>
-              <Tab active={activeTab === 'timeline'} onClick={() => setActiveTab('timeline')} icon={<Activity className="w-4 h-4"/>}>Timeline</Tab>
-              <Tab active={activeTab === 'name'} onClick={() => setActiveTab('name')} icon={<Type className="w-4 h-4"/>}>Name Analysis</Tab>
-              <Tab active={activeTab === 'akashic'} onClick={() => setActiveTab('akashic')} icon={<BookOpen className="w-4 h-4"/>}>Akashic Records</Tab>
-              <Tab active={activeTab === 'patterns'} onClick={() => setActiveTab('patterns')} icon={<Fingerprint className="w-4 h-4"/>}>Synchronicities</Tab>
-              <Tab active={activeTab === 'angel_numbers'} onClick={() => setActiveTab('angel_numbers')} icon={<Sparkles className="w-4 h-4"/>}>Angel Numbers</Tab>
-              <Tab active={activeTab === 'vortex'} onClick={() => setActiveTab('vortex')} icon={<CirclePlay className="w-4 h-4 text-cyan-400"/>}>Vortex Sequencing</Tab>
-              <Tab active={activeTab === 'gematria_calc'} onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
-              <Tab active={activeTab === 'golden_ratio'} onClick={() => setActiveTab('golden_ratio')} icon={<Grid className="w-4 h-4 text-amber-500" />}>Kathara Grid</Tab>
-              <Tab active={activeTab === 'sky_map'} onClick={() => setActiveTab('sky_map')} icon={<Compass className="w-4 h-4 text-indigo-400"/>}>Atlas Sky Map</Tab>
-              <Tab active={activeTab === 'tetragrammaton'} onClick={() => setActiveTab('tetragrammaton')} icon={<Hexagon className="w-4 h-4 text-fbbf24"/>}>YHVH HUD</Tab>
-              <Tab active={activeTab === 'sandbox'} onClick={() => setActiveTab('sandbox')} icon={<Box className="w-4 h-4 text-emerald-400"/>}>Creative Sandbox</Tab>
-              <Tab active={activeTab === 'findings'} onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
-              <Tab active={activeTab === 'harmonics'} onClick={() => setActiveTab('harmonics')} icon={<BarChart2 className="w-4 h-4"/>}>Harmonics</Tab>
+              <Tab active={activeTab === 'identity'} tabId="identity" onClick={() => setActiveTab('identity')} icon={<UserIcon className="w-4 h-4"/>}>My Identity</Tab>
+              <Tab active={activeTab === 'torus'} tabId="torus" onClick={() => setActiveTab('torus')} icon={<Activity className="w-4 h-4"/>}>Soul Blueprint</Tab>
+              <Tab active={activeTab === 'soul_path'} tabId="soul_path" onClick={() => setActiveTab('soul_path')} icon={<Compass className="w-4 h-4"/>}>Soul Path</Tab>
+              <Tab active={activeTab === 'brain'} tabId="brain" onClick={() => setActiveTab('brain')} icon={<Brain className="w-4 h-4"/>}>Neural Core</Tab>
+              <Tab active={activeTab === 'planets'} tabId="planets" onClick={() => setActiveTab('planets')} icon={<Moon className="w-4 h-4"/>}>Astrology</Tab>
+              <Tab active={activeTab === 'celestial_dna'} tabId="celestial_dna" onClick={() => setActiveTab('celestial_dna')} icon={<Hexagon className="w-4 h-4"/>}>Celestial DNA</Tab>
+              <Tab active={activeTab === 'numbers'} tabId="numbers" onClick={() => setActiveTab('numbers')} icon={<Fingerprint className="w-4 h-4"/>}>Numerology</Tab>
+              <Tab active={activeTab === 'kabbalah'} tabId="kabbalah" onClick={() => setActiveTab('kabbalah')} icon={<Hexagon className="w-4 h-4"/>}>Mysticism</Tab>
+              <Tab active={activeTab === 'kabbalistic_numerology'} tabId="kabbalistic_numerology" onClick={() => setActiveTab('kabbalistic_numerology')} icon={<Network className="w-4 h-4"/>}>Kabbalistic Numerology</Tab>
+              <Tab active={activeTab === 'chakras'} tabId="chakras" onClick={() => setActiveTab('chakras')} icon={<Activity className="w-4 h-4"/>}>Pranic Energy</Tab>
+              <Tab active={activeTab === 'compatibility'} tabId="compatibility" onClick={() => setActiveTab('compatibility')} icon={<Heart className="w-4 h-4"/>}>Compatibility</Tab>
+              <Tab active={activeTab === 'cycles'} tabId="cycles" onClick={() => setActiveTab('cycles')} icon={<Star className="w-4 h-4"/>}>Cycles</Tab>
+              <Tab active={activeTab === 'daily'} tabId="daily" onClick={() => setActiveTab('daily')} icon={<Sun className="w-4 h-4"/>}>Forecasts</Tab>
+              <Tab active={activeTab === 'synthesis'} tabId="synthesis" onClick={() => setActiveTab('synthesis')} icon={<Network className="w-4 h-4"/>}>Synthesis</Tab>
+              <Tab active={activeTab === 'strategy'} tabId="strategy" onClick={() => setActiveTab('strategy')} icon={<Compass className="w-4 h-4"/>}>Life Strategy</Tab>
+              <Tab active={activeTab === 'timeline'} tabId="timeline" onClick={() => setActiveTab('timeline')} icon={<Activity className="w-4 h-4"/>}>Timeline</Tab>
+              <Tab active={activeTab === 'name'} tabId="name" onClick={() => setActiveTab('name')} icon={<Type className="w-4 h-4"/>}>Name Analysis</Tab>
+              <Tab active={activeTab === 'akashic'} tabId="akashic" onClick={() => setActiveTab('akashic')} icon={<BookOpen className="w-4 h-4"/>}>Akashic Records</Tab>
+              <Tab active={activeTab === 'patterns'} tabId="patterns" onClick={() => setActiveTab('patterns')} icon={<Fingerprint className="w-4 h-4"/>}>Synchronicities</Tab>
+              <Tab active={activeTab === 'angel_numbers'} tabId="angel_numbers" onClick={() => setActiveTab('angel_numbers')} icon={<Sparkles className="w-4 h-4"/>}>Angel Numbers</Tab>
+              <Tab active={activeTab === 'vortex'} tabId="vortex" onClick={() => setActiveTab('vortex')} icon={<CirclePlay className="w-4 h-4 text-cyan-400"/>}>Vortex Sequencing</Tab>
+              <Tab active={activeTab === 'gematria_calc'} tabId="gematria_calc" onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
+              <Tab active={activeTab === 'golden_ratio'} tabId="golden_ratio" onClick={() => setActiveTab('golden_ratio')} icon={<Grid className="w-4 h-4 text-amber-500" />}>Kathara Grid</Tab>
+              <Tab active={activeTab === 'sky_map'} tabId="sky_map" onClick={() => setActiveTab('sky_map')} icon={<Compass className="w-4 h-4 text-indigo-400"/>}>Atlas Sky Map</Tab>
+              <Tab active={activeTab === 'obsidian'} tabId="obsidian" onClick={() => setActiveTab('obsidian')} icon={<BookOpen className="w-4 h-4 text-purple-400"/>}>Akashic Vault</Tab>
+              <Tab active={activeTab === 'codex'} tabId="codex" onClick={() => setActiveTab('codex')} icon={<Search className="w-4 h-4 text-emerald-400"/>}>Cosmic Codex</Tab>
+              <Tab active={activeTab === 'evolution'} tabId="evolution" onClick={() => setActiveTab('evolution')} icon={<Cpu className="w-4 h-4 text-blue-500"/>}>Quantum Evolution</Tab>
+              <Tab active={activeTab === 'nexus'} tabId="nexus" onClick={() => setActiveTab('nexus')} icon={<Network className="w-4 h-4 text-fuchsia-400"/>}>Dev Nexus</Tab>
+              <Tab active={activeTab === 'tetragrammaton'} tabId="tetragrammaton" onClick={() => setActiveTab('tetragrammaton')} icon={<Hexagon className="w-4 h-4 text-fbbf24"/>}>YHVH HUD</Tab>
+              <Tab active={activeTab === 'sandbox'} tabId="sandbox" onClick={() => setActiveTab('sandbox')} icon={<Box className="w-4 h-4 text-emerald-400"/>}>Creative Sandbox</Tab>
+              <Tab active={activeTab === 'findings'} tabId="findings" onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
+              <Tab active={activeTab === 'harmonics'} tabId="harmonics" onClick={() => setActiveTab('harmonics')} icon={<BarChart2 className="w-4 h-4"/>}>Harmonics</Tab>
             </div>
             
             <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/20">
@@ -2030,44 +2116,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     )}
                   </motion.div>
                 )}
-                {activeTab === 'houses' && (
-                  <motion.div key="houses" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
-                    {!data.houses ? (
-                      <div className="bg-white/5 p-10 rounded-3xl border border-white/10 text-center space-y-4">
-                        <Globe className="w-16 h-16 text-indigo-400 mx-auto opacity-30" />
-                        <h3 className="text-xl text-white font-light tracking-widest uppercase">Realms Uncharted</h3>
-                        <p className="text-sm text-stone-400 max-w-sm mx-auto leading-relaxed italic">
-                          "The 12 astrological houses that structure your earthly existence await their final mapping."
-                        </p>
-                        <p className="text-xs text-stone-500 max-w-xs mx-auto">Re-initialize your data to generate the detailed descriptions for all 12 realms of life.</p>
-                        <button 
-                          onClick={() => loadedInputs ? onGenerate(loadedInputs.name, loadedInputs.date, loadedInputs.time, loadedInputs.location) : window.location.reload()}
-                          className="mt-6 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-full text-xs font-bold tracking-widest uppercase transition-all shadow-lg shadow-indigo-900/50"
-                        >
-                          Map the 12 Realms
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                          <Globe className="w-5 h-5 text-indigo-400" />
-                          <h3 className="text-xl font-light text-white">The 12 Realms</h3>
-                        </div>
-                        <div className="grid grid-cols-1 gap-4">
-                          {data.houses.map((house) => (
-                             <BoundResearchBox key={house.houseNumber} title={`Astrological House ${house.houseNumber}: ${house.realmName}`} content={house.description}>
-                               <div className="flex justify-between items-center mb-2">
-                                 <h4 className="text-sm font-medium text-indigo-300">House {house.houseNumber}</h4>
-                                 <span className="text-xs uppercase tracking-widest text-indigo-400 font-light">{house.realmName}</span>
-                               </div>
-                               <p className="text-xs font-light leading-relaxed text-stone-300">{house.description}</p>
-                             </BoundResearchBox>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </motion.div>
-                )}
+
                 {activeTab === 'daily' && (
                   <motion.div key="daily" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     {!data.dailyInsight ? (
@@ -2187,79 +2236,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 
                 {activeTab === 'planets' && (
                   <motion.div key="planets" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                      <div className="p-5 bg-gradient-to-br from-purple-900/30 to-indigo-900/30 rounded-3xl border border-purple-500/30 shadow-xl overflow-hidden relative group">
-                        <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                          <Zap className="w-24 h-24 text-amber-400" />
-                        </div>
-                        <h4 className="text-[10px] uppercase tracking-widest text-purple-400 mb-1">Dominant Force</h4>
-                        <div className="flex items-end gap-2 mb-2">
-                           <span className="text-2xl font-light text-white">{data.planets?.[0]?.name || 'N/A'}</span>
-                           <span className="text-xs text-purple-300 pb-1 italic">in {data.planets?.[0]?.sign || 'N/A'}</span>
-                        </div>
-                        <p className="text-[10px] text-stone-400 leading-relaxed italic">The most resonant celestial frequency in your natal matrix.</p>
-                      </div>
-
-                      <div className="p-5 bg-gradient-to-br from-emerald-900/30 to-teal-900/30 rounded-3xl border border-emerald-500/30 shadow-xl overflow-hidden relative group">
-                        <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                          <Globe className="w-24 h-24 text-emerald-400" />
-                        </div>
-                        <h4 className="text-[10px] uppercase tracking-widest text-emerald-400 mb-1">Elemental Signature</h4>
-                        <div className="flex items-end gap-2 mb-2">
-                           <span className="text-2xl font-light text-white">
-                             {(() => {
-                               const counts: any = { Fire: 0, Earth: 0, Air: 0, Water: 0 };
-                               data.planets?.forEach(p => {
-                                 if (['Aries', 'Leo', 'Sagittarius'].includes(p.sign)) counts.Fire++;
-                                 else if (['Taurus', 'Virgo', 'Capricorn'].includes(p.sign)) counts.Earth++;
-                                 else if (['Gemini', 'Libra', 'Aquarius'].includes(p.sign)) counts.Air++;
-                                 else if (['Cancer', 'Scorpio', 'Pisces'].includes(p.sign)) counts.Water++;
-                               });
-                               return Object.entries(counts).reduce((a, b) => a[1] > b[1] ? a : b)[0];
-                             })()}
-                           </span>
-                           <span className="text-xs text-emerald-300 pb-1 italic">Dominance</span>
-                        </div>
-                        <p className="text-[10px] text-stone-400 leading-relaxed italic">Your soul's primary elemental resonance in this incarnation.</p>
-                      </div>
-                    </div>
-
-                    <div className="mb-8 p-6 bg-white/5 rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden relative group">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                         <BarChart2 className="w-24 h-24 text-purple-500" />
-                      </div>
-                      <div className="relative z-10">
-                        <h3 className="text-xl font-light text-white mb-2 flex items-center gap-2">
-                          <BarChart2 className="w-5 h-5 text-purple-400" />
-                          Planetary Power Distribution
-                        </h3>
-                        <p className="text-xs text-stone-400 mb-6 font-light">Calculated based on house placement and elemental dignity.</p>
-                        <AstrologyCharts planets={data.planets} />
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-stone-400 mb-4 italic text-center">Click any planetary body to explore its deep meaning and Tree of Life connection.</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-                      {data.planets.map(p => (
-                        <BoundResearchBox key={p.name} title={`Planetary Influence: ${p.name}`} content={p.meaning} className="bg-transparent p-0 border-0 hover:border-0">
-                          <CelestialDetailBox 
-                            name={p.name} 
-                            data={p} 
-                            themeColor={themeColor} 
-                            onResearch={() => handleGeneralDeepDive(`Planetary Influence: ${p.name}`, p.meaning)} 
-                          />
-                        </BoundResearchBox>
-                      ))}
-                    </div>
-                    <h3 className="text-sm uppercase tracking-widest text-stone-400 mb-3 text-center">Nodes & Points</h3>
-                    <div className="grid grid-cols-1 gap-3">
-                       <BoundResearchBox title="North Node Deep Dive" content={data.nodes.north.meaning} className="p-0 border-0"><CelestialDetailBox name="North Node" data={data.nodes.north} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("North Node", data.nodes.north.meaning)} /></BoundResearchBox>
-                       <BoundResearchBox title="South Node Deep Dive" content={data.nodes.south.meaning} className="p-0 border-0"><CelestialDetailBox name="South Node" data={data.nodes.south} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("South Node", data.nodes.south.meaning)} /></BoundResearchBox>
-                       <BoundResearchBox title="Vertex Connection" content={data.points.vertex.meaning} className="p-0 border-0"><CelestialDetailBox name="Vertex" data={data.points.vertex} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Vertex", data.points.vertex.meaning)} /></BoundResearchBox>
-                       <BoundResearchBox title="Part of Fortune Analysis" content={data.points.partOfFortune.meaning} className="p-0 border-0"><CelestialDetailBox name="Part of Fortune" data={data.points.partOfFortune} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Part of Fortune", data.points.partOfFortune.meaning)} /></BoundResearchBox>
-                       <BoundResearchBox title="Chiron Healing Research" content={data.points.chiron.meaning} className="p-0 border-0"><CelestialDetailBox name="Chiron" data={data.points.chiron} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Chiron", data.points.chiron.meaning)} /></BoundResearchBox>
-                       <BoundResearchBox title="Black Moon Lilith Shadow" content={data.points.blackMoonLilith.meaning} className="p-0 border-0"><CelestialDetailBox name="Lilith" data={data.points.blackMoonLilith} themeColor={themeColor} onResearch={() => handleGeneralDeepDive("Lilith", data.points.blackMoonLilith.meaning)} /></BoundResearchBox>
-                    </div>
+                    <AstrologyDashboard data={data} onDeepDive={(title, content) => handleGeneralDeepDive(title, content)} />
                   </motion.div>
                 )}
 
@@ -2568,6 +2545,26 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <SandboxSection />
                   </motion.div>
                 )}
+                {activeTab === 'obsidian' && (
+                  <motion.div key="obsidian" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
+                    <ObsidianVaultSection />
+                  </motion.div>
+                )}
+                {activeTab === 'codex' && (
+                  <motion.div key="codex" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
+                    <CosmicCodex />
+                  </motion.div>
+                )}
+                {activeTab === 'evolution' && (
+                  <motion.div key="evolution" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
+                    <AIEvolutionStream />
+                  </motion.div>
+                )}
+                {activeTab === 'nexus' && (
+                  <motion.div key="nexus" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
+                    <ObsidianReleaseIntegration />
+                  </motion.div>
+                )}
                 {activeTab === 'tetragrammaton' && (
                   <motion.div key="tetragrammaton" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
                     <TetragrammatonHUD activeTab={activeTab} data={data} />
@@ -2599,9 +2596,63 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
   );
 };
 
-const Tab = ({ active, children, onClick, icon }: any) => (
+const playTabHoverSound = (tabId?: string) => {
+  switch (tabId) {
+    case 'planets':
+    case 'sky_map':
+    case 'torus':
+      soundEngine.astrologyHover(); break;
+    case 'numbers':
+    case 'gematria_calc':
+    case 'angel_numbers':
+      soundEngine.numerologyHover(); break;
+    case 'kabbalah':
+    case 'tetragrammaton':
+    case 'kabbalistic_numerology':
+      soundEngine.mysticHover(); break;
+    case 'brain':
+    case 'vortex':
+      soundEngine.neuralHover(); break;
+    case 'sandbox':
+    case 'robotics':
+      soundEngine.mechHover(); break;
+    default:
+      soundEngine.hover();
+  }
+};
+
+const playTabClickSound = (tabId?: string) => {
+  switch (tabId) {
+    case 'planets':
+    case 'sky_map':
+    case 'torus':
+      soundEngine.astrologyClick(); break;
+    case 'numbers':
+    case 'gematria_calc':
+    case 'angel_numbers':
+      soundEngine.numerologyClick(); break;
+    case 'kabbalah':
+    case 'tetragrammaton':
+    case 'kabbalistic_numerology':
+      soundEngine.mysticClick(); break;
+    case 'brain':
+    case 'vortex':
+      soundEngine.neuralClick(); break;
+    case 'sandbox':
+    case 'robotics':
+      soundEngine.mechClick(); break;
+    default:
+      soundEngine.select();
+  }
+};
+
+const Tab = ({ active, children, onClick, icon, tabId }: any) => (
   <button 
-    onClick={onClick}
+    onClick={() => {
+      playTabClickSound(tabId);
+      onClick();
+    }}
+    onMouseEnter={() => playTabHoverSound(tabId)}
     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium uppercase tracking-wider transition-all whitespace-nowrap ${active ? 'bg-white/10 text-white shadow-sm border border-white/10' : 'text-stone-400 hover:bg-white/5 hover:text-stone-200'}`}
   >
     {icon} {children}

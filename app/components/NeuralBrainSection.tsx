@@ -6,7 +6,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Brain as BrainIcon, Activity, Zap, Waves, Network, Lock, Sliders, Search, Eye, ArrowLeft, Code, Minimize2, Power, Palette, Fingerprint, Terminal, Box } from 'lucide-react';
 import { TerminalOverlay } from './profile/TerminalOverlay';
 
-// Brain Point Cloud Component with Shader Optimization
+// Import sound engine
+import { soundEngine } from '../lib/soundEffects';
+
 const NeuralParticlesShader = {
     uniforms: {
         uTime: { value: 0 },
@@ -487,6 +489,52 @@ export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?:
                 </div>
             </div>
 
+            {/* Quality of Life Controls Overlay */}
+            <div className="absolute top-6 right-6 z-20 flex flex-col gap-3 pointer-events-auto w-64">
+                <div className="bg-black/60 backdrop-blur-xl border border-white/10 p-4 rounded-3xl shadow-2xl">
+                    <h3 className="text-xs text-white uppercase tracking-[0.2em] font-bold mb-4 flex items-center gap-2">
+                        <Sliders size={14} className="text-purple-400" /> QoL Overrides
+                    </h3>
+                    <div className="flex flex-col gap-2">
+                        <QoLToggle 
+                            icon={<Zap />} 
+                            label="Overdrive Mode" 
+                            active={overdrive} 
+                            onClick={() => setOverdrive(!overdrive)} 
+                            color="#ef4444"
+                        />
+                        <QoLToggle 
+                            icon={<Sliders />} 
+                            label="Schema Refinement" 
+                            active={schemaRefine} 
+                            onClick={() => setSchemaRefine(!schemaRefine)} 
+                            color="#3b82f6"
+                        />
+                        <QoLToggle 
+                            icon={<Waves />} 
+                            label="Emotive Synthesis" 
+                            active={emotiveSynth} 
+                            onClick={() => setEmotiveSynth(!emotiveSynth)} 
+                            color="#fb7185"
+                        />
+                        <QoLToggle 
+                            icon={<Search />} 
+                            label="Indexing Mode" 
+                            active={indexingMode} 
+                            onClick={() => setIndexingMode(!indexingMode)} 
+                            color="#f59e0b"
+                        />
+                        <QoLToggle 
+                            icon={<Network />} 
+                            label="Collective Link" 
+                            active={collectiveLink} 
+                            onClick={() => setCollectiveLink(!collectiveLink)} 
+                            color="#a855f7"
+                        />
+                    </div>
+                </div>
+            </div>
+
             {/* Node Info Overlay */}
             <AnimatePresence>
                 {hoveredNode && (
@@ -508,23 +556,7 @@ export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?:
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-5xl bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 z-30 space-y-6">
                 
                 {/* Advanced Core Toggles Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    <ToggleSwitch 
-                        icon={<Zap />} 
-                        label="Database Index" 
-                        active={indexingMode} 
-                        onClick={() => setIndexingMode(!indexingMode)} 
-                        subLabel="Vector Search"
-                        color="#f59e0b"
-                    />
-                    <ToggleSwitch 
-                        icon={<Sliders />} 
-                        label="Info Refine" 
-                        active={schemaRefine} 
-                        onClick={() => setSchemaRefine(!schemaRefine)} 
-                        subLabel="Synaptic Snapping"
-                        color="#3b82f6"
-                    />
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                     <ToggleSwitch 
                         icon={<Code />} 
                         label="Script Injection" 
@@ -540,14 +572,6 @@ export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?:
                         onClick={() => setVisMode(prev => prev === 'solid' ? 'ghost' : 'solid')} 
                         subLabel={visMode === 'solid' ? 'Solid' : 'Ghost'}
                         color="#ec4899"
-                    />
-                    <ToggleSwitch 
-                        icon={<Zap />} 
-                        label="Overdrive" 
-                        active={overdrive} 
-                        onClick={() => setOverdrive(!overdrive)} 
-                        subLabel="6.2GHz Active"
-                        color="#ef4444"
                     />
                     <ToggleSwitch 
                         icon={<Fingerprint />} 
@@ -566,28 +590,12 @@ export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?:
                         color="#6366f1"
                     />
                     <ToggleSwitch 
-                        icon={<Network />} 
-                        label="Collective" 
-                        active={collectiveLink} 
-                        onClick={() => setCollectiveLink(!collectiveLink)} 
-                        subLabel="Hive Mind"
-                        color="#a855f7"
-                    />
-                    <ToggleSwitch 
                         icon={<Minimize2 />} 
                         label="Compression" 
                         active={compression} 
                         onClick={() => setCompression(!compression)} 
                         subLabel="Memory Pack"
                         color="#f43f5e"
-                    />
-                    <ToggleSwitch 
-                        icon={<Waves />} 
-                        label="Emotive Synth" 
-                        active={emotiveSynth} 
-                        onClick={() => setEmotiveSynth(!emotiveSynth)} 
-                        subLabel="Freq: 432Hz"
-                        color="#fb7185"
                     />
                     <ToggleSwitch 
                         icon={<Lock />} 
@@ -648,25 +656,72 @@ export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?:
 const ToggleSwitch = ({ icon, label, active, onClick, subLabel, color }: any) => {
     return (
         <button 
-            onClick={onClick}
-            className={`group relative flex flex-col items-start p-4 rounded-2xl border transition-all text-left overflow-hidden ${active ? 'bg-white/5 border-white/20' : 'bg-black/20 border-white/5 hover:border-white/10'}`}
+            onClick={(e) => {
+                soundEngine.neuralClick();
+                if (onClick) onClick(e);
+            }}
+            onMouseEnter={() => soundEngine.neuralHover()}
+            className={`group relative flex flex-col items-start p-4 rounded-2xl border transition-all text-left overflow-hidden ${active ? `bg-${color}/10 border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.05)]` : 'bg-black/20 border-white/5 hover:border-white/10'}`}
         >
-            <div className="flex justify-between w-full mb-3">
-                <div className={`p-2 rounded-xl ${active ? 'bg-white/10 text-white' : 'bg-black/40 text-stone-600'}`} style={{ color: active && color ? color : undefined }}>
+            <div className="flex justify-between w-full mb-3 z-10">
+                <div className={`p-2 rounded-xl transition-all ${active ? 'bg-white/10 text-white scale-110 shadow-lg' : 'bg-black/40 text-stone-600'}`} style={{ color: active && color ? color : undefined }}>
                     {React.cloneElement(icon as React.ReactElement, { size: 16 })}
                 </div>
-                <div className={`w-3 h-3 rounded-full ${active ? 'bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.5)]' : 'bg-stone-800'}`}></div>
+                <div className={`w-3 h-3 rounded-full transition-all ${active ? 'bg-green-400 shadow-[0_0_15px_rgba(74,222,128,1)] scale-125' : 'bg-stone-800'}`}></div>
             </div>
-            <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${active ? 'text-white' : 'text-stone-500 group-hover:text-stone-300'}`}>{label}</span>
-            <span className="text-[8px] text-stone-600 uppercase tracking-[0.2em]">{subLabel}</span>
+            <div className="z-10">
+                <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 block transition-colors ${active ? 'text-white' : 'text-stone-500 group-hover:text-stone-300'}`}>{label}</span>
+                <span className={`text-[8px] uppercase tracking-[0.2em] transition-colors ${active ? 'text-white/60' : 'text-stone-600'}`}>{subLabel}</span>
+            </div>
             {active && (
                 <motion.div 
-                    layoutId="active-bg"
-                    className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"
+                    style={{ backgroundColor: `${color}10` }}
+                />
+            )}
+            {active && (
+                <motion.div 
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12"
                 />
             )}
         </button>
     );
 }
 
-// Removing duplicate ToggleSwitch definition
+// Compact QoL Toggle specifically for the overriding panel
+const QoLToggle = ({ icon, label, active, onClick, color }: any) => {
+    return (
+        <button 
+            onClick={(e) => {
+                soundEngine.neuralClick();
+                if (onClick) onClick(e);
+            }}
+            onMouseEnter={() => soundEngine.neuralHover()}
+            className={`group flex items-center justify-between p-3 rounded-2xl border transition-all text-left relative overflow-hidden ${active ? 'bg-white/10 border-white/30 shadow-[0_0_25px_rgba(0,0,0,0.5)]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}
+        >
+            <div className="flex items-center gap-3 z-10">
+                <div className={`p-1.5 rounded-lg transition-all ${active ? 'bg-white/20 text-white scale-110 shadow-[0_0_10px_rgba(255,255,255,0.2)]' : 'bg-black/40 text-stone-500 group-hover:text-stone-400'}`} style={{ color: active && color ? color : undefined }}>
+                    {React.cloneElement(icon as React.ReactElement, { size: 14 })}
+                </div>
+                <div className="flex flex-col">
+                    <span className={`text-[10px] font-bold uppercase tracking-widest leading-none ${active ? 'text-white' : 'text-stone-500 group-hover:text-stone-300'}`}>{label}</span>
+                    {active && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[7px] text-green-400/80 uppercase tracking-widest mt-1">Status: Active</motion.span>}
+                </div>
+            </div>
+            <div className={`w-2.5 h-2.5 rounded-full transition-all z-10 ${active ? 'bg-green-400 shadow-[0_0_12px_rgba(74,222,128,1)] scale-125' : 'bg-stone-800'}`}></div>
+            
+            {active && (
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.1 }}
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ backgroundColor: color }}
+                />
+            )}
+        </button>
+    );
+};

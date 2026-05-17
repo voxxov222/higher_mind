@@ -1,9 +1,10 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { Float, Stars, Center } from '@react-three/drei';
+import { Float, Stars, Center, Html, Line, Points, PointMaterial } from '@react-three/drei';
 import { EffectComposer, Bloom, ChromaticAberration, Vignette } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
+import { CelestialBody } from '../types';
 
 // --------------------------------------------------------
 // SHADERS
@@ -214,33 +215,282 @@ const CosmicVortex = () => {
     )
 }
 
+const PlanetNode = ({ 
+    planet, 
+    index, 
+    total, 
+    onSelect, 
+    isSelected 
+}: { 
+    planet: CelestialBody, 
+    index: number, 
+    total: number, 
+    onSelect: () => void, 
+    isSelected: boolean 
+}) => {
+    const meshRef = useRef<THREE.Mesh>(null!);
+    const angle = (index / total) * Math.PI * 2;
+    const radius = 2.8;
+    const initialPos: [number, number, number] = [
+        Math.cos(angle) * radius,
+        (index % 3) * 0.4 - 0.4,
+        Math.sin(angle) * radius
+    ];
 
-export const SoulBlueprintAura = () => {
+    useFrame((state) => {
+        if (meshRef.current) {
+            meshRef.current.position.y = initialPos[1] + Math.sin(state.clock.getElapsedTime() * 0.8 + index) * 0.15;
+            meshRef.current.rotation.y += 0.02;
+            meshRef.current.rotation.x += 0.01;
+            
+            // Pulse color/scale when selected
+            if (isSelected) {
+                const s = 1.0 + Math.sin(state.clock.getElapsedTime() * 4) * 0.1;
+                meshRef.current.scale.set(s, s, s);
+            } else {
+                meshRef.current.scale.set(1, 1, 1);
+            }
+        }
+    });
+
+    return (
+        <group position={initialPos}>
+            <mesh 
+                ref={meshRef} 
+                onClick={(e) => { e.stopPropagation(); onSelect(); }}
+                onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+                onPointerOut={() => { document.body.style.cursor = 'auto'; }}
+            >
+                <icosahedronGeometry args={[0.12, 1]} />
+                <meshStandardMaterial 
+                    color={isSelected ? "#fff" : "#a855f7"} 
+                    emissive={isSelected ? "#fff" : "#a855f7"} 
+                    emissiveIntensity={isSelected ? 10 : 3}
+                    wireframe
+                />
+            </mesh>
+            
+            {isSelected && (
+                <Html distanceFactor={8} position={[0, 0.4, 0]}>
+                    <div className="bg-black/80 backdrop-blur-2xl border border-purple-500/50 p-6 rounded-[2rem] min-w-[280px] shadow-[0_0_50px_rgba(168,85,247,0.4)] animate-in fade-in zoom-in duration-500 pointer-events-auto">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 rounded-full bg-purple-400 animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+                                <span className="text-sm text-white uppercase font-black tracking-[0.2em]">{planet.name}</span>
+                            </div>
+                            <span className="text-[10px] text-purple-400 font-mono tracking-tighter">{planet.degree.toFixed(2)}°</span>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <h4 className="text-[10px] text-purple-300/60 uppercase font-black tracking-widest mb-1">Celestial State</h4>
+                                <p className="text-white text-base font-light tracking-tight">In {planet.sign} • {planet.house}th House</p>
+                            </div>
+
+                            {planet.meaning && (
+                                <div>
+                                    <h4 className="text-[10px] text-purple-300/60 uppercase font-black tracking-widest mb-1">Archival Meaning</h4>
+                                    <p className="text-stone-300 text-xs leading-relaxed font-light">{planet.meaning}</p>
+                                </div>
+                            )}
+
+                            {planet.interpretation && (
+                                <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5">
+                                    <h4 className="text-[10px] text-emerald-400 uppercase font-black tracking-widest mb-2 flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Soul Guidance
+                                    </h4>
+                                    <p className="text-stone-200 text-xs leading-relaxed italic">{planet.interpretation}</p>
+                                </div>
+                            )}
+
+                            {planet.treeOfLifeConnection && (
+                                <div className="border-t border-white/10 pt-4 mt-2">
+                                    <h4 className="text-[10px] text-sky-400 uppercase font-black tracking-widest mb-1">Kabbalistic Node</h4>
+                                    <p className="text-sky-100 text-[11px] font-medium">{planet.treeOfLifeConnection}</p>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="mt-6 flex gap-2">
+                             <button className="flex-1 bg-white text-black py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-transform">Research Deeply</button>
+                             <button className="px-4 bg-purple-600/20 text-purple-300 border border-purple-500/30 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-purple-600/40 transition-colors">Listen</button>
+                        </div>
+                    </div>
+                </Html>
+            )}
+        </group>
+    );
+};
+
+const AspectLine = ({ 
+    p1, p2, aspect, onSelect, isSelected 
+}: { 
+    p1: [number, number, number], 
+    p2: [number, number, number], 
+    aspect: any,
+    onSelect: () => void,
+    isSelected: boolean
+}) => {
+    const type = aspect.type;
+    const color = type === 'conjunction' ? '#fff' : type === 'trine' ? '#34d399' : type === 'sextile' ? '#60a5fa' : type === 'square' ? '#f87171' : '#fb923c';
+    
+    // Calculate middle point for the aspect junction
+    const mid: [number, number, number] = [
+        (p1[0] + p2[0]) / 2,
+        (p1[1] + p2[1]) / 2,
+        (p1[2] + p2[2]) / 2
+    ];
+
+    return (
+        <group>
+            <Line 
+                points={[p1, p2]} 
+                color={color} 
+                lineWidth={isSelected ? 1.5 : 0.5} 
+                transparent 
+                opacity={isSelected ? 0.8 : 0.2} 
+                dashed={type === 'square' || type === 'opposition'}
+            />
+            
+            {/* Aspect Junction Node */}
+            <mesh 
+                position={mid} 
+                onClick={(e) => { e.stopPropagation(); onSelect(); }}
+                onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+                onPointerOut={() => { document.body.style.cursor = 'auto'; }}
+            >
+                <octahedronGeometry args={[0.06, 0]} />
+                <meshStandardMaterial 
+                    color={color} 
+                    emissive={color} 
+                    emissiveIntensity={isSelected ? 5 : 1}
+                    transparent
+                    opacity={0.8}
+                />
+            </mesh>
+            
+            {isSelected && (
+                <Html distanceFactor={8} position={mid}>
+                    <div className="bg-black/90 backdrop-blur-2xl border border-white/10 p-5 rounded-[2rem] min-w-[260px] shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500 pointer-events-auto">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
+                            <span className="text-xs text-white uppercase font-black tracking-widest">{aspect.type}</span>
+                            <span className="text-[10px] text-stone-500 font-mono tracking-widest ml-auto">{aspect.planet1} ⚺ {aspect.planet2}</span>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <h4 className="text-[9px] text-stone-500 uppercase font-black tracking-widest mb-1 italic">Geometric Frequency</h4>
+                                <p className="text-white text-sm font-medium leading-relaxed">{aspect.meaning || "A profound alignment in the cosmic lattice."}</p>
+                            </div>
+                            
+                            <div className="bg-white/5 p-3 rounded-xl border border-white/5">
+                                <span className="text-[8px] text-stone-600 block mb-1 font-bold uppercase">Dynamic Interaction</span>
+                                <p className="text-[10px] text-stone-300 leading-relaxed">
+                                    This {aspect.type} represents the {aspect.planet1}'s energy blending with the {aspect.planet2}, creating a unique resonance in your soul blueprint.
+                                </p>
+                            </div>
+                        </div>
+
+                        <button className="w-full mt-4 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all">
+                            Explore Alignment
+                        </button>
+                    </div>
+                </Html>
+            )}
+        </group>
+    );
+};
+
+export const SoulBlueprintAura = ({ data }: { data?: any }) => {
+  const [selectedBody, setSelectedBody] = useState<string | null>(null);
+  const [selectedAspect, setSelectedAspect] = useState<number | null>(null);
+
+  const planets = useMemo(() => data?.planets || [], [data]);
+
+  const planetPositions = useMemo(() => {
+    return planets.map((p: any, i: number) => {
+      const angle = (i / planets.length) * Math.PI * 2;
+      const radius = 2.8;
+      return {
+        name: p.name,
+        pos: [
+          Math.cos(angle) * radius,
+          (i % 3) * 0.4 - 0.4,
+          Math.sin(angle) * radius
+        ] as [number, number, number]
+      };
+    });
+  }, [planets]);
+
+  const onHandleSelectBody = (id: string) => {
+    setSelectedBody(id);
+    setSelectedAspect(null);
+  };
+
+  const onHandleSelectAspect = (idx: number) => {
+    setSelectedAspect(idx);
+    setSelectedBody(null);
+  };
+  
   return (
-    <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen opacity-80" style={{ transform: 'translateZ(-100px)'}}>
-      <Canvas gl={{ alpha: true, antialias: false }} camera={{ position: [0, 0, 5], fov: 45 }}>
-        <fog attach="fog" args={['#000', 3, 10]} />
-        <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+    <div className="absolute inset-0 z-0 pointer-events-auto mix-blend-screen opacity-90" style={{ transform: 'translateZ(-100px)'}}>
+      <Canvas gl={{ alpha: true, antialias: true }} camera={{ position: [0, 0, 7], fov: 45 }} onClick={() => { setSelectedBody(null); setSelectedAspect(null); }}>
+        <fog attach="fog" args={['#000', 3, 15]} />
+        
+        <ambientLight intensity={0.5} />
+        <pointLight position={[5, 5, 5]} intensity={2} color="#a855f7" />
+
+        <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.2}>
           <Center>
             <HumanSilhouette />
           </Center>
         </Float>
         
+        <group>
+           {planets.map((p: any, i: number) => (
+             <PlanetNode 
+               key={p.name} 
+               planet={p} 
+               index={i} 
+               total={planets.length} 
+               isSelected={selectedBody === p.name}
+               onSelect={() => onHandleSelectBody(p.name)}
+             />
+           ))}
+
+           {data?.aspects?.map((aspect: any, idx: number) => {
+             const p1 = planetPositions.find(p => p.name === aspect.planet1);
+             const p2 = planetPositions.find(p => p.name === aspect.planet2);
+             if (p1 && p2) {
+               return (
+                <AspectLine 
+                    key={idx} 
+                    p1={p1.pos} 
+                    p2={p2.pos} 
+                    aspect={aspect} 
+                    isSelected={selectedAspect === idx}
+                    onSelect={() => onHandleSelectAspect(idx)}
+                />
+               );
+             }
+             return null;
+           })}
+        </group>
+
         <CosmicVortex />
         
-        {/* Massive starfield */}
-        <Stars radius={50} depth={50} count={30000} factor={4} saturation={1} fade speed={1} />
-        <Stars radius={100} depth={100} count={20000} factor={6} saturation={0.5} fade speed={0.5} />
+        <Stars radius={50} depth={50} count={20000} factor={4} saturation={1} fade speed={1} />
         
         <EffectComposer disableNormalPass>
           <Bloom 
-            intensity={2.0} 
-            luminanceThreshold={0.1} 
+            intensity={1.5} 
+            luminanceThreshold={0.2} 
             luminanceSmoothing={0.9} 
             blendFunction={BlendFunction.SCREEN} 
           />
           <ChromaticAberration 
-            offset={new THREE.Vector2(0.002, 0.002)} 
+            offset={new THREE.Vector2(0.001, 0.001)} 
             blendFunction={BlendFunction.NORMAL} 
           />
         </EffectComposer>

@@ -55,7 +55,7 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
   CRITICAL: You MUST use the current year (${new Date().getFullYear()}) and current date for all daily, weekly, monthly, and yearly insights, as well as the 'present' timeline events. Do NOT use fake past years or default to 2024.
 
   You must calculate or logically approximate the following. **EXTREME CRITICAL INSTRUCTION: Keep ALL text generation to an ABSOLUTE MINIMUM. Use 10 words or less per description where possible. Use terse bullet-point logic. Do not write paragraphs. Speed of generation is the single most important factor. Output must be extremely fast:**
-  1. Natal Chart (10 planets/Ascendant). EXACT degree (0-360) and house. VERY SHORT 'meaning' and 'treeOfLifeConnection'.
+  1. Natal Chart (10 planets/Ascendant). EXACT degree (0-360) and house. Provide a deep archetypal 'interpretation' for each planet, especially focusing on the Sun sign and its corresponding House placement, explaining its core meaning and relation to the user's identity. VERY SHORT 'meaning' and 'treeOfLifeConnection'.
   2. Cosmic Nodes: North/South (degree/house). SHORT 'meaning' and 'treeOfLifeConnection'.
   3. Cosmic Points: Vertex, Part of Fortune, Chiron, Black Moon Lilith. SHORT 'meaning'/'treeOfLifeConnection'.
   4. Advanced Cycles: Morning/Evening Star, Arabic Lots (Spirit, Eros), 3 Asteroids, Planet Phases, and 2 Soli-Arcs. MAXIMUM brevity.
@@ -130,7 +130,7 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -259,7 +259,7 @@ export const fetchCosmicChatResponse = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-1.5-flash",
       contents: [
         ...safeHistory,
         { role: 'user', parts: [{ text: userMessage }] }
@@ -323,7 +323,7 @@ export const fetchTimelineDepth = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -381,7 +381,7 @@ export const fetchTimelineDeepDiveOption = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -446,7 +446,7 @@ export const fetchGeneralDeepDive = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -520,7 +520,7 @@ export const fetchAuraInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",
@@ -607,7 +607,7 @@ export const fetchAngelNumberInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",
@@ -641,7 +641,7 @@ export const streamGeminiChat = async (messages: {role: string, text: string}[],
         }));
         
         const responseStream = await ai.models.generateContentStream({
-            model: "gemini-3-flash-preview",
+            model: "gemini-1.5-flash",
             contents,
             config: {
                 temperature: 0.7,

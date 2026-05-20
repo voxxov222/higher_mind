@@ -466,7 +466,7 @@ const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, a
               <div className="space-y-4">
                 <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
                   <p className="text-stone-300 text-[13px] font-light leading-relaxed italic">
-                    {name === 'Earth' ? 'The focal point of Gaia consciousness. A living library of physical experience.' : astro?.meaning || 'Planetary frequency synchronized. Exploring resonance.'}
+                    {name === 'Earth' ? 'The focal point of Gaia consciousness. A living library of physical experience.' : astro?.interpretation || astro?.meaning || 'Planetary frequency synchronized. Exploring resonance.'}
                   </p>
                 </div>
 
@@ -847,7 +847,7 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
                         <>
                           <div className="bg-white/5 p-5 rounded-3xl border border-white/10">
                             <p className="text-stone-200 text-sm italic leading-relaxed font-light">
-                              {sunAstro?.meaning || selectedPlanet.description}
+                              {sunAstro?.interpretation || sunAstro?.meaning || selectedPlanet.description}
                             </p>
                           </div>
 

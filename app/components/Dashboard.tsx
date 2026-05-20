@@ -8,7 +8,8 @@ import {
   Sparkles, Moon, Sun, Star, Activity, Hexagon, Fingerprint, Network, Menu, X, 
   Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, 
   Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, Zap, Upload, Palette, 
-  Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box, Key, Cpu 
+  Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box, Key, Cpu,
+  Workflow
 } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
@@ -38,15 +39,18 @@ import CommunityFeed from './social/CommunityFeed';
 import LiveMessenger from './social/LiveMessenger';
 import { HigherMindSettings } from './HigherMindSettings';
 import { useHigherMind } from './HigherMindProvider';
+import { HyperNexus } from './HyperNexus';
 import { getAstralProfile } from '../services/socialService';
 import BirthChartGuide from './BirthChartGuide';
 import { SandboxSection } from './sandbox/SandboxSection';
 import { VoiceCommander } from './VoiceCommander';
 import { TetragrammatonHUD } from './TetragrammatonHUD';
 import { soundEngine } from '../lib/soundEffects';
+import { AstralCanvas } from './AstralCanvas';
 
 import { QuantumEvolutionSection } from './QuantumEvolutionSection';
 import { ObsidianVaultSection } from './ObsidianVaultSection';
+import { ChristSophiaSection } from './ChristSophiaSection';
 
 /**
  * Interface for DashboardProps
@@ -56,8 +60,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton';
-  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton') => void;
+  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'hypernexus' | 'christ_sophia' | 'astral_canvas';
+  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'hypernexus' | 'christ_sophia' | 'astral_canvas') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -1078,18 +1082,16 @@ const MockOpastroTerminal = ({ sign = "Aries", period = "daily" }: { sign?: stri
 export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab, user, onSignIn, onSignOut, loadedInputs, profileConfig, onUpdateProfile, onPresentationRequest, externalDeepDive, onClearExternalDeepDive, vortexMode, setVortexMode }: DashboardProps) => {
   // --- LOCAL COMPONENT STATE ---
   const [name, setName] = useState('');
-  const [date, setDate] = useState(() => {
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+
+  useEffect(() => {
     const now = new Date();
     const offset = now.getTimezoneOffset() * 60000;
     const local = new Date(now.getTime() - offset);
-    return local.toISOString().split('T')[0];
-  });
-  const [time, setTime] = useState(() => {
-    const now = new Date();
-    const offset = now.getTimezoneOffset() * 60000;
-    const local = new Date(now.getTime() - offset);
-    return local.toISOString().split('T')[1].slice(0, 5);
-  });
+    setDate(local.toISOString().split('T')[0]);
+    setTime(local.toISOString().split('T')[1].slice(0, 5));
+  }, []);
   const [location, setLocation] = useState('');
   
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -1108,9 +1110,10 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
   const [isHigherMindSettingsOpen, setIsHigherMindSettingsOpen] = useState(false);
   const [selectedRecipientId, setSelectedRecipientId] = useState<string | undefined>();
   const [selectedRecipientProfile, setSelectedRecipientProfile] = useState<UserProfileConfig | undefined>();
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    setCurrentTime(new Date());
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -1229,6 +1232,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
     }
   };
 
+  // Moved outside Dashboard to prevent unnecessary unmounts
   const BoundResearchBox = (props: any) => {
     const onResearch = props.onResearch || (() => handleGeneralDeepDive(props.title, props.content));
     return (
@@ -1403,7 +1407,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             <span className="text-[10px] uppercase tracking-widest text-purple-300 font-bold hidden sm:inline">AI Interface</span>
           </button>
           <div className="text-[10px] text-white/50 uppercase tracking-[0.2em] font-mono hidden md:block" suppressHydrationWarning>
-              {currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} - {currentTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
+              {currentTime ? `${currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} - ${currentTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}` : 'Calibrating Temporal Displacement...'}
           </div>
         </div>
       </header>
@@ -1494,14 +1498,17 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'patterns'} tabId="patterns" onClick={() => setActiveTab('patterns')} icon={<Fingerprint className="w-4 h-4"/>}>Synchronicities</Tab>
               <Tab active={activeTab === 'angel_numbers'} tabId="angel_numbers" onClick={() => setActiveTab('angel_numbers')} icon={<Sparkles className="w-4 h-4"/>}>Angel Numbers</Tab>
               <Tab active={activeTab === 'vortex'} tabId="vortex" onClick={() => setActiveTab('vortex')} icon={<CirclePlay className="w-4 h-4 text-cyan-400"/>}>Vortex Sequencing</Tab>
+              <Tab active={activeTab === 'astral_canvas'} tabId="astral_canvas" onClick={() => setActiveTab('astral_canvas')} icon={<Workflow className="w-4 h-4 text-purple-400 animate-pulse"/>}>Research Canvas</Tab>
               <Tab active={activeTab === 'gematria_calc'} tabId="gematria_calc" onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
               <Tab active={activeTab === 'golden_ratio'} tabId="golden_ratio" onClick={() => setActiveTab('golden_ratio')} icon={<Grid className="w-4 h-4 text-amber-500" />}>Kathara Grid</Tab>
               <Tab active={activeTab === 'sky_map'} tabId="sky_map" onClick={() => setActiveTab('sky_map')} icon={<Compass className="w-4 h-4 text-indigo-400"/>}>Atlas Sky Map</Tab>
               <Tab active={activeTab === 'obsidian'} tabId="obsidian" onClick={() => setActiveTab('obsidian')} icon={<BookOpen className="w-4 h-4 text-purple-400"/>}>Akashic Vault</Tab>
               <Tab active={activeTab === 'codex'} tabId="codex" onClick={() => setActiveTab('codex')} icon={<Search className="w-4 h-4 text-emerald-400"/>}>Cosmic Codex</Tab>
               <Tab active={activeTab === 'evolution'} tabId="evolution" onClick={() => setActiveTab('evolution')} icon={<Cpu className="w-4 h-4 text-blue-500"/>}>Quantum Evolution</Tab>
+              <Tab active={activeTab === 'hypernexus'} tabId="hypernexus" onClick={() => setActiveTab('hypernexus')} icon={<Sparkles className="w-4 h-4 text-purple-400 animate-pulse"/>}>HyperNexus</Tab>
+              <Tab active={activeTab === 'christ_sophia'} tabId="christ_sophia" onClick={() => setActiveTab('christ_sophia')} icon={<Sparkles className="w-4 h-4 text-amber-300 animate-pulse"/>}>Christ-Sophia Gnosis</Tab>
               <Tab active={activeTab === 'nexus'} tabId="nexus" onClick={() => setActiveTab('nexus')} icon={<Network className="w-4 h-4 text-fuchsia-400"/>}>Dev Nexus</Tab>
-              <Tab active={activeTab === 'tetragrammaton'} tabId="tetragrammaton" onClick={() => setActiveTab('tetragrammaton')} icon={<Hexagon className="w-4 h-4 text-fbbf24"/>}>YHVH HUD</Tab>
+              <Tab active={activeTab === 'tetragrammaton'} tabId="tetragrammaton" onClick={() => setActiveTab('tetragrammaton')} icon={<Hexagon className="w-4 h-4 text-[#fbbf24]"/>}>YHVH HUD</Tab>
               <Tab active={activeTab === 'sandbox'} tabId="sandbox" onClick={() => setActiveTab('sandbox')} icon={<Box className="w-4 h-4 text-emerald-400"/>}>Creative Sandbox</Tab>
               <Tab active={activeTab === 'findings'} tabId="findings" onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
               <Tab active={activeTab === 'harmonics'} tabId="harmonics" onClick={() => setActiveTab('harmonics')} icon={<BarChart2 className="w-4 h-4"/>}>Harmonics</Tab>
@@ -2535,6 +2542,16 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <SkyMapSection />
                   </motion.div>
                 )}
+                {activeTab === 'astral_canvas' && (
+                  <motion.div key="astral_canvas" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
+                    <AstralCanvas cosmicData={data} />
+                  </motion.div>
+                )}
+                {activeTab === 'christ_sophia' && (
+                  <motion.div key="christ_sophia" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <ChristSophiaSection data={data} />
+                  </motion.div>
+                )}
                 {activeTab === 'soul_path' && (
                   <motion.div key="soul_path" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <SoulPathSection data={data} />
@@ -2558,6 +2575,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'evolution' && (
                   <motion.div key="evolution" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
                     <AIEvolutionStream />
+                  </motion.div>
+                )}
+                {activeTab === 'hypernexus' && (
+                  <motion.div key="hypernexus" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="h-[750px] mb-20 overflow-hidden rounded-[2.5rem] border border-white/10">
+                    <HyperNexus data={data} />
                   </motion.div>
                 )}
                 {activeTab === 'nexus' && (
@@ -2608,10 +2630,12 @@ const playTabHoverSound = (tabId?: string) => {
       soundEngine.numerologyHover(); break;
     case 'kabbalah':
     case 'tetragrammaton':
+    case 'christ_sophia':
     case 'kabbalistic_numerology':
       soundEngine.mysticHover(); break;
     case 'brain':
     case 'vortex':
+    case 'astral_canvas':
       soundEngine.neuralHover(); break;
     case 'sandbox':
     case 'robotics':
@@ -2633,10 +2657,12 @@ const playTabClickSound = (tabId?: string) => {
       soundEngine.numerologyClick(); break;
     case 'kabbalah':
     case 'tetragrammaton':
+    case 'christ_sophia':
     case 'kabbalistic_numerology':
       soundEngine.mysticClick(); break;
     case 'brain':
     case 'vortex':
+    case 'astral_canvas':
       soundEngine.neuralClick(); break;
     case 'sandbox':
     case 'robotics':

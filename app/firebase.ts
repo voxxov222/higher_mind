@@ -7,7 +7,20 @@ import { CosmicData, UserProfileConfig } from './types';
 
 // Initialize the core Firebase App and services
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+
+let firestoreInstance;
+try {
+  firestoreInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId || undefined);
+} catch (error) {
+  console.warn("Retrying Firestore initialization with default database...", error);
+  try {
+    firestoreInstance = getFirestore(app);
+  } catch (err) {
+    console.error("Critical: Firestore failed to initialize completely", err);
+  }
+}
+
+export const db = firestoreInstance!;
 export const auth = getAuth(app);
 
 export const authProvider = new GoogleAuthProvider();
@@ -163,4 +176,6 @@ async function testConnection(retries = 3) {
     }
   }
 }
-testConnection();
+if (typeof window !== 'undefined') {
+  testConnection();
+}

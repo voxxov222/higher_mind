@@ -25,7 +25,7 @@ export async function action({ request }: ActionFunctionArgs) {
     }));
     
     const responseStream = await ai.models.generateContentStream({
-      model: "gemini-3-flash-preview",
+      model: "gemini-1.5-flash",
       contents,
       config: {
         temperature: 0.7,

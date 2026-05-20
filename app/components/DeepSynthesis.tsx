@@ -111,7 +111,7 @@ type SynthesisMode = 'overview' | 'infographic' | 'mindmap' | '3d' | 'video' | '
  * DeepSynthesis Component
  * High-fidelity data visualization module offering multiple perspectives on cosmic data.
  */
-export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicData | null, onPresentationRequest: () => void }) => {
+const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData | null, onPresentationRequest: () => void }) => {
   // --- COMPONENT STATE & VIEW REFS ---
   const [mode, setMode] = useState<SynthesisMode>('summary');
   const [infographicType, setInfographicType] = useState<'identity' | 'path' | 'karmic' | 'resonance'>('identity');
@@ -1467,4 +1467,24 @@ export const DeepSynthesis = ({ data, onPresentationRequest }: { data: CosmicDat
       </div>
     </div>
   );
+};
+
+export const DeepSynthesis = (props: { data: CosmicData | null; onPresentationRequest: () => void }) => {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return (
+      <div className="w-full h-[600px] flex items-center justify-center bg-stone-950/40 rounded-[2rem] border border-white/5">
+        <div className="flex flex-col items-center gap-2">
+          <RefreshCw className="w-8 h-8 animate-spin text-purple-500" />
+          <span className="text-xs text-stone-400 font-mono">Initializing Deep Synthesis Matrix...</span>
+        </div>
+      </div>
+    );
+  }
+
+  return <DeepSynthesisInner {...props} />;
 };

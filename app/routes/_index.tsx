@@ -181,9 +181,7 @@ export default function Index() {
             exit={{ opacity: 0 }}
             className="w-full h-full"
           >
-            <Canvas shadows dpr={[1, 1.5]} gl={{ powerPreference: "high-performance" }}>
-              <SolarSystemScene data={data} onPlanetClick={handleSpeak} />
-            </Canvas>
+            <SolarSystemScene data={data} onPlanetClick={handleSpeak} />
           </motion.div>
         )}
       </AnimatePresence>

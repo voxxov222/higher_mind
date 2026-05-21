@@ -658,3 +658,71 @@ export const streamGeminiChat = async (messages: {role: string, text: string}[],
         throw new Error(e.message || "Failed to stream chat", { cause: e });
     }
 };
+
+/**
+ * fetchUnfoldedNodes
+ * Generates structured study nodes for the Research Canvas.
+ */
+export const fetchUnfoldedNodes = async (
+  canvasCtx: string,
+  cosmicData: CosmicData | null
+): Promise<{ nodes: any[] }> => {
+  try {
+    const ai = getAI();
+    const prompt = `
+    You are the Astral Mind Guide. Analyze the Seeker's current active research nodes:
+    ${canvasCtx || 'Initial study coordinate space.'}
+
+    Using their cosmic profile context:
+    ${cosmicData ? JSON.stringify(cosmicData) : 'General cosmic dimensions.'}
+
+    Generate 3 to 4 highly synchronized structural nodes representing deeper psychospiritual, numerological, and geometric study topics.
+    
+    Node properties to define based on their type:
+    1. "noteNode": general note with text content. Choose a matching "color" theme.
+    2. "threeWidgetNode": 3D sacred geometry viewer. Specify "shapeType" ("merkaba" | "icosahedron" | "torus" | "frequency") and "color" theme.
+    3. "solfeggioNode": therapeutic/astral sound tuning. Specify a valid "solfeggioHz" (174 | 285 | 396 | 417 | 528 | 639 | 741 | 852 | 963).
+    4. "dynamicNotepadNode": a node containing an action-oriented psychospiritual declaration or channeling space.
+    5. "mediaNode": visual or audio content module. Specify "mediaType" ("image" | "gif" | "video" | "audio") and optionally a descriptive title.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            nodes: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  id: { type: Type.STRING },
+                  type: { type: Type.STRING },
+                  title: { type: Type.STRING },
+                  content: { type: Type.STRING },
+                  color: { type: Type.STRING },
+                  shapeType: { type: Type.STRING },
+                  solfeggioHz: { type: Type.INTEGER },
+                  mediaType: { type: Type.STRING },
+                  url: { type: Type.STRING }
+                },
+                required: ["id", "type", "title", "content"]
+              }
+            }
+          },
+          required: ["nodes"]
+        }
+      }
+    });
+
+    const text = response.text?.trim() || "{\"nodes\": []}";
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Error generating unfolded nodes:", error);
+    return { nodes: [] };
+  }
+};
+

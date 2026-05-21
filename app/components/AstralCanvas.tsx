@@ -41,10 +41,23 @@ import {
   Download,
   Info,
   X,
+  Music,
+  Upload,
+  Image,
+  Link,
+  Volume2,
+  VolumeX,
+  Headphones,
+  BookOpen,
+  Settings,
+  HelpCircle,
+  Sparkle
 } from 'lucide-react';
 import { CosmicData } from '../types';
-import { fetchCosmicChatResponse } from '../services/geminiService';
+import { fetchCosmicChatResponse, fetchUnfoldedNodes } from '../services/geminiService';
 import ReactMarkdown from 'react-markdown';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Float } from '@react-three/drei';
 
 // --- CUSTOM NODE TYPES AND CORRESPONDING COMPONENT REGISTRATION ---
 
@@ -62,6 +75,12 @@ interface CanvasNodeData {
   chatHistory?: { role: 'user' | 'model'; parts: { text: string }[] }[];
   cosmicData?: CosmicData | null;
   updateNodeData?: (id: string, data: Partial<CanvasNodeData>) => void;
+  // Dynamic media & 3D widgets components properties
+  mediaType?: 'image' | 'video' | 'audio' | 'gif';
+  shapeType?: 'merkaba' | 'icosahedron' | 'torus' | 'frequency';
+  solfeggioHz?: number;
+  notepadResponse?: string;
+  notepadStatus?: 'idle' | 'synthesizing' | 'calculating' | 'translated' | 'shadowing';
 }
 
 // 1. NOTE NODE (A Custom note taking widget with themes)
@@ -192,6 +211,644 @@ const VideoNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
       </div>
 
       <Handle type="source" position={Position.Right} className="w-3 h-3 bg-rose-500 rounded-full border-2 border-black" />
+    </div>
+  );
+};
+
+// 2b. UNIVERSAL MEDIA NODE (Supports Image, Video, Gif, Audio uploading and URL loading)
+const MediaNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
+  const [url, setUrl] = useState(data.url || '');
+  const [type, setType] = useState<'image' | 'video' | 'audio' | 'gif'>(data.mediaType || 'image');
+  const [title, setTitle] = useState(data.title || 'Celestial Media Canvas');
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileType = file.type;
+    let detected: 'image' | 'video' | 'audio' | 'gif' = 'image';
+    if (fileType.includes('gif')) detected = 'gif';
+    else if (fileType.includes('video')) detected = 'video';
+    else if (fileType.includes('audio')) detected = 'audio';
+    else if (fileType.includes('image')) detected = 'image';
+
+    const objectUrl = URL.createObjectURL(file);
+    setUrl(objectUrl);
+    setType(detected);
+    setTitle(file.name);
+
+    if (data.updateNodeData) {
+      data.updateNodeData(id, { url: objectUrl, mediaType: detected, title: file.name });
+    }
+  };
+
+  useEffect(() => {
+    if (data.updateNodeData) {
+      data.updateNodeData(id, { url, mediaType: type, title });
+    }
+  }, [url, type, title]);
+
+  return (
+    <div className="rounded-2xl border border-emerald-500/30 bg-black/95 backdrop-blur-xl p-4 shadow-2xl min-w-[320px] max-w-[340px] text-white transition-all duration-300" style={{ boxShadow: '0 0 15px rgba(16, 185, 129, 0.15)' }}>
+      <Handle type="target" position={Position.Left} className="w-3 h-3 bg-emerald-500 rounded-full border-2 border-black" />
+      
+      <div className="flex items-center justify-between mb-3 border-b border-emerald-500/20 pb-2">
+        <div className="flex items-center gap-2">
+          {type === 'image' && <Image className="w-4 h-4 text-emerald-400" />}
+          {type === 'gif' && <Sparkle className="w-4 h-4 text-emerald-400" />}
+          {type === 'video' && <Video className="w-4 h-4 text-emerald-400" />}
+          {type === 'audio' && <Music className="w-4 h-4 text-emerald-400" />}
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="bg-transparent font-medium text-xs text-emerald-300 focus:outline-none w-44"
+          />
+        </div>
+        <span className="text-[9px] uppercase tracking-wider font-semibold border border-emerald-500/25 px-1.5 py-0.5 rounded-full text-emerald-400 bg-emerald-500/5">Asset</span>
+      </div>
+
+      <div className="mb-4 space-y-2">
+        <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl">
+          {(['image', 'gif', 'video', 'audio'] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setType(t)}
+              className={`flex-1 py-1 rounded text-[9px] font-bold uppercase transition-all ${type === t ? 'bg-emerald-500/20 text-emerald-300' : 'text-white/40 hover:text-white'}`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={url.startsWith('blob:') ? '' : url}
+            onChange={(e) => {
+              setUrl(e.target.value);
+              if (data.updateNodeData) data.updateNodeData(id, { url: e.target.value });
+            }}
+            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white/90 focus:outline-none focus:border-emerald-500/50"
+            placeholder="Paste URL or links..."
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="bg-emerald-600/20 hover:bg-emerald-600/35 border border-emerald-500/35 hover:scale-105 rounded-xl px-2.5 flex items-center justify-center text-emerald-300 transition-all font-bold text-xs"
+            title="Upload local media asset"
+          >
+            <Upload className="w-3.5 h-3.5" />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handleFileUpload}
+            accept="image/*,video/*,audio/*,.gif"
+            className="hidden"
+          />
+        </div>
+      </div>
+
+      <div className="bg-black/40 rounded-xl overflow-hidden min-h-[140px] max-h-[180px] flex items-center justify-center border border-white/5 relative">
+        {url ? (
+          <>
+            {(type === 'image' || type === 'gif') && (
+              <img src={url} alt={title} className="w-full h-full object-contain max-h-[160px] rounded-lg" />
+            )}
+            {type === 'video' && (
+              <video src={url} controls className="w-full h-full object-contain max-h-[160px] rounded-lg" />
+            )}
+            {type === 'audio' && (
+              <div className="flex flex-col items-center justify-center p-3 w-full gap-2">
+                <div className="flex items-center gap-1.5 justify-center py-2">
+                  <span className="w-1.5 h-6 rounded bg-emerald-500 animate-pulse" />
+                  <span className="w-1.5 h-8 rounded bg-emerald-400 animate-pulse" style={{ animationDelay: '0.1s' }} />
+                  <span className="w-1.5 h-10 rounded bg-emerald-300 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                  <span className="w-1.5 h-7 rounded bg-emerald-400 animate-pulse" style={{ animationDelay: '0.3s' }} />
+                  <span className="w-1.5 h-5 rounded bg-emerald-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+                </div>
+                <audio src={url} controls className="w-full h-8 px-1" />
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-1 text-white/30 text-center p-4">
+            <Upload className="w-5 h-5 text-emerald-500/60 animate-bounce" />
+            <span className="text-[11px] font-mono">Upload content above</span>
+          </div>
+        )}
+      </div>
+
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-emerald-500 rounded-full border-2 border-black" />
+    </div>
+  );
+};
+
+// 2c. 3D SACRED GEOMETRY INTERACTIVE WIDGET NODE (Three.js WebGL Interactive Objects)
+const ThreeWidgetNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
+  const [shape, setShape] = useState<'merkaba' | 'icosahedron' | 'torus' | 'frequency'>(data.shapeType || 'merkaba');
+  const [color, setColor] = useState(data.color || '#3b82f6'); 
+  const [speed, setSpeed] = useState(2);
+  const [activeFrequencyHz, setActiveFrequencyHz] = useState<number | null>(null);
+  const [isResonating, setIsResonating] = useState(false);
+
+  useEffect(() => {
+    const handleSolfeggioActive = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail.isPlaying) {
+        setActiveFrequencyHz(detail.hz);
+        setIsResonating(true);
+      } else {
+        setIsResonating(false);
+      }
+    };
+    window.addEventListener('solfeggio-sound-active', handleSolfeggioActive);
+    return () => window.removeEventListener('solfeggio-sound-active', handleSolfeggioActive);
+  }, []);
+
+  useEffect(() => {
+    if (data.updateNodeData) {
+      data.updateNodeData(id, { shapeType: shape, color });
+    }
+  }, [shape, color]);
+
+  const shapes = [
+    { value: 'merkaba', label: 'Merkaba Star' },
+    { value: 'icosahedron', label: 'Platonic Crystal' },
+    { value: 'torus', label: 'Harmonic Portal' },
+    { value: 'frequency', label: 'Resonance Aura' }
+  ];
+
+  const colors = [
+    { hex: '#3b82f6', label: 'Cobalt' },
+    { hex: '#a855f7', label: 'Amethyst' },
+    { hex: '#ef4444', label: 'Ruby' },
+    { hex: '#10b981', label: 'Jade' },
+    { hex: '#f59e0b', label: 'Amber' }
+  ];
+
+  return (
+    <div className="rounded-2xl border border-sky-500/30 bg-black/95 backdrop-blur-xl p-4 shadow-2xl min-w-[280px] max-w-[300px] text-white transition-all duration-300" style={{ boxShadow: '0 0 15px rgba(59, 130, 246, 0.15)' }}>
+      <Handle type="target" position={Position.Left} className="w-3 h-3 bg-sky-500 rounded-full border-2 border-black" />
+      
+      <div className="flex items-center justify-between mb-3 border-b border-sky-500/20 pb-2">
+        <div className="flex items-center gap-1.5">
+          <Layers className="w-4 h-4 text-sky-400" />
+          <span className="font-medium text-xs text-sky-300">Aetheric 3D Generator</span>
+        </div>
+        <span className="text-[9px] uppercase tracking-wider font-semibold border border-sky-500/25 px-1.5 py-0.5 rounded-full text-sky-400 bg-sky-500/5">3D WebGL</span>
+      </div>
+
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-1.5 bg-white/5 p-1 rounded-xl">
+          {shapes.map((sh) => (
+            <button
+              key={sh.value}
+              onClick={() => setShape(sh.value as any)}
+              className={`py-1 rounded text-[9px] font-bold uppercase transition-all ${shape === sh.value ? 'bg-sky-500/20 text-sky-300' : 'text-white/40 hover:text-white'}`}
+            >
+              {sh.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="h-[180px] w-full bg-slate-950/80 rounded-xl relative overflow-hidden border border-white/5 shadow-inner">
+          <Canvas camera={{ position: [0, 0, 3], fov: 45 }} style={{ width: '100%', height: '100%' }}>
+            <ambientLight intensity={1.5} />
+            <pointLight position={[5, 5, 5]} intensity={2} />
+            <Float speed={isResonating ? speed * 3.5 : speed * 1.5} rotationIntensity={isResonating ? 3.5 : 1.5} floatIntensity={isResonating ? 2.5 : 1}>
+              {shape === 'icosahedron' && (
+                <mesh rotation={[Math.PI / 4, 0, 0]} scale={isResonating ? [1.2, 1.2, 1.2] : [1, 1, 1]}>
+                  <icosahedronGeometry args={[0.8, 1]} />
+                  <meshStandardMaterial color={color} wireframe emissive={color} emissiveIntensity={isResonating ? 1.0 : 0.25} />
+                </mesh>
+              )}
+              {shape === 'torus' && (
+                <mesh scale={isResonating ? [1.2, 1.2, 1.2] : [1, 1, 1]}>
+                  <torusKnotGeometry args={[0.5, 0.2, 100, 16]} />
+                  <meshStandardMaterial color={color} roughness={0.1} metalness={0.9} emissive={color} emissiveIntensity={isResonating ? 0.8 : 0.1} />
+                </mesh>
+              )}
+              {shape === 'frequency' && (
+                <mesh scale={isResonating ? [1.2, 1.2, 1.2] : [1, 1, 1]}>
+                  <sphereGeometry args={[0.7, 32, 32]} />
+                  <meshStandardMaterial color={color} wireframe emissive={color} emissiveIntensity={isResonating ? 1.2 : 0.4} />
+                </mesh>
+              )}
+              {shape === 'merkaba' && (
+                <group scale={isResonating ? [1.2, 1.2, 1.2] : [1, 1, 1]}>
+                  <mesh>
+                    <coneGeometry args={[0.65, 1.2, 3]} />
+                    <meshStandardMaterial color={color} wireframe emissive={color} emissiveIntensity={isResonating ? 1.0 : 0.3} />
+                  </mesh>
+                  <mesh rotation={[Math.PI, 0, 0]} position={[0, 0, 0]}>
+                    <coneGeometry args={[0.65, 1.2, 3]} />
+                    <meshStandardMaterial color={color} wireframe emissive={color} emissiveIntensity={isResonating ? 1.0 : 0.3} />
+                  </mesh>
+                </group>
+              )}
+            </Float>
+            <OrbitControls enableZoom={false} />
+          </Canvas>
+
+          {isResonating && (
+            <div className="absolute top-2 right-2 z-10 bg-sky-500/25 border border-sky-500/40 px-2 py-0.5 rounded text-[8px] font-mono text-sky-300 font-bold tracking-widest animate-pulse">
+              RESONATING {activeFrequencyHz}HZ
+            </div>
+          )}
+
+          <div className="absolute bottom-2 left-2 z-10 bg-black/75 px-2 py-1 rounded text-[8px] font-mono text-white/50 pointer-events-none">
+            DRAG TO ROTATE
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between border-t border-white/5 pt-2">
+          <div className="flex gap-1.5">
+            {colors.map((c) => (
+              <button
+                key={c.hex}
+                onClick={() => setColor(c.hex)}
+                className={`w-4.5 h-4.5 rounded-full border border-white/20 transition-all hover:scale-125 ${color === c.hex ? 'ring-2 ring-sky-400' : ''}`}
+                style={{ backgroundColor: c.hex }}
+                title={c.label}
+              />
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono text-white/40 uppercase">Speed</span>
+            <input
+              type="range"
+              min="0"
+              max="5"
+              step="0.5"
+              value={speed}
+              onChange={(e) => setSpeed(parseFloat(e.target.value))}
+              className="w-16 accent-sky-400 cursor-pointer h-1 rounded"
+            />
+          </div>
+        </div>
+      </div>
+
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-sky-500 rounded-full border-2 border-black" />
+    </div>
+  );
+};
+
+// 2d. INTERACTIVE DYNAMIC NOTEPAD (AI prompt interactions triggers inside note)
+const DynamicNotepadNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
+  const [content, setContent] = useState(data.content || '');
+  const [title, setTitle] = useState(data.title || 'Dynamic Manifest Notepad');
+  const [aiResponse, setAiResponse] = useState(data.notepadResponse || '');
+  const [status, setStatus] = useState<'idle' | 'synthesizing' | 'calculating' | 'translated' | 'shadowing'>(data.notepadStatus || 'idle');
+
+  const cosmicData = data.cosmicData;
+
+  const triggerAIAction = async (action: 'astrology' | 'gematria' | 'shadow') => {
+    if (!content.trim()) return;
+    setStatus(action === 'astrology' ? 'synthesizing' : action === 'gematria' ? 'calculating' : 'shadowing');
+    
+    let promptText = '';
+    if (action === 'astrology') {
+      promptText = `
+        You are the Astral Mind Guide. Analyze this note typed by the Seeker:
+        "${content}"
+        
+        Synthesize this content with their astrological profile. Highlight exactly 2 key psychospiritual planetary influences or transits that coordinate with this thought. Deliver in deep cosmic style.
+      `;
+    } else if (action === 'gematria') {
+      promptText = `
+        You are the Astral Mind Guide. Interpret this note typed by the Seeker:
+        "${content}"
+        
+        Calculate or extract important gematria keys and alphanumeric terms. Highlight the kabbalistic resonance and corresponding Sephirot paths. Limit to 3 bullets in deep esoteric style.
+      `;
+    } else if (action === 'shadow') {
+      promptText = `
+        You are the Astral Mind Guide. Analyze this note typed by the Seeker:
+        "${content}"
+        
+        Tailor a standard psychospiritual Shadow Work integration prompt designed to release blocking anchors or repressions related to this thought. Write in deep, intimate mystic mentoring tone.
+      `;
+    }
+
+    try {
+      const response = await fetchCosmicChatResponse(promptText, [], cosmicData || null);
+      setAiResponse(response.text);
+      if (data.updateNodeData) {
+        data.updateNodeData(id, { notepadResponse: response.text, notepadStatus: 'idle' });
+      }
+    } catch (err) {
+      console.error(err);
+      setAiResponse("A shadow portal obstructed the stream. Re-align and retry.");
+    } finally {
+      setStatus('idle');
+    }
+  };
+
+  useEffect(() => {
+    if (data.updateNodeData) {
+      data.updateNodeData(id, { content, title, notepadResponse: aiResponse, notepadStatus: status });
+    }
+  }, [content, title, aiResponse, status]);
+
+  return (
+    <div className="rounded-2xl border border-purple-500/30 bg-black/95 backdrop-blur-xl p-4 shadow-2xl min-w-[320px] max-w-[350px] text-white transition-all duration-300" style={{ boxShadow: '0 0 15px rgba(168, 85, 247, 0.15)' }}>
+      <Handle type="target" position={Position.Left} className="w-3 h-3 bg-purple-500 rounded-full border-2 border-black" />
+      
+      <div className="flex items-center justify-between mb-3 border-b border-purple-500/20 pb-2">
+        <div className="flex items-center gap-1.5">
+          <BookOpen className="w-4 h-4 text-purple-400" />
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="bg-transparent font-medium text-xs text-purple-300 focus:outline-none w-44"
+          />
+        </div>
+        <span className="text-[9px] uppercase tracking-wider font-semibold border border-purple-500/25 px-1.5 py-0.5 rounded-full text-purple-400 bg-purple-500/5">Notepad</span>
+      </div>
+
+      <div className="space-y-3">
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          className="w-full h-24 bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs text-white/95 focus:outline-none focus:border-purple-500/50 resize-none font-mono"
+          placeholder="Capture your channelings or dreams here..."
+        />
+
+        <div className="flex items-center justify-between gap-1.5 bg-white/5 p-1 rounded-xl">
+          <button
+            onClick={() => triggerAIAction('astrology')}
+            disabled={status !== 'idle' || !content.trim()}
+            className="flex-1 py-1 px-1 rounded text-[8px] font-bold uppercase transition-all bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/10 disabled:opacity-35"
+          >
+            {status === 'synthesizing' ? 'Reading...' : 'Astrology'}
+          </button>
+          <button
+            onClick={() => triggerAIAction('gematria')}
+            disabled={status !== 'idle' || !content.trim()}
+            className="flex-1 py-1 px-1 rounded text-[8px] font-bold uppercase transition-all bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/10 disabled:opacity-35"
+          >
+            {status === 'calculating' ? 'Math...' : 'Gematria'}
+          </button>
+          <button
+            onClick={() => triggerAIAction('shadow')}
+            disabled={status !== 'idle' || !content.trim()}
+            className="flex-1 py-1 px-1 rounded text-[8px] font-bold uppercase transition-all bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/10 disabled:opacity-35"
+          >
+            {status === 'shadowing' ? 'Oracle...' : 'Shadow Oracle'}
+          </button>
+        </div>
+
+        {aiResponse && (
+          <div className="p-3 bg-purple-950/20 border border-purple-500/25 rounded-xl text-[11px] space-y-1 relative">
+            <div className="flex items-center justify-between border-b border-purple-500/10 pb-1 mb-1">
+              <span className="text-[9px] font-mono tracking-widest uppercase font-bold text-purple-300">Resonant Transmission</span>
+              <button
+                onClick={() => setAiResponse('')}
+                className="text-white/40 hover:text-white transition-all text-[9.5px] font-mono uppercase"
+              >
+                Clear
+              </button>
+            </div>
+            <div className="text-white/95 leading-relaxed font-sans max-h-36 overflow-y-auto scrollbar-thin">
+              <ReactMarkdown>{aiResponse}</ReactMarkdown>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-purple-500 rounded-full border-2 border-black" />
+    </div>
+  );
+};
+
+// 2e. SOLFEGGIO SOUND GENERATOR NODE (Real Sound Synthesizer Node using Web Audio API)
+const SolfeggioNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hz, setHz] = useState(data.solfeggioHz || 528);
+  const [volume, setVolume] = useState(0.2);
+  const [binaural, setBinaural] = useState(true);
+
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const osc1Ref = useRef<OscillatorNode | null>(null);
+  const osc2Ref = useRef<OscillatorNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+
+  const frequencies = [
+    { value: 174, label: '174 Hz', desc: 'Grounding Energy' },
+    { value: 396, label: '396 Hz', desc: 'Liberating Fear & Guilt' },
+    { value: 417, label: '417 Hz', desc: 'Facilitating Change' },
+    { value: 528, label: '528 Hz', desc: 'DNA Transformation' },
+    { value: 639, label: '639 Hz', desc: 'Relate & Connection' },
+    { value: 741, label: '741 Hz', desc: 'Awaking Intuition' },
+    { value: 852, label: '852 Hz', desc: 'Spiritual Order' },
+    { value: 963, label: '963 Hz', desc: 'Divine Consciousness' },
+  ];
+
+  const stopSound = () => {
+    if (osc1Ref.current) {
+      try { osc1Ref.current.stop(); } catch (e) { console.debug('Sound stop suppressed', e); }
+      osc1Ref.current = null;
+    }
+    if (osc2Ref.current) {
+      try { osc2Ref.current.stop(); } catch (e) { console.debug('Sound stop suppressed', e); }
+      osc2Ref.current = null;
+    }
+    if (audioCtxRef.current) {
+      try { audioCtxRef.current.close(); } catch (e) { console.debug('Audio close suppressed', e); }
+      audioCtxRef.current = null;
+    }
+    setIsPlaying(false);
+  };
+
+  const playSound = () => {
+    try {
+      stopSound();
+
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+
+      const ctx = new AudioCtx();
+      audioCtxRef.current = ctx;
+
+      const mainGain = ctx.createGain();
+      mainGain.gain.setValueAtTime(volume, ctx.currentTime);
+      mainGain.connect(ctx.destination);
+      gainNodeRef.current = mainGain;
+
+      // Left Channel
+      const osc1 = ctx.createOscillator();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(hz, ctx.currentTime);
+
+      const panner1 = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+      if (panner1) {
+        panner1.pan.setValueAtTime(-1, ctx.currentTime);
+        osc1.connect(panner1);
+        panner1.connect(mainGain);
+      } else {
+        osc1.connect(mainGain);
+      }
+      osc1.start();
+      osc1Ref.current = osc1;
+
+      // Right Channel (binaural detune delta -4Hz for meditative state)
+      const osc2 = ctx.createOscillator();
+      osc2.type = 'sine';
+      const detuneHz = binaural ? hz + 4.5 : hz;
+      osc2.frequency.setValueAtTime(detuneHz, ctx.currentTime);
+
+      const panner2 = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+      if (panner2) {
+        panner2.pan.setValueAtTime(1, ctx.currentTime);
+        osc2.connect(panner2);
+        panner2.connect(mainGain);
+      } else {
+        osc2.connect(mainGain);
+      }
+      osc2.start();
+      osc2Ref.current = osc2;
+
+      setIsPlaying(true);
+    } catch (e) {
+      console.warn("Failed to initiate Web Audio Synthesizer:", e);
+    }
+  };
+
+  const toggleSound = () => {
+    if (isPlaying) {
+      stopSound();
+    } else {
+      playSound();
+    }
+  };
+
+  useEffect(() => {
+    if (isPlaying && gainNodeRef.current && audioCtxRef.current) {
+      gainNodeRef.current.gain.setValueAtTime(volume, audioCtxRef.current.currentTime);
+    }
+  }, [volume]);
+
+  useEffect(() => {
+    if (isPlaying) {
+      playSound();
+    }
+    if (data.updateNodeData) {
+      data.updateNodeData(id, { solfeggioHz: hz });
+    }
+  }, [hz, binaural]);
+
+  useEffect(() => {
+    let interval: any;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        window.dispatchEvent(new CustomEvent('solfeggio-sound-active', {
+          detail: { hz, isPlaying: true, timestamp: Date.now() }
+        }));
+      }, 100);
+    } else {
+      window.dispatchEvent(new CustomEvent('solfeggio-sound-active', {
+        detail: { hz, isPlaying: false, timestamp: Date.now() }
+      }));
+    }
+    return () => {
+      clearInterval(interval);
+      window.dispatchEvent(new CustomEvent('solfeggio-sound-active', {
+        detail: { hz, isPlaying: false, timestamp: Date.now() }
+      }));
+    };
+  }, [isPlaying, hz]);
+
+  useEffect(() => {
+    return () => stopSound();
+  }, []);
+
+  return (
+    <div className="rounded-2xl border border-amber-500/30 bg-black/95 backdrop-blur-xl p-4 shadow-2xl min-w-[280px] max-w-[300px] text-white transition-all duration-300" style={{ boxShadow: '0 0 15px rgba(245, 158, 11, 0.15)' }}>
+      <Handle type="target" position={Position.Left} className="w-3 h-3 bg-amber-500 rounded-full border-2 border-black" />
+      
+      <div className="flex items-center justify-between mb-3 border-b border-amber-500/20 pb-2">
+        <div className="flex items-center gap-1.5">
+          <Headphones className="w-4 h-4 text-amber-500" />
+          <span className="font-medium text-xs text-amber-300">Solfeggio Sound Matrix</span>
+        </div>
+        <span className="text-[9px] uppercase tracking-wider font-semibold border border-amber-500/25 px-1.5 py-0.5 rounded-full text-amber-400 bg-amber-500/5">Acoustics</span>
+      </div>
+
+      <div className="space-y-3">
+        <select
+          value={hz}
+          onChange={(e) => setHz(parseInt(e.target.value))}
+          className="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white/90 focus:outline-none focus:border-amber-500/40"
+        >
+          {frequencies.map((f) => (
+            <option key={f.value} value={f.value} className="text-black font-sans">
+              {f.label} • {f.desc}
+            </option>
+          ))}
+        </select>
+
+        <div className="h-20 bg-slate-950/80 rounded-xl flex items-center justify-center border border-white/5 overflow-hidden relative">
+          {isPlaying ? (
+            <div className="flex items-center justify-center gap-1.5 h-12 w-full px-5">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="w-1.5 rounded bg-amber-500 animate-pulse"
+                  style={{
+                    height: `${Math.max(15, Math.random() * 50 + 10)}%`,
+                    animationDelay: `${i * 0.08}s`,
+                    animationDuration: `${0.4 + (hz / 1000)}s`
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <span className="text-[10px] font-mono text-white/30 tracking-widest animate-pulse">SOUND SILENT • RESONATE MATRIX</span>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between gap-4 border-t border-white/5 pt-2">
+          <button
+            onClick={toggleSound}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg active:scale-95 ${isPlaying ? 'bg-amber-600 animate-pulse hover:bg-amber-700' : 'bg-amber-500 hover:bg-amber-600'}`}
+          >
+            {isPlaying ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white animate-bounce" />}
+          </button>
+
+          <div className="flex flex-col flex-1 gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-mono text-white/40 uppercase">Aura Volume</span>
+              <span className="text-[9px] font-mono text-amber-300">{(volume * 100).toFixed(0)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="0.5"
+              step="0.05"
+              value={volume}
+              onChange={(e) => setVolume(parseFloat(e.target.value))}
+              className="w-full accent-amber-500 cursor-pointer h-1 rounded bg-white/10"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-xs font-mono text-white/60 border-t border-white/5 pt-2">
+          <span>Theta Brainwave Binaural (-4.5Hz)</span>
+          <button
+            onClick={() => setBinaural(!binaural)}
+            className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold transition-all ${binaural ? 'bg-amber-500/20 border border-amber-500/40 text-amber-300 animate-pulse' : 'bg-white/5 text-white/40'}`}
+          >
+            {binaural ? 'Active' : 'Binaural Off'}
+          </button>
+        </div>
+      </div>
+
+      <Handle type="source" position={Position.Right} className="w-3 h-3 bg-amber-500 rounded-full border-2 border-black" />
     </div>
   );
 };
@@ -721,37 +1378,9 @@ const ChatbotNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
     setActionLabel('Unfolding akashic geometry...');
 
     const canvasCtx = gatherCanvasContext();
-    const alignmentTheme = `
-      You are standardizing an interlocking grid map of nodes. 
-      Analyze the user's active details:
-      ${canvasCtx || 'General cosmic coordinates'}
-      
-      Generate a set of 3-4 highly synchronized structural nodes representing further advanced spiritual research topics.
-      Each node MUST have:
-      - title: name of the topic
-      - content: brief summary (1-2 sentences) of why it connects to their profile.
-      - type: "noteNode"
-      
-      Provide your response in EXACT, VALID JSON format matching this schema:
-      {
-        "nodes": [
-          {"id": "gen_1", "type": "noteNode", "title": "...", "content": "..."},
-          ...
-        ]
-      }
-      Do NOT include any extra conversational markdown. ONLY return the final JSON.
-    `;
 
     try {
-      const response = await fetchCosmicChatResponse(alignmentTheme, [], cosmicData || null);
-      
-      let parsedResponse: { nodes?: { id: string; type: string; title: string; content: string }[] } = {};
-      try {
-        const cleanJson = response.text.replace(/```json|```/g, "").trim();
-        parsedResponse = JSON.parse(cleanJson);
-      } catch (err) {
-        console.error("Failed to parse automatic canvas structure", err);
-      }
+      const parsedResponse = await fetchUnfoldedNodes(canvasCtx, cosmicData || null);
 
       if (parsedResponse.nodes && parsedResponse.nodes.length > 0) {
         // Dispatch callback event or update parent nodes state by sending custom data through window event or direct update hook
@@ -765,7 +1394,7 @@ const ChatbotNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
 
         setHistory((prev) => [
           ...prev,
-          { role: 'model' as const, parts: [{ text: "✨ **Akashic grid unfolded successfully!** I have projected 3 complementary intelligence structures onto your cosmic workspace, interconnected with glowing energetic links based on your resonance." }] },
+          { role: 'model' as const, parts: [{ text: "✨ **Akashic grid unfolded successfully!** I have projected complementary intelligence structures onto your cosmic workspace, interconnected with glowing energetic links based on your resonance." }] },
         ]);
       } else {
         setHistory((prev) => [
@@ -775,6 +1404,10 @@ const ChatbotNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
       }
     } catch (err) {
       console.error(err);
+      setHistory((prev) => [
+        ...prev,
+        { role: 'model' as const, parts: [{ text: "The cosmic alignment was disrupted while unfolding the grid. Please re-align and try again." }] },
+      ]);
     } finally {
       setIsLoading(false);
       setActionLabel('');
@@ -922,19 +1555,27 @@ const AstralCanvasInner = ({ cosmicData }: AstralCanvasProps) => {
       const startX = chatNode ? chatNode.position.x + 380 : 200;
       const startY = chatNode ? chatNode.position.y : 150;
 
-      const preparedNodes: Node<CanvasNodeData>[] = newNodes.map((n: any, index: number) => ({
-        id: `gen_note_${Date.now()}_${index}`,
-        type: 'noteNode',
-        position: { x: startX + (index * 300) - 300, y: startY + 280 + (index % 2 * 60) },
-        data: {
-          id: `gen_note_${Date.now()}_${index}`,
-          title: n.title,
-          content: n.content,
-          color: '#a855f7',
-          cosmicData,
-          updateNodeData,
-        }
-      }));
+      const preparedNodes: Node<CanvasNodeData>[] = newNodes.map((n: any, index: number) => {
+        const type = n.type || 'noteNode';
+        const nodeId = `gen_${type}_${Date.now()}_${index}`;
+        return {
+          id: nodeId,
+          type: type,
+          position: { x: startX + (index * 320) - 320, y: startY + 280 + ((index % 2) * 60) },
+          data: {
+            id: nodeId,
+            title: n.title,
+            content: n.content || '',
+            color: n.color || '#a855f7',
+            shapeType: n.shapeType || 'merkaba',
+            solfeggioHz: n.solfeggioHz || 528,
+            mediaType: n.mediaType || 'image',
+            url: n.url || '',
+            cosmicData,
+            updateNodeData,
+          }
+        };
+      });
 
       const preparedEdges: Edge[] = preparedNodes.map((pn) => ({
         id: `${chatbotNodeId}-to-${pn.id}`,
@@ -1016,17 +1657,51 @@ const AstralCanvasInner = ({ cosmicData }: AstralCanvasProps) => {
   const nodeTypes = useMemo(() => ({
     noteNode: NoteNode,
     videoNode: VideoNode,
+    mediaNode: MediaNode,
     celestialNode: CelestialNode,
     voiceNode: VoiceNode,
     chatbotNode: ChatbotNode,
+    threeWidgetNode: ThreeWidgetNode,
+    dynamicNotepadNode: DynamicNotepadNode,
+    solfeggioNode: SolfeggioNode,
   }), [cosmicData]);
 
   const onConnect = (params: Connection) => {
+    let strokeColor = '#a855f7'; // amethyst
+    let strokeWidth = 2.5;
+    const animated = true;
+
+    const src = params.source || '';
+    const tgt = params.target || '';
+    
+    if (src.includes('solfeggio') || tgt.includes('solfeggio')) {
+      strokeColor = '#f59e0b'; // amber gold
+      strokeWidth = 3;
+    } else if (src.includes('chatbot') || tgt.includes('chatbot')) {
+      strokeColor = '#ec4899'; // starry pink
+      strokeWidth = 3;
+    } else if (src.includes('three') || tgt.includes('three') || src.includes('widget') || tgt.includes('widget')) {
+      strokeColor = '#06b6d4'; // neon cyan
+      strokeWidth = 2.5;
+    } else if (src.includes('media') || tgt.includes('media')) {
+      strokeColor = '#10b981'; // emerald green
+    }
+
     const newEdge: Edge = {
       ...params,
       id: `edge_${Date.now()}`,
-      animated: true,
-      style: { stroke: '#8b5cf6', strokeWidth: 1.5 },
+      animated,
+      style: {
+        stroke: strokeColor,
+        strokeWidth: strokeWidth,
+        filter: `drop-shadow(0px 0px 4px ${strokeColor})`,
+      },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: strokeColor,
+        width: 15,
+        height: 15,
+      }
     };
     setEdges((eds) => addEdge(newEdge, eds));
   };
@@ -1086,15 +1761,19 @@ const AstralCanvasInner = ({ cosmicData }: AstralCanvasProps) => {
     }
   };
 
-  const handleAddNode = (type: 'noteNode' | 'videoNode' | 'celestialNode' | 'voiceNode' | 'chatbotNode') => {
+  const handleAddNode = (type: 'noteNode' | 'videoNode' | 'mediaNode' | 'celestialNode' | 'voiceNode' | 'chatbotNode' | 'threeWidgetNode' | 'dynamicNotepadNode' | 'solfeggioNode') => {
     const newId = `${type}_${Date.now()}`;
     // position node nicely at center coordinates
     const offsetPositions = {
       noteNode: { title: 'Cosmic Reflection' },
       videoNode: { title: 'Celestial Meditations' },
+      mediaNode: { title: 'Celestial Media Canvas' },
       celestialNode: { title: 'Astrology Alignment' },
       voiceNode: { title: 'Spiritual Transcription' },
       chatbotNode: { title: 'Dimensional Synthesizer' },
+      threeWidgetNode: { title: 'Aetheric 3D Object' },
+      dynamicNotepadNode: { title: 'Dynamic Notepad' },
+      solfeggioNode: { title: 'Solfeggio Frequencies' },
     };
 
     const newNode: Node<CanvasNodeData> = {
@@ -1173,7 +1852,16 @@ const AstralCanvasInner = ({ cosmicData }: AstralCanvasProps) => {
             title="Add Youtube players"
           >
             <Video className="w-4 h-4 text-rose-400" />
-            <span>Video</span>
+            <span>Video URL</span>
+          </button>
+
+          <button
+            onClick={() => handleAddNode('mediaNode')}
+            className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-emerald-500/30 text-white text-xs px-3 py-2 rounded-xl transition-all"
+            title="Upload raw assets (images, gifs, video, audio)"
+          >
+            <Upload className="w-4 h-4 text-emerald-400" />
+            <span>Upload Media</span>
           </button>
 
           <button
@@ -1201,6 +1889,33 @@ const AstralCanvasInner = ({ cosmicData }: AstralCanvasProps) => {
           >
             <MessageSquare className="w-4 h-4 text-purple-400" />
             <span>AI Chat</span>
+          </button>
+
+          <button
+            onClick={() => handleAddNode('dynamicNotepadNode')}
+            className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-purple-400/30 text-white text-xs px-3 py-2 rounded-xl transition-all"
+            title="Create interactive notes and prompt tools"
+          >
+            <BookOpen className="w-4 h-4 text-purple-300" />
+            <span>Interactive Notepad</span>
+          </button>
+
+          <button
+            onClick={() => handleAddNode('threeWidgetNode')}
+            className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-sky-400/30 text-white text-xs px-3 py-2 rounded-xl transition-all"
+            title="Open immersive 3D generative objects"
+          >
+            <Layers className="w-4 h-4 text-sky-300" />
+            <span>3D Object</span>
+          </button>
+
+          <button
+            onClick={() => handleAddNode('solfeggioNode')}
+            className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-amber-400/30 text-white text-xs px-3 py-2 rounded-xl transition-all"
+            title="Synthesize real meditative soundscapes"
+          >
+            <Headphones className="w-4 h-4 text-amber-300 animate-pulse" />
+            <span>Solfeggio Sound</span>
           </button>
 
           <div className="h-6 w-[1px] bg-white/10 mx-1" />

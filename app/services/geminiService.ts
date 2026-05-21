@@ -52,6 +52,10 @@ export const fetchAngelNumberInsight = async (query: string, cosmicData: CosmicD
   return apiProxy("fetchAngelNumberInsight", { query, cosmicData });
 };
 
+export const fetchUnfoldedNodes = async (canvasCtx: string, cosmicData: CosmicData | null): Promise<{ nodes: any[] }> => {
+  return apiProxy("fetchUnfoldedNodes", { canvasCtx, cosmicData });
+};
+
 export const streamGeminiChat = async (messages: {role: string, text: string}[], onChunk: (chunk: string) => void) => {
   const response = await fetch("/api/gemini-stream", {
     method: "POST",

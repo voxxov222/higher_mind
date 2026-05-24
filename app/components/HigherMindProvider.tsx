@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Thought, Feeling, Experience, SynapticCluster, ConsciousnessPacket, UserProfileConfig } from '../types';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { Thought, Feeling, Experience, SynapticCluster, ConsciousnessPacket, UserProfileConfig, AstralTheme } from '../types';
+import { ASTRAL_THEMES } from '../utils/themes';
 
 interface HigherMindContextType {
   thoughts: Thought[];
@@ -17,6 +18,10 @@ interface HigherMindContextType {
   toggleModule: (id: string) => void;
   userData: UserProfileConfig | null;
   setUserData: (data: UserProfileConfig) => void;
+  activeThemeId: string;
+  setActiveThemeId: (id: string) => void;
+  activeTheme: AstralTheme;
+  themes: AstralTheme[];
 }
 
 export interface AIModule {
@@ -31,7 +36,29 @@ export interface AIModule {
 const HigherMindContext = createContext<HigherMindContextType | undefined>(undefined);
 
 export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [activeThemeId, setActiveThemeIdState] = useState<string>('futuristic');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('astral_active_theme');
+      if (savedTheme && ASTRAL_THEMES.some(t => t.id === savedTheme)) {
+        setActiveThemeIdState(savedTheme);
+      }
+    }
+  }, []);
+
+  const setActiveThemeId = (id: string) => {
+    setActiveThemeIdState(id);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('astral_active_theme', id);
+    }
+  };
+
+  const activeTheme = ASTRAL_THEMES.find(t => t.id === activeThemeId) || ASTRAL_THEMES[0];
+  const themes = ASTRAL_THEMES;
+
   const [thoughts, setThoughts] = useState<Thought[]>([]);
+
   const [feelings, setFeelings] = useState<Feeling[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [clusters, setClusters] = useState<SynapticCluster[]>([]);
@@ -157,7 +184,11 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       aiModules,
       toggleModule,
       userData,
-      setUserData
+      setUserData,
+      activeThemeId,
+      setActiveThemeId,
+      activeTheme,
+      themes
     }}>
       {children}
     </HigherMindContext.Provider>

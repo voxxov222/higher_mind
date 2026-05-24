@@ -152,14 +152,16 @@ const AvatarHologramModel = ({
           return (
             <line key={`meridian_line_${i}`}>
               <bufferGeometry>
-                <float32Array attach="attributes-position" args={[
-                  new Float32Array([
+                <bufferAttribute
+                  attach="attributes-position"
+                  count={3}
+                  array={new Float32Array([
                     0, -2.8, 0,
                     Math.cos(angle) * r, 0, Math.sin(angle) * r,
                     0, 3.7, 0
-                  ]),
-                  3
-                ]} />
+                  ])}
+                  itemSize={3}
+                />
               </bufferGeometry>
               <lineBasicMaterial color="#0891b2" transparent opacity={0.06} />
             </line>

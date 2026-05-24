@@ -356,3 +356,28 @@ export interface UserProfileConfig {
     tags?: string[];
   }[];
 }
+
+export interface AstralTheme {
+  id: string;
+  name: string;
+  description: string;
+  primaryColor: string;
+  secondaryColor: string;
+  fontFamily: string;
+  bgType: 'none' | 'stars' | 'nebula' | 'particles' | 'hologram' | 'aurora' | '3d_room';
+  borderStyle: 'none' | 'thin' | 'neon' | 'glass' | 'double_gold' | 'scanline';
+  glowStyle: string;
+  cardBg: string;
+  textStyle: string;
+  headingStyle: string;
+  effects: {
+    animated?: boolean;
+    interactive?: boolean;
+    dragAndDrop?: boolean;
+    largeFont?: boolean;
+    solfeggio?: boolean;
+    ancientSymbolic?: boolean;
+    terminalTech?: boolean;
+  };
+}
+

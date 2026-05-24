@@ -3,7 +3,7 @@ class SoundEngine {
   private masterGain: GainNode | null = null;
   private isInitialized = false;
 
-  private init() {
+  private init = () => {
     if (this.isInitialized || typeof window === 'undefined') return;
     try {
       this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -16,7 +16,7 @@ class SoundEngine {
     }
   }
 
-  private playTone(freq: number, type: OscillatorType, duration: number, vol = 0.5, slideFreq?: number) {
+  private playTone = (freq: number, type: OscillatorType, duration: number, vol = 0.5, slideFreq?: number) => {
     if (!this.ctx || !this.masterGain) return;
     
     const osc = this.ctx.createOscillator();
@@ -40,7 +40,7 @@ class SoundEngine {
     osc.stop(this.ctx.currentTime + duration);
   }
 
-  private playNoise(duration: number, vol = 0.5, isMetallic = false) {
+  private playNoise = (duration: number, vol = 0.5, isMetallic = false) => {
     if (!this.ctx || !this.masterGain) return;
     const bufferSize = this.ctx.sampleRate * duration;
     const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
@@ -69,42 +69,42 @@ class SoundEngine {
   }
 
   // Common UI Sounds
-  hover() {
+  hover = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(800, 'sine', 0.05, 0.1);
     this.playTone(1200, 'sine', 0.05, 0.05);
   }
 
-  click() {
+  click = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(400, 'square', 0.1, 0.2, 100);
     this.playNoise(0.05, 0.1, true);
   }
 
-  select() {
+  select = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(600, 'triangle', 0.2, 0.3, 1200);
     this.playTone(900, 'sine', 0.3, 0.2);
   }
 
-  open() {
+  open = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(100, 'sawtooth', 0.3, 0.1, 800);
     this.playNoise(0.3, 0.05, true);
   }
 
-  close() {
+  close = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(800, 'sawtooth', 0.2, 0.1, 100);
     this.playNoise(0.2, 0.05, true);
   }
 
-  scan() {
+  scan = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     for (let i = 0; i < 5; i++) {
@@ -114,7 +114,7 @@ class SoundEngine {
     }
   }
 
-  error() {
+  error = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(150, 'sawtooth', 0.3, 0.3, 100);
@@ -124,13 +124,13 @@ class SoundEngine {
   // --- SECTION-SPECIFIC SOUNDS ---
 
   // Astrology / Celestial (Ethereal, Orbital, Resonance)
-  astrologyHover() {
+  astrologyHover = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(432, 'sine', 0.1, 0.15); // 432Hz tuning vibe
   }
   
-  astrologyClick() {
+  astrologyClick = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(528, 'sine', 0.3, 0.2, 852); // Solfeggio ascension
@@ -138,14 +138,14 @@ class SoundEngine {
   }
 
   // Numerology (Crisp, Calculation, Digital Blips)
-  numerologyHover() {
+  numerologyHover = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(2000, 'square', 0.02, 0.05);
     setTimeout(() => this.playTone(2400, 'square', 0.02, 0.05), 30);
   }
 
-  numerologyClick() {
+  numerologyClick = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     for (let i = 0; i < 3; i++) {
@@ -156,13 +156,13 @@ class SoundEngine {
   }
 
   // Kabbalah / Mystical (Deep, Crystalline, Harmonic)
-  mysticHover() {
+  mysticHover = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(300, 'triangle', 0.2, 0.15); // Deep resonance
   }
 
-  mysticClick() {
+  mysticClick = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(256, 'triangle', 0.5, 0.2, 512); // Octave jump
@@ -170,13 +170,13 @@ class SoundEngine {
   }
 
   // Neural / AI (Sci-fi, Cyberpunk, Fluid synch)
-  neuralHover() {
+  neuralHover = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(800 + Math.random() * 400, 'sawtooth', 0.05, 0.05, 600);
   }
 
-  neuralClick() {
+  neuralClick = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(400, 'sawtooth', 0.2, 0.15, 1200); // Zap up
@@ -184,13 +184,13 @@ class SoundEngine {
   }
 
   // Mechanical / Robotics (Heavy servos, ratchets)
-  mechHover() {
+  mechHover = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playNoise(0.03, 0.2); // short click
   }
 
-  mechClick() {
+  mechClick = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(100, 'square', 0.1, 0.3, 50); // Heavy clunk

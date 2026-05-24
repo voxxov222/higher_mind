@@ -9,7 +9,7 @@ import {
   Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, 
   Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, Zap, Upload, Palette, 
   Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box, Key, Cpu,
-  Workflow
+  Workflow, Radio
 } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
@@ -52,6 +52,7 @@ import { AvatarMatrix } from './AvatarMatrix';
 import { QuantumEvolutionSection } from './QuantumEvolutionSection';
 import { ObsidianVaultSection } from './ObsidianVaultSection';
 import { ChristSophiaSection } from './ChristSophiaSection';
+import { VibrationalTuningSection } from './VibrationalTuningSection';
 
 /**
  * Interface for DashboardProps
@@ -1365,7 +1366,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
     }
   };
 
-  const themeColor = profileConfig?.theme?.primaryColor || '#a855f7';
+  const { activeTheme } = useHigherMind();
+  const themeColor = activeTheme.primaryColor;
 
   useEffect(() => {
     if (loadedInputs) {
@@ -1469,8 +1471,94 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl w-full max-w-xl h-full max-h-[80vh] flex flex-col overflow-hidden shadow-2xl relative mx-auto sm:mx-0 sm:ml-0"
+            className={`pointer-events-auto w-full max-w-xl h-full max-h-[80vh] flex flex-col overflow-hidden relative mx-auto sm:mx-0 sm:ml-0 transition-all duration-500 ${
+              activeTheme.cardBg
+            } ${
+              activeTheme.fontFamily
+            } ${
+              activeTheme.glowStyle
+            } ${
+              activeTheme.effects.largeFont ? "text-lg md:text-xl font-medium" : "text-stone-300"
+            } ${
+              activeTheme.borderStyle === 'double_gold' ? 'border-double border-4 border-amber-500/30 font-serif' : 
+              activeTheme.borderStyle === 'scanline' ? 'border border-green-500/30 font-mono' : 
+              activeTheme.borderStyle === 'neon' ? 'border border-fuchsia-500/20 font-sans' : 'border border-white/10 font-sans'
+            } ${
+              activeTheme.borderStyle === 'glass' ? 'rounded-3xl shadow-2xl' : 'rounded-none'
+            }`}
           >
+            {/* --- PREMIUM THEMATIC ACCENTS & INTERACTIVE CORE OVERLAYS --- */}
+            
+            {/* A: Retro Terminal Overlay */}
+            {activeTheme.id === 'cyber_terminal' && (
+              <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-[99] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,3px_100%]" />
+            )}
+
+            {/* B: Interactive Node Resonance Panel */}
+            {activeTheme.id === 'interactive_tuning' && (
+              <div className="bg-sky-500/5 border-b border-sky-500/15 p-3 flex items-center justify-between gap-4 select-none shrink-0 text-sky-400 z-10">
+                <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+                  <span>Interactive Resonance Tuning</span>
+                </div>
+                <div className="flex gap-4 items-center flex-1 justify-end">
+                  <label className="text-[8px] uppercase tracking-widest text-sky-500/80 font-mono">Astral Sync:</label>
+                  <input 
+                    type="range" 
+                    min="10" 
+                    max="100" 
+                    defaultValue="65" 
+                    className="w-20 md:w-28 accent-sky-500 bg-sky-950/40 h-1 outline-none rounded-full cursor-col-resize hover:accent-sky-400" 
+                    onChange={() => soundEngine.tick()}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* C: Modular Draggable HUD */}
+            {activeTheme.id === 'drag_and_drop' && (
+              <div className="bg-indigo-500/5 border-b border-indigo-500/10 p-3 flex items-center justify-between shrink-0 text-indigo-400 z-10">
+                <div className="flex items-center gap-1.5 font-sans text-[10px] uppercase tracking-wider font-bold">
+                  <span className="w-2 h-2 rounded bg-indigo-500 animate-pulse" />
+                  <span>Draggable Grid Workspace</span>
+                </div>
+                <span className="text-[9px] uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-0.5 rounded-full text-indigo-300">
+                  Customizable Drag
+                </span>
+              </div>
+            )}
+
+            {/* D: Solfeggio Micro Sound visualizer */}
+            {activeTheme.id === 'solfeggio_harmony' && (
+              <div className="bg-amber-500/5 border-b border-amber-500/10 p-3 flex items-center justify-between shrink-0 text-amber-500 z-10">
+                <div className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-wider font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span>Solfeggio: <strong className="text-pink-400 font-mono">528 Hz</strong></span>
+                </div>
+                <div className="flex gap-1 h-3 items-end">
+                  <span className="w-0.5 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
+                  <span className="w-0.5 h-3 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  <span className="w-0.5 h-1 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
+                  <span className="w-0.5 h-2.5 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.6s' }} />
+                </div>
+              </div>
+            )}
+
+            {/* E: Antique Alchemy Seals */}
+            {activeTheme.id === 'sacred_alchemist' && (
+              <div className="bg-stone-900/40 border-b border-amber-900/30 p-2 text-center text-[10px] font-serif uppercase tracking-[0.2em] italic text-amber-500/60 font-bold shrink-0 z-10">
+                ☉ Hermetic Synthesis Portal ☽
+              </div>
+            )}
+
+            {/* F: Dynamic Kinetic Orbits elements */}
+            {activeTheme.id === 'advanced_animated' && (
+              <div className="absolute top-0 right-10 w-24 h-24 rounded-full border border-pink-500/5 pointer-events-none animate-spin z-10" style={{ animationDuration: '30s' }}>
+                <div className="absolute top-0 left-12 w-1.5 h-1.5 rounded-full bg-cyan-400/60 blur-[1px]" />
+                <div className="absolute bottom-12 left-0 w-1 h-1 rounded-full bg-pink-400/60 blur-[1px]" />
+              </div>
+            )}
+
             <button 
               onClick={() => setIsMinimized(true)}
               className="absolute top-4 right-4 z-20 bg-black/50 hover:bg-white/10 p-2 rounded-full border border-white/10 text-stone-400 hover:text-white transition-colors"
@@ -1500,6 +1588,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'patterns'} tabId="patterns" onClick={() => setActiveTab('patterns')} icon={<Fingerprint className="w-4 h-4"/>}>Synchronicities</Tab>
               <Tab active={activeTab === 'angel_numbers'} tabId="angel_numbers" onClick={() => setActiveTab('angel_numbers')} icon={<Sparkles className="w-4 h-4"/>}>Angel Numbers</Tab>
               <Tab active={activeTab === 'vortex'} tabId="vortex" onClick={() => setActiveTab('vortex')} icon={<CirclePlay className="w-4 h-4 text-cyan-400"/>}>Vortex Sequencing</Tab>
+              <Tab active={activeTab === 'vibrational_tuning'} tabId="vibrational_tuning" onClick={() => setActiveTab('vibrational_tuning')} icon={<Radio className="w-4 h-4 text-fuchsia-400 animate-pulse"/>}>Vibrational Tuning</Tab>
               <Tab active={activeTab === 'astral_canvas'} tabId="astral_canvas" onClick={() => setActiveTab('astral_canvas')} icon={<Workflow className="w-4 h-4 text-purple-400 animate-pulse"/>}>Research Canvas</Tab>
               <Tab active={activeTab === 'gematria_calc'} tabId="gematria_calc" onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
               <Tab active={activeTab === 'golden_ratio'} tabId="golden_ratio" onClick={() => setActiveTab('golden_ratio')} icon={<Grid className="w-4 h-4 text-amber-500" />}>Kathara Grid</Tab>
@@ -2533,6 +2622,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                         setVortexMode={setVortexMode} 
                       />
                    </motion.div>
+                )}
+                {activeTab === 'vibrational_tuning' && (
+                  <motion.div key="vibrational_tuning" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="h-full min-h-[700px]">
+                    <VibrationalTuningSection />
+                  </motion.div>
                 )}
                 {activeTab === 'gematria_calc' && (
                   <motion.div key="gematria_calc" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">

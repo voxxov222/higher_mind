@@ -31,9 +31,11 @@ async function startServer() {
     const distPath = path.join(process.cwd(), "dist/client");
     app.use(express.static(distPath, { immutable: true, maxAge: "1y" }));
     
+    const buildPath = path.join(process.cwd(), "dist/server/index.js");
+    let buildPromise = import(buildPath);
+    
     app.all("*", (req, res, next) => {
-       const buildPath = path.join(process.cwd(), "dist/server/index.js");
-       import(buildPath).then((build: any) => {
+       buildPromise.then((build: any) => {
          return createRequestHandler({
            build,
            mode: "production",

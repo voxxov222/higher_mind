@@ -130,7 +130,7 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -259,7 +259,7 @@ export const fetchCosmicChatResponse = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-3.5-flash",
       contents: [
         ...safeHistory,
         { role: 'user', parts: [{ text: userMessage }] }
@@ -323,7 +323,7 @@ export const fetchTimelineDepth = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -381,7 +381,7 @@ export const fetchTimelineDeepDiveOption = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -446,7 +446,7 @@ export const fetchGeneralDeepDive = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -520,7 +520,7 @@ export const fetchAuraInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.5-flash',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",
@@ -607,7 +607,7 @@ export const fetchAngelNumberInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.5-flash',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",
@@ -641,7 +641,7 @@ export const streamGeminiChat = async (messages: {role: string, text: string}[],
         }));
         
         const responseStream = await ai.models.generateContentStream({
-            model: "gemini-1.5-flash",
+            model: "gemini-3.5-flash",
             contents,
             config: {
                 temperature: 0.7,

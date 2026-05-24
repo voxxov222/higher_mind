@@ -47,6 +47,7 @@ import { VoiceCommander } from './VoiceCommander';
 import { TetragrammatonHUD } from './TetragrammatonHUD';
 import { soundEngine } from '../lib/soundEffects';
 import { AstralCanvas } from './AstralCanvas';
+import { AvatarMatrix } from './AvatarMatrix';
 
 import { QuantumEvolutionSection } from './QuantumEvolutionSection';
 import { ObsidianVaultSection } from './ObsidianVaultSection';
@@ -60,8 +61,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'hypernexus' | 'christ_sophia' | 'astral_canvas';
-  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'hypernexus' | 'christ_sophia' | 'astral_canvas') => void;
+  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'hypernexus' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix';
+  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'hypernexus' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -1476,7 +1477,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             >
               <Minimize2 className="w-4 h-4" />
             </button>
-            <div className="flex border-b border-white/10 p-2 gap-2 overflow-x-auto no-scrollbar pr-14">
+            <div className="flex border-b border-white/10 p-2 gap-2 overflow-x-auto no-scrollbar pr-14 flex-nowrap shrink-0">
+              <Tab active={activeTab === 'avatar_matrix'} tabId="avatar_matrix" onClick={() => setActiveTab('avatar_matrix')} icon={<UserIcon className="w-4 h-4 text-emerald-400 animate-pulse"/>}>Avatar Core Summary</Tab>
               <Tab active={activeTab === 'identity'} tabId="identity" onClick={() => setActiveTab('identity')} icon={<UserIcon className="w-4 h-4"/>}>My Identity</Tab>
               <Tab active={activeTab === 'torus'} tabId="torus" onClick={() => setActiveTab('torus')} icon={<Activity className="w-4 h-4"/>}>Soul Blueprint</Tab>
               <Tab active={activeTab === 'soul_path'} tabId="soul_path" onClick={() => setActiveTab('soul_path')} icon={<Compass className="w-4 h-4"/>}>Soul Path</Tab>
@@ -2228,6 +2230,12 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     )}
                   </motion.div>
                 )}
+                {activeTab === 'avatar_matrix' && (
+                  <motion.div key="avatar_matrix" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
+                    <AvatarMatrix data={data} />
+                  </motion.div>
+                )}
+
                 {activeTab === 'torus' && (
                   <motion.div key="torus" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 text-stone-200 font-light leading-relaxed relative min-h-[70vh]">
                     <SoulBlueprintTab 

@@ -15,6 +15,9 @@ import {
   Position,
   ReactFlowProvider,
   MarkerType,
+  BaseEdge,
+  getBezierPath,
+  type EdgeProps,
 } from '@xyflow/react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -51,7 +54,13 @@ import {
   BookOpen,
   Settings,
   HelpCircle,
-  Sparkle
+  Sparkle,
+  Lock,
+  Unlock,
+  Copy,
+  Maximize2,
+  Shapes,
+  Palette
 } from 'lucide-react';
 import { CosmicData } from '../types';
 import { fetchCosmicChatResponse, fetchUnfoldedNodes } from '../services/geminiService';
@@ -81,7 +90,131 @@ interface CanvasNodeData {
   solfeggioHz?: number;
   notepadResponse?: string;
   notepadStatus?: 'idle' | 'synthesizing' | 'calculating' | 'translated' | 'shadowing';
+  // Cosmic Customizations
+  shape?: 'rounded' | 'sharp' | 'bevel' | 'hex' | 'pill';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  texture?: 'glass' | 'grid' | 'noise' | 'plasma' | 'scanlines';
+  customAnimation?: 'none' | 'bobbing' | 'pulse' | 'glow';
+  locked?: boolean;
 }
+
+// Helper to extract custom styling modifiers (Shape, Size, Texture, Animation, Lock)
+const getNodeStyles = (data: CanvasNodeData) => {
+  // Shape Border styles
+  let shapeClass = "rounded-2xl";
+  if (data.shape === 'sharp') {
+    shapeClass = "rounded-none";
+  } else if (data.shape === 'bevel') {
+    shapeClass = "rounded-xl border-dashed";
+  } else if (data.shape === 'hex') {
+    shapeClass = "rounded-sm border-l-4 border-r-4";
+  } else if (data.shape === 'pill') {
+    shapeClass = "rounded-[36px]";
+  }
+
+  // Size transforms
+  let sizeStyle: React.CSSProperties = {};
+  if (data.size === 'sm') {
+    sizeStyle = { transform: 'scale(0.85)', transformOrigin: 'center' };
+  } else if (data.size === 'lg') {
+    sizeStyle = { transform: 'scale(1.1)', transformOrigin: 'center' };
+  } else if (data.size === 'xl') {
+    sizeStyle = { transform: 'scale(1.2)', transformOrigin: 'center' };
+  }
+
+  // Textures overlays
+  let textureClass = "bg-black/80 backdrop-blur-xl border border-white/10";
+  if (data.texture === 'grid') {
+    textureClass = "bg-[#070b19] border border-cyan-500/30 bg-[linear-gradient(rgba(103,232,249,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(103,232,249,0.04)_1px,transparent_1px)] bg-[size:16px_16px] backdrop-blur-xl";
+  } else if (data.texture === 'noise') {
+    textureClass = "bg-[#0b0c14] border border-purple-500/30 bg-[radial-gradient(#ffffff1a_1px,transparent_1px)] bg-[size:10px_10px] backdrop-blur-xl shadow-inner";
+  } else if (data.texture === 'plasma') {
+    textureClass = "bg-gradient-to-tr from-purple-950/90 via-slate-950 to-indigo-950/80 border border-fuchsia-500/40 shadow-[0_0_25px_rgba(217,70,239,0.25)] backdrop-blur-lg";
+  } else if (data.texture === 'scanlines') {
+    textureClass = "bg-[#00050c] border border-emerald-500/30 bg-[linear-gradient(rgba(16,185,129,0.03)_50%,rgba(0,0,0,0.4)_50%)] bg-[size:100%_4px] shadow-lg shadow-emerald-950/20";
+  }
+
+  // Animation flow
+  let animateClass = "";
+  if (data.customAnimation === 'bobbing') {
+    animateClass = "animate-bobbing";
+  } else if (data.customAnimation === 'pulse') {
+    animateClass = "animate-pulse border-white/40";
+  } else if (data.customAnimation === 'glow') {
+    animateClass = "shadow-[0_0_20px_rgba(168,85,247,0.45)] border-purple-400 animate-pulse";
+  }
+
+  const isLocked = !!data.locked;
+
+  return { shapeClass, sizeStyle, textureClass, animateClass, isLocked };
+};
+
+// 0. CUSTOM RESONANCE EDGE WITH PULSING GRADIENT EFFECT
+const ResonanceEdge = ({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  style = {},
+  markerEnd,
+}: EdgeProps) => {
+  const [edgePath] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetPosition,
+    targetX,
+    targetY,
+  });
+
+  const strokeColor = style.stroke || '#a855f7';
+  const strokeWidth = style.strokeWidth || 2.5;
+
+  return (
+    <>
+      {/* 1. Underlying think track / glow shadow animation pass */}
+      <path
+        id={`${id}-glow`}
+        d={edgePath}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth={Number(strokeWidth) + 4}
+        className="opacity-20 blur-[4px] pointer-events-none transition-all duration-300 animate-resonance-pulse"
+      />
+      
+      {/* 2. Base High-contrast Connection Line */}
+      <path
+        d={edgePath}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth={strokeWidth}
+        className="opacity-50 pointer-events-none transition-all duration-300"
+      />
+
+      {/* 3. The Pulsing flowing white gradient overlay */}
+      <path
+        d={edgePath}
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth={Number(strokeWidth) + 0.5}
+        className="animate-resonance-flow opacity-80 pointer-events-none"
+        style={{
+          strokeDasharray: '12 24',
+          filter: `drop-shadow(0 0 3px ${strokeColor})`,
+        }}
+        markerEnd={markerEnd}
+      />
+
+      {/* 4. High-velocity light sphere traversing along the path */}
+      <circle r={3.5} fill="#ffffff" className="pointer-events-none filter drop-shadow-[0_0_5px_#ffffff]">
+        <animateMotion dur="2.5s" repeatCount="indefinite" path={edgePath} />
+      </circle>
+    </>
+  );
+};
 
 // 1. NOTE NODE (A Custom note taking widget with themes)
 const NoteNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
@@ -103,43 +236,53 @@ const NoteNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
     { label: 'Sunburst Gold', value: '#f59e0b' },
   ];
 
+  const { shapeClass, sizeStyle, textureClass, animateClass, isLocked } = getNodeStyles(data);
+
   return (
     <div
-      className="rounded-2xl border bg-black/80 backdrop-blur-xl p-4 shadow-2xl min-w-[280px] text-white overflow-hidden transition-all duration-300"
-      style={{ borderColor: `${theme}66`, boxShadow: `0 0 15px ${theme}33` }}
+      className={`p-4 shadow-2xl min-w-[280px] text-white overflow-hidden transition-all duration-300 border ${shapeClass} ${textureClass} ${animateClass}`}
+      style={{ borderColor: `${theme}66`, boxShadow: `0 0 15px ${theme}33`, ...sizeStyle }}
     >
       <Handle type="target" position={Position.Left} className="w-3 h-3 bg-purple-500 rounded-full border-2 border-black" />
       
-      <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
-        <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4" style={{ color: theme }} />
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="bg-transparent font-medium text-sm focus:outline-none focus:border-b focus:border-white/20 w-40"
-            placeholder="Title"
-          />
+      {isLocked && (
+        <div className="absolute top-2 right-2 bg-red-500/20 text-red-400 p-0.5 rounded-full border border-red-500/30 z-10">
+          <Lock className="w-3 h-3" />
         </div>
-        <div className="flex gap-1">
-          {themes.map((th) => (
-            <button
-              key={th.value}
-              onClick={() => setTheme(th.value)}
-              className="w-3.5 h-3.5 rounded-full border border-white/25 transition-all hover:scale-125"
-              style={{ backgroundColor: th.value }}
-              title={th.label}
+      )}
+      
+      <div className={`space-y-3 ${isLocked ? 'pointer-events-none opacity-60' : ''}`}>
+        <div className="flex items-center justify-between border-b border-white/10 pb-2">
+          <div className="flex items-center gap-2">
+            <FileText className="w-4 h-4" style={{ color: theme }} />
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="bg-transparent font-medium text-sm focus:outline-none focus:border-b focus:border-white/20 w-40"
+              placeholder="Title"
             />
-          ))}
+          </div>
+          <div className="flex gap-1">
+            {themes.map((th) => (
+              <button
+                key={th.value}
+                onClick={() => setTheme(th.value)}
+                className="w-3.5 h-3.5 rounded-full border border-white/25 transition-all hover:scale-125"
+                style={{ backgroundColor: th.value }}
+                title={th.label}
+              />
+            ))}
+          </div>
         </div>
-      </div>
 
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        className="w-full h-32 bg-white/5 border border-white/10 rounded-xl p-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none text-white/90"
-        placeholder="Write down your cosmic discoveries..."
-      />
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          className="w-full h-32 bg-white/5 border border-white/10 rounded-xl p-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none text-white/90"
+          placeholder="Write down your cosmic discoveries..."
+        />
+      </div>
 
       <Handle type="source" position={Position.Right} className="w-3 h-3 bg-purple-500 rounded-full border-2 border-black" />
     </div>
@@ -173,41 +316,54 @@ const VideoNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
     }
   }, [url]);
 
+  const { shapeClass, sizeStyle, textureClass, animateClass, isLocked } = getNodeStyles(data);
+
   return (
-    <div className="rounded-2xl border border-rose-500/30 bg-black/95 backdrop-blur-xl p-4 shadow-2xl min-w-[340px] text-white transition-all duration-300" style={{ boxShadow: '0 0 15px rgba(244, 63, 94, 0.15)' }}>
+    <div
+      className={`p-4 shadow-2xl min-w-[340px] text-white transition-all duration-300 border ${shapeClass} ${textureClass} ${animateClass}`}
+      style={{ borderColor: 'rgba(244, 63, 94, 0.3)', boxShadow: '0 0 15px rgba(244, 63, 94, 0.15)', ...sizeStyle }}
+    >
       <Handle type="target" position={Position.Left} className="w-3 h-3 bg-rose-500 rounded-full border-2 border-black" />
       
-      <div className="flex items-center gap-2 mb-3 border-b border-rose-500/20 pb-2">
-        <Video className="w-4 h-4 text-rose-400" />
-        <span className="font-medium text-sm text-rose-300">Celestial Media Widget</span>
-      </div>
+      {isLocked && (
+        <div className="absolute top-2 right-2 bg-red-500/20 text-red-400 p-0.5 rounded-full border border-red-500/30 z-10">
+          <Lock className="w-3 h-3" />
+        </div>
+      )}
+      
+      <div className={`space-y-3 ${isLocked ? 'pointer-events-none opacity-60' : ''}`}>
+        <div className="flex items-center gap-2 mb-3 border-b border-rose-500/20 pb-2">
+          <Video className="w-4 h-4 text-rose-400" />
+          <span className="font-medium text-sm text-rose-300">Celestial Media Widget</span>
+        </div>
 
-      <div className="mb-3 space-y-1">
-        <label className="text-[10px] text-white/50 uppercase tracking-widest font-bold">YouTube / Video URL</label>
-        <input
-          type="text"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white/90 focus:outline-none focus:border-rose-500/50"
-          placeholder="Paste connection URL..."
-        />
-      </div>
-
-      <div className="bg-black/40 rounded-xl overflow-hidden aspect-video flex items-center justify-center border border-white/5 relative">
-        {embedUrl ? (
-          <iframe
-            src={embedUrl}
-            title="Cosmic Stream Player"
-            className="w-full h-full border-0 absolute inset-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
+        <div className="space-y-1">
+          <label className="text-[10px] text-white/50 uppercase tracking-widest font-bold">YouTube / Video URL</label>
+          <input
+            type="text"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white/90 focus:outline-none focus:border-rose-500/50"
+            placeholder="Paste connection URL..."
           />
-        ) : (
-          <div className="flex flex-col items-center gap-1.5 text-white/30 text-center p-4">
-            <Video className="w-6 h-6 animate-pulse" />
-            <span className="text-[11px]">Enter valid video connection above</span>
-          </div>
-        )}
+        </div>
+
+        <div className="bg-black/40 rounded-xl overflow-hidden aspect-video flex items-center justify-center border border-white/5 relative">
+          {embedUrl ? (
+            <iframe
+              src={embedUrl}
+              title="Cosmic Stream Player"
+              className="w-full h-full border-0 absolute inset-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-1.5 text-white/30 text-center p-4">
+              <Video className="w-6 h-6 animate-pulse" />
+              <span className="text-[11px]">Enter valid video connection above</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <Handle type="source" position={Position.Right} className="w-3 h-3 bg-rose-500 rounded-full border-2 border-black" />
@@ -250,95 +406,108 @@ const MediaNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
     }
   }, [url, type, title]);
 
+  const { shapeClass, sizeStyle, textureClass, animateClass, isLocked } = getNodeStyles(data);
+
   return (
-    <div className="rounded-2xl border border-emerald-500/30 bg-black/95 backdrop-blur-xl p-4 shadow-2xl min-w-[320px] max-w-[340px] text-white transition-all duration-300" style={{ boxShadow: '0 0 15px rgba(16, 185, 129, 0.15)' }}>
+    <div
+      className={`p-4 shadow-2xl min-w-[320px] max-w-[340px] text-white transition-all duration-300 border ${shapeClass} ${textureClass} ${animateClass}`}
+      style={{ borderColor: 'rgba(16, 185, 129, 0.3)', boxShadow: '0 0 15px rgba(16, 185, 129, 0.15)', ...sizeStyle }}
+    >
       <Handle type="target" position={Position.Left} className="w-3 h-3 bg-emerald-500 rounded-full border-2 border-black" />
       
-      <div className="flex items-center justify-between mb-3 border-b border-emerald-500/20 pb-2">
-        <div className="flex items-center gap-2">
-          {type === 'image' && <Image className="w-4 h-4 text-emerald-400" />}
-          {type === 'gif' && <Sparkle className="w-4 h-4 text-emerald-400" />}
-          {type === 'video' && <Video className="w-4 h-4 text-emerald-400" />}
-          {type === 'audio' && <Music className="w-4 h-4 text-emerald-400" />}
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="bg-transparent font-medium text-xs text-emerald-300 focus:outline-none w-44"
-          />
+      {isLocked && (
+        <div className="absolute top-2 right-2 bg-red-500/20 text-red-400 p-0.5 rounded-full border border-red-500/30 z-10">
+          <Lock className="w-3 h-3" />
         </div>
-        <span className="text-[9px] uppercase tracking-wider font-semibold border border-emerald-500/25 px-1.5 py-0.5 rounded-full text-emerald-400 bg-emerald-500/5">Asset</span>
-      </div>
-
-      <div className="mb-4 space-y-2">
-        <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl">
-          {(['image', 'gif', 'video', 'audio'] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setType(t)}
-              className={`flex-1 py-1 rounded text-[9px] font-bold uppercase transition-all ${type === t ? 'bg-emerald-500/20 text-emerald-300' : 'text-white/40 hover:text-white'}`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={url.startsWith('blob:') ? '' : url}
-            onChange={(e) => {
-              setUrl(e.target.value);
-              if (data.updateNodeData) data.updateNodeData(id, { url: e.target.value });
-            }}
-            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white/90 focus:outline-none focus:border-emerald-500/50"
-            placeholder="Paste URL or links..."
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="bg-emerald-600/20 hover:bg-emerald-600/35 border border-emerald-500/35 hover:scale-105 rounded-xl px-2.5 flex items-center justify-center text-emerald-300 transition-all font-bold text-xs"
-            title="Upload local media asset"
-          >
-            <Upload className="w-3.5 h-3.5" />
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            onChange={handleFileUpload}
-            accept="image/*,video/*,audio/*,.gif"
-            className="hidden"
-          />
-        </div>
-      </div>
-
-      <div className="bg-black/40 rounded-xl overflow-hidden min-h-[140px] max-h-[180px] flex items-center justify-center border border-white/5 relative">
-        {url ? (
-          <>
-            {(type === 'image' || type === 'gif') && (
-              <img src={url} alt={title} className="w-full h-full object-contain max-h-[160px] rounded-lg" />
-            )}
-            {type === 'video' && (
-              <video src={url} controls className="w-full h-full object-contain max-h-[160px] rounded-lg" />
-            )}
-            {type === 'audio' && (
-              <div className="flex flex-col items-center justify-center p-3 w-full gap-2">
-                <div className="flex items-center gap-1.5 justify-center py-2">
-                  <span className="w-1.5 h-6 rounded bg-emerald-500 animate-pulse" />
-                  <span className="w-1.5 h-8 rounded bg-emerald-400 animate-pulse" style={{ animationDelay: '0.1s' }} />
-                  <span className="w-1.5 h-10 rounded bg-emerald-300 animate-pulse" style={{ animationDelay: '0.2s' }} />
-                  <span className="w-1.5 h-7 rounded bg-emerald-400 animate-pulse" style={{ animationDelay: '0.3s' }} />
-                  <span className="w-1.5 h-5 rounded bg-emerald-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
-                </div>
-                <audio src={url} controls className="w-full h-8 px-1" />
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="flex flex-col items-center gap-1 text-white/30 text-center p-4">
-            <Upload className="w-5 h-5 text-emerald-500/60 animate-bounce" />
-            <span className="text-[11px] font-mono">Upload content above</span>
+      )}
+      
+      <div className={`space-y-3 ${isLocked ? 'pointer-events-none opacity-60' : ''}`}>
+        <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+          <div className="flex items-center gap-2">
+            {type === 'image' && <Image className="w-4 h-4 text-emerald-400" />}
+            {type === 'gif' && <Sparkle className="w-4 h-4 text-emerald-400" />}
+            {type === 'video' && <Video className="w-4 h-4 text-emerald-400" />}
+            {type === 'audio' && <Music className="w-4 h-4 text-emerald-400" />}
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="bg-transparent font-medium text-xs text-emerald-300 focus:outline-none w-44"
+            />
           </div>
-        )}
+          <span className="text-[9px] uppercase tracking-wider font-semibold border border-emerald-500/25 px-1.5 py-0.5 rounded-full text-emerald-400 bg-emerald-500/5">Asset</span>
+        </div>
+
+        <div className="mb-4 space-y-2">
+          <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl">
+            {(['image', 'gif', 'video', 'audio'] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setType(t)}
+                className={`flex-1 py-1 rounded text-[9px] font-bold uppercase transition-all ${type === t ? 'bg-emerald-500/20 text-emerald-300' : 'text-white/40 hover:text-white'}`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={url.startsWith('blob:') ? '' : url}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                if (data.updateNodeData) data.updateNodeData(id, { url: e.target.value });
+              }}
+              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white/90 focus:outline-none focus:border-emerald-500/50"
+              placeholder="Paste URL or links..."
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-emerald-600/20 hover:bg-emerald-600/35 border border-emerald-500/35 hover:scale-105 rounded-xl px-2.5 flex items-center justify-center text-emerald-300 transition-all font-bold text-xs"
+              title="Upload local media asset"
+            >
+              <Upload className="w-3.5 h-3.5" />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={handleFileUpload}
+              accept="image/*,video/*,audio/*,.gif"
+              className="hidden"
+            />
+          </div>
+        </div>
+
+        <div className="bg-black/40 rounded-xl overflow-hidden min-h-[140px] max-h-[180px] flex items-center justify-center border border-white/5 relative">
+          {url ? (
+            <>
+              {(type === 'image' || type === 'gif') && (
+                <img src={url} alt={title} className="w-full h-full object-contain max-h-[160px] rounded-lg" />
+              )}
+              {type === 'video' && (
+                <video src={url} controls className="w-full h-full object-contain max-h-[160px] rounded-lg" />
+              )}
+              {type === 'audio' && (
+                <div className="flex flex-col items-center justify-center p-3 w-full gap-2">
+                  <div className="flex items-center gap-1.5 justify-center py-2">
+                    <span className="w-1.5 h-6 rounded bg-emerald-500 animate-pulse" />
+                    <span className="w-1.5 h-8 rounded bg-emerald-400 animate-pulse" style={{ animationDelay: '0.1s' }} />
+                    <span className="w-1.5 h-10 rounded bg-emerald-300 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                    <span className="w-1.5 h-7 rounded bg-emerald-400 animate-pulse" style={{ animationDelay: '0.3s' }} />
+                    <span className="w-1.5 h-5 rounded bg-emerald-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+                  </div>
+                  <audio src={url} controls className="w-full h-8 px-1" />
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-1 text-white/30 text-center p-4">
+              <Upload className="w-5 h-5 text-emerald-500/60 animate-bounce" />
+              <span className="text-[11px] font-mono">Upload content above</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <Handle type="source" position={Position.Right} className="w-3 h-3 bg-emerald-500 rounded-full border-2 border-black" />
@@ -389,105 +558,118 @@ const ThreeWidgetNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
     { hex: '#f59e0b', label: 'Amber' }
   ];
 
+  const { shapeClass, sizeStyle, textureClass, animateClass, isLocked } = getNodeStyles(data);
+
   return (
-    <div className="rounded-2xl border border-sky-500/30 bg-black/95 backdrop-blur-xl p-4 shadow-2xl min-w-[280px] max-w-[300px] text-white transition-all duration-300" style={{ boxShadow: '0 0 15px rgba(59, 130, 246, 0.15)' }}>
+    <div
+      className={`p-4 shadow-2xl min-w-[280px] max-w-[300px] text-white transition-all duration-300 border ${shapeClass} ${textureClass} ${animateClass}`}
+      style={{ borderColor: 'rgba(59, 130, 246, 0.3)', boxShadow: '0 0 15px rgba(59, 130, 246, 0.15)', ...sizeStyle }}
+    >
       <Handle type="target" position={Position.Left} className="w-3 h-3 bg-sky-500 rounded-full border-2 border-black" />
       
-      <div className="flex items-center justify-between mb-3 border-b border-sky-500/20 pb-2">
-        <div className="flex items-center gap-1.5">
-          <Layers className="w-4 h-4 text-sky-400" />
-          <span className="font-medium text-xs text-sky-300">Aetheric 3D Generator</span>
+      {isLocked && (
+        <div className="absolute top-2 right-2 bg-red-500/20 text-red-400 p-0.5 rounded-full border border-red-500/30 z-10">
+          <Lock className="w-3 h-3" />
         </div>
-        <span className="text-[9px] uppercase tracking-wider font-semibold border border-sky-500/25 px-1.5 py-0.5 rounded-full text-sky-400 bg-sky-500/5">3D WebGL</span>
-      </div>
-
-      <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-1.5 bg-white/5 p-1 rounded-xl">
-          {shapes.map((sh) => (
-            <button
-              key={sh.value}
-              onClick={() => setShape(sh.value as any)}
-              className={`py-1 rounded text-[9px] font-bold uppercase transition-all ${shape === sh.value ? 'bg-sky-500/20 text-sky-300' : 'text-white/40 hover:text-white'}`}
-            >
-              {sh.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="h-[180px] w-full bg-slate-950/80 rounded-xl relative overflow-hidden border border-white/5 shadow-inner">
-          <Canvas camera={{ position: [0, 0, 3], fov: 45 }} style={{ width: '100%', height: '100%' }}>
-            <ambientLight intensity={1.5} />
-            <pointLight position={[5, 5, 5]} intensity={2} />
-            <Float speed={isResonating ? speed * 3.5 : speed * 1.5} rotationIntensity={isResonating ? 3.5 : 1.5} floatIntensity={isResonating ? 2.5 : 1}>
-              {shape === 'icosahedron' && (
-                <mesh rotation={[Math.PI / 4, 0, 0]} scale={isResonating ? [1.2, 1.2, 1.2] : [1, 1, 1]}>
-                  <icosahedronGeometry args={[0.8, 1]} />
-                  <meshStandardMaterial color={color} wireframe emissive={color} emissiveIntensity={isResonating ? 1.0 : 0.25} />
-                </mesh>
-              )}
-              {shape === 'torus' && (
-                <mesh scale={isResonating ? [1.2, 1.2, 1.2] : [1, 1, 1]}>
-                  <torusKnotGeometry args={[0.5, 0.2, 100, 16]} />
-                  <meshStandardMaterial color={color} roughness={0.1} metalness={0.9} emissive={color} emissiveIntensity={isResonating ? 0.8 : 0.1} />
-                </mesh>
-              )}
-              {shape === 'frequency' && (
-                <mesh scale={isResonating ? [1.2, 1.2, 1.2] : [1, 1, 1]}>
-                  <sphereGeometry args={[0.7, 32, 32]} />
-                  <meshStandardMaterial color={color} wireframe emissive={color} emissiveIntensity={isResonating ? 1.2 : 0.4} />
-                </mesh>
-              )}
-              {shape === 'merkaba' && (
-                <group scale={isResonating ? [1.2, 1.2, 1.2] : [1, 1, 1]}>
-                  <mesh>
-                    <coneGeometry args={[0.65, 1.2, 3]} />
-                    <meshStandardMaterial color={color} wireframe emissive={color} emissiveIntensity={isResonating ? 1.0 : 0.3} />
-                  </mesh>
-                  <mesh rotation={[Math.PI, 0, 0]} position={[0, 0, 0]}>
-                    <coneGeometry args={[0.65, 1.2, 3]} />
-                    <meshStandardMaterial color={color} wireframe emissive={color} emissiveIntensity={isResonating ? 1.0 : 0.3} />
-                  </mesh>
-                </group>
-              )}
-            </Float>
-            <OrbitControls enableZoom={false} />
-          </Canvas>
-
-          {isResonating && (
-            <div className="absolute top-2 right-2 z-10 bg-sky-500/25 border border-sky-500/40 px-2 py-0.5 rounded text-[8px] font-mono text-sky-300 font-bold tracking-widest animate-pulse">
-              RESONATING {activeFrequencyHz}HZ
-            </div>
-          )}
-
-          <div className="absolute bottom-2 left-2 z-10 bg-black/75 px-2 py-1 rounded text-[8px] font-mono text-white/50 pointer-events-none">
-            DRAG TO ROTATE
+      )}
+      
+      <div className={`space-y-3 ${isLocked ? 'pointer-events-none opacity-60' : ''}`}>
+        <div className="flex items-center justify-between border-b border-sky-500/20 pb-2">
+          <div className="flex items-center gap-1.5">
+            <Layers className="w-4 h-4 text-sky-400" />
+            <span className="font-medium text-xs text-sky-300">Aetheric 3D Generator</span>
           </div>
+          <span className="text-[9px] uppercase tracking-wider font-semibold border border-sky-500/25 px-1.5 py-0.5 rounded-full text-sky-400 bg-sky-500/5">3D WebGL</span>
         </div>
 
-        <div className="flex items-center justify-between border-t border-white/5 pt-2">
-          <div className="flex gap-1.5">
-            {colors.map((c) => (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-1.5 bg-white/5 p-1 rounded-xl">
+            {shapes.map((sh) => (
               <button
-                key={c.hex}
-                onClick={() => setColor(c.hex)}
-                className={`w-4.5 h-4.5 rounded-full border border-white/20 transition-all hover:scale-125 ${color === c.hex ? 'ring-2 ring-sky-400' : ''}`}
-                style={{ backgroundColor: c.hex }}
-                title={c.label}
-              />
+                key={sh.value}
+                onClick={() => setShape(sh.value as any)}
+                className={`py-1 rounded text-[9px] font-bold uppercase transition-all ${shape === sh.value ? 'bg-sky-500/20 text-sky-300' : 'text-white/40 hover:text-white'}`}
+              >
+                {sh.label}
+              </button>
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-white/40 uppercase">Speed</span>
-            <input
-              type="range"
-              min="0"
-              max="5"
-              step="0.5"
-              value={speed}
-              onChange={(e) => setSpeed(parseFloat(e.target.value))}
-              className="w-16 accent-sky-400 cursor-pointer h-1 rounded"
-            />
+          <div className="h-[180px] w-full bg-slate-950/80 rounded-xl relative overflow-hidden border border-white/5 shadow-inner">
+            <Canvas camera={{ position: [0, 0, 3], fov: 45 }} style={{ width: '100%', height: '100%' }}>
+              <ambientLight intensity={1.5} />
+              <pointLight position={[5, 5, 5]} intensity={2} />
+              <Float speed={isResonating ? speed * 3.5 : speed * 1.5} rotationIntensity={isResonating ? 3.5 : 1.5} floatIntensity={isResonating ? 2.5 : 1}>
+                {shape === 'icosahedron' && (
+                  <mesh rotation={[Math.PI / 4, 0, 0]} scale={isResonating ? [1.2, 1.2, 1.2] : [1, 1, 1]}>
+                    <icosahedronGeometry args={[0.8, 1]} />
+                    <meshStandardMaterial color={color} wireframe emissive={color} emissiveIntensity={isResonating ? 1.0 : 0.25} />
+                  </mesh>
+                )}
+                {shape === 'torus' && (
+                  <mesh scale={isResonating ? [1.2, 1.2, 1.2] : [1, 1, 1]}>
+                    <torusKnotGeometry args={[0.5, 0.2, 100, 16]} />
+                    <meshStandardMaterial color={color} roughness={0.1} metalness={0.9} emissive={color} emissiveIntensity={isResonating ? 0.8 : 0.1} />
+                  </mesh>
+                )}
+                {shape === 'frequency' && (
+                  <mesh scale={isResonating ? [1.2, 1.2, 1.2] : [1, 1, 1]}>
+                    <sphereGeometry args={[0.7, 32, 32]} />
+                    <meshStandardMaterial color={color} wireframe emissive={color} emissiveIntensity={isResonating ? 1.2 : 0.4} />
+                  </mesh>
+                )}
+                {shape === 'merkaba' && (
+                  <group scale={isResonating ? [1.2, 1.2, 1.2] : [1, 1, 1]}>
+                    <mesh>
+                      <coneGeometry args={[0.65, 1.2, 3]} />
+                      <meshStandardMaterial color={color} wireframe emissive={color} emissiveIntensity={isResonating ? 1.0 : 0.3} />
+                    </mesh>
+                    <mesh rotation={[Math.PI, 0, 0]} position={[0, 0, 0]}>
+                      <coneGeometry args={[0.65, 1.2, 3]} />
+                      <meshStandardMaterial color={color} wireframe emissive={color} emissiveIntensity={isResonating ? 1.0 : 0.3} />
+                    </mesh>
+                  </group>
+                )}
+              </Float>
+              <OrbitControls enableZoom={false} />
+            </Canvas>
+
+            {isResonating && (
+              <div className="absolute top-2 right-2 z-10 bg-sky-500/25 border border-sky-500/40 px-2 py-0.5 rounded text-[8px] font-mono text-sky-300 font-bold tracking-widest animate-pulse">
+                RESONATING {activeFrequencyHz}HZ
+              </div>
+            )}
+
+            <div className="absolute bottom-2 left-2 z-10 bg-black/75 px-2 py-1 rounded text-[8px] font-mono text-white/50 pointer-events-none">
+              DRAG TO ROTATE
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between border-t border-white/5 pt-2">
+            <div className="flex gap-1.5">
+              {colors.map((c) => (
+                <button
+                  key={c.hex}
+                  onClick={() => setColor(c.hex)}
+                  className={`w-4.5 h-4.5 rounded-full border border-white/20 transition-all hover:scale-125 ${color === c.hex ? 'ring-2 ring-sky-400' : ''}`}
+                  style={{ backgroundColor: c.hex }}
+                  title={c.label}
+                />
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono text-white/40 uppercase">Speed</span>
+              <input
+                type="range"
+                min="0"
+                max="5"
+                step="0.5"
+                value={speed}
+                onChange={(e) => setSpeed(parseFloat(e.target.value))}
+                className="w-16 accent-sky-400 cursor-pointer h-1 rounded"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -1187,16 +1369,27 @@ const VoiceNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
+  const { shapeClass, sizeStyle, textureClass, animateClass, isLocked } = getNodeStyles(data);
+
   return (
-    <div className="rounded-2xl border border-sky-500/30 bg-black/95 backdrop-blur-xl p-4 shadow-2xl min-w-[280px] max-w-[300px] text-white transition-all duration-300" style={{ boxShadow: '0 0 15px rgba(14, 165, 233, 0.15)' }}>
+    <div
+      className={`p-4 shadow-2xl min-w-[280px] max-w-[300px] text-white transition-all duration-300 border ${shapeClass} ${textureClass} ${animateClass}`}
+      style={{ borderColor: 'rgba(14, 165, 233, 0.3)', boxShadow: '0 0 15px rgba(14, 165, 233, 0.15)', ...sizeStyle }}
+    >
       <Handle type="target" position={Position.Left} className="w-3 h-3 bg-sky-500 rounded-full border-2 border-black" />
       
-      <div className="flex items-center gap-2 mb-3 border-b border-sky-500/20 pb-2">
-        <Mic className="w-4 h-4 text-sky-400" />
-        <span className="font-medium text-sm text-sky-300">Insight Audio Note</span>
-      </div>
+      {isLocked && (
+        <div className="absolute top-2 right-2 bg-red-500/20 text-red-400 p-0.5 rounded-full border border-red-500/30 z-10">
+          <Lock className="w-3 h-3" />
+        </div>
+      )}
+      
+      <div className={`space-y-3 ${isLocked ? 'pointer-events-none opacity-60' : ''}`}>
+        <div className="flex items-center gap-2 mb-3 border-b border-sky-500/20 pb-2">
+          <Mic className="w-4 h-4 text-sky-400" />
+          <span className="font-medium text-sm text-sky-300">Insight Audio Note</span>
+        </div>
 
-      <div className="space-y-3">
         {/* Waveform Canvas */}
         <div className="bg-white/5 border border-white/10 rounded-xl p-2 relative">
           <canvas ref={canvasRef} width={240} height={40} className="w-full h-10 block" />
@@ -1761,6 +1954,31 @@ const AstralCanvasInner = ({ cosmicData }: AstralCanvasProps) => {
     }
   };
 
+  const handleCopyNode = (node: Node<any>) => {
+    const newId = `${node.type}_clone_${Date.now()}`;
+    const clonedNode: Node<any> = {
+      ...node,
+      id: newId,
+      selected: false,
+      position: { x: node.position.x + 40, y: node.position.y + 40 },
+      data: {
+        ...node.data,
+        id: newId,
+        updateNodeData, // rebind update ref
+      },
+    };
+    setNodes((nds) => [...nds, clonedNode]);
+  };
+
+  const handleDeleteSelectedNode = (nodeId: string) => {
+    setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+    setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId));
+  };
+
+  const selectedNode = useMemo(() => {
+    return nodes.find((n) => n.selected);
+  }, [nodes]);
+
   const handleAddNode = (type: 'noteNode' | 'videoNode' | 'mediaNode' | 'celestialNode' | 'voiceNode' | 'chatbotNode' | 'threeWidgetNode' | 'dynamicNotepadNode' | 'solfeggioNode') => {
     const newId = `${type}_${Date.now()}`;
     // position node nicely at center coordinates
@@ -1941,7 +2159,7 @@ const AstralCanvasInner = ({ cosmicData }: AstralCanvasProps) => {
       </div>
 
       {/* 2. MAIN FLOW AREA */}
-      <div className="flex-1 w-full bg-slate-950 position relative min-h-[500px]">
+      <div className="flex-1 w-full bg-slate-950 relative min-h-[500px]">
         <ReactFlowProvider>
           <ReactFlow
             nodes={nodes}
@@ -1968,6 +2186,116 @@ const AstralCanvasInner = ({ cosmicData }: AstralCanvasProps) => {
               className="hidden sm:block"
             />
           </ReactFlow>
+
+          {/* Majestic Floating Node Menu */}
+          <AnimatePresence>
+            {selectedNode && (
+              <motion.div
+                initial={{ opacity: 0, y: -20, scale: 0.95, x: '-50%' }}
+                animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+                exit={{ opacity: 0, y: -20, scale: 0.95, x: '-50%' }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="absolute top-4 left-1/2 -translate-x-1/2 z-20"
+              >
+                <div className="flex flex-wrap items-center gap-2 bg-black/95 backdrop-blur-xl px-4 py-2.5 rounded-2xl border border-purple-500/40 text-white shadow-[0_0_25px_rgba(168,85,247,0.3)] max-w-[95vw] overflow-x-auto scrollbar-none shrink-0">
+                  {/* Title Info */}
+                  <div className="flex items-center gap-1.5 pr-2.5 border-r border-white/10">
+                    <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
+                    <span className="text-[11px] font-mono uppercase tracking-wider font-bold text-white/90 truncate max-w-[100px]">Customizer</span>
+                  </div>
+
+                  {/* Lock/Unlock Switcher */}
+                  <button
+                    onClick={() => updateNodeData(selectedNode.id, { locked: !selectedNode.data.locked })}
+                    className={`p-1.5 rounded-xl border transition-all ${selectedNode.data.locked ? 'bg-red-500/20 border-red-500/30 text-red-400' : 'bg-white/5 border-white/10 hover:border-white/20 text-white/60 hover:text-white'}`}
+                    title={selectedNode.data.locked ? "Unlock Node Content" : "Lock Node Content"}
+                  >
+                    {selectedNode.data.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                  </button>
+
+                  {/* Shape customized selector */}
+                  <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl px-2 py-1 shrink-0">
+                    <Shapes className="w-3.5 h-3.5 text-sky-400" />
+                    <select
+                      value={selectedNode.data.shape || 'rounded'}
+                      onChange={(e) => updateNodeData(selectedNode.id, { shape: e.target.value as any })}
+                      className="bg-transparent text-[10px] font-bold uppercase tracking-wider border-0 focus:ring-0 text-white cursor-pointer py-0.5 outline-none font-mono"
+                    >
+                      <option value="rounded" className="bg-slate-950 text-white">Round</option>
+                      <option value="sharp" className="bg-slate-950 text-white">Sharp Edge</option>
+                      <option value="bevel" className="bg-slate-950 text-white">Bevel Border</option>
+                      <option value="hex" className="bg-slate-950 text-white">Hexagon Style</option>
+                      <option value="pill" className="bg-slate-950 text-white">Pill Shape</option>
+                    </select>
+                  </div>
+
+                  {/* Size customized selector */}
+                  <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl px-2 py-1 shrink-0">
+                    <Maximize2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <select
+                      value={selectedNode.data.size || 'md'}
+                      onChange={(e) => updateNodeData(selectedNode.id, { size: e.target.value as any })}
+                      className="bg-transparent text-[10px] font-bold uppercase tracking-wider border-0 focus:ring-0 text-white cursor-pointer py-0.5 outline-none font-mono"
+                    >
+                      <option value="sm" className="bg-slate-950 text-white">Small</option>
+                      <option value="md" className="bg-slate-950 text-white">Medium</option>
+                      <option value="lg" className="bg-slate-950 text-white">Large</option>
+                      <option value="xl" className="bg-slate-950 text-white">Scale Up</option>
+                    </select>
+                  </div>
+
+                  {/* Texture customized selector */}
+                  <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl px-2 py-1 shrink-0">
+                    <Palette className="w-3.5 h-3.5 text-purple-400" />
+                    <select
+                      value={selectedNode.data.texture || 'glass'}
+                      onChange={(e) => updateNodeData(selectedNode.id, { texture: e.target.value as any })}
+                      className="bg-transparent text-[10px] font-bold uppercase tracking-wider border-0 focus:ring-0 text-white cursor-pointer py-0.5 outline-none font-mono"
+                    >
+                      <option value="glass" className="bg-slate-950 text-white">Glow Glass</option>
+                      <option value="grid" className="bg-slate-950 text-white">Matrix Grid</option>
+                      <option value="noise" className="bg-slate-950 text-white">Fine Noise</option>
+                      <option value="plasma" className="bg-slate-950 text-white">Nebula Plasma</option>
+                      <option value="scanlines" className="bg-slate-950 text-white">Phosphor Line</option>
+                    </select>
+                  </div>
+
+                  {/* Animation customized selector */}
+                  <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl px-2 py-1 shrink-0">
+                    <Activity className="w-3.5 h-3.5 text-amber-400" />
+                    <select
+                      value={selectedNode.data.customAnimation || 'none'}
+                      onChange={(e) => updateNodeData(selectedNode.id, { customAnimation: e.target.value as any })}
+                      className="bg-transparent text-[10px] font-bold uppercase tracking-wider border-0 focus:ring-0 text-white cursor-pointer py-0.5 outline-none font-mono"
+                    >
+                      <option value="none" className="bg-slate-950 text-white">Static</option>
+                      <option value="bobbing" className="bg-slate-950 text-white">Pendulum Bob</option>
+                      <option value="pulse" className="bg-slate-950 text-white">Emanating Pulse</option>
+                      <option value="glow" className="bg-slate-950 text-white">Radiance Glow</option>
+                    </select>
+                  </div>
+
+                  {/* Copy button */}
+                  <button
+                    onClick={() => handleCopyNode(selectedNode)}
+                    className="p-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all text-white/70 hover:text-white"
+                    title="Duplicate selected Node"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Delete button */}
+                  <button
+                    onClick={() => handleDeleteSelectedNode(selectedNode.id)}
+                    className="p-1.5 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-300 transition-all hover:scale-105"
+                    title="Delete selected Node"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </ReactFlowProvider>
 
         {/* Dynamic Instructional Helper Badge */}

@@ -18,7 +18,7 @@ export default function Index() {
   const [data, setData] = useState<CosmicData | null>(null);
   const [state, setState] = useState<AppState>(AppState.IDLE);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'tetragrammaton' | 'hypernexus' | 'christ_sophia' | 'astral_canvas'>('torus');
+  const [activeTab, setActiveTab] = useState<'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'tetragrammaton' | 'hypernexus' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix'>('torus');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -116,6 +116,7 @@ export default function Index() {
       case 'findings': return 'analyzing';
       case 'chakras':
       case 'identity':
+      case 'avatar_matrix':
       case 'angel_numbers':
       case 'vortex':
       case 'harmonics': return 'transcendent';

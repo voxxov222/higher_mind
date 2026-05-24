@@ -23,3 +23,43 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Cosmic Whiteboard Resonance Edge Flow animations */
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -120;
+  }
+}
+
+.animate-resonance-flow {
+  animation: flow-dash 3s linear infinite;
+}
+
+@keyframes pulse-opacity {
+  0%, 100% {
+    opacity: 0.15;
+    filter: drop-shadow(0 0 1px currentColor) blur(3px);
+  }
+  50% {
+    opacity: 0.65;
+    filter: drop-shadow(0 0 6px currentColor) blur(4px);
+  }
+}
+
+.animate-resonance-pulse {
+  animation: pulse-opacity 2.5s ease-in-out infinite;
+}
+
+/* Custom Node Smooth Bobbing animation */
+@keyframes smooth-bob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-bobbing {
+  animation: smooth-bob 4s ease-in-out infinite;
+}

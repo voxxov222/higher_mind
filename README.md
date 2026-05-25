@@ -1,6 +1,6 @@
-# 🌌 ASTRAL MIND: Neural Cosmic Intelligence
+# 🌌 HIGHER 🧠 MIND: Neural Cosmic Intelligence
 
-**ASTRAL MIND** is a high-fidelity, sentient-like neural network visualization system designed to decode the mathematical and mystical architecture of individual identity. Built with Three.js/WebGL, it transforms abstract astrological, numerological, and gematria data into a cinematic, interactive 3D experience.
+**HIGHER 🧠 MIND** is a high-fidelity, sentient-like neural network visualization system designed to decode the mathematical and mystical architecture of individual identity. Built with Three.js/WebGL, it transforms abstract astrological, numerological, and gematria data into a cinematic, interactive 3D experience.
 
 ---
 

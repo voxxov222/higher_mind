@@ -1,7 +1,7 @@
 // --- FIREBASE INFRASTRUCTURE & AUTH ---
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, getDocFromServer, collection, query, where, getDocs, Timestamp, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { initializeFirestore, doc, setDoc, getDoc, getDocFromServer, collection, query, where, getDocs, Timestamp, updateDoc, serverTimestamp } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 import { CosmicData, UserProfileConfig } from './types';
 
@@ -10,11 +10,16 @@ const app = initializeApp(firebaseConfig);
 
 let firestoreInstance;
 try {
-  firestoreInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId || undefined);
+  // Use initializeFirestore with long-polling for better reliability in proxy environments
+  firestoreInstance = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+  }, firebaseConfig.firestoreDatabaseId || undefined);
 } catch (error) {
-  console.warn("Retrying Firestore initialization with default database...", error);
+  console.warn("Retrying Firestore initialization with default settings...", error);
   try {
-    firestoreInstance = getFirestore(app);
+    firestoreInstance = initializeFirestore(app, {
+      experimentalForceLongPolling: true,
+    });
   } catch (err) {
     console.error("Critical: Firestore failed to initialize completely", err);
   }

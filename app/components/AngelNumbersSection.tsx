@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Hash, Search, Volume2, Sparkles, BookOpen, Fingerprint, Activity, Layers, Plus, Info, Zap, RefreshCw } from 'lucide-react';
 import { CosmicData } from '../types';
 import { fetchAngelNumberInsight } from '../services/geminiService';
+import { soundEngine } from '../lib/soundEffects';
 
 interface AngelNumbersSectionProps {
   cosmicData: CosmicData | null;
@@ -14,6 +15,18 @@ export const AngelNumbersSection = ({ cosmicData }: AngelNumbersSectionProps) =>
   const [result, setResult] = useState<any>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState<'personal' | 'research' | 'gematria'>('research');
+
+  // Custom Stellar Integration Academy states
+  const [showAcademy, setShowAcademy] = useState(false);
+  const [academyTab, setAcademyTab] = useState<'blueprint' | 'video' | 'attune'>('blueprint');
+  const [lessonTime, setLessonTime] = useState(12);
+  const [isLessonPlaying, setIsLessonPlaying] = useState(true);
+  const [lessonChapter, setLessonChapter] = useState(1);
+  const [lessonAttuned, setLessonAttuned] = useState(false);
+  const [numericQuizStep, setNumericQuizStep] = useState(0);
+  const [numericAnswer, setNumericAnswer] = useState<number | null>(null);
+  const [numericScore, setNumericScore] = useState(0);
+  const [numericCompleted, setNumericCompleted] = useState(false);
   const [gematriaInput, setGematriaInput] = useState('');
   const [gematriaSystem, setGematriaSystem] = useState<'standard' | 'pythagorean' | 'ascii'>('standard');
   const [history, setHistory] = useState<{word: string, value: number, system: string}[]>(() => {
@@ -45,6 +58,30 @@ export const AngelNumbersSection = ({ cosmicData }: AngelNumbersSectionProps) =>
   useEffect(() => {
     localStorage.setItem('gematria_history', JSON.stringify(history.slice(0, 50)));
   }, [history]);
+
+  useEffect(() => {
+    let interval: any;
+    if (isLessonPlaying && showAcademy && academyTab === 'video') {
+      interval = setInterval(() => {
+        setLessonTime((prev) => {
+          const next = prev + 1;
+          if (next >= 110) {
+            setIsLessonPlaying(false);
+            return 110;
+          }
+          if (next >= 70) {
+            setLessonChapter(3);
+          } else if (next >= 30) {
+            setLessonChapter(2);
+          } else {
+            setLessonChapter(1);
+          }
+          return next;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isLessonPlaying, showAcademy, academyTab]);
 
   // Gematria Calculation Logic
   const calculateGematria = (text: string, system: 'standard' | 'pythagorean' | 'ascii' | 'hebrew' = 'standard') => {
@@ -325,6 +362,270 @@ export const AngelNumbersSection = ({ cosmicData }: AngelNumbersSectionProps) =>
                                     </div>
                                 </div>
                             </div>
+
+                            {/* STELLAR INTEGRATION ACADEMY ACCORDION */}
+                            <div className="mt-8 border-t border-white/10 pt-8 relative z-10">
+                                <button
+                                    onClick={() => { setShowAcademy(!showAcademy); try { soundEngine.click(); } catch (err) { console.debug(err); } }}
+                                    className="w-full flex items-center justify-between p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all group text-left"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-amber-400/10 p-2 rounded-xl text-amber-400 group-hover:scale-110 transition-transform">
+                                            <Zap size={18} />
+                                        </div>
+                                        <div>
+                                            <span className="text-[9px] uppercase tracking-[0.25em] text-amber-400 font-mono font-bold block">Angelic Frequency Academy</span>
+                                            <span className="text-sm font-semibold text-white">Stellar Integration &amp; Quick Lesson Video Player</span>
+                                        </div>
+                                    </div>
+                                    <span className="text-[10px] uppercase font-mono tracking-widest text-stone-400 group-hover:text-white transition-colors">
+                                        {showAcademy ? "Collapse Lesson x" : "Initialize Lesson →"}
+                                    </span>
+                                </button>
+
+                                <AnimatePresence>
+                                    {showAcademy && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="overflow-hidden mt-4 space-y-6"
+                                        >
+                                            {/* Subtab selection */}
+                                            <div className="flex gap-1 bg-stone-900 border border-white/5 p-1 rounded-xl">
+                                                <button
+                                                    onClick={() => { setAcademyTab('blueprint'); try { soundEngine.click(); } catch (err) { console.debug(err); } }}
+                                                    className={`flex-1 py-2 text-[9px] uppercase tracking-widest font-black rounded-lg transition-all ${academyTab === 'blueprint' ? 'bg-stone-800 border border-white/10 text-white shadow-md' : 'text-stone-500 hover:text-stone-300'}`}
+                                                >
+                                                    🎨 Reference Geometry
+                                                </button>
+                                                <button
+                                                    onClick={() => { setAcademyTab('video'); try { soundEngine.click(); } catch (err) { console.debug(err); } }}
+                                                    className={`flex-1 py-2 text-[9px] uppercase tracking-widest font-black rounded-lg transition-all ${academyTab === 'video' ? 'bg-stone-800 border border-white/10 text-white shadow-md' : 'text-stone-500 hover:text-stone-300'}`}
+                                                >
+                                                    🎬 Quick Lesson Video
+                                                </button>
+                                                <button
+                                                    onClick={() => { setAcademyTab('attune'); try { soundEngine.click(); } catch (err) { console.debug(err); } }}
+                                                    className={`flex-1 py-2 text-[9px] uppercase tracking-widest font-black rounded-lg transition-all ${academyTab === 'attune' ? 'bg-stone-800 border border-white/10 text-white shadow-md' : 'text-stone-500 hover:text-stone-300'}`}
+                                                >
+                                                    🧩 Attunement Quiz
+                                                </button>
+                                            </div>
+
+                                            {/* TAB 1: BLUEPRINT */}
+                                            {academyTab === 'blueprint' && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-stone-950/80 border border-white/5 rounded-2xl p-6">
+                                                    <div className="flex justify-center items-center">
+                                                        <svg className="w-full max-w-[200px] aspect-square text-cyan-400/40 relative z-10" viewBox="0 0 100 100">
+                                                            <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="0.4" strokeDasharray="3, 3" />
+                                                            <polygon points="50,15 80,75 20,75" fill="none" stroke="rgba(6,182,212,0.3)" strokeWidth="0.4" />
+                                                            <line x1="50" y1="50" x2="50" y2="15" stroke="currentColor" strokeWidth="0.3" />
+                                                            <line x1="50" y1="50" x2="80" y2="75" stroke="currentColor" strokeWidth="0.3" />
+                                                            <line x1="50" y1="50" x2="20" y2="75" stroke="currentColor" strokeWidth="0.3" />
+                                                            <circle cx="50" cy="50" r="2.5" className="fill-stone-950 stroke-cyan-400" strokeWidth="1" />
+                                                            <circle cx="50" cy="15" r="3.5" className="fill-stone-900 stroke-amber-400" strokeWidth="1" />
+                                                            <circle cx="80" cy="75" r="3.5" className="fill-stone-900 stroke-purple-400" strokeWidth="1" />
+                                                            <circle cx="20" cy="75" r="3.5" className="fill-stone-900 stroke-emerald-400" strokeWidth="1" />
+                                                            <text x="50" y="27" textAnchor="middle" fontSize="4.5" className="fill-stone-400 font-mono tracking-tighter">GATEWAY</text>
+                                                        </svg>
+                                                    </div>
+                                                    <div className="space-y-4 flex flex-col justify-between">
+                                                        <div>
+                                                            <span className="text-[10px] uppercase font-mono tracking-widest text-cyan-400 font-bold block">Angelic Vector Key</span>
+                                                            <p className="text-stone-300 text-xs font-light leading-relaxed mt-2">
+                                                                This spatial coordinate layout maps repeating waves of &ldquo;{query || "Frequency"}&rdquo; to active centers. The center node represents the balanced Golden Anchor vector. You are currently in passive learning mode. Switch to references to practice.
+                                                            </p>
+                                                        </div>
+                                                        <div className="bg-stone-900/60 p-3 rounded-xl border border-white/5 text-[9px] font-mono text-stone-400 flex items-center gap-2">
+                                                            <Info size={14} className="shrink-0 text-cyan-400" />
+                                                            <span>Aligned structure maps directly to higher mind synthesis guidelines.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* TAB 2: SIMULATED VIDEO PLAYER */}
+                                            {academyTab === 'video' && (
+                                                <div className="space-y-4 bg-stone-950/80 border border-white/5 rounded-2xl p-6">
+                                                    <div className="flex justify-between items-center text-[8px] font-mono text-stone-500">
+                                                        <span>STREAM • INTERACTIVE LESSON</span>
+                                                        <span>{lessonTime}s / 110s</span>
+                                                    </div>
+
+                                                    <div className="relative aspect-video max-h-[180px] bg-stone-950 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden">
+                                                        <div className="absolute inset-0 bg-radial-gradient(circle_at_center,rgba(52,211,153,0.06)_0%,transparent_70%) pointer-events-none" />
+                                                        
+                                                        {/* Animated radar rings indicating lesson play */}
+                                                        <div className={`w-32 h-32 border border-emerald-500/25 rounded-full absolute flex items-center justify-center transition-transform duration-1000 ${isLessonPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '8s' }}>
+                                                            <div className="w-3 h-3 bg-emerald-400 rounded-full absolute top-0" />
+                                                        </div>
+                                                        <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-400 flex items-center justify-center">
+                                                            <Zap className="w-4 h-4 text-purple-200 animate-pulse" />
+                                                        </div>
+
+                                                        {/* Time overlay */}
+                                                        <div className="absolute bottom-2 left-3 bg-stone-900/90 px-2 py-0.5 rounded text-[8px] font-mono text-stone-400 border border-white/5">
+                                                            CHAPTER {lessonChapter}: {getNumericalCaptions(query)[lessonChapter - 1]?.title.toUpperCase()}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="bg-stone-900/80 p-4 rounded-xl text-center italic text-xs text-stone-200 min-h-[60px] flex items-center justify-center">
+                                                        &ldquo;{getNumericalCaptions(query)[lessonChapter - 1]?.caption}&rdquo;
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between border-t border-white/5 pt-3">
+                                                        <div className="flex gap-1">
+                                                            {[1, 2, 3].map((ch) => (
+                                                                <button
+                                                                    key={ch}
+                                                                    onClick={() => {
+                                                                        setLessonChapter(ch);
+                                                                        setLessonTime(ch === 1 ? 0 : ch === 2 ? 30 : 70);
+                                                                        try { soundEngine.click(); } catch (err) { console.debug(err); }
+                                                                    }}
+                                                                    className={`px-3 py-1 rounded-md text-[9px] font-mono border ${lessonChapter === ch ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-transparent border-white/5 text-stone-400 hover:text-white'}`}
+                                                                >
+                                                                    Ch {ch}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => { setIsLessonPlaying(!isLessonPlaying); try { soundEngine.click(); } catch (err) { console.debug(err); } }}
+                                                            className={`px-3 py-1 text-[9px] uppercase tracking-widest font-mono rounded-lg border border-white/10 ${isLessonPlaying ? 'bg-amber-500/10 text-amber-300' : 'bg-emerald-500/10 text-emerald-300'}`}
+                                                        >
+                                                            {isLessonPlaying ? "Pause Video" : "Play Video"}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* TAB 3: ATTUNEMENT QUIZ */}
+                                            {academyTab === 'attune' && (
+                                                <div className="bg-stone-950/80 border border-white/5 rounded-2xl p-6">
+                                                    {!numericCompleted ? (
+                                                        <div className="space-y-4">
+                                                            <div className="flex justify-between items-center text-[8px] font-mono text-stone-500 pb-3 border-b border-white/5">
+                                                                <span>FREQUENCY ALIGNMENT CHECKUP</span>
+                                                                <span>QUEST {numericQuizStep + 1} OF {numericQuestions.length}</span>
+                                                            </div>
+
+                                                            <h4 className="text-xs text-white tracking-wide font-light">
+                                                                {numericQuestions[numericQuizStep].q}
+                                                            </h4>
+
+                                                            <div className="space-y-2">
+                                                                {numericQuestions[numericQuizStep].options.map((option, idx) => {
+                                                                    const isAnswered = numericAnswer !== null;
+                                                                    const isCorrect = idx === numericQuestions[numericQuizStep].correct;
+                                                                    const isSel = idx === numericAnswer;
+                                                                    return (
+                                                                        <button
+                                                                            key={idx}
+                                                                            onClick={() => {
+                                                                                if (isAnswered) return;
+                                                                                try { soundEngine.click(); } catch (err) { console.debug(err); }
+                                                                                setNumericAnswer(idx);
+                                                                                if (idx === numericQuestions[numericQuizStep].correct) {
+                                                                                    setNumericScore(prev => prev + 1);
+                                                                                }
+                                                                            }}
+                                                                            disabled={isAnswered}
+                                                                            className={`w-full text-left p-3 rounded-lg text-xs flex justify-between items-center transition-all border ${
+                                                                                isAnswered
+                                                                                    ? isCorrect
+                                                                                        ? 'bg-emerald-500/15 border-emerald-500 text-emerald-300'
+                                                                                        : isSel
+                                                                                            ? 'bg-red-500/15 border-red-500 text-red-300'
+                                                                                            : 'bg-transparent border-white/5 text-stone-500'
+                                                                                    : 'bg-stone-900/40 hover:bg-stone-900/90 border-white/5 text-stone-300 hover:text-white hover:border-cyan-500/30'
+                                                                            }`}
+                                                                        >
+                                                                            <span>{option}</span>
+                                                                            <div>
+                                                                                {isAnswered && isCorrect && <span className="text-emerald-400">✓</span>}
+                                                                                {isAnswered && isSel && !isCorrect && <span className="text-red-400">✗</span>}
+                                                                            </div>
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+
+                                                            {numericAnswer !== null && (
+                                                                <div className="p-3 bg-stone-900 text-[10px] text-stone-300 rounded-lg leading-relaxed font-light">
+                                                                    {numericQuestions[numericQuizStep].expl}
+                                                                </div>
+                                                            )}
+
+                                                            <div className="flex justify-end pt-3">
+                                                                <button
+                                                                    disabled={numericAnswer === null}
+                                                                    onClick={() => {
+                                                                        try { soundEngine.click(); } catch (err) { console.debug(err); }
+                                                                        if (numericQuizStep < numericQuestions.length - 1) {
+                                                                            setNumericQuizStep(prev => prev + 1);
+                                                                            setNumericAnswer(null);
+                                                                        } else {
+                                                                            setNumericCompleted(true);
+                                                                        }
+                                                                    }}
+                                                                    className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold rounded-lg transition-all ${numericAnswer !== null ? 'bg-cyan-500 text-stone-950 font-black cursor-pointer shadow-[0_0_10px_rgba(6,182,212,0.3)]' : 'bg-stone-800 text-stone-500 cursor-not-allowed'}`}
+                                                                >
+                                                                    {numericQuizStep === numericQuestions.length - 1 ? "Verify Attunement" : "Next Question"}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center p-4 space-y-4">
+                                                            <div className="w-12 h-12 bg-cyan-400/10 border border-cyan-500/30 rounded-full flex items-center justify-center mx-auto mb-2 animate-bounce">
+                                                                <Sparkles className="w-6 h-6 text-cyan-400" />
+                                                            </div>
+                                                            <h5 className="text-white text-sm font-semibold uppercase tracking-widest">Alignment Verified!</h5>
+                                                            <p className="text-xs text-stone-400 font-light max-w-sm mx-auto">
+                                                                Cognitive metrics mapped cleanly to your Higher Mind profile.
+                                                            </p>
+                                                            <div className="inline-block px-4 py-2 bg-stone-900 border border-white/5 rounded-xl text-xs font-mono">
+                                                                Score: <span className="text-emerald-400 font-bold">{numericScore} / {numericQuestions.length}</span>
+                                                            </div>
+
+                                                            {lessonAttuned ? (
+                                                                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-[9px] font-mono text-emerald-300 max-w-xs mx-auto">
+                                                                    Attunement Completed • Celestial Integration Locked
+                                                                </div>
+                                                            ) : (
+                                                                <div className="flex gap-2 justify-center pt-2">
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            try { soundEngine.magic?.(); } catch (err) { console.debug(err); }
+                                                                            setLessonAttuned(true);
+                                                                        }}
+                                                                        className="px-5 py-2 bg-gradient-to-r from-purple-600 to-cyan-500 text-white rounded-lg text-[9px] uppercase tracking-widest font-black"
+                                                                    >
+                                                                        Attune Level
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setNumericQuizStep(0);
+                                                                            setNumericAnswer(null);
+                                                                            setNumericScore(0);
+                                                                            setNumericCompleted(false);
+                                                                            setLessonAttuned(false);
+                                                                        }}
+                                                                        className="px-4 py-2 bg-transparent border border-white/10 text-stone-400 rounded-lg text-[9px] uppercase tracking-widest font-bold"
+                                                                    >
+                                                                        Restart
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                            
                         </div>
                     ) : (
                         <div className="h-full bg-black/40 border border-white/5 border-dashed rounded-[3rem] flex flex-col items-center justify-center p-20 text-center space-y-8">

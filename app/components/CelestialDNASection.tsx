@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html, Sphere, Trail, Sparkles, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Network, Fingerprint, Star, ArrowLeft, MessageCircle } from 'lucide-react';
+import { X, Network, Fingerprint, Star, ArrowLeft, MessageCircle, Activity } from 'lucide-react';
 import { useHigherMind } from './HigherMindProvider';
 
 const DnaPair = ({ 
@@ -19,6 +19,7 @@ const DnaPair = ({
     descriptionRight,
     activationPercentage,
     integrationPercentage,
+    frequency,
     onHover,
     onSelect
 }: any) => {
@@ -42,12 +43,12 @@ const DnaPair = ({
     useFrame((state) => {
         if (pairRef.current) {
             // Add slight gentle breathing
-            pairRef.current.position.y = y + Math.sin(state.clock.elapsedTime * 2 + index) * 0.1;
+            pairRef.current.position.y = y + Math.sin(state.clock.elapsedTime * (frequency === 528 ? 2.5 : 2) + index) * (frequency === 528 ? 0.15 : 0.1);
         }
 
         if (memoryPacketRef.current) {
             // Animate memory packet along the bridge
-            const t = (state.clock.elapsedTime * 0.5 + index * 0.1) % 1; // 0 to 1
+            const t = (state.clock.elapsedTime * (frequency === 528 ? 0.8 : 0.5) + index * 0.1) % 1; // 0 to 1
             const pingPong = Math.sin(t * Math.PI); // 0 to 1 to 0
             
             memoryPacketRef.current.position.x = THREE.MathUtils.lerp(x1, x2, t);
@@ -55,17 +56,17 @@ const DnaPair = ({
             memoryPacketRef.current.position.z = THREE.MathUtils.lerp(z1, z2, t);
             
             // Pulse scale
-            memoryPacketRef.current.scale.setScalar(0.5 + pingPong * 0.5);
+            memoryPacketRef.current.scale.setScalar((frequency === 528 ? 0.8 : 0.5) + pingPong * 0.5);
         }
 
         // Pulsate nodes based on activation percentage (higher activation = faster pulse)
-        const pulseSpeed = (activationPercentage || 50) / 20; 
+        const pulseSpeed = frequency === 528 ? 5.28 : (activationPercentage || 50) / 20; 
         if (leftNodeRef.current) {
-            const scale = 1 + Math.sin(state.clock.elapsedTime * pulseSpeed + index) * 0.15;
+            const scale = 1 + Math.sin(state.clock.elapsedTime * pulseSpeed + index) * (frequency === 528 ? 0.25 : 0.15);
             leftNodeRef.current.scale.setScalar(scale);
         }
         if (rightNodeRef.current) {
-            const scale = 1 + Math.sin(state.clock.elapsedTime * pulseSpeed + index + Math.PI) * 0.15;
+            const scale = 1 + Math.sin(state.clock.elapsedTime * pulseSpeed + index + Math.PI) * (frequency === 528 ? 0.25 : 0.15);
             rightNodeRef.current.scale.setScalar(scale);
         }
     });
@@ -210,6 +211,7 @@ const DnaHelixCore = ({ data, setSelection }: any) => {
     const numPairs = dnaPairs.length;
     const heightSpread = 30;
     const radius = 6;
+    const currentFrequency = 528; // Hardcoded for this request
 
     return (
         <group ref={helixRef}>
@@ -221,13 +223,16 @@ const DnaHelixCore = ({ data, setSelection }: any) => {
                     radius={radius}
                     heightSpread={heightSpread}
                     {...pair}
+                    colorLeft={currentFrequency === 528 && i % 3 === 0 ? '#10b981' : pair.colorLeft} // Add emerald flashes for repair
+                    colorRight={currentFrequency === 528 && i % 3 === 1 ? '#fcd34d' : pair.colorRight} // Add gold flashes for repair
+                    frequency={currentFrequency}
                     onHover={() => {}}
                     onSelect={setSelection}
                 />
             ))}
             
-            <Sparkles count={400} scale={[radius * 3, heightSpread * 1.5, radius * 3]} size={2} color="#8b5cf6" opacity={0.3} speed={0.5} />
-            <Sparkles count={200} scale={[radius * 2, heightSpread, radius * 2]} size={4} color="#fcd34d" opacity={0.5} speed={1.2} />
+            <Sparkles count={currentFrequency === 528 ? 600 : 400} scale={[radius * 3, heightSpread * 1.5, radius * 3]} size={currentFrequency === 528 ? 3 : 2} color={currentFrequency === 528 ? '#10b981' : '#8b5cf6'} opacity={0.4} speed={0.8} />
+            <Sparkles count={currentFrequency === 528 ? 300 : 200} scale={[radius * 2, heightSpread, radius * 2]} size={4} color="#fcd34d" opacity={0.6} speed={1.5} />
         </group>
     );
 };
@@ -280,8 +285,12 @@ export const CelestialDNASection = ({ data, setActiveTab }: { data: any, setActi
                     <Fingerprint className="text-purple-400 w-6 h-6" />
                     <h2 className="text-2xl text-white font-light uppercase tracking-[0.3em]">Celestial DNA</h2>
                 </div>
-                <p className="text-stone-400 text-xs tracking-widest uppercase font-mono max-w-sm">
-                    Interactive analysis of inherited energetic patterns, ancestral memory, and karmic evolution matrices.
+                <div className="flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/30 px-3 py-1.5 rounded-full w-fit">
+                    <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-[9px] uppercase tracking-widest text-emerald-300 font-bold">528Hz Structural Repair</span>
+                </div>
+                <p className="text-stone-400 text-xs tracking-widest uppercase font-mono max-w-sm mt-1">
+                    Harmonic alignment active. Interactive analysis of inherited energetic patterns, ancestral memory, and karmic evolution matrices.
                 </p>
             </div>
 

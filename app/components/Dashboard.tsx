@@ -9,7 +9,7 @@ import {
   Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, 
   Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, Zap, Upload, Palette, 
   Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box, Key, Cpu,
-  Workflow, Radio
+  Workflow, Radio, Loader2
 } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
@@ -18,41 +18,44 @@ import {
 // --- SERVICE INTEGRATIONS ---
 import { fetchTimelineDepth, fetchTimelineDeepDiveOption, fetchGeneralDeepDive } from '../services/geminiService';
 import { User } from 'firebase/auth';
-import { AstrologyDashboard } from './AstrologyDashboard';
-import { DeepSynthesis } from './DeepSynthesis';
-import { HarmonicVisualizer } from './HarmonicVisualizer';
-import { ChakraScene } from './ChakraScene';
-import { CompatibilityMatrix } from './CompatibilityMatrix';
-import { SoulBlueprintAura } from './SoulBlueprintAura';
-import { CelestialDNASection } from './CelestialDNASection';
-import { NeuralBrainSection } from './NeuralBrainSection';
-import { CosmicCodex } from './CosmicCodex';
-import { AIEvolutionStream } from './AIEvolutionStream';
-import { ObsidianReleaseIntegration } from './ObsidianReleaseIntegration';
-import { AngelNumbersSection } from './AngelNumbersSection';
-import { GematriaCalculatorSection } from './GematriaCalculatorSection';
-import { VortexSequencingSection } from './VortexSequencingSection';
-import { GoldenRatioSection } from './GoldenRatioSection';
-import { SkyMapSection } from './SkyMapSection';
-import { SoulPathSection } from './SoulPathSection';
-import CommunityFeed from './social/CommunityFeed';
-import LiveMessenger from './social/LiveMessenger';
-import { HigherMindSettings } from './HigherMindSettings';
-import { useHigherMind } from './HigherMindProvider';
-import { HyperNexus } from './HyperNexus';
-import { getAstralProfile } from '../services/socialService';
-import BirthChartGuide from './BirthChartGuide';
-import { SandboxSection } from './sandbox/SandboxSection';
-import { VoiceCommander } from './VoiceCommander';
-import { TetragrammatonHUD } from './TetragrammatonHUD';
-import { soundEngine } from '../lib/soundEffects';
-import { AstralCanvas } from './AstralCanvas';
-import { AvatarMatrix } from './AvatarMatrix';
 
-import { QuantumEvolutionSection } from './QuantumEvolutionSection';
-import { ObsidianVaultSection } from './ObsidianVaultSection';
-import { ChristSophiaSection } from './ChristSophiaSection';
-import { VibrationalTuningSection } from './VibrationalTuningSection';
+// --- DYNAMICALLY IMPORTED COMPONENTS ---
+const AstrologyDashboard = React.lazy(() => import('./AstrologyDashboard').then(m => ({ default: m.AstrologyDashboard })));
+const DeepSynthesis = React.lazy(() => import('./DeepSynthesis').then(m => ({ default: m.DeepSynthesis })));
+const HarmonicVisualizer = React.lazy(() => import('./HarmonicVisualizer').then(m => ({ default: m.HarmonicVisualizer })));
+const ChakraScene = React.lazy(() => import('./ChakraScene').then(m => ({ default: m.ChakraScene })));
+const CompatibilityMatrix = React.lazy(() => import('./CompatibilityMatrix').then(m => ({ default: m.CompatibilityMatrix })));
+const SoulBlueprintAura = React.lazy(() => import('./SoulBlueprintAura').then(m => ({ default: m.SoulBlueprintAura })));
+const CelestialDNASection = React.lazy(() => import('./CelestialDNASection').then(m => ({ default: m.CelestialDNASection })));
+const NeuralBrainSection = React.lazy(() => import('./NeuralBrainSection'));
+const CosmicCodex = React.lazy(() => import('./CosmicCodex').then(m => ({ default: m.CosmicCodex })));
+const AIEvolutionStream = React.lazy(() => import('./AIEvolutionStream').then(m => ({ default: m.AIEvolutionStream })));
+const ObsidianReleaseIntegration = React.lazy(() => import('./ObsidianReleaseIntegration').then(m => ({ default: m.ObsidianReleaseIntegration })));
+const AngelNumbersSection = React.lazy(() => import('./AngelNumbersSection').then(m => ({ default: m.AngelNumbersSection })));
+const GematriaCalculatorSection = React.lazy(() => import('./GematriaCalculatorSection').then(m => ({ default: m.GematriaCalculatorSection })));
+const VortexSequencingSection = React.lazy(() => import('./VortexSequencingSection').then(m => ({ default: m.VortexSequencingSection })));
+const GoldenRatioSection = React.lazy(() => import('./GoldenRatioSection').then(m => ({ default: m.GoldenRatioSection })));
+const SkyMapSection = React.lazy(() => import('./SkyMapSection').then(m => ({ default: m.SkyMapSection })));
+const SoulPathSection = React.lazy(() => import('./SoulPathSection').then(m => ({ default: m.SoulPathSection })));
+const CommunityFeed = React.lazy(() => import('./social/CommunityFeed'));
+const LiveMessenger = React.lazy(() => import('./social/LiveMessenger'));
+const HigherMindSettings = React.lazy(() => import('./HigherMindSettings').then(m => ({ default: m.HigherMindSettings })));
+const HyperNexus = React.lazy(() => import('./HyperNexus').then(m => ({ default: m.HyperNexus })));
+import { getAstralProfile } from '../services/socialService';
+const BirthChartGuide = React.lazy(() => import('./BirthChartGuide'));
+const SandboxSection = React.lazy(() => import('./sandbox/SandboxSection').then(m => ({ default: m.SandboxSection })));
+const VoiceCommander = React.lazy(() => import('./VoiceCommander').then(m => ({ default: m.VoiceCommander })));
+const TetragrammatonHUD = React.lazy(() => import('./TetragrammatonHUD').then(m => ({ default: m.TetragrammatonHUD })));
+import { soundEngine } from '../lib/soundEffects';
+const AstralCanvas = React.lazy(() => import('./AstralCanvas').then(m => ({ default: m.AstralCanvas })));
+const AvatarMatrix = React.lazy(() => import('./AvatarMatrix').then(m => ({ default: m.AvatarMatrix })));
+
+const QuantumEvolutionSection = React.lazy(() => import('./QuantumEvolutionSection').then(m => ({ default: m.QuantumEvolutionSection })));
+const ObsidianVaultSection = React.lazy(() => import('./ObsidianVaultSection').then(m => ({ default: m.ObsidianVaultSection })));
+const ChristSophiaSection = React.lazy(() => import('./ChristSophiaSection').then(m => ({ default: m.ChristSophiaSection })));
+const VibrationalTuningSection = React.lazy(() => import('./VibrationalTuningSection').then(m => ({ default: m.VibrationalTuningSection })));
+const CelestialBlueprintSection = React.lazy(() => import('./CelestialBlueprintSection').then(m => ({ default: m.CelestialBlueprintSection })));
+import { useHigherMind } from './HigherMindProvider';
 
 /**
  * Interface for DashboardProps
@@ -949,78 +952,600 @@ const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handl
   data: any
 }) => {
   if (!deepDiveData) return null;
+
+  const [activeModalTab, setActiveModalTab] = useState<'text' | 'images' | 'video' | 'interactive'>('text');
+  
+  // Video simulation states
+  const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(true);
+  const [videoTime, setVideoTime] = useState<number>(15); // offset
+  const [interactivePlaybackSpeed, setInteractivePlaybackSpeed] = useState<number>(1);
+  const [videoChapter, setVideoChapter] = useState<number>(1);
+
+  // Selected diagram nodes
+  const [hoveredDiagramNode, setHoveredDiagramNode] = useState<string | null>(null);
+
+  // Quiz game state
+  const [quizScore, setQuizScore] = useState<number>(0);
+  const [quizAnswered, setQuizAnswered] = useState<boolean>(false);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [currentQuizQuestion, setCurrentQuizQuestion] = useState<number>(0);
+  const [quizCompleted, setQuizCompleted] = useState<boolean>(false);
+  const [nodeAttuned, setNodeAttuned] = useState<boolean>(false);
+
+  // Video ticking simulation
+  useEffect(() => {
+    let interval: any;
+    if (isVideoPlaying && activeModalTab === 'video') {
+      interval = setInterval(() => {
+        setVideoTime((prev) => {
+          const next = prev + 1 * interactivePlaybackSpeed;
+          if (next >= 110) {
+            setIsVideoPlaying(false);
+            return 110;
+          }
+          if (next >= 70) {
+            setVideoChapter(3);
+          } else if (next >= 30) {
+            setVideoChapter(2);
+          } else {
+            setVideoChapter(1);
+          }
+          return next;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isVideoPlaying, activeModalTab, interactivePlaybackSpeed]);
+
+  const cleanTitle = deepDiveData.title || "Stellar Identity";
+  
+  // Custom lessons dynamically generated based on current item
+  const chapters = [
+    {
+      id: 1,
+      name: "Metaphysical Foundations",
+      start: 0,
+      end: 30,
+      caption: `Initiating exploration of "${cleanTitle}". We begin by stabilizing the core spiritual frequency, locating your natal or numerical parameters. Notice the active harmonic channels resonating at 528Hz. This foundation represents your unique celestial signature on the earthly plane.`,
+    },
+    {
+      id: 2,
+      name: "Geometric & Alphanumeric Synchronicities",
+      start: 30,
+      end: 70,
+      caption: `We are now looking at the geometric intersections. Observe how "${cleanTitle}" overlaps with the 10 Sephirot on the Tree of Life. In this chapter, we map the Gematria codes to specific cosmic nodes, demonstrating that language and celestial orbits share a unified blueprint.`,
+    },
+    {
+      id: 3,
+      name: "Consciousness Synchronization Steps",
+      start: 70,
+      end: 110,
+      caption: `Finally, we execute the synchronization. To integrate "${cleanTitle}", focus on grounding meditations. Keep your aura aligned, visualising Metatron's Cube overlay balancing your fields. You have successfully decapsulated this knowledge portal.`,
+    }
+  ];
+
+  const currentChapterData = chapters.find(c => c.id === videoChapter) || chapters[0];
+
+  const quizQuestions = [
+    {
+      q: `Which energy center primarily integrates with "${cleanTitle}"?`,
+      options: [
+        "The Solar Plexus - Grounding of Core Will power",
+        "The Crown Sephirah (Keter) - Highest Gateway of cosmic descent",
+        "The Throat Chakra - Alphanumeric expression and vocal harmonics",
+        "The Galactic Core Matrix - Center of absolute soul origins"
+      ],
+      correct: 1,
+      expl: "Correct! The Crown center governs divine descent of cosmic light, channeling planetary and numeric frequencies directly into the soul's blueprint."
+    },
+    {
+      q: "What is the optimal Solfeggio frequency to expand this state?",
+      options: [
+        "174 Hz (Grounding & Safety)",
+        "396 Hz (Release of Fears)",
+        "528 Hz (Vibrational Repair & Spiritual Transformation)",
+        "852 Hz (Spiritual Order Return)"
+      ],
+      correct: 2,
+      expl: "Correct! 528 Hz represents golden ratio alignment, healing DNA layers and stabilizing mystical geometry overlaps."
+    },
+    {
+      q: `How do we incorporate the lessons of ${cleanTitle} into daily life?`,
+      options: [
+        "By daily alphanumeric chanting and natal grid projection",
+        "By ignoring transits and relying solely on solar periods",
+        "By harmonizing thoughts, emotions, and episodic experiences in parallel",
+        "By isolating oneself to prevent energetic interference"
+      ],
+      correct: 2,
+      expl: "Correct! True integration requires binding thoughts, feelings, and events into unified, coherent synaptic clusters."
+    }
+  ];
+
+  const handleSelectOption = (idx: number) => {
+    if (quizAnswered) return;
+    try { soundEngine.click(); } catch(e){ /* ignore safe */ }
+    setSelectedOption(idx);
+    setQuizAnswered(true);
+    if (idx === quizQuestions[currentQuizQuestion].correct) {
+      setQuizScore(prev => prev + 1);
+    }
+  };
+
+  const handleNextQuiz = () => {
+    try { soundEngine.click(); } catch(e){ /* ignore safe */ }
+    if (currentQuizQuestion < quizQuestions.length - 1) {
+      setCurrentQuizQuestion(prev => prev + 1);
+      setSelectedOption(null);
+      setQuizAnswered(false);
+    } else {
+      setQuizCompleted(true);
+    }
+  };
+
+  const handleAttuneNode = () => {
+    try { 
+      soundEngine.magic?.(); 
+      if (soundEngine.success) soundEngine.success();
+    } catch(e){ /* ignore safe */ }
+    setNodeAttuned(true);
+  };
+
+  const handleResetQuiz = () => {
+    try { soundEngine.click(); } catch(e){ /* ignore safe */ }
+    setCurrentQuizQuestion(0);
+    setSelectedOption(null);
+    setQuizAnswered(false);
+    setQuizScore(0);
+    setQuizCompleted(false);
+    setNodeAttuned(false);
+  };
+
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md pointer-events-auto">
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md pointer-events-auto overflow-y-auto">
       <motion.div 
-        initial={{ opacity: 0, y: 20, scale: 0.95 }} 
+        initial={{ opacity: 0, y: 30, scale: 0.95 }} 
         animate={{ opacity: 1, y: 0, scale: 1 }} 
-        className="bg-stone-900 border border-white/20 p-8 rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl relative scrollbar-thin scrollbar-thumb-white/20"
+        className="bg-stone-900 border border-white/10 rounded-[2rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative scrollbar-thin scrollbar-thumb-white/20 p-6 md:p-8"
       >
+        {/* CLOSE BUTTON */}
         <button 
           onClick={() => { soundEngine.close(); setDeepDiveData(null); }}
           onMouseEnter={() => soundEngine.hover()}
-          className="absolute top-6 right-6 text-stone-400 hover:text-white bg-white/5 p-2 rounded-full border border-white/10 transition-colors"
+          className="absolute top-6 right-6 text-stone-400 hover:text-white bg-white/5 p-2.5 rounded-full border border-white/10 transition-colors z-30"
         >
-          <X size={20} />
+          <X size={18} />
         </button>
         
-        <div className="flex items-center justify-between gap-3 mb-6">
+        {/* HEADER INFORMATION */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-6 border-b border-white/5">
           <div className="flex items-center gap-3">
-            <Search className="w-6 h-6 text-purple-400" />
-            <h2 className="text-2xl font-light text-white tracking-wide">Esoteric Research: <span className="font-medium text-purple-200">{deepDiveData.title}</span></h2>
+            <div className="bg-purple-500/10 p-3 rounded-2xl border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.15)] animate-pulse">
+              <Search className="w-5 h-5 text-purple-400" />
+            </div>
+            <div>
+              <span className="text-[9px] uppercase tracking-[0.3em] font-mono text-purple-400 font-bold block">Esoteric Research Academy</span>
+              <h2 className="text-xl md:text-2xl font-light text-white tracking-wide">
+                Deep Dive: <span className="font-semibold text-purple-200">{cleanTitle}</span>
+              </h2>
+            </div>
           </div>
+
           <div className="flex items-center gap-2">
             <button 
-              onClick={() => handleSaveToVault(deepDiveData.title, deepDiveData.detailedAnalysis, 'Deep Dive', ['exploration'])}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold border border-white/10 bg-white/5 text-stone-400 hover:text-white hover:bg-white/10 transition-all"
-              title="Save to Vault"
+              onClick={() => handleSaveToVault(cleanTitle, deepDiveData.detailedAnalysis, 'Deep Dive', ['exploration'])}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[9px] uppercase tracking-widest font-black border border-white/10 bg-white/5 text-stone-400 hover:text-white hover:bg-white/10 transition-all"
+              title="Save to Cosmic Vault"
             >
-              <Bookmark size={14} />
-              Save finding
+              <Bookmark size={12} />
+              Save Discovery
             </button>
             <button 
               onClick={() => handleReadOutLoud(deepDiveData.detailedAnalysis)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold border border-white/10 transition-all ${isReading ? 'bg-purple-600 text-white animate-pulse shadow-[0_0_15px_rgba(168,85,247,0.5)]' : 'bg-white/5 text-stone-400 hover:text-white hover:bg-white/10'}`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[9px] uppercase tracking-widest font-black border border-white/10 transition-all ${isReading ? 'bg-purple-600 text-white animate-pulse shadow-[0_0_15px_rgba(168,85,247,0.5)]' : 'bg-white/5 text-stone-400 hover:text-white hover:bg-white/10'}`}
             >
-              <Volume2 size={14} />
-              {isReading ? 'Stop Reading' : 'Read Deep Dive'}
+              <Volume2 size={12} />
+              {isReading ? 'Stop Transmission' : 'Vocal Sync'}
             </button>
           </div>
         </div>
 
         {isDeepDiveLoading ? (
-          <div className="py-20 text-center space-y-4">
-            <div className="w-12 h-12 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin mx-auto"></div>
-            <p className="text-stone-400 font-light italic animate-pulse">Accessing the universal knowledge matrix...</p>
+          <div className="py-24 text-center space-y-4">
+            <div className="relative w-16 h-16 mx-auto">
+              <div className="w-16 h-16 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
+              <div className="absolute inset-2 w-12 h-12 border-2 border-emerald-500/20 border-b-emerald-400 rounded-full animate-spin" style={{ animationDirection: 'reverse' }}></div>
+            </div>
+            <p className="text-stone-400 font-light italic text-sm animate-pulse tracking-wide font-mono mt-4">Consulting the higher Akashic Records matrix...</p>
           </div>
         ) : (
-          <div className="space-y-8">
-            {deepDiveData.title === 'Birth Chart Guide' ? (
-               <BirthChartGuide />
-            ) : (
-              <div className="space-y-4">
-                <div className="bg-black/40 p-6 rounded-2xl border border-white/5">
-                  <p className="text-stone-200 font-light leading-relaxed whitespace-pre-wrap">{deepDiveData.detailedAnalysis}</p>
-                </div>
-                
-                {deepDiveData.followUpOptions && deepDiveData.followUpOptions.length > 0 && (
-                  <div className="pt-4 border-t border-white/10">
-                    <h4 className="text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-4 font-bold">Resonant Pathways</h4>
-                    <div className="flex flex-wrap gap-2">
-                       {deepDiveData.followUpOptions.map((option: string) => (
-                         <button 
-                           key={option}
-                           onClick={() => handleDeepDiveNext(option)}
-                           className="px-4 py-2 bg-white/5 hover:bg-purple-900/30 border border-white/10 hover:border-purple-500/50 rounded-xl text-xs text-stone-300 hover:text-white transition-all"
-                         >
-                           {option}
-                         </button>
-                       ))}
+          <div className="space-y-6">
+            
+            {/* CORE MODE TAB CONTROLLER */}
+            <div className="flex flex-wrap gap-1 bg-stone-950/80 border border-white/5 p-1 rounded-2xl">
+              <button 
+                onClick={() => { setActiveModalTab('text'); try{soundEngine.click();}catch(e){ /* ignore */ } }}
+                className={`flex-1 py-3 px-4 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all flex items-center justify-center gap-2 ${activeModalTab === 'text' ? 'bg-stone-900 border border-white/10 text-white shadow-xl' : 'text-stone-500 hover:text-stone-300'}`}
+              >
+                <BookOpen size={13} className={activeModalTab === 'text' ? "text-purple-400" : ""} />
+                <span>📖 Description & Lore</span>
+              </button>
+              
+              <button 
+                onClick={() => { setActiveModalTab('images'); try{soundEngine.click();}catch(e){ /* ignore */ } }}
+                className={`flex-1 py-3 px-4 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all flex items-center justify-center gap-2 ${activeModalTab === 'images' ? 'bg-stone-900 border border-white/10 text-white shadow-xl' : 'text-stone-500 hover:text-stone-300'}`}
+              >
+                <Palette size={13} className={activeModalTab === 'images' ? "text-amber-400" : ""} />
+                <span>🎨 Reference Images</span>
+              </button>
+
+              <button 
+                onClick={() => { setActiveModalTab('video'); try{soundEngine.click();}catch(e){ /* ignore */ } }}
+                className={`flex-1 py-3 px-4 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all flex items-center justify-center gap-2 ${activeModalTab === 'video' ? 'bg-stone-900 border border-white/10 text-white shadow-xl' : 'text-stone-500 hover:text-stone-300'}`}
+              >
+                <CirclePlay size={13} className={activeModalTab === 'video' ? "text-emerald-400 animate-pulse" : ""} />
+                <span>🎬 Quick Video Lesson</span>
+              </button>
+
+              <button 
+                onClick={() => { setActiveModalTab('interactive'); try{soundEngine.click();}catch(e){ /* ignore */ } }}
+                className={`flex-1 py-3 px-4 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all flex items-center justify-center gap-2 ${activeModalTab === 'interactive' ? 'bg-stone-900 border border-white/10 text-white shadow-xl' : 'text-stone-500 hover:text-stone-300'}`}
+              >
+                <Brain size={13} className={activeModalTab === 'interactive' ? "text-cyan-400 animate-pulse" : ""} />
+                <span>🧩 Attunement Quiz</span>
+              </button>
+            </div>
+
+            {/* TAB PANELS CONTAINER */}
+            <div className="min-h-[360px] flex flex-col justify-between">
+              
+              {/* Tab 1: TEXT DESCRIPTION */}
+              {activeModalTab === 'text' && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 15 }} 
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-6"
+                >
+                  {cleanTitle === 'Birth Chart Guide' ? (
+                    <BirthChartGuide />
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="bg-black/35 p-6 rounded-2xl border border-white/5 shadow-2xl relative overflow-hidden leading-relaxed text-sm text-stone-200 font-light whitespace-pre-wrap">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
+                        {deepDiveData.detailedAnalysis}
+                      </div>
+
+                      {deepDiveData.followUpOptions && deepDiveData.followUpOptions.length > 0 && (
+                        <div className="pt-4 border-t border-white/5 space-y-3">
+                          <h4 className="text-[9px] uppercase tracking-[0.25em] text-purple-400 font-black">Resonant Pathways to Explore Deeper</h4>
+                          <div className="flex flex-wrap gap-2">
+                             {deepDiveData.followUpOptions.map((option: string) => (
+                               <button 
+                                 key={option}
+                                 onClick={() => handleDeepDiveNext(option)}
+                                 className="px-4 py-2 border border-purple-500/20 bg-purple-500/5 hover:bg-purple-900/40 hover:border-purple-500/50 rounded-xl text-xs text-stone-300 hover:text-white transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                               >
+                                 {option} →
+                               </button>
+                             ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Tab 2: REFERENCE IMAGES (ASTRO schematics & geometry blueprint) */}
+              {activeModalTab === 'images' && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 15 }} 
+                  animate={{ opacity: 1, y: 0 }}
+                  className="grid grid-cols-1 md:grid-cols-3 gap-6"
+                >
+                  <div className="md:col-span-2 bg-stone-950/80 border border-white/10 rounded-2xl overflow-hidden p-6 relative flex flex-col justify-center items-center select-none aspect-video">
+                    {/* SVG Interactive Holographic Chart Reference */}
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.06)_0%,transparent_70%)]" />
+                    <div className="absolute top-2 left-3 font-mono text-[8px] text-stone-500 uppercase tracking-widest">Interactive Blueprint: {cleanTitle}</div>
+                    
+                    <svg className="w-full max-w-[280px] aspect-square text-amber-500/40 relative z-10" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="0.3" strokeDasharray="2, 2" className="animate-spin" style={{ animationDuration: '40s' }} />
+                      <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(251,191,36,0.25)" strokeWidth="0.5" />
+                      <circle cx="50" cy="50" r="22" fill="none" stroke="rgba(45,212,191,0.2)" strokeWidth="0.4" />
+                      
+                      {/* Triangle Overlays representing alignment aspects */}
+                      <polygon points="50,5 89,72.5 11,72.5" fill="none" stroke="currentColor" strokeWidth="0.25" className="hover:stroke-amber-400 transition-colors cursor-pointer" />
+                      <polygon points="50,95 11,27.5 89,27.5" fill="none" stroke="rgba(168,85,247,0.3)" strokeWidth="0.25" />
+
+                      {/* Interactive Hotspots / Nodes */}
+                      <g className="cursor-pointer" 
+                         onMouseEnter={() => setHoveredDiagramNode('Crown Node: Channels cosmic information downwards representing maximum potential.')}
+                         onMouseLeave={() => setHoveredDiagramNode(null)}>
+                        <circle cx="50" cy="5" r="3" className="fill-stone-900 stroke-purple-400 hover:fill-purple-500 transition-all" strokeWidth="1" />
+                        <text x="50" y="5" textAnchor="middle" dominantBaseline="central" fontSize="3" className="fill-white font-mono pointer-events-none">I</text>
+                      </g>
+                      
+                      <g className="cursor-pointer" 
+                         onMouseEnter={() => setHoveredDiagramNode('Spiritual Anchor: Keeps planetary energies grounded in the Earth matrix.')}
+                         onMouseLeave={() => setHoveredDiagramNode(null)}>
+                        <circle cx="89" cy="72.5" r="3" className="fill-stone-900 stroke-amber-400 hover:fill-amber-500 transition-all" strokeWidth="1" />
+                        <text x="89" y="72.5" textAnchor="middle" dominantBaseline="central" fontSize="3" className="fill-white font-mono pointer-events-none">II</text>
+                      </g>
+
+                      <g className="cursor-pointer" 
+                         onMouseEnter={() => setHoveredDiagramNode('Vibrational Transmuter: The gateway representing active spiritual growth and karma removal.')}
+                         onMouseLeave={() => setHoveredDiagramNode(null)}>
+                        <circle cx="11" cy="72.5" r="3" className="fill-stone-900 stroke-emerald-400 hover:fill-emerald-500 transition-all" strokeWidth="1" />
+                        <text x="11" y="72.5" textAnchor="middle" dominantBaseline="central" fontSize="3" className="fill-white font-mono pointer-events-none">III</text>
+                      </g>
+
+                      <g className="cursor-pointer" 
+                         onMouseEnter={() => setHoveredDiagramNode('Inner Core Point: Solfeggio 528Hz alignment cell governing cells rejuvenation.')}
+                         onMouseLeave={() => setHoveredDiagramNode(null)}>
+                        <circle cx="50" cy="50" r="4.5" className="fill-stone-950 stroke-cyan-400 hover:fill-cyan-400 hover:scale-110 transition-all" strokeWidth="1" />
+                        <text x="50" y="50" textAnchor="middle" dominantBaseline="central" fontSize="4.5" className="fill-cyan-300 font-mono pointer-events-none font-bold">528</text>
+                      </g>
+                    </svg>
+                  </div>
+
+                  <div className="bg-stone-900/60 border border-white/5 rounded-2xl p-5 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Palette size={14} className="text-amber-400" />
+                        <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Reference Details</h4>
+                      </div>
+                      <p className="text-stone-300 text-xs font-light leading-relaxed">
+                        {hoveredDiagramNode || "Hover over any node (I, II, III or 528 Core) on the interactive diagram on the left to reveal celestial reference meanings."}
+                      </p>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/5">
+                      <div className="bg-amber-400/5 border border-amber-500/10 p-3 rounded-lg flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-amber-500/80 shrink-0" />
+                        <div className="text-[10px] font-mono text-stone-300 tracking-wide">
+                          Interactive learning overlays generated dynamically. High contrast grid maps 100% accurate.
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
-            )}
+                </motion.div>
+              )}
+
+              {/* Tab 3: QUICK VIDEO LESSON (Interactive Simulated Video Deck) */}
+              {activeModalTab === 'video' && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 15 }} 
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  {/* Glowing custom video console */}
+                  <div className="bg-black/75 border border-emerald-500/20 rounded-2xl overflow-hidden p-6 relative">
+                    <div className="absolute inset-0 bg-radial-gradient(ellipse_at_top,rgba(16,185,129,0.06)_0%,transparent_80%) pointer-events-none" />
+                    
+                    {/* VIDEO FRAME HEADER HUD */}
+                    <div className="relative z-10 flex justify-between items-center pb-3 border-b border-white/5 mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2.5 h-2.5 rounded-full ${isVideoPlaying ? 'bg-red-500 animate-ping' : 'bg-stone-500'}`} />
+                        <span className="font-mono text-[9px] text-stone-300 tracking-wider">ASTRONET STREAMING • QUICK LESSON</span>
+                      </div>
+                      <div className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest">{videoTime}s / 110s</div>
+                    </div>
+
+                    {/* INTERACTIVE VIDEO VISUALIZATION SCREEN */}
+                    <div className="relative aspect-video max-h-[220px] mx-auto rounded-xl bg-stone-950 border border-white/10 flex items-center justify-center overflow-hidden mb-4">
+                      {/* Interactive Pulsing Orbits and Nodes */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className={`w-40 h-40 border border-emerald-500/20 rounded-full transition-transform duration-1000 ${isVideoPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '12s' }}>
+                          <div className="w-4 h-4 rounded-full bg-emerald-400 absolute top-0 left-1/2 -ml-2 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                        </div>
+                        <div className={`w-24 h-24 border border-cyan-500/10 rounded-full absolute transition-transform duration-1000 ${isVideoPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '6s', animationDirection: 'reverse' }}>
+                          <div className="w-3.5 h-3.5 rounded-full bg-cyan-400 absolute bottom-0 left-1/2 -ml-1.5 shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+                        </div>
+                        <div className={`w-12 h-12 bg-purple-500/20 border border-purple-400 animate-pulse rounded-full absolute flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.4)]`}>
+                          <Sparkles className="w-5 h-5 text-purple-200" />
+                        </div>
+                      </div>
+
+                      {/* Decibel/Audio visualization lines */}
+                      <div className="absolute bottom-3 right-3 flex items-end gap-1 h-8">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div 
+                            key={i} 
+                            className="bg-emerald-400 w-1 rounded-sm transition-all duration-150" 
+                            style={{ 
+                              height: isVideoPlaying ? `${Math.floor(Math.random() * 24) + 6}px` : '4px',
+                              animationDelay: `${i * 0.1}s` 
+                            }} 
+                          />
+                        ))}
+                      </div>
+
+                      {/* VIDEO STATUS BANNER */}
+                      <div className="absolute top-3 left-3 bg-stone-900/95 border border-white/10 px-2.5 py-1 rounded-md text-[8px] tracking-wider font-mono text-stone-300">
+                        {currentChapterData.name.toUpperCase()}
+                      </div>
+                    </div>
+
+                    {/* LIVE INTERACTIVE STREAM CAPTIONS / LESSON */}
+                    <div className="bg-stone-900/90 border border-white/5 rounded-xl p-4 min-h-[75px] flex items-center">
+                      <p className="text-stone-100 text-xs text-center w-full italic font-light tracking-wide leading-relaxed">
+                        &ldquo;{currentChapterData.caption}&rdquo;
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* CUSTOM VIDEO CONTROLLER HUD */}
+                  <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-stone-900 p-4 rounded-xl border border-white/5">
+                    {/* Chapter list / quick jumping */}
+                    <div className="flex gap-1">
+                      {chapters.map((ch) => (
+                        <button
+                          key={ch.id}
+                          onClick={() => {
+                            setVideoChapter(ch.id);
+                            setVideoTime(ch.start);
+                            try{soundEngine.click();}catch(e){ /* ignore */ }
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-[9px] font-mono tracking-wider transition-all border ${videoChapter === ch.id ? 'bg-emerald-500/25 border-emerald-500 text-emerald-300 font-bold' : 'bg-transparent border-white/10 text-stone-400 hover:text-white'}`}
+                        >
+                          Ch {ch.id}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Main action triggers */}
+                    <div className="flex items-center gap-4">
+                      <button 
+                        onClick={() => {
+                          setIsVideoPlaying(!isVideoPlaying);
+                          try{soundEngine.click();}catch(e){ /* ignore safe */ }
+                        }}
+                        className={`p-3 rounded-full border transition-all ${isVideoPlaying ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-emerald-500/20 border-emerald-500/45 text-emerald-300'}`}
+                      >
+                        {isVideoPlaying ? (
+                          <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" /></svg>
+                        ) : (
+                          <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" /></svg>
+                        )}
+                      </button>
+
+                      <div className="text-xs text-stone-400">
+                        Lesson speed:
+                        <select 
+                          value={interactivePlaybackSpeed}
+                          onChange={(e) => setInteractivePlaybackSpeed(Number(e.target.value))}
+                          className="ml-1 bg-stone-950 border border-white/10 rounded-md px-1.5 py-0.5 text-[10px] text-white"
+                        >
+                          <option value="0.5">0.5x</option>
+                          <option value="1">1.0x</option>
+                          <option value="1.5">1.5x</option>
+                          <option value="2">2.0x</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Tab 4: INTERACTIVE LEARNING QUIZ (Attunement and certification) */}
+              {activeModalTab === 'interactive' && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 15 }} 
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  {!quizCompleted ? (
+                    <div className="bg-stone-900 border border-white/5 rounded-2xl p-6 relative overflow-hidden">
+                      <div className="flex justify-between items-center pb-3 border-b border-white/5 mb-4">
+                        <span className="font-mono text-[9px] text-stone-400">COSMIC ASSESSMENT PORTAL</span>
+                        <span className="font-mono text-[9px] text-cyan-400">QUESTION {currentQuizQuestion + 1} OF {quizQuestions.length}</span>
+                      </div>
+
+                      <h3 className="text-sm md:text-base font-light text-white mb-6 leading-relaxed">
+                        {quizQuestions[currentQuizQuestion].q}
+                      </h3>
+
+                      <div className="space-y-2.5">
+                        {quizQuestions[currentQuizQuestion].options.map((option, idx) => {
+                          const isCorrect = idx === quizQuestions[currentQuizQuestion].correct;
+                          const isSelected = idx === selectedOption;
+                          return (
+                            <button
+                              key={idx}
+                              onClick={() => handleSelectOption(idx)}
+                              disabled={quizAnswered}
+                              className={`w-full text-left p-4 rounded-xl text-xs flex justify-between items-center transition-all border ${
+                                quizAnswered
+                                  ? isCorrect
+                                    ? 'bg-emerald-500/10 border-emerald-500 text-emerald-200'
+                                    : isSelected
+                                      ? 'bg-red-500/10 border-red-500 text-red-200'
+                                      : 'bg-black/30 border-white/5 text-stone-500'
+                                  : 'bg-stone-950/40 hover:bg-stone-950/80 border-white/5 text-stone-300 hover:text-white hover:border-cyan-500/40'
+                              }`}
+                            >
+                              <span>{option}</span>
+                              <div className="shrink-0 ml-2">
+                                {quizAnswered && isCorrect && <span className="text-emerald-400 font-bold">✓</span>}
+                                {quizAnswered && isSelected && !isCorrect && <span className="text-red-400 font-bold">✗</span>}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {quizAnswered && (
+                        <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/5 text-xs text-stone-300 font-light leading-relaxed animate-fade-in">
+                          {quizQuestions[currentQuizQuestion].expl}
+                        </div>
+                      )}
+
+                      <div className="mt-6 flex justify-end">
+                        <button
+                          onClick={handleNextQuiz}
+                          disabled={!quizAnswered}
+                          className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                            quizAnswered 
+                              ? 'bg-cyan-500 hover:bg-cyan-600 text-stone-950 cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.4)]' 
+                              : 'bg-stone-800 text-stone-500 cursor-not-allowed'
+                          }`}
+                        >
+                          {currentQuizQuestion === quizQuestions.length - 1 ? "Complete Verification" : "Next Aspect"}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-stone-950 border border-white/10 rounded-2xl p-8 text-center space-y-6 relative overflow-hidden">
+                      {/* Decorative star lines */}
+                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-cyan-500 to-amber-500" />
+                      
+                      <div className="w-16 h-16 rounded-full bg-cyan-400/10 border border-cyan-500/30 flex items-center justify-center mx-auto mb-4 animate-bounce">
+                        <Activity className="w-8 h-8 text-cyan-400" />
+                      </div>
+
+                      <h3 className="text-2xl font-light text-white tracking-wide">Attunement Verified!</h3>
+                      <div className="max-w-md mx-auto">
+                        <p className="text-stone-300 text-xs font-light leading-relaxed">
+                          Your current cognitive resonance with <span className="font-semibold text-cyan-300">{cleanTitle}</span> has been analyzed and processed safely.
+                        </p>
+                      </div>
+
+                      <div className="inline-block px-5 py-3 rounded-2xl bg-white/5 border border-white/5 font-mono text-sm">
+                        <div className="text-stone-400 text-[10px] uppercase font-bold tracking-widest">Cognitive Score</div>
+                        <div className="text-2xl font-black text-emerald-400">{quizScore} / {quizQuestions.length} Aspects</div>
+                      </div>
+
+                      {nodeAttuned ? (
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl max-w-sm mx-auto text-[11px] font-mono text-emerald-300"
+                        >
+                          🌌 528Hz WAVE ALIGNED SUCCESSFULLY • PORTAL STABILIZED
+                        </motion.div>
+                      ) : (
+                        <div className="flex gap-3 justify-center">
+                          <button
+                            onClick={handleAttuneNode}
+                            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white rounded-xl text-xs uppercase tracking-widest font-black transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+                          >
+                            Harmonize Portal
+                          </button>
+                          <button
+                            onClick={handleResetQuiz}
+                            className="px-4 py-3 bg-transparent border border-white/20 hover:border-white text-stone-400 hover:text-white rounded-xl text-xs uppercase tracking-widest font-bold transition-all"
+                          >
+                            Re-Quiz
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+            </div>
+
           </div>
         )}
       </motion.div>
@@ -1593,6 +2118,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'gematria_calc'} tabId="gematria_calc" onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
               <Tab active={activeTab === 'golden_ratio'} tabId="golden_ratio" onClick={() => setActiveTab('golden_ratio')} icon={<Grid className="w-4 h-4 text-amber-500" />}>Kathara Grid</Tab>
               <Tab active={activeTab === 'sky_map'} tabId="sky_map" onClick={() => setActiveTab('sky_map')} icon={<Compass className="w-4 h-4 text-indigo-400"/>}>Atlas Sky Map</Tab>
+              <Tab active={activeTab === 'celestial_blueprint'} tabId="celestial_blueprint" onClick={() => setActiveTab('celestial_blueprint')} icon={<Compass className="w-4 h-4 text-emerald-400 animate-pulse"/>}>Celestial Blueprint</Tab>
               <Tab active={activeTab === 'obsidian'} tabId="obsidian" onClick={() => setActiveTab('obsidian')} icon={<BookOpen className="w-4 h-4 text-purple-400"/>}>Akashic Vault</Tab>
               <Tab active={activeTab === 'codex'} tabId="codex" onClick={() => setActiveTab('codex')} icon={<Search className="w-4 h-4 text-emerald-400"/>}>Cosmic Codex</Tab>
               <Tab active={activeTab === 'evolution'} tabId="evolution" onClick={() => setActiveTab('evolution')} icon={<Cpu className="w-4 h-4 text-blue-500"/>}>Quantum Evolution</Tab>
@@ -1606,8 +2132,16 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             </div>
             
             <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/20">
-              <AnimatePresence mode="wait">
-                {activeTab === 'identity' && (
+              <React.Suspense fallback={
+                <div className="h-full flex flex-col items-center justify-center gap-4 opacity-50">
+                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }}>
+                    <Loader2 className="w-8 h-8 text-purple-500" />
+                  </motion.div>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-purple-400/60">Assembling Synaptic Buffer...</p>
+                </div>
+              }>
+                <AnimatePresence mode="wait">
+                  {activeTab === 'identity' && (
                   <motion.div key="identity" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8 pb-32">
                     <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 shadow-2xl">
                       {/* Banner */}
@@ -2644,6 +3178,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <SkyMapSection />
                   </motion.div>
                 )}
+                {activeTab === 'celestial_blueprint' && (
+                  <motion.div key="celestial_blueprint" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <CelestialBlueprintSection data={data} setActiveTab={setActiveTab} />
+                  </motion.div>
+                )}
                 {activeTab === 'astral_canvas' && (
                   <motion.div key="astral_canvas" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
                     <AstralCanvas cosmicData={data} />
@@ -2695,7 +3234,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+              </React.Suspense>
+          </div>
             <div className="p-4 border-t border-white/10 bg-black/20 text-center">
               <button onClick={() => window.location.reload()} className="text-xs uppercase tracking-widest text-stone-500 hover:text-white transition-colors">Reset Environment</button>
             </div>

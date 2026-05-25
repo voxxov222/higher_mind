@@ -27,6 +27,8 @@ export async function action({ request }: ActionFunctionArgs) {
         return json(await geminiServer.fetchAngelNumberInsight(payload.query, payload.cosmicData));
       case "fetchUnfoldedNodes":
         return json(await geminiServer.fetchUnfoldedNodes(payload.canvasCtx, payload.cosmicData));
+      case "fetchCelestialBlueprintExplanation":
+        return json(await geminiServer.fetchCelestialBlueprintExplanation(payload.level, payload.userPrompt, payload.cosmicData));
       default:
         return json({ error: "Unknown action" }, { status: 400 });
     }

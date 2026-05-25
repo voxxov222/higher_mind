@@ -5,6 +5,8 @@ import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
 import { Brain as BrainIcon, Activity, Zap, Waves, Network, Lock, Sliders, Search, Eye, ArrowLeft, Code, Minimize2, Power, Palette, Fingerprint, Terminal, Box } from 'lucide-react';
 import { TerminalOverlay } from './profile/TerminalOverlay';
+import { ConsciousnessStreams } from './ConsciousnessStreams';
+import { useHigherMind } from './HigherMindProvider';
 
 // Import sound engine
 import { soundEngine } from '../lib/soundEffects';
@@ -232,7 +234,8 @@ const NeuralBrainCore = ({ colorTheme, overdrive, schemaRefine, indexingMode, em
 }
 
 
-export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?: (tab: any) => void }) => {
+export default function NeuralBrainSection({ data, setActiveTab }: { data?: any, setActiveTab?: (tab: any) => void }) {
+    const { thoughts, feelings, experiences, coherence, alignment } = useHigherMind();
     // Persistent Toggles using localStorage
     const [hudActive, setHudActive] = useState(() => {
         if (typeof window === 'undefined') return true;
@@ -392,6 +395,13 @@ export const NeuralBrainSection = ({ setActiveTab }: { data: any, setActiveTab?:
                     setHoveredNode={setHoveredNode}
                     hapticMode={hapticMode}
                     visMode={visMode}
+                />
+
+                <ConsciousnessStreams 
+                    thoughts={thoughts} 
+                    feelings={feelings} 
+                    experiences={experiences} 
+                    coherence={coherence} 
                 />
                 
                 {safetyProtocol && (

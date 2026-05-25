@@ -1643,7 +1643,9 @@ const ChatbotNode = ({ id, data }: NodeProps<Node<CanvasNodeData>>) => {
               <div key={index} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                 <span className="text-[9px] text-white/35 font-mono mb-0.5 capitalize">{msg.role === 'user' ? 'Seeker' : 'Higher Mind'}</span>
                 <div className={`p-2.5 rounded-xl max-w-[85%] text-xs ${msg.role === 'user' ? 'bg-purple-500/20 border border-purple-500/30 text-white' : 'bg-white/5 border border-white/5 text-white/90'}`}>
-                  <ReactMarkdown className="markdown-body font-sans leading-relaxed break-words">{msg.parts?.[0]?.text}</ReactMarkdown>
+                  <div className="markdown-body font-sans leading-relaxed break-words">
+                    <ReactMarkdown>{msg.parts?.[0]?.text}</ReactMarkdown>
+                  </div>
                 </div>
               </div>
             ))

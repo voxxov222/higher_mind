@@ -121,6 +121,65 @@ class SoundEngine {
     this.playTone(140, 'sawtooth', 0.3, 0.3, 90);
   }
 
+  private humOsc: OscillatorNode | null = null;
+  private humGain: GainNode | null = null;
+  private humFilter: BiquadFilterNode | null = null;
+
+  updateHarmonicHum = (coherence: number) => {
+    this.init();
+    if (!this.ctx || !this.masterGain || this.ctx.state !== 'running') return;
+
+    if (!this.humOsc) {
+      this.humOsc = this.ctx.createOscillator();
+      this.humGain = this.ctx.createGain();
+      this.humFilter = this.ctx.createBiquadFilter();
+
+      this.humOsc.type = 'sine';
+      this.humOsc.frequency.setValueAtTime(174, this.ctx.currentTime); // Grounding frequency base
+
+      this.humFilter.type = 'lowpass';
+      this.humFilter.frequency.setValueAtTime(1000, this.ctx.currentTime);
+      this.humFilter.Q.value = 5;
+
+      this.humGain.gain.setValueAtTime(0, this.ctx.currentTime);
+      this.humGain.gain.linearRampToValueAtTime(0.05, this.ctx.currentTime + 1);
+
+      this.humOsc.connect(this.humFilter);
+      this.humFilter.connect(this.humGain);
+      this.humGain.connect(this.masterGain);
+
+      this.humOsc.start();
+    }
+
+    // Dynamic updates based on coherence
+    const now = this.ctx.currentTime;
+    const baseFreq = 174 + (coherence * 354); // Scale between 174Hz and 528Hz (Healing/Coherence)
+    this.humOsc.frequency.exponentialRampToValueAtTime(baseFreq, now + 0.5);
+    
+    if (this.humFilter) {
+      this.humFilter.frequency.exponentialRampToValueAtTime(500 + (coherence * 1500), now + 0.5);
+    }
+    
+    if (this.humGain) {
+      const targetGain = 0.02 + (coherence * 0.08); // Louder when more coherent
+      this.humGain.gain.linearRampToValueAtTime(targetGain, now + 0.5);
+    }
+  }
+
+  stopHarmonicHum = () => {
+    if (this.humGain && this.ctx) {
+      this.humGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 1);
+      setTimeout(() => {
+        if (this.humOsc) {
+          this.humOsc.stop();
+          this.humOsc = null;
+        }
+        this.humGain = null;
+        this.humFilter = null;
+      }, 1100);
+    }
+  }
+
   // --- SECTION-SPECIFIC SOUNDS ---
 
   // Astrology / Celestial (Ethereal, Orbital, Resonance)

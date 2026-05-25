@@ -3,8 +3,7 @@ import { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Sphere, Text } from '@react-three/drei';
-
-import { useHigherMind } from './HigherMindProvider';
+import { Thought, Feeling, Experience } from '../types';
 
 export type ThinkingMode = 'idle' | 'planetary' | 'emotional' | 'numerology' | 'transit' | 'insight' | 'transcendent' | 'synergetic' | 'kabbalistic' | 'analyzing';
 
@@ -335,7 +334,7 @@ function deformToBrain(geometry: THREE.BufferGeometry) {
 // COMPONENTS
 // --------------------------------------------------------
 
-const NeuralBrain = ({ mode }: { mode: ThinkingMode }) => {
+const NeuralBrain = ({ mode, coherence = 0.5, alignment = 0.7, feelings = [] }: { mode: ThinkingMode, coherence?: number, alignment?: number, feelings?: Feeling[] }) => {
   const pointsRef = useRef<THREE.Points>(null!);
   const linesRef = useRef<THREE.LineSegments>(null!);
   const shellRef = useRef<THREE.Mesh>(null!);
@@ -349,7 +348,7 @@ const NeuralBrain = ({ mode }: { mode: ThinkingMode }) => {
   
   // Ghost shell over the brain
   const cortexGeo = useMemo(() => {
-     const geo = new THREE.IcosahedronGeometry(1.0, 32); // Reduced detail from 48
+     const geo = new THREE.IcosahedronGeometry(1.0, 32); 
      deformToBrain(geo);
      return geo;
   }, []);
@@ -393,7 +392,6 @@ const NeuralBrain = ({ mode }: { mode: ThinkingMode }) => {
   
   const mousePos = useMemo(() => new THREE.Vector3(0,0,10), []);
   const targetColor = useMemo(() => new THREE.Color(), []);
-  const { coherence, alignment, feelings } = useHigherMind();
   
   useFrame((state) => {
       const t = state.clock.getElapsedTime();
@@ -550,7 +548,7 @@ const DataRings = ({ mode }: { mode: ThinkingMode }) => {
     )
 }
 
-export const AstralMind = ({ mode = 'idle' }: { mode?: ThinkingMode }) => {
+export const AstralMind = ({ mode = 'idle', coherence = 0.5, alignment = 0.7, feelings = [] }: { mode?: ThinkingMode, coherence?: number, alignment?: number, feelings?: Feeling[] }) => {
   const groupRef = useRef<THREE.Group>(null!);
   const { mouse } = useThree();
 
@@ -572,7 +570,7 @@ export const AstralMind = ({ mode = 'idle' }: { mode?: ThinkingMode }) => {
   return (
     <group scale={[1.6, 1.6, 1.6]}>
        <group ref={groupRef}>
-          <NeuralBrain mode={mode} />
+          <NeuralBrain mode={mode} coherence={coherence} alignment={alignment} feelings={feelings} />
           {/* Inner core giving a central quantum glow */}
           <Sphere args={[0.3, 32, 32]}>
              <meshBasicMaterial color="#ffffff" transparent opacity={0.05} blending={THREE.AdditiveBlending} />

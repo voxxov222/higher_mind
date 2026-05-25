@@ -108,7 +108,7 @@ const SkyMapScene = ({ onSelectStar, travelMode, targetPosition, starDensity, sh
       {/* Constellation Lines */}
       {showConstellations && constellationLines.map((line, i) => (
         <Line 
-          key={`const_${i}`}
+          key={`const_${starDensity}_${i}`}
           points={[line.start, line.end]}
           color="#4f46e5"
           opacity={0.3}

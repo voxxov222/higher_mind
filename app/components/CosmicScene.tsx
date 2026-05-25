@@ -9,9 +9,11 @@ import { BlendFunction } from 'postprocessing';
 import * as THREE from 'three';
 import { CosmicData } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
+import { useHigherMind } from './HigherMindProvider';
 import { AstralMind, ThinkingMode } from './AstralMind';
 import { VortexScene } from './VortexSequencingSection';
 import { CelestialSolarCore, PlanetaryGravityNetwork } from './CelestialSolarCore';
+import { Gematria3DVisualizer } from './Gematria3DVisualizer';
 import { X, Minus, Lock, Unlock, Play, Square, Palette, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity as InfinityIcon, Magnet, Shuffle, Waves, Terminal } from 'lucide-react';
 import { TerminalOverlay } from './profile/TerminalOverlay';
 
@@ -980,7 +982,7 @@ const BlueprintGrid = () => {
  * CentralCore Component
  * Represents the central living intelligence core.
  */
-const CentralCore = ({ mode = 'idle', onPointerDown, onPointerMove, onPointerUp, onContextMenu, onPointerLeave }: { mode?: ThinkingMode, onPointerDown?: any, onPointerMove?: any, onPointerUp?: any, onContextMenu?: any, onPointerLeave?: any }) => {
+const CentralCore = ({ mode = 'idle', coherence = 0.5, alignment = 0.7, feelings = [], onPointerDown, onPointerMove, onPointerUp, onContextMenu, onPointerLeave }: { mode?: ThinkingMode, coherence?: number, alignment?: number, feelings?: any[], onPointerDown?: any, onPointerMove?: any, onPointerUp?: any, onContextMenu?: any, onPointerLeave?: any }) => {
   return (
     <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
       <group 
@@ -990,7 +992,7 @@ const CentralCore = ({ mode = 'idle', onPointerDown, onPointerMove, onPointerUp,
         onPointerOut={onPointerLeave}
         onContextMenu={onContextMenu}
       >
-        <AstralMind mode={mode} />
+        <AstralMind mode={mode} coherence={coherence} alignment={alignment} feelings={feelings} />
       </group>
     </Float>
   );
@@ -1373,6 +1375,9 @@ const CameraController = ({ isPresentationActive, activeTab, data }: { isPresent
     } else if (activeTab === 'vortex') {
       targetPos.set(0, 10, -55);
       lookAtTarget.set(0, -5, -40);
+    } else if (activeTab === 'gematria_calc') {
+      targetPos.set(-25, 10, 35);
+      lookAtTarget.set(-20, 0, 20);
     }
     
     const distance = state.camera.position.distanceTo(targetPos);
@@ -1542,8 +1547,8 @@ const NumerologyGeometria = ({ data, onSelect }: { data: CosmicData, onSelect: (
  * The primary 3D rendering context using React Three Fiber.
  * Integrates geometry, lighting, effects, and camera management.
  */
-export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive, mode, vortexMode }: CosmicSceneProps) => {
-
+export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive, mode = 'idle', vortexMode }: CosmicSceneProps) => {
+  const { coherence, alignment, feelings } = useHigherMind();
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [showBrainMenu, setShowBrainMenu] = useState<{x: number, y: number} | null>(null);
   const touchTimer = useRef<NodeJS.Timeout | null>(null);
@@ -1612,6 +1617,9 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
       {/* --- CENTRAL BLUEPRINT GEOMETRY --- */}
       <CentralCore 
         mode={mode} 
+        coherence={coherence}
+        alignment={alignment}
+        feelings={feelings}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -1637,12 +1645,21 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
           <NavNode position={[-15, 0, -15]} title="Akashic Records" active={activeTab === 'akashic'} onClick={() => setActiveTab('akashic')} color="#818cf8" />
           <NavNode position={[15, 0, -15]} title="Synchronicities" active={activeTab === 'patterns'} onClick={() => setActiveTab('patterns')} color="#2dd4bf" />
           <NavNode position={[0, -5, -40]} title="Vortex Sequencing" active={activeTab === 'vortex'} onClick={() => setActiveTab('vortex')} color="#22d3ee" />
+          <NavNode position={[-20, 0, 20]} title="Gematria Matrix" active={activeTab === 'gematria_calc'} onClick={() => setActiveTab('gematria_calc')} color="#ec4899" />
 
           {/* VORTEX 3D SPACE */}
           {activeTab === 'vortex' && (
             <group position={[0, -10, -40]}>
               <VortexScene mode={vortexMode || 'sync'} userNumbers={userNumbers} />
               <pointLight color="#22d3ee" intensity={5} distance={50} />
+            </group>
+          )}
+
+          {/* GEMATRIA 3D SPACE */}
+          {activeTab === 'gematria_calc' && (
+            <group position={[-20, 0, 20]}>
+              <Gematria3DVisualizer onNodeClick={onPlanetClick} />
+              <pointLight color="#ec4899" intensity={5} distance={50} />
             </group>
           )}
         </group>

@@ -10,6 +10,9 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       host: "0.0.0.0",
     },
+    resolve: {
+      dedupe: ["react", "react-dom", "three", "@react-three/fiber"],
+    },
     plugins: [
       remix({
         buildDirectory: "dist",
@@ -26,7 +29,19 @@ export default defineConfig(({ mode }) => {
     ],
     
     build: {
-      minify: false,
+      minify: "esbuild",
+      sourcemap: false,
+      cssMinify: true,
+      chunkSizeWarningLimit: 2000,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              return "vendor";
+            }
+          }
+        }
+      }
     },
   };
 });

@@ -130,7 +130,7 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -259,7 +259,7 @@ export const fetchCosmicChatResponse = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-1.5-flash",
       contents: [
         ...safeHistory,
         { role: 'user', parts: [{ text: userMessage }] }
@@ -323,7 +323,7 @@ export const fetchTimelineDepth = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -381,7 +381,7 @@ export const fetchTimelineDeepDiveOption = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -446,7 +446,7 @@ export const fetchGeneralDeepDive = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -520,7 +520,7 @@ export const fetchAuraInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-1.5-flash',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",
@@ -607,7 +607,7 @@ export const fetchAngelNumberInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-1.5-flash',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",
@@ -641,7 +641,7 @@ export const streamGeminiChat = async (messages: {role: string, text: string}[],
         }));
         
         const responseStream = await ai.models.generateContentStream({
-            model: "gemini-3.5-flash",
+            model: "gemini-1.5-flash",
             contents,
             config: {
                 temperature: 0.7,
@@ -687,7 +687,7 @@ export const fetchUnfoldedNodes = async (
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -723,6 +723,61 @@ export const fetchUnfoldedNodes = async (
   } catch (error) {
     console.error("Error generating unfolded nodes:", error);
     return { nodes: [] };
+  }
+};
+
+export const fetchCelestialBlueprintExplanation = async (
+  level: string,
+  userPrompt: string,
+  cosmicData: any
+): Promise<{ explanation: string; frequency: number; resonantSymbol: string }> => {
+  const ai = getAI();
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
+      contents: `
+        Analyze the user's cosmic positioning and guide them through a deep, cinematic-mystic explanation of their location in the universe.
+        User's Natal profile:
+        - Name: \${cosmicData?.profile?.name || "Seeker"}
+        - Sun Sign: \${cosmicData?.astrology?.sun?.sign || "Unknown"} in House \${cosmicData?.astrology?.sun?.house || "Unknown"}
+        - Ascendant Sign: \${cosmicData?.astrology?.ascendant?.sign || "Unknown"}
+        
+        Current Scale of Consciousness: \${level} Level
+        User's Navigation inquiry: "\${userPrompt}"
+        
+        Create an extremely immersive, sci-fi HUD inspired, but deeply spiritual response (150-250 words) that bridges astronomical truth (e.g. coordinates, movement, velocity, universal addresses) with Hermetic Kabbalistic or Astrological symbolism. Use deep, evocative display metaphors.
+        
+        Return a JSON structure matching:
+        {
+          "explanation": "Markdown text describing details about this scale of cosmic position, our velocity, gravity streams, and psychospiritual alignment.",
+          "frequency": 528, // Solfeggio frequency (integer) reinforcing this level
+          "resonantSymbol": "Flower of Life / Metatron / Solar Core / Galactic Axis"
+        }
+      `,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            explanation: { type: Type.STRING },
+            frequency: { type: Type.INTEGER },
+            resonantSymbol: { type: Type.STRING }
+          },
+          required: ["explanation", "frequency", "resonantSymbol"]
+        },
+        systemInstruction: "You are the Astral Mind Guide, an expert digital mystic. Speak with poetic intelligence, cinematic space descriptions, and high technical authority."
+      }
+    });
+
+    const text = response.text?.trim() || "{}";
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Error in fetchCelestialBlueprintExplanation:", error);
+    return {
+      explanation: "The celestial signal collapsed into interstellar noise. We are navigating the quantum drift without telemetry.",
+      frequency: 432,
+      resonantSymbol: "Ethereal Horizon"
+    };
   }
 };
 

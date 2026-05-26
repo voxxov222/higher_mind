@@ -75,8 +75,8 @@ const ProfileEditor = ({ onClose }: { onClose: () => void }) => {
         null // We could pass current config if needed
       );
       
-      if (response.suggestedProfileUpdate?.bio) {
-        handleUpdate('bio.text', response.suggestedProfileUpdate.bio);
+      if ((response as any).suggestedProfileUpdate?.bio) {
+        handleUpdate('bio.text', (response as any).suggestedProfileUpdate.bio);
       }
     } catch (e) {
       console.error(e);

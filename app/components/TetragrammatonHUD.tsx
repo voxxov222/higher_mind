@@ -44,7 +44,7 @@ const InteractiveNode = ({ node, index, type, activeNode, setActiveNode, setHove
         </mesh>
       )}
 
-      <Text position={[0, 0, 0.8]} fontSize={0.6} color="#0f172a" anchorX="center" anchorY="center">
+      <Text position={[0, 0, 0.8]} fontSize={0.6} color="#0f172a" anchorX="center" anchorY="middle">
         {node.letter}
       </Text>
       {isActive && (

@@ -1,9 +1,8 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { Float, Stars, Center, Html, Line, Points, PointMaterial } from '@react-three/drei';
-import { EffectComposer, Bloom, ChromaticAberration, Vignette } from '@react-three/postprocessing';
-import { BlendFunction } from 'postprocessing';
+import { Float, Stars, Center, Html, Line, Points, PointMaterial, OrbitControls } from '@react-three/drei';
+
 import { CelestialBody } from '../types';
 
 // --------------------------------------------------------
@@ -436,6 +435,7 @@ export const SoulBlueprintAura = ({ data }: { data?: any }) => {
   return (
     <div className="absolute inset-0 z-0 pointer-events-auto mix-blend-screen opacity-90" style={{ transform: 'translateZ(-100px)'}}>
       <Canvas gl={{ alpha: true, antialias: true }} camera={{ position: [0, 0, 7], fov: 45 }} onClick={() => { setSelectedBody(null); setSelectedAspect(null); }}>
+        <OrbitControls enableZoom={true} enablePan={true} maxDistance={20} minDistance={2} />
         <fog attach="fog" args={['#000', 3, 15]} />
         
         <ambientLight intensity={0.5} />
@@ -482,18 +482,7 @@ export const SoulBlueprintAura = ({ data }: { data?: any }) => {
         
         <Stars radius={50} depth={50} count={20000} factor={4} saturation={1} fade speed={1} />
         
-        <EffectComposer disableNormalPass>
-          <Bloom 
-            intensity={1.5} 
-            luminanceThreshold={0.2} 
-            luminanceSmoothing={0.9} 
-            blendFunction={BlendFunction.SCREEN} 
-          />
-          <ChromaticAberration 
-            offset={new THREE.Vector2(0.001, 0.001)} 
-            blendFunction={BlendFunction.NORMAL} 
-          />
-        </EffectComposer>
+
       </Canvas>
     </div>
   );

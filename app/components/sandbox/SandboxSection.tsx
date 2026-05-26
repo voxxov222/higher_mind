@@ -63,7 +63,7 @@ const SandboxSectionInner = () => {
         []
     );
     const onConnect = useCallback(
-        (params: Connection | Edge) => setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#10b981', strokeWidth: 2 } }, eds)),
+        (params: Connection | Edge) => setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#10b981', strokeWidth: 2 } } as any, eds)),
         []
     );
 
@@ -284,7 +284,7 @@ function WidgetNode({ data, selected }: NodeProps<Node>) {
 };
 
 function WidgetContent({ widget }: { widget: Widget }) {
-    switch (widget.type) {
+    switch (widget.type as string) {
         case 'cpu': return <CPUWidget />;
         case 'memory': return <MemoryWidget />;
         case 'radar_astral': return <RadarAstralWidget />;
@@ -410,7 +410,7 @@ function BioRhythmWidget() {
 function Quantum3DWidget() {
     return (
         <div className="w-full h-full cursor-grab active:cursor-grabbing">
-            <Canvas>
+            <Canvas >
                  <ambientLight intensity={0.5} />
                  <directionalLight position={[10, 10, 5]} intensity={1} />
                  <Float speed={4} rotationIntensity={2} floatIntensity={2}>

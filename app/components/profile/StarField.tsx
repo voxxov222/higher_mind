@@ -12,8 +12,7 @@ const StarField = () => {
       id="cosmic-starfield"
       className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
     >
-      <Canvas 
-        camera={{ position: [0, 0, 1] }}
+      <Canvas camera={{ position: [0, 0, 1] }}
         gl={{ antialias: true, alpha: true }}
       >
         <color attach="background" args={['#000000']} />

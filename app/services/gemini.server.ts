@@ -34,7 +34,60 @@ export interface CosmicInput {
   location: string;
 }
 
-// --- CORE COSMIC READING ENGINE ---
+
+// --- ANCESTRY ORIGINS ENGINE ---
+/**
+ * generateAncestryResearch
+ * Deep dives into the genealogical, etymological, and historical origins of a surname.
+ */
+export const generateAncestryResearch = async (lastName: string, maidenName?: string) => {
+  const ai = getAI();
+  const prompt = `
+  You are an expert genealogist, genetic anthropologist, and historical etymologist.
+  Research the origins of the primary surname: "${lastName}".
+  ${maidenName ? 'Also research the maternal maiden name: "' + maidenName + '".' : ''}
+  
+  Provide a deep, realistic historical analysis of these names, their roots, global migration patterns, and typical regions where descendants are found.
+  
+  Format the output EXACTLY as this JSON object:
+  {
+    "lastNameOrigin": {
+      "history": "Detailed history of the surname...",
+      "meaning": "Etymological root meaning"
+    },
+    ${maidenName ? `"maidenNameOrigin": {
+      "history": "Detailed history of the maiden name...",
+      "meaning": "Etymological root meaning"
+    },` : ''}
+    "connections": ["Region/Country 1", "Region/Country 2", "Region/Country 3", "Historical Event connection"],
+    "coordinates": [
+      { "lat": 44.0, "lng": 12.0, "name": "Historical Hotspot 1" },
+      { "lat": 51.5, "lng": -0.1, "name": "Migration Point 2" }
+    ]
+  }
+  
+  Ensure coordinates are somewhat historically accurate depending on the surname origins. Provide ~3-5 distinct geographical points that map to early migration routes or strong concentrations for these names.
+  Return purely valid JSON without markdown wrapping.`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      }
+    });
+
+    const text = response.text?.trim() || "{}";
+    if (!text || text === "{}") throw new Error("Empty response from AI for Ancestry Research");
+
+    return JSON.parse(text);
+  } catch (err) {
+    console.error("Error generating Ancestry Research:", err);
+    throw new Error("Failed to formulate ancestry data.", { cause: err });
+  }
+};
+
 
 /**
  * fetchCosmicReading
@@ -130,7 +183,7 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -253,13 +306,24 @@ export const fetchCosmicChatResponse = async (
       "emergent_insight": "...",
       "astral_alignment": 0.88,
       "next_thought_direction": "..."
+    },
+    "visualData": {
+      "type": "chart | metrics | meaning_tree",
+      "chartType": "bar | radar | pie",
+      "title": "Topic Visual Demonstration",
+      "data": [{"name": "Category", "value": 100, "color": "#a855f7"}],
+      "metrics": [{"label": "Metric A", "value": "100%", "description": "Details..."}],
+      "meaningTree": [{"node": "Word Segment", "translation": "Direct Translation", "history": "Historical Origin Context"}]
     }
   }
+
+  IMPORTANT VISUAL DIRECTIVE:
+  When the user asks for research (like meaning of a name, astrological background, deep analysis), ALWAYS provide \`visualData\` to visually demonstrate the topic creatively! If you provide \`visualData\`, choose the most appropriate \`type\` ("chart" for distributions/stats, "metrics" for scores/levels, "meaning_tree" for name origins/etymology/pedigree). You MUST NOT return visualData as null if they are asking for an analysis.
   `;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       contents: [
         ...safeHistory,
         { role: 'user', parts: [{ text: userMessage }] }
@@ -323,7 +387,7 @@ export const fetchTimelineDepth = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -381,7 +445,7 @@ export const fetchTimelineDeepDiveOption = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -418,7 +482,17 @@ export const fetchGeneralDeepDive = async (
   topicTitle: string,
   topicContent: string,
   cosmicData: CosmicData
-): Promise<{ detailedAnalysis: string; followUpOptions: string[] }> => {
+): Promise<{ 
+  detailedAnalysis: string; 
+  followUpOptions: string[];
+  videoChapters: { name: string; caption: string; }[];
+  imageReference: {
+    description: string;
+    svgPolygons: string[];
+    svgCircles: { cx: number; cy: number; r: number; opacity: number; dashed: boolean; }[];
+    svgNodes: { id: string; label: string; description: string; cx: number; cy: number; color: string; }[];
+  };
+}> => {
   const ai = getAI();
   const prompt = `
   You are an expert, multi-disciplinary mystic researcher. You specialize in the intersection of Astrology, Numerology, Kabbalah, and Gematria.
@@ -434,19 +508,38 @@ export const fetchGeneralDeepDive = async (
   Go far beyond the surface level.
   
   Provide exactly 3 follow-up research questions or specific esoteric branches they can explore next.
-  
+
+  Additionally, generate custom data for:
+  1. A Quick Video Lesson: Provide 3 chapters with specific names and educational captions teaching the user about this exact topic. For each chapter, also provide visual parameters to render a unique geometric animation to match the lore of the chapter: a 'centerIcon' (choose from "Sparkles", "Hexagon", "Zap", "Radio", "Sun", "Moon", "Star"), a 'colors' array of two tailwind color names (must be hex values or specific like '#34d399', or tailwind names like 'emerald', 'cyan', 'purple', 'amber'), and an 'orbitParams' array with 2 objects describing inner and outer orbits (each having 'size' from 20-60, 'speed' 4-20, 'dotSize' 2-8).
+  2. A Reference Image Blueprint: Configure an advanced Sacred Geometry interactive SVG representation. Provide a 'description' of the geometry, an array of 'svgPolygons' (each a string of points like "50,5 89,72.5 11,72.5" within a 100x100 viewBox), an array of 'svgCircles' (decorative orbits/paths), and an array of 'svgNodes' (up to 5 interactive nodes with id, label, meaning description, cx (0-100), cy (0-100), and a tailwind color like "purple", "amber", "cyan", "emerald"). Make the visualization geometrically unique to the numerological or astrological significance of the topic.
+
   Format the output STRICTLY as valid JSON matching this schema:
   {
     "detailedAnalysis": "...",
-    "followUpOptions": ["Option 1", "Option 2", "Option 3"]
+    "followUpOptions": ["Option 1", ...],
+    "videoChapters": [
+      { 
+        "name": "...", 
+        "caption": "...",
+        "centerIcon": "Atom",
+        "colors": ["emerald", "cyan"],
+        "orbitParams": [ { "size": 60, "speed": 12, "dotSize": 4 }, { "size": 30, "speed": 6, "dotSize": 3 } ]
+      }
+    ],
+    "imageReference": {
+      "description": "...",
+      "svgPolygons": ["50,5 89,72 11,72", ...],
+      "svgCircles": [ { "cx": 50, "cy": 50, "r": 35, "opacity": 0.2, "dashed": false } ],
+      "svgNodes": [
+        { "id": "I", "label": "Crown Node", "description": "...", "cx": 50, "cy": 5, "color": "purple" }
+      ]
+    }
   }
-  
-  Do not wrap the JSON in Markdown formatting. Output ONLY the JSON block.
   `;
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -454,9 +547,68 @@ export const fetchGeneralDeepDive = async (
           type: Type.OBJECT,
           properties: {
             detailedAnalysis: { type: Type.STRING },
-            followUpOptions: { type: Type.ARRAY, items: { type: Type.STRING } }
+            followUpOptions: { type: Type.ARRAY, items: { type: Type.STRING } },
+            videoChapters: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  name: { type: Type.STRING },
+                  caption: { type: Type.STRING },
+                  centerIcon: { type: Type.STRING },
+                  colors: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  orbitParams: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        size: { type: Type.NUMBER },
+                        speed: { type: Type.NUMBER },
+                        dotSize: { type: Type.NUMBER }
+                      },
+                      required: ["size", "speed", "dotSize"]
+                    }
+                  }
+                },
+                required: ["name", "caption", "centerIcon", "colors", "orbitParams"]
+              }
+            },
+            imageReference: {
+              type: Type.OBJECT,
+              properties: {
+                description: { type: Type.STRING },
+                svgPolygons: { type: Type.ARRAY, items: { type: Type.STRING } },
+                svgCircles: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      cx: { type: Type.NUMBER }, cy: { type: Type.NUMBER }, r: { type: Type.NUMBER },
+                      opacity: { type: Type.NUMBER }, dashed: { type: Type.BOOLEAN }
+                    },
+                    required: ["cx", "cy", "r", "opacity", "dashed"]
+                  }
+                },
+                svgNodes: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      id: { type: Type.STRING },
+                      label: { type: Type.STRING },
+                      description: { type: Type.STRING },
+                      cx: { type: Type.NUMBER },
+                      cy: { type: Type.NUMBER },
+                      color: { type: Type.STRING }
+                    },
+                    required: ["id", "label", "description", "cx", "cy", "color"]
+                  }
+                }
+              },
+              required: ["description", "svgPolygons", "svgNodes", "svgCircles"]
+            }
           },
-          required: ["detailedAnalysis", "followUpOptions"]
+          required: ["detailedAnalysis", "followUpOptions", "videoChapters", "imageReference"]
         }
       }
     });
@@ -467,7 +619,7 @@ export const fetchGeneralDeepDive = async (
     if (start !== -1 && end !== -1 && end >= start) {
       text = text.substring(start, end + 1);
     }
-    return JSON.parse(text) as { detailedAnalysis: string; followUpOptions: string[] };
+    return JSON.parse(text) as any;
   } catch (error) {
     console.error("Error fetching general deep dive:", error);
     throw error;
@@ -520,7 +672,7 @@ export const fetchAuraInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",
@@ -607,7 +759,7 @@ export const fetchAngelNumberInsight = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: systemPrompt,
       config: {
         responseMimeType: "application/json",
@@ -641,7 +793,7 @@ export const streamGeminiChat = async (messages: {role: string, text: string}[],
         }));
         
         const responseStream = await ai.models.generateContentStream({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash",
             contents,
             config: {
                 temperature: 0.7,
@@ -687,7 +839,7 @@ export const fetchUnfoldedNodes = async (
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -734,7 +886,7 @@ export const fetchCelestialBlueprintExplanation = async (
   const ai = getAI();
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       contents: `
         Analyze the user's cosmic positioning and guide them through a deep, cinematic-mystic explanation of their location in the universe.
         User's Natal profile:

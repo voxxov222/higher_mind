@@ -1,7 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Stars, Center, Html, PerspectiveCamera, OrbitControls, Line, Sphere, Points, PointMaterial } from '@react-three/drei';
-import { EffectComposer, Bloom, ChromaticAberration, Noise } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
 import { Box, Hexagon, Network, Sparkles, Zap, ChevronRight, ChevronLeft, Layers, Activity } from 'lucide-react';
@@ -226,11 +225,7 @@ const HyperNexusScene = ({ activeDim, data, showLifePath }: { activeDim: number,
                 <DimensionalObject dim={activeDim} time={time} data={data} showLifePath={showLifePath} />
             </Float>
 
-            <EffectComposer disableNormalPass>
-                <Bloom intensity={1.5} luminanceThreshold={0.2} luminanceSmoothing={0.9} />
-                <Noise opacity={0.05} />
-                <ChromaticAberration offset={new THREE.Vector2(0.001, 0.001)} />
-            </EffectComposer>
+
         </>
     );
 };

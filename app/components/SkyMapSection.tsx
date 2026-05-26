@@ -61,11 +61,12 @@ const generateConstellations = (stars: any[]) => {
 
   Object.entries(grouped).forEach(([name, constellationStars]) => {
     // Just connect them in a sequence for a mystical look
-    for (let i = 0; i < constellationStars.length - 1; i++) {
+    const arr = constellationStars as any[];
+    for (let i = 0; i < arr.length - 1; i++) {
       if (Math.random() > 0.3) {
         lines.push({
-          start: constellationStars[i].position,
-          end: constellationStars[i + 1].position,
+          start: arr[i].position,
+          end: arr[i + 1].position,
           name
         });
       }
@@ -140,7 +141,7 @@ const SkyMapScene = ({ onSelectStar, travelMode, targetPosition, starDensity, sh
                color="white"
                anchorX="center"
                anchorY="middle"
-               opacity={0.5}
+               {...{ opacity: 0.5 } as any}
              >
                {star.constellation}
              </Text>

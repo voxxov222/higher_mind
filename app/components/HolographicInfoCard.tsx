@@ -30,12 +30,11 @@ export const HolographicInfoCard: React.FC<HolographicInfoCardProps> = ({
   const { saveToChat } = useHigherMind();
 
   const handleSaveToChat = () => {
-    saveToChat({
-      id: `info-${Date.now()}`,
-      title: `${title} - Analysis`,
-      content: `${subtitle ? subtitle + '\n\n' : ''}${description}${meaning ? '\n\nInterpretation: ' + meaning : ''}`,
-      type: 'insight'
-    });
+    saveToChat(
+      `${title} - Analysis`,
+      `${subtitle ? subtitle + '\n\n' : ''}${description}${meaning ? '\n\nInterpretation: ' + meaning : ''}`,
+      'insight'
+    );
   };
 
   return (

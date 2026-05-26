@@ -88,7 +88,7 @@ const SoulPathScene = ({ northNode, southNode }: { northNode: any, southNode: an
             itemSize={3}
           />
         </bufferGeometry>
-        <lineBasicMaterial color="#475569" transparent opacity={0.3} dashed />
+        <lineBasicMaterial {...{ color: "#475569", transparent: true, opacity: 0.3, dashed: true } as any} />
       </line>
 
       <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
@@ -105,12 +105,11 @@ export const SoulPathSection = ({ data }: { data: any }) => {
   const { saveToChat } = useHigherMind();
 
   const handleSaveToChat = () => {
-    saveToChat({
-      id: `soulpath-${Date.now()}`,
-      title: 'Karmic Soul Path Analysis',
-      content: `SOUTH NODE (${southNode?.sign || 'Unknown'}): ${southNode?.interpretation || 'Inherent strengths from past incarnations.'}\n\nNORTH NODE (${northNode?.sign || 'Unknown'}): ${northNode?.interpretation || 'The path of spiritual growth.'}${data.akashic ? '\n\nAkashic Echoes: ' + data.akashic.pastLifeThemes + '\n\nSoul Gifts: ' + data.akashic.soulGifts : ''}`,
-      type: 'experience'
-    });
+    saveToChat(
+      'Karmic Soul Path Analysis',
+      `SOUTH NODE (${southNode?.sign || 'Unknown'}): ${southNode?.interpretation || 'Inherent strengths from past incarnations.'}\n\nNORTH NODE (${northNode?.sign || 'Unknown'}): ${northNode?.interpretation || 'The path of spiritual growth.'}${data.akashic ? '\n\nAkashic Echoes: ' + data.akashic.pastLifeThemes + '\n\nSoul Gifts: ' + data.akashic.soulGifts : ''}`,
+      'experience'
+    );
   };
 
   return (

@@ -70,10 +70,17 @@ export const ConsciousnessMonitor: React.FC = () => {
             ) : (
               [...thoughts].reverse().map((t, i) => (
                 <motion.div 
+                  layout
                   key={t.thoughtId}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="p-3 bg-white/5 border border-white/5 rounded-2xl space-y-1"
+                  initial={{ opacity: 0, y: -15, scale: 0.95 }}
+                  animate={{ 
+                    opacity: 1, 
+                    y: 0, 
+                    scale: [0.95, 1.04, 1],
+                    boxShadow: ["0 0 0 rgba(168,85,247,0)", "0 0 20px rgba(168,85,247,0.4)", "0 0 0 rgba(168,85,247,0)"]
+                  }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  className="p-3 bg-white/5 border border-white/5 rounded-2xl space-y-1 relative"
                 >
                   <div className="flex justify-between items-center">
                     <span className="text-[9px] text-stone-500 font-mono italic">#{t.thoughtId.slice(-4)}</span>

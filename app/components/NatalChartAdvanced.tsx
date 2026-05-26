@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Line, Text, Html, Sphere, Ring, Trail, Sparkles, Float } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
-import { Compass } from 'lucide-react';
+import { Compass, Sparkles as SparklesIcon } from 'lucide-react';
 import { HolographicInfoCard } from './HolographicInfoCard';
 
 const SIGN_NAMES = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
@@ -170,7 +170,7 @@ const ZodiacSign = ({ sign, index, selected, onSelect, onResearch, onSave }: any
                 style={{ borderLeftColor: color, borderLeftWidth: '4px' }}
               >
                  <div className="absolute top-0 right-0 p-2 opacity-20">
-                    <Sparkles size={16} style={{ color }} />
+                    <SparklesIcon size={16} style={{ color }} />
                  </div>
                  <h5 className="text-[10px] uppercase tracking-widest text-stone-400 mb-2">Celestial Blueprint</h5>
                  <div className="grid grid-cols-2 gap-4">

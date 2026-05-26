@@ -16,22 +16,26 @@ const CosmicNebula = ({ color = "#a855f7" }: { color: string }) => {
   return (
     <group>
       <Cloud
-        opacity={0.15}
-        speed={0.2} 
-        width={10} 
-        depth={1.5} 
-        segments={20} 
-        color={color}
-        position={[-5, 2, -5]}
+        {...{
+          opacity: 0.15,
+          speed: 0.2, 
+          width: 10, 
+          depth: 1.5, 
+          segments: 20, 
+          color: color,
+          position: [-5, 2, -5]
+        } as any}
       />
       <Cloud
-        opacity={0.1}
-        speed={0.1} 
-        width={20} 
-        depth={2} 
-        segments={40} 
-        color="#1d4ed8"
-        position={[5, -2, -8]}
+        {...{
+          opacity: 0.1,
+          speed: 0.1, 
+          width: 20, 
+          depth: 2, 
+          segments: 40, 
+          color: "#1d4ed8",
+          position: [5, -2, -8]
+        } as any}
       />
     </group>
   );

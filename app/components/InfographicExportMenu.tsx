@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Download, FileText, Image as ImageIcon, Film, X, ChevronDown, Check } from 'lucide-react';
 import { toJpeg, toPng, toBlob } from 'html-to-image';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
+import { GIFEncoder, quantize, applyPalette } from 'gifenc';
 
 interface ExportMenuProps {
   targetId: string;
@@ -43,7 +44,6 @@ export const InfographicExportMenu = ({ targetId, fileName, onClose }: ExportMen
         pdf.save(`${fileName}.pdf`);
         setProgress(100);
       } else if (format === 'gif') {
-        const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
         const gif = new GIFEncoder();
         
         const frames = 30; // Increased frames

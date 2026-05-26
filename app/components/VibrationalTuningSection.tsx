@@ -97,7 +97,6 @@ const IntentionTextStream = ({ intention, isActive, color }: { intention: string
             anchorY="middle"
             maxWidth={10}
             textAlign="center"
-            font="/fonts/SpaceGrotesk-Bold.ttf"
           >
             {intention}
             <meshBasicMaterial color={color} transparent opacity={0.8} />

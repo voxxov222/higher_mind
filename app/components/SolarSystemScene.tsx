@@ -676,7 +676,7 @@ const SolarSystem3DScene = ({
       <PerspectiveCamera makeDefault position={[120, 120, 120]} fov={50} />
       <OrbitControls 
         ref={controlsRef}
-        enablePan={false}
+        enablePan={true}
         maxDistance={500}
         minDistance={10}
         autoRotate={!selectedPlanet && rotationPerspective === 'orbit'}
@@ -710,8 +710,6 @@ const SolarSystem3DScene = ({
         cellThickness={0.2} 
         position={[0, -2, 0]}
         rotation={[0, 0, 0]}
-        transparent
-        material-opacity={0.05}
       />
 
       {/* The Center Point (Sun in Solar) */}
@@ -981,7 +979,7 @@ const SolarSystem3DScene = ({
          />
          <Noise opacity={sceneMode === 'void' ? 0.4 : 0.08} />
          <Vignette eskil={false} offset={0.2} darkness={sceneMode === 'void' ? 1.6 : 1.2} />
-         {sceneMode === 'quantum' && <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={new THREE.Vector2(0.003, 0.003)} />}
+         {sceneMode === 'quantum' && <ChromaticAberration {...{ blendFunction: BlendFunction.NORMAL, offset: new THREE.Vector2(0.003, 0.003) } as any} />}
       </EffectComposer>
     </>
   );
@@ -1011,6 +1009,7 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
   const [auraInsight, setAuraInsight] = useState<string | null>(null);
   const [selectedAuraNode, setSelectedAuraNode] = useState<AuraVisualNode | null>(null);
   const [auraLogs, setAuraLogs] = useState<string[]>(["Core systems initialized.", "Scanning celestial resonance..."]);
+  const [isAuraMinimized, setIsAuraMinimized] = useState(false);
 
   const controlsRef = useRef<any>(null);
 
@@ -1105,7 +1104,8 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
             transition={{ duration: 0.6 }}
             className="w-full h-full absolute inset-0 z-10"
           >
-            <Canvas shadows dpr={[1, 1.5]} gl={{ powerPreference: "high-performance" }}>
+            <div className="w-full h-full absolute inset-0 z-10" id="solar-system-canvas-container">
+            <Canvas id="solar-canvas" shadows dpr={[1, 1.5]} gl={{ powerPreference: "high-performance" }} className="w-full h-full block">
               <SolarSystem3DScene 
                 data={data}
                 selectedPlanet={selectedPlanet}
@@ -1130,6 +1130,7 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
                 setSelectedAuraNode={setSelectedAuraNode}
               />
             </Canvas>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1267,13 +1268,20 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
       </div>
 
       {/* Aura AI Agent Panel Overlay */}
-      <div className="absolute top-8 right-8 z-[115] w-[450px] flex flex-col gap-4 pointer-events-none">
+      <div className="absolute top-8 right-8 z-[115] flex flex-col gap-4 pointer-events-none">
          <motion.div 
+           drag
+           dragMomentum={false}
            initial={{ x: 20, opacity: 0 }}
-           animate={{ x: 0, opacity: 1 }}
-           className="bg-stone-950/80 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-6 shadow-2xl pointer-events-auto"
+           animate={{ 
+             x: 0, 
+             opacity: 1,
+             height: isAuraMinimized ? 84 : 'auto',
+             width: isAuraMinimized ? 300 : 450
+           }}
+           className="bg-stone-950/80 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-6 shadow-2xl pointer-events-auto overflow-hidden cursor-grab active:cursor-grabbing flex flex-col"
          >
-           <div className="flex justify-between items-start mb-6">
+           <div className="flex justify-between items-start mb-6 shrink-0">
              <div className="flex items-center gap-3">
                <div className="p-3 bg-purple-500/10 rounded-2xl text-purple-400 border border-purple-500/20">
                  <Bot size={20} className={isAuraThinking ? 'animate-spin' : ''} />
@@ -1284,60 +1292,86 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
                </div>
              </div>
              
-             {viewMode === 'solar' && (
-               <button 
-                 onClick={() => {
-                   soundEngine.select();
-                   setIsNeuralSyncActive(!isNeuralSyncActive);
-                 }}
-                 className={`px-4 py-2 border rounded-full text-[9px] uppercase tracking-widest font-mono transition-all ${isNeuralSyncActive ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]' : 'bg-white/5 border-white/10 text-white/40'}`}
+             <div className="flex items-center gap-2">
+                 <button
+                     onClick={(e) => {
+                         e.stopPropagation();
+                         setIsAuraMinimized(!isAuraMinimized);
+                     }}
+                     className="px-2 py-2 border rounded-full text-white/40 hover:text-white transition-all bg-white/5 border-white/10 hover:bg-white/10"
+                 >
+                     {isAuraMinimized ? <Maximize2 size={12} /> : <Minimize2 size={12} />}
+                 </button>
+                 {!isAuraMinimized && viewMode === 'solar' && (
+                   <button 
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       soundEngine.select();
+                       setIsNeuralSyncActive(!isNeuralSyncActive);
+                     }}
+                     className={`px-4 py-2 border rounded-full text-[9px] uppercase tracking-widest font-mono transition-all ${isNeuralSyncActive ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]' : 'bg-white/5 border-white/10 text-white/40'}`}
+                   >
+                     {isNeuralSyncActive ? 'SYNC_ONLINE' : 'SYNC_OFFLINE'}
+                   </button>
+                 )}
+             </div>
+           </div>
+
+           <AnimatePresence>
+             {!isAuraMinimized && (
+               <motion.div 
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 exit={{ opacity: 0 }}
+                 transition={{ duration: 0.2 }}
+                 className="flex flex-col gap-4"
                >
-                 {isNeuralSyncActive ? 'SYNC_ONLINE' : 'SYNC_OFFLINE'}
-               </button>
+                 <div className="space-y-4 mb-4">
+                    <div className="h-[140px] bg-black/40 border border-white/5 rounded-3xl p-4 overflow-y-auto space-y-2 font-mono text-[9px] text-[#00ff22]/60 scrollbar-hide">
+                      <div className="text-stone-500 text-[8px] uppercase tracking-widest border-b border-white/5 pb-1 mb-2">Diagnostic Stream</div>
+                      {auraLogs.map((log, i) => (
+                        <div key={i} className="flex gap-2 items-start leading-relaxed">
+                          <span className="text-stone-700">►</span>
+                          <span>{log}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {auraPrompt && (
+                      <div className="flex gap-2">
+                        <div className="flex bg-purple-500/10 border border-purple-500/30 rounded-2xl p-4 gap-3">
+                          <Zap className="text-purple-400 animate-pulse mt-0.5" size={14} />
+                          <p className="text-stone-300 text-xs font-light leading-relaxed">
+                            {auraInsight || "The Aura Oracle is scanning planetary transits. Ask which zodiac placement is governing your focal energy."}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                 </div>
+
+                 <div className="flex gap-2 max-w-full">
+                    <input 
+                      type="text" 
+                      placeholder="Synthesize current natal transits..." 
+                      value={auraPrompt}
+                      onChange={(e) => setAuraPrompt(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAuraSubmit()}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      className="flex-grow px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-xs text-white placeholder-stone-500 focus:outline-none focus:border-purple-500 transition-colors"
+                      disabled={isAuraThinking}
+                    />
+                    <button 
+                      onClick={handleAuraSubmit}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      className="p-3.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 rounded-2xl text-white transition-colors flex items-center justify-center border border-purple-400"
+                      disabled={isAuraThinking}
+                    >
+                      {isAuraThinking ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                    </button>
+                 </div>
+               </motion.div>
              )}
-           </div>
-
-           <div className="space-y-4 mb-4">
-              <div className="h-[140px] bg-black/40 border border-white/5 rounded-3xl p-4 overflow-y-auto space-y-2 font-mono text-[9px] text-[#00ff22]/60 scrollbar-hide">
-                <div className="text-stone-500 text-[8px] uppercase tracking-widest border-b border-white/5 pb-1 mb-2">Diagnostic Stream</div>
-                {auraLogs.map((log, i) => (
-                  <div key={i} className="flex gap-2 items-start leading-relaxed">
-                    <span className="text-stone-700">►</span>
-                    <span>{log}</span>
-                  </div>
-                ))}
-              </div>
-
-              {auraPrompt && (
-                <div className="flex gap-2">
-                  <div className="flex bg-purple-500/10 border border-purple-500/30 rounded-2xl p-4 gap-3">
-                    <Zap className="text-purple-400 animate-pulse mt-0.5" size={14} />
-                    <p className="text-stone-300 text-xs font-light leading-relaxed">
-                      {auraInsight || "The Aura Oracle is scanning planetary transits. Ask which zodiac placement is governing your focal energy."}
-                    </p>
-                  </div>
-                </div>
-              )}
-           </div>
-
-           <div className="flex gap-2 max-w-full">
-             <input 
-               type="text" 
-               placeholder="Synthesize current natal transits..." 
-               value={auraPrompt}
-               onChange={(e) => setAuraPrompt(e.target.value)}
-               onKeyDown={(e) => e.key === 'Enter' && handleAuraSubmit()}
-               className="flex-grow px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-xs text-white placeholder-stone-500 focus:outline-none focus:border-purple-500 transition-colors"
-               disabled={isAuraThinking}
-             />
-             <button 
-               onClick={handleAuraSubmit}
-               className="p-3.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 rounded-2xl text-white transition-colors flex items-center justify-center border border-purple-400"
-               disabled={isAuraThinking}
-             >
-               {isAuraThinking ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-             </button>
-           </div>
+           </AnimatePresence>
          </motion.div>
 
          {selectedAuraNode && (

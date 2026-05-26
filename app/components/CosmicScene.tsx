@@ -1,6 +1,5 @@
 // --- CORE IMPORTS & THREE.JS FIBER REFS ---
-import * as React from 'react';
-import { useRef, useMemo, useState, useEffect, createContext, useContext } from 'react';
+import React, { useRef, useMemo, useState, useEffect, createContext, useContext } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Line, Ring, Sparkles, Stars, Text, Trail, OrbitControls, Html, PerspectiveCamera, Points, PointMaterial } from '@react-three/drei';
 // --- POST-PROCESSING EFFX ---
@@ -1601,8 +1600,8 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
   }, [data]);
 
   return (
-    <>
-    <Canvas id="cosmic-canvas" dpr={[1, 1.5]} gl={{ powerPreference: "high-performance", alpha: false, stencil: false, antialias: false }} camera={{ position: [0, 15, 20], fov: 60 }} className="w-full h-full absolute inset-0 bg-black">
+    <div className="w-full h-full absolute inset-0 bg-black" id="cosmic-canvas-container">
+    <Canvas id="cosmic-canvas" dpr={[1, 1.5]} gl={{ powerPreference: "high-performance", alpha: false, stencil: false, antialias: false }} camera={{ position: [0, 15, 20], fov: 60 }} className="w-full h-full block">
       {/* --- SCENE INFRASTRUCTURE --- */}
       <CameraController isPresentationActive={isPresentationActive} activeTab={activeTab} data={data} />
       <fog attach="fog" args={['#000', 5, 50]} />
@@ -1963,6 +1962,6 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
     <AnimatePresence>
         {isTerminalOpen && <TerminalOverlay onClose={() => setIsTerminalOpen(false)} />}
     </AnimatePresence>
-    </>
+    </div>
   );
 };

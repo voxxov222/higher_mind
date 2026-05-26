@@ -150,6 +150,22 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
     interactive: true
   });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  
+  const [selectedInsight, setSelectedInsight] = useState<{ title: string; content: string; } | null>(null);
+  const [isGeneratingInsight, setIsGeneratingInsight] = useState(false);
+
+  const handleInteractiveInsight = async (title: string, context: string) => {
+    setIsGeneratingInsight(true);
+    setSelectedInsight({ title, content: "Channeling Akashic wisdom..." });
+    try {
+      const res = await fetchGeneralDeepDive(title, context, data!);
+      setSelectedInsight({ title, content: res.detailedAnalysis });
+    } catch (e) {
+      setSelectedInsight({ title, content: "Synthesis interference detected. Please try again." });
+    } finally {
+      setIsGeneratingInsight(false);
+    }
+  };
 
   // --- MIND MAP (REACT FLOW) STATE ---
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -671,12 +687,19 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
                               </h3>
                               <div className="space-y-8">
                                 {data.planets?.slice(0, 4).map((p, i) => (
-                                  <div key={i} className="flex gap-8 group/item">
+                                  <div 
+                                    key={i} 
+                                    className="flex gap-8 group/item cursor-pointer hover:bg-white/5 p-4 -ml-4 rounded-3xl transition-all"
+                                    onClick={() => handleInteractiveInsight(`Planet ${p.name} Synthesis`, `Provide a deep dive into the impact of ${p.name} in ${p.sign} in the ${p.house} house as part of the overall structural identity blueprint.`)}
+                                  >
                                     <div className="text-4xl text-zinc-100 font-black w-14 shrink-0 group-hover/item:text-purple-400 transition-colors uppercase tracking-tighter">{p.sign?.slice(0, 2)}</div>
                                     <div className="border-l border-zinc-800 pl-8 space-y-1">
                                       <div className="text-sm text-zinc-200 font-bold tracking-tight uppercase tracking-widest">{p.name} • {p.sign}</div>
                                       <div className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">House {p.house || (i + 1)}</div>
-                                      <p className="text-xs text-zinc-500 leading-relaxed font-light mt-2 italic opacity-70 group-hover/item:opacity-100 transition-opacity">"{p.interpretation?.split('.')[0]}."</p>
+                                      <p className="text-xs text-zinc-500 leading-relaxed font-light mt-2 italic opacity-70 group-hover/item:opacity-100 transition-opacity flex items-center justify-between gap-4">
+                                        <span>"{p.interpretation?.split('.')[0]}."</span>
+                                        <MousePointer2 className="w-4 h-4 text-purple-500/0 group-hover/item:text-purple-500/50 transition-colors" />
+                                      </p>
                                     </div>
                                   </div>
                                 ))}
@@ -694,9 +717,16 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
                               </h3>
                               <div className="grid grid-cols-2 gap-4">
                                  {data.numerology.coreNumbers?.slice(0, 4).map((n, i) => (
-                                   <div key={i} className="p-6 bg-black/40 rounded-[2rem] border border-white/5 group hover:bg-white/5 transition-all hover:scale-[1.05]">
+                                   <div 
+                                     key={i} 
+                                     className="p-6 bg-black/40 rounded-[2rem] border border-white/5 group hover:bg-white/5 transition-all hover:scale-[1.05] cursor-pointer relative"
+                                     onClick={() => handleInteractiveInsight(`Numerology ${n.name}`, `Analyze the specific vibrational significance of having ${n.name} as number ${n.value}. What are the primary strengths and shadows?`)}
+                                    >
                                       <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-black mb-2">{n.name}</div>
-                                      <div className="text-4xl text-sky-400 font-black tracking-tighter">{n.value}</div>
+                                      <div className="text-4xl text-sky-400 font-black tracking-tighter flex items-center justify-between">
+                                          {n.value}
+                                          <Monitor className="w-5 h-5 text-sky-500/0 group-hover:text-sky-500/40 transition-colors" />
+                                      </div>
                                    </div>
                                  ))}
                               </div>
@@ -707,7 +737,8 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
                             <motion.div 
                               initial={{ scale: 0.9, opacity: 0 }}
                               whileInView={{ scale: 1, opacity: 1 }}
-                              className="bg-black/60 p-12 rounded-[4rem] border border-white/10 shadow-3xl relative overflow-hidden backdrop-blur-2xl group"
+                              className="bg-black/60 p-12 rounded-[4rem] border border-white/10 shadow-3xl relative overflow-hidden backdrop-blur-2xl group cursor-pointer hover:border-purple-500/50 transition-all"
+                              onClick={() => handleInteractiveInsight('Attribute Radius Evaluation', 'Provide a synthesis of the radar chart containing intuition, emotion, logic, structure, consciousness, and cosmic edge. How do they balance each other out?')}
                             >
                               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
                               <h3 className="text-xl font-black text-white mb-10 flex items-center gap-3 relative z-10 uppercase tracking-tighter">
@@ -718,7 +749,7 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
                                  <ResponsiveContainer width="100%" height="100%">
                                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={infographicData}>
                                       <PolarGrid stroke="#222" />
-                                      <PolarAngleAxis dataKey="subject" tick={{ fill: '#444', fontSize: 10, fontWeight: 900, textTransform: 'uppercase' }} />
+                                      <PolarAngleAxis dataKey="subject" tick={{ fill: '#444', fontSize: 10, fontWeight: 900 }} />
                                       <Radar name="Value" dataKey="A" stroke="#a855f7" fill="#a855f7" fillOpacity={0.5} />
                                    </RadarChart>
                                  </ResponsiveContainer>
@@ -775,10 +806,14 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
                         <motion.div 
                           initial={{ scale: 0.9, opacity: 0 }}
                           whileInView={{ scale: 1, opacity: 1 }}
-                          className="lg:col-span-12 xl:col-span-4 bg-gradient-to-br from-sky-500/20 via-zinc-950 to-zinc-950 border border-sky-500/30 p-12 rounded-[4rem] flex flex-col items-center justify-center text-center relative overflow-hidden group"
+                          className="lg:col-span-12 xl:col-span-4 bg-gradient-to-br from-sky-500/20 via-zinc-950 to-zinc-950 border border-sky-500/30 p-12 rounded-[4rem] flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-sky-400/50 transition-all cursor-pointer"
+                          onClick={() => handleInteractiveInsight(`Life Path Trajectory: ${data.numerology.lifePath}`, `Generate a detailed life path evolutionary journey focusing on archetype frequency, destiny resonance, and what the soul is attempting to master during this temporal incarnation for Life Path ${data.numerology.lifePath}.`)}
                         >
                           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(14,165,233,0.15),transparent)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                          <div className="text-sky-400 text-[10px] uppercase tracking-[0.4em] font-black mb-8 relative z-10">Primary Archetype Frequency</div>
+                          <div className="text-sky-400 text-[10px] uppercase tracking-[0.4em] font-black mb-8 relative z-10 flex items-center justify-center gap-2">
+                             Primary Archetype Frequency
+                             <MousePointer2 className="w-3 h-3 text-sky-400/50" />
+                          </div>
                           <div className="text-[12rem] font-black text-white leading-none relative z-10 drop-shadow-[0_0_30px_rgba(14,165,233,0.4)] group-hover:scale-110 transition-transform duration-700">{data.numerology.lifePath}</div>
                           <div className="mt-8 relative z-10 space-y-4">
                              <div className="px-6 py-2 bg-white/5 border border-white/10 rounded-full inline-block backdrop-blur-md">
@@ -889,7 +924,7 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
                                KARMA LOAD ANALYSIS
                              </h3>
                              <div className="space-y-8 relative z-10">
-                               {data.karma?.karmicDebts && data.karma.karmicDebts.length > 0 ? data.karma.karmicDebts.map((k, i) => (
+                               {(data as any).karma?.karmicDebts && (data as any).karma.karmicDebts.length > 0 ? (data as any).karma.karmicDebts.map((k: any, i: number) => (
                                  <div key={i} className="group cursor-default">
                                     <div className="flex justify-between items-end mb-2">
                                        <div className="text-xl font-black text-zinc-100 group-hover:text-amber-400 transition-colors uppercase tracking-tighter">{k.title}</div>
@@ -918,7 +953,7 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
                                       <Globe className="text-amber-400" size={32} />
                                    </div>
                                    <div>
-                                      <div className="text-2xl font-black text-white tracking-tight uppercase leading-none">{data.karma?.soulAge || 'Ancient'} SOUL</div>
+                                      <div className="text-2xl font-black text-white tracking-tight uppercase leading-none">{(data as any).karma?.soulAge || 'Ancient'} SOUL</div>
                                       <div className="text-[10px] text-amber-600 font-bold uppercase tracking-widest mt-2">{data.akashic?.soulOrigin || 'Nova Station'} ORIGIN</div>
                                    </div>
                                 </div>
@@ -953,7 +988,7 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
                                 <div className="absolute top-0 left-0 w-1 h-full bg-amber-500" />
                                 <h3 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.4em] mb-4">INCARNATION NODE</h3>
                                 <p className="text-sm font-light text-zinc-300 leading-relaxed italic pr-4">
-                                   "Your presence in this timeline is a calculated choice for the resolution of {data.karma?.karmicDebts?.[0]?.title?.toLowerCase() || 'ancestral growth'} cycles."
+                                   "Your presence in this timeline is a calculated choice for the resolution of {(data as any).karma?.karmicDebts?.[0]?.title?.toLowerCase() || 'ancestral growth'} cycles."
                                 </p>
                              </motion.section>
                           </div>
@@ -967,7 +1002,7 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
                           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_50%_0%,rgba(245,158,11,0.05),transparent)]" />
                           <h3 className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.8em] mb-10">AKASHIC DECODING</h3>
                           <p className="text-2xl md:text-3xl font-light text-zinc-300 leading-tight italic max-w-4xl mx-auto tracking-tight">
-                             "{data.akashic?.missionStatement || 'Healing the ancestral line through conscious embodiment of the current fractal identity.'}"
+                             "{(data.akashic as any)?.missionStatement || 'Healing the ancestral line through conscious embodiment of the current fractal identity.'}"
                           </p>
                        </motion.div>
                     </motion.div>
@@ -1342,8 +1377,8 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
                       className="text-center space-y-12 max-w-4xl"
                     >
                        <motion.div 
-                         initial={{ opacity: 0, tracking: '0.2em' }}
-                         animate={{ opacity: 1, tracking: '0.8em' }}
+                         initial={{ opacity: 0, letterSpacing: '0.2em' }}
+                         animate={{ opacity: 1, letterSpacing: '0.8em' }}
                          transition={{ delay: 0.5, duration: 1.5 }}
                          className="text-zinc-500 text-[11px] uppercase font-black"
                        >
@@ -1465,6 +1500,53 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
           )}
         </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {selectedInsight && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl"
+            onClick={() => setSelectedInsight(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-zinc-950 border border-white/10 p-8 md:p-12 rounded-[3.5rem] w-full max-w-2xl max-h-[80vh] overflow-y-auto scrollbar-thin relative shadow-2xl"
+            >
+              <button 
+                onClick={() => setSelectedInsight(null)}
+                className="absolute top-8 right-8 p-3 text-zinc-500 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+              
+              <div className="flex items-center gap-3 mb-8">
+                <Sparkles className="text-purple-500" size={24} />
+                <h3 className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-black">Interactive Deep Dive</h3>
+              </div>
+              
+              <h2 className="text-3xl md:text-5xl font-black text-white mb-8 tracking-tighter leading-tight">{selectedInsight.title}</h2>
+              
+              {isGeneratingInsight ? (
+                <div className="flex flex-col items-center justify-center gap-4 py-20 text-purple-400/60">
+                   <RefreshCw className="animate-spin" size={32} />
+                   <p className="text-[10px] uppercase tracking-widest font-mono">Synthesizing Akashic Records...</p>
+                </div>
+              ) : (
+                <div className="space-y-6 text-zinc-300 font-light leading-relaxed prose prose-invert max-w-none">
+                  {selectedInsight.content.split('\n').map((paragraph, idx) => (
+                    <p key={idx}>{paragraph}</p>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -20,27 +20,27 @@ import { fetchTimelineDepth, fetchTimelineDeepDiveOption, fetchGeneralDeepDive }
 import { User } from 'firebase/auth';
 
 // --- DYNAMICALLY IMPORTED COMPONENTS ---
-const AstrologyDashboard = React.lazy(() => import('./AstrologyDashboard').then(m => ({ default: m.AstrologyDashboard })));
 const DeepSynthesis = React.lazy(() => import('./DeepSynthesis').then(m => ({ default: m.DeepSynthesis })));
 const HarmonicVisualizer = React.lazy(() => import('./HarmonicVisualizer').then(m => ({ default: m.HarmonicVisualizer })));
 const ChakraScene = React.lazy(() => import('./ChakraScene').then(m => ({ default: m.ChakraScene })));
 const CompatibilityMatrix = React.lazy(() => import('./CompatibilityMatrix').then(m => ({ default: m.CompatibilityMatrix })));
 const SoulBlueprintAura = React.lazy(() => import('./SoulBlueprintAura').then(m => ({ default: m.SoulBlueprintAura })));
 const CelestialDNASection = React.lazy(() => import('./CelestialDNASection').then(m => ({ default: m.CelestialDNASection })));
+const AlignmentSection = React.lazy(() => import('./AlignmentSection').then(m => ({ default: m.AlignmentSection })));
+const AIAgentsSection = React.lazy(() => import('./AIAgentsSection').then(m => ({ default: m.AIAgentsSection })));
 const NeuralBrainSection = React.lazy(() => import('./NeuralBrainSection'));
 const CosmicCodex = React.lazy(() => import('./CosmicCodex').then(m => ({ default: m.CosmicCodex })));
 const AIEvolutionStream = React.lazy(() => import('./AIEvolutionStream').then(m => ({ default: m.AIEvolutionStream })));
-const ObsidianReleaseIntegration = React.lazy(() => import('./ObsidianReleaseIntegration').then(m => ({ default: m.ObsidianReleaseIntegration })));
 const AngelNumbersSection = React.lazy(() => import('./AngelNumbersSection').then(m => ({ default: m.AngelNumbersSection })));
 const GematriaCalculatorSection = React.lazy(() => import('./GematriaCalculatorSection').then(m => ({ default: m.GematriaCalculatorSection })));
 const VortexSequencingSection = React.lazy(() => import('./VortexSequencingSection').then(m => ({ default: m.VortexSequencingSection })));
 const GoldenRatioSection = React.lazy(() => import('./GoldenRatioSection').then(m => ({ default: m.GoldenRatioSection })));
 const SkyMapSection = React.lazy(() => import('./SkyMapSection').then(m => ({ default: m.SkyMapSection })));
 const SoulPathSection = React.lazy(() => import('./SoulPathSection').then(m => ({ default: m.SoulPathSection })));
+const AncestralResearchSection = React.lazy(() => import('./AncestralResearchSection').then(m => ({ default: m.AncestralResearchSection })));
 const CommunityFeed = React.lazy(() => import('./social/CommunityFeed'));
 const LiveMessenger = React.lazy(() => import('./social/LiveMessenger'));
 const HigherMindSettings = React.lazy(() => import('./HigherMindSettings').then(m => ({ default: m.HigherMindSettings })));
-const HyperNexus = React.lazy(() => import('./HyperNexus').then(m => ({ default: m.HyperNexus })));
 import { getAstralProfile } from '../services/socialService';
 const BirthChartGuide = React.lazy(() => import('./BirthChartGuide'));
 const SandboxSection = React.lazy(() => import('./sandbox/SandboxSection').then(m => ({ default: m.SandboxSection })));
@@ -65,8 +65,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'hypernexus' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix';
-  setActiveTab: (tab: 'torus' | 'planets' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'hypernexus' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix') => void;
+  activeTab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution';
+  setActiveTab: (tab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -951,8 +951,6 @@ const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handl
   handleDeepDiveNext: any,
   data: any
 }) => {
-  if (!deepDiveData) return null;
-
   const [activeModalTab, setActiveModalTab] = useState<'text' | 'images' | 'video' | 'interactive'>('text');
   
   // Video simulation states
@@ -997,10 +995,26 @@ const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handl
     return () => clearInterval(interval);
   }, [isVideoPlaying, activeModalTab, interactivePlaybackSpeed]);
 
+  if (!deepDiveData) return null;
+
   const cleanTitle = deepDiveData.title || "Stellar Identity";
   
   // Custom lessons dynamically generated based on current item
-  const chapters = [
+  const chapters = deepDiveData.videoChapters && Array.isArray(deepDiveData.videoChapters) && deepDiveData.videoChapters.length > 0 
+    ? deepDiveData.videoChapters.map((ch: any, idx: number) => ({
+        id: idx + 1,
+        name: ch?.name || `Chapter ${idx + 1}`,
+        start: idx * 40,
+        end: (idx + 1) * 40,
+        caption: ch?.caption || `Initiating exploration of "${cleanTitle}"...`,
+        centerIcon: ch?.centerIcon || "Sparkles",
+        colors: ch?.colors && Array.isArray(ch.colors) && ch.colors.length >= 2 ? ch.colors : ["emerald", "cyan"],
+        orbitParams: ch?.orbitParams && Array.isArray(ch.orbitParams) && ch.orbitParams.length >= 2 ? ch.orbitParams : [
+          { size: 40, speed: 12, dotSize: 4 },
+          { size: 24, speed: 6, dotSize: 3.5 }
+        ]
+      }))
+    : [
     {
       id: 1,
       name: "Metaphysical Foundations",
@@ -1024,7 +1038,7 @@ const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handl
     }
   ];
 
-  const currentChapterData = chapters.find(c => c.id === videoChapter) || chapters[0];
+  const currentChapterData = chapters.find((c: any) => c.id === videoChapter) || chapters[0];
 
   const quizQuestions = [
     {
@@ -1250,41 +1264,48 @@ const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handl
                     
                     <svg className="w-full max-w-[280px] aspect-square text-amber-500/40 relative z-10" viewBox="0 0 100 100">
                       <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="0.3" strokeDasharray="2, 2" className="animate-spin" style={{ animationDuration: '40s' }} />
-                      <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(251,191,36,0.25)" strokeWidth="0.5" />
-                      <circle cx="50" cy="50" r="22" fill="none" stroke="rgba(45,212,191,0.2)" strokeWidth="0.4" />
                       
-                      {/* Triangle Overlays representing alignment aspects */}
-                      <polygon points="50,5 89,72.5 11,72.5" fill="none" stroke="currentColor" strokeWidth="0.25" className="hover:stroke-amber-400 transition-colors cursor-pointer" />
-                      <polygon points="50,95 11,27.5 89,27.5" fill="none" stroke="rgba(168,85,247,0.3)" strokeWidth="0.25" />
+                      {/* Dynamic Orbits / Circles */}
+                      {((Array.isArray(deepDiveData.imageReference?.svgCircles) ? deepDiveData.imageReference.svgCircles : [
+                        { cx: 50, cy: 50, r: 35, opacity: 0.25, dashed: false },
+                        { cx: 50, cy: 50, r: 22, opacity: 0.2, dashed: false }
+                      ])).map((circle: any, idx: number) => (
+                        <circle key={idx} cx={circle?.cx || 50} cy={circle?.cy || 50} r={circle?.r || 20} fill="none" stroke={`rgba(251,191,36,${circle?.opacity || 0.2})`} strokeWidth="0.5" strokeDasharray={circle?.dashed ? "2, 2" : "none"} />
+                      ))}
+                      
+                      {/* Dynamic Triangle Overlays representing alignment aspects */}
+                      {((Array.isArray(deepDiveData.imageReference?.svgPolygons) ? deepDiveData.imageReference.svgPolygons : ["50,5 89,72.5 11,72.5", "50,95 11,27.5 89,27.5"])).map((pts: string, idx: number) => (
+                        <polygon key={idx} points={typeof pts === 'string' ? pts : "50,5"} fill="none" stroke={idx % 2 === 0 ? "currentColor" : "rgba(168,85,247,0.3)"} strokeWidth="0.25" className="hover:stroke-amber-400 transition-colors cursor-pointer" />
+                      ))}
 
                       {/* Interactive Hotspots / Nodes */}
-                      <g className="cursor-pointer" 
-                         onMouseEnter={() => setHoveredDiagramNode('Crown Node: Channels cosmic information downwards representing maximum potential.')}
-                         onMouseLeave={() => setHoveredDiagramNode(null)}>
-                        <circle cx="50" cy="5" r="3" className="fill-stone-900 stroke-purple-400 hover:fill-purple-500 transition-all" strokeWidth="1" />
-                        <text x="50" y="5" textAnchor="middle" dominantBaseline="central" fontSize="3" className="fill-white font-mono pointer-events-none">I</text>
-                      </g>
-                      
-                      <g className="cursor-pointer" 
-                         onMouseEnter={() => setHoveredDiagramNode('Spiritual Anchor: Keeps planetary energies grounded in the Earth matrix.')}
-                         onMouseLeave={() => setHoveredDiagramNode(null)}>
-                        <circle cx="89" cy="72.5" r="3" className="fill-stone-900 stroke-amber-400 hover:fill-amber-500 transition-all" strokeWidth="1" />
-                        <text x="89" y="72.5" textAnchor="middle" dominantBaseline="central" fontSize="3" className="fill-white font-mono pointer-events-none">II</text>
-                      </g>
+                      {((Array.isArray(deepDiveData.imageReference?.svgNodes) ? deepDiveData.imageReference.svgNodes : [
+                        { id: "I", label: "Crown Node", description: "Channels cosmic information downwards representing maximum potential.", cx: 50, cy: 5, color: "purple" },
+                        { id: "II", label: "Spiritual Anchor", description: "Keeps planetary energies grounded in the Earth matrix.", cx: 89, cy: 72.5, color: "amber" },
+                        { id: "III", label: "Vibrational Transmuter", description: "The gateway representing active spiritual growth and karma removal.", cx: 11, cy: 72.5, color: "emerald" },
+                        { id: "528", label: "Inner Core Point", description: "Solfeggio 528Hz alignment cell governing cells rejuvenation.", cx: 50, cy: 50, color: "cyan" }
+                      ])).map((node: any, idx: number) => {
+                        if (!node) return null;
+                        const strokes: Record<string, string> = {
+                          purple: 'stroke-purple-400', amber: 'stroke-amber-400', emerald: 'stroke-emerald-400', cyan: 'stroke-cyan-400'
+                        };
+                        const fills: Record<string, string> = {
+                          purple: 'hover:fill-purple-500', amber: 'hover:fill-amber-500', emerald: 'hover:fill-emerald-500', cyan: 'hover:fill-cyan-500'
+                        };
+                        const strokeClass = strokes[node.color] || 'stroke-amber-400';
+                        const fillClass = fills[node.color] || 'hover:fill-amber-500';
 
-                      <g className="cursor-pointer" 
-                         onMouseEnter={() => setHoveredDiagramNode('Vibrational Transmuter: The gateway representing active spiritual growth and karma removal.')}
-                         onMouseLeave={() => setHoveredDiagramNode(null)}>
-                        <circle cx="11" cy="72.5" r="3" className="fill-stone-900 stroke-emerald-400 hover:fill-emerald-500 transition-all" strokeWidth="1" />
-                        <text x="11" y="72.5" textAnchor="middle" dominantBaseline="central" fontSize="3" className="fill-white font-mono pointer-events-none">III</text>
-                      </g>
-
-                      <g className="cursor-pointer" 
-                         onMouseEnter={() => setHoveredDiagramNode('Inner Core Point: Solfeggio 528Hz alignment cell governing cells rejuvenation.')}
-                         onMouseLeave={() => setHoveredDiagramNode(null)}>
-                        <circle cx="50" cy="50" r="4.5" className="fill-stone-950 stroke-cyan-400 hover:fill-cyan-400 hover:scale-110 transition-all" strokeWidth="1" />
-                        <text x="50" y="50" textAnchor="middle" dominantBaseline="central" fontSize="4.5" className="fill-cyan-300 font-mono pointer-events-none font-bold">528</text>
-                      </g>
+                        return (
+                        <g key={idx} className="cursor-pointer" 
+                           onMouseEnter={() => setHoveredDiagramNode(`${node.label}: ${node.description}`)}
+                           onMouseLeave={() => setHoveredDiagramNode(null)}>
+                          <circle cx={node.cx} cy={node.cy} r={node.id === "528" ? 4.5 : 3} 
+                                  className={`fill-stone-900 ${strokeClass} ${fillClass} transition-all`} 
+                                  strokeWidth="1" />
+                          <text x={node.cx} y={node.cy} textAnchor="middle" dominantBaseline="central" fontSize={node.id === "528" ? 4.5 : 3} className={`fill-white font-mono pointer-events-none ${node.id === '528' ? 'font-bold text-cyan-300/80' : ''}`}>{node.id}</text>
+                        </g>
+                        );
+                      })}
                     </svg>
                   </div>
 
@@ -1295,7 +1316,7 @@ const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handl
                         <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Reference Details</h4>
                       </div>
                       <p className="text-stone-300 text-xs font-light leading-relaxed">
-                        {hoveredDiagramNode || "Hover over any node (I, II, III or 528 Core) on the interactive diagram on the left to reveal celestial reference meanings."}
+                        {hoveredDiagramNode || deepDiveData.imageReference?.description || "Hover over any node on the interactive diagram on the left to reveal celestial reference meanings."}
                       </p>
                     </div>
 
@@ -1335,14 +1356,46 @@ const DeepDiveModal = ({ deepDiveData, setDeepDiveData, handleSaveToVault, handl
                     <div className="relative aspect-video max-h-[220px] mx-auto rounded-xl bg-stone-950 border border-white/10 flex items-center justify-center overflow-hidden mb-4">
                       {/* Interactive Pulsing Orbits and Nodes */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className={`w-40 h-40 border border-emerald-500/20 rounded-full transition-transform duration-1000 ${isVideoPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '12s' }}>
-                          <div className="w-4 h-4 rounded-full bg-emerald-400 absolute top-0 left-1/2 -ml-2 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                        </div>
-                        <div className={`w-24 h-24 border border-cyan-500/10 rounded-full absolute transition-transform duration-1000 ${isVideoPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '6s', animationDirection: 'reverse' }}>
-                          <div className="w-3.5 h-3.5 rounded-full bg-cyan-400 absolute bottom-0 left-1/2 -ml-1.5 shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
-                        </div>
-                        <div className={`w-12 h-12 bg-purple-500/20 border border-purple-400 animate-pulse rounded-full absolute flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.4)]`}>
-                          <Sparkles className="w-5 h-5 text-purple-200" />
+                        {(Array.isArray(currentChapterData.orbitParams) ? currentChapterData.orbitParams : []).map((orbit: any, i: number) => {
+                          if (!orbit) return null;
+                          const colorsArray = Array.isArray(currentChapterData.colors) ? currentChapterData.colors : ["emerald"];
+                          const rawColor = typeof colorsArray[i % colorsArray.length] === 'string' ? colorsArray[i % colorsArray.length] : "emerald";
+                          const isHex = rawColor.startsWith('#');
+                          const color500 = isHex ? rawColor : `var(--color-${rawColor}-500, #10b981)`;
+                          const color400 = isHex ? rawColor : `var(--color-${rawColor}-400, #34d399)`;
+                          return (
+                            <div key={i} className={`absolute border rounded-full transition-transform duration-1000 ${isVideoPlaying ? 'animate-spin' : ''}`} 
+                                 style={{ 
+                                   width: `${orbit.size * 2}px`, 
+                                   height: `${orbit.size * 2}px`, 
+                                   animationDuration: `${orbit.speed}s`,
+                                   animationDirection: i % 2 === 0 ? 'normal' : 'reverse',
+                                   borderColor: isHex ? `${rawColor}33` : `color-mix(in srgb, ${color500} 20%, transparent)`
+                                 }}>
+                              <div className="absolute top-0 left-1/2 rounded-full" 
+                                   style={{
+                                     width: `${orbit.dotSize * 2}px`,
+                                     height: `${orbit.dotSize * 2}px`,
+                                     marginLeft: `-${orbit.dotSize}px`,
+                                     marginTop: `-${orbit.dotSize}px`,
+                                     backgroundColor: color400,
+                                     boxShadow: `0 0 10px ${color400}`
+                                   }} />
+                            </div>
+                          );
+                        })}
+                        
+                        <div className="bg-purple-500/20 animate-pulse rounded-full absolute flex items-center justify-center border shadow-lg"
+                             style={{ 
+                               width: '48px', height: '48px', 
+                               backgroundColor: typeof currentChapterData?.colors?.[0] === 'string' && currentChapterData.colors[0].startsWith('#') ? `${currentChapterData.colors[0]}33` : `color-mix(in srgb, var(--color-${currentChapterData?.colors?.[0] || 'emerald'}-500, #10b981) 20%, transparent)`, 
+                               borderColor: typeof currentChapterData?.colors?.[0] === 'string' && currentChapterData.colors[0].startsWith('#') ? currentChapterData.colors[0] : `var(--color-${currentChapterData?.colors?.[0] || 'emerald'}-400, #34d399)`,
+                               boxShadow: `0 0 20px ${typeof currentChapterData?.colors?.[0] === 'string' && currentChapterData.colors[0].startsWith('#') ? currentChapterData.colors[0] + '66' : `var(--color-${currentChapterData?.colors?.[0] || 'emerald'}-500, #10b981)`}`
+                             }}>
+                          {(() => {
+                            const IconComponent = {Sparkles, Moon, Sun, Star, Hexagon, Zap, Radio}[currentChapterData.centerIcon as "Sparkles"|"Moon"|"Sun"|"Star"|"Hexagon"|"Zap"|"Radio"] || Sparkles;
+                            return <IconComponent className="w-5 h-5" style={{color: typeof currentChapterData?.colors?.[0] === 'string' && currentChapterData.colors[0].startsWith('#') ? '#fff' : `var(--color-${currentChapterData?.colors?.[0] || 'emerald'}-200, #fff)`}} />;
+                          })()}
                         </div>
                       </div>
 
@@ -2096,7 +2149,6 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'torus'} tabId="torus" onClick={() => setActiveTab('torus')} icon={<Activity className="w-4 h-4"/>}>Soul Blueprint</Tab>
               <Tab active={activeTab === 'soul_path'} tabId="soul_path" onClick={() => setActiveTab('soul_path')} icon={<Compass className="w-4 h-4"/>}>Soul Path</Tab>
               <Tab active={activeTab === 'brain'} tabId="brain" onClick={() => setActiveTab('brain')} icon={<Brain className="w-4 h-4"/>}>Neural Core</Tab>
-              <Tab active={activeTab === 'planets'} tabId="planets" onClick={() => setActiveTab('planets')} icon={<Moon className="w-4 h-4"/>}>Astrology</Tab>
               <Tab active={activeTab === 'celestial_dna'} tabId="celestial_dna" onClick={() => setActiveTab('celestial_dna')} icon={<Hexagon className="w-4 h-4"/>}>Celestial DNA</Tab>
               <Tab active={activeTab === 'numbers'} tabId="numbers" onClick={() => setActiveTab('numbers')} icon={<Fingerprint className="w-4 h-4"/>}>Numerology</Tab>
               <Tab active={activeTab === 'kabbalah'} tabId="kabbalah" onClick={() => setActiveTab('kabbalah')} icon={<Hexagon className="w-4 h-4"/>}>Mysticism</Tab>
@@ -2114,6 +2166,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'angel_numbers'} tabId="angel_numbers" onClick={() => setActiveTab('angel_numbers')} icon={<Sparkles className="w-4 h-4"/>}>Angel Numbers</Tab>
               <Tab active={activeTab === 'vortex'} tabId="vortex" onClick={() => setActiveTab('vortex')} icon={<CirclePlay className="w-4 h-4 text-cyan-400"/>}>Vortex Sequencing</Tab>
               <Tab active={activeTab === 'vibrational_tuning'} tabId="vibrational_tuning" onClick={() => setActiveTab('vibrational_tuning')} icon={<Radio className="w-4 h-4 text-fuchsia-400 animate-pulse"/>}>Vibrational Tuning</Tab>
+              <Tab active={activeTab === 'alignment'} tabId="alignment" onClick={() => setActiveTab('alignment')} icon={<Radio className="w-4 h-4 text-teal-400 animate-pulse"/>}>Alignment</Tab>
+              <Tab active={activeTab === 'ai_agents'} tabId="ai_agents" onClick={() => setActiveTab('ai_agents')} icon={<Cpu className="w-4 h-4 text-emerald-400"/>}>AI Agents Swarm</Tab>
               <Tab active={activeTab === 'astral_canvas'} tabId="astral_canvas" onClick={() => setActiveTab('astral_canvas')} icon={<Workflow className="w-4 h-4 text-purple-400 animate-pulse"/>}>Research Canvas</Tab>
               <Tab active={activeTab === 'gematria_calc'} tabId="gematria_calc" onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
               <Tab active={activeTab === 'golden_ratio'} tabId="golden_ratio" onClick={() => setActiveTab('golden_ratio')} icon={<Grid className="w-4 h-4 text-amber-500" />}>Kathara Grid</Tab>
@@ -2122,9 +2176,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'obsidian'} tabId="obsidian" onClick={() => setActiveTab('obsidian')} icon={<BookOpen className="w-4 h-4 text-purple-400"/>}>Akashic Vault</Tab>
               <Tab active={activeTab === 'codex'} tabId="codex" onClick={() => setActiveTab('codex')} icon={<Search className="w-4 h-4 text-emerald-400"/>}>Cosmic Codex</Tab>
               <Tab active={activeTab === 'evolution'} tabId="evolution" onClick={() => setActiveTab('evolution')} icon={<Cpu className="w-4 h-4 text-blue-500"/>}>Quantum Evolution</Tab>
-              <Tab active={activeTab === 'hypernexus'} tabId="hypernexus" onClick={() => setActiveTab('hypernexus')} icon={<Sparkles className="w-4 h-4 text-purple-400 animate-pulse"/>}>HyperNexus</Tab>
               <Tab active={activeTab === 'christ_sophia'} tabId="christ_sophia" onClick={() => setActiveTab('christ_sophia')} icon={<Sparkles className="w-4 h-4 text-amber-300 animate-pulse"/>}>Christ-Sophia Gnosis</Tab>
-              <Tab active={activeTab === 'nexus'} tabId="nexus" onClick={() => setActiveTab('nexus')} icon={<Network className="w-4 h-4 text-fuchsia-400"/>}>Dev Nexus</Tab>
               <Tab active={activeTab === 'tetragrammaton'} tabId="tetragrammaton" onClick={() => setActiveTab('tetragrammaton')} icon={<Hexagon className="w-4 h-4 text-[#fbbf24]"/>}>YHVH HUD</Tab>
               <Tab active={activeTab === 'sandbox'} tabId="sandbox" onClick={() => setActiveTab('sandbox')} icon={<Box className="w-4 h-4 text-emerald-400"/>}>Creative Sandbox</Tab>
               <Tab active={activeTab === 'findings'} tabId="findings" onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
@@ -2355,6 +2407,12 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                                 <p className="text-lg font-light leading-relaxed text-sky-50 italic relative z-10">"{data.nameAnalysis.overallBigPicture}"</p>
                              </div>
                            )}
+
+                           <div className="mt-12">
+                             <React.Suspense fallback={<div className="h-40 flex items-center justify-center text-white/50"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
+                                <AncestralResearchSection initialLastName={data.nameAnalysis.last?.name || ''} />
+                             </React.Suspense>
+                           </div>
                         </div>
                       </>
                     )}
@@ -2774,7 +2832,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                           <span className="text-xs tracking-widest text-stone-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">{data.dailyInsight.date}</span>
                         </div>
 
-                        <MockOpastroTerminal sign={data.celestialDna?.sunSign || "Aries"} />
+                        <MockOpastroTerminal sign={(data as any).celestialDna?.sunSign || data.planets?.find((p: any) => p.name.toLowerCase() === 'sun')?.sign || "Aries"} />
 
                         <div className="space-y-4 mb-8">
                           <BoundResearchBox title="Daily Horoscope Research" content={data.dailyInsight.horoscope}>
@@ -2872,12 +2930,6 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                   </motion.div>
                 )}
                 
-                {activeTab === 'planets' && (
-                  <motion.div key="planets" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
-                    <AstrologyDashboard data={data} onDeepDive={(title, content) => handleGeneralDeepDive(title, content)} />
-                  </motion.div>
-                )}
-
                 {activeTab === 'cycles' && data.advancedCycles && (
                   <motion.div key="cycles" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <BoundResearchBox title="Morning & Evening Stars Significance" content={data.advancedCycles.morningEveningStars.meaning}>
@@ -3162,6 +3214,20 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <VibrationalTuningSection />
                   </motion.div>
                 )}
+                {activeTab === 'alignment' && (
+                  <motion.div key="alignment" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="h-full min-h-[700px]">
+                    <React.Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="w-8 h-8 text-teal-400 animate-spin" /></div>}>
+                      <AlignmentSection cosmicData={data} />
+                    </React.Suspense>
+                  </motion.div>
+                )}
+                {activeTab === 'ai_agents' && (
+                  <motion.div key="ai_agents" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="h-full min-h-[700px]">
+                    <React.Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="w-8 h-8 text-emerald-400 animate-spin" /></div>}>
+                      <AIAgentsSection cosmicData={data} />
+                    </React.Suspense>
+                  </motion.div>
+                )}
                 {activeTab === 'gematria_calc' && (
                   <motion.div key="gematria_calc" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <GematriaCalculatorSection />
@@ -3216,16 +3282,6 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'evolution' && (
                   <motion.div key="evolution" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
                     <AIEvolutionStream />
-                  </motion.div>
-                )}
-                {activeTab === 'hypernexus' && (
-                  <motion.div key="hypernexus" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="h-[750px] mb-20 overflow-hidden rounded-[2.5rem] border border-white/10">
-                    <HyperNexus data={data} />
-                  </motion.div>
-                )}
-                {activeTab === 'nexus' && (
-                  <motion.div key="nexus" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
-                    <ObsidianReleaseIntegration />
                   </motion.div>
                 )}
                 {activeTab === 'tetragrammaton' && (

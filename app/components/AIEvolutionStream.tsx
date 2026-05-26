@@ -44,10 +44,26 @@ export const AIEvolutionStream = () => {
       // Attempt to parse JSON from AI response
       let manifest;
       try {
-        const jsonMatch = response.text.match(/\{[\s\S]*\}/);
-        manifest = jsonMatch ? JSON.parse(jsonMatch[0]) : { title: 'Cosmic Anomaly', description: response.text };
-      } catch (e) {
-        manifest = { title: 'Spontaneous Insight', description: response.text };
+        const responseText = response.text || '';
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        
+        if (jsonMatch) {
+          manifest = JSON.parse(jsonMatch[0]);
+        } else {
+          // Graceful fallback for non-JSON response instead of Cosmic Anomaly
+          manifest = { 
+            title: 'Evolution Synthesis', 
+            description: responseText.trim() || 'A new perspective has emerged from the void.',
+            logicHighlight: '// Integration in progress'
+          };
+        }
+      } catch (error) {
+        console.warn("Failed to parse manifestation format:", error);
+        manifest = { 
+          title: 'Spontaneous Insight', 
+          description: response.text?.trim()?.substring(0, 200) + '...',
+          logicHighlight: '// Re-calibrating pathways'
+        };
       }
 
       const newEntry: EvolutionEntry = {

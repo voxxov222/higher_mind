@@ -102,7 +102,7 @@ const SoulEntity = ({ color = '#a855f7' }: { color?: string }) => {
 
 export const SoulAvatar = ({ color = '#a855f7' }: { color?: string }) => {
   return (
-    <div className="w-full h-full min-h-[300px] relative cursor-pointer">
+    <div className="w-full h-full min-h-[300px] relative cursor-pointer" id="soul-avatar-canvas-container">
       <Canvas camera={{ position: [0, 0, 5], fov: 45 }} gl={{ antialias: false, stencil: false, depth: true }}>
         <color attach="background" args={['black']} />
         <ambientLight intensity={1.5} />

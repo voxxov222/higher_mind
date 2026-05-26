@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx server.ts",
     "build": "remix vite:build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "postbuild": "touch dist/index.html",
     "start": "node dist/server.cjs",
     "lint": "eslint app"
   },
@@ -27,6 +28,7 @@
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
     "date-fns": "^4.1.0",
+    "downloadjs": "^1.4.7",
     "firebase": "^12.13.0",
     "gifenc": "1.0.3",
     "html-to-image": "^1.11.13",

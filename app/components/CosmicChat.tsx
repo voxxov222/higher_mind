@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageSquare, Send, X, Minimize2, Maximize2, Sparkles, Brain, Network, Zap, User, BookOpen, Archive } from 'lucide-react';
+import { MessageSquare, Send, X, Minimize2, Maximize2, Sparkles, Brain, Network, Zap, User, BookOpen, Archive, GitBranch, Activity, Compass, Globe } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart, Pie, Cell } from 'recharts';
 import { CosmicData, ConsciousnessPacket } from '../types';
 import { fetchCosmicChatResponse } from '../services/geminiService';
 import { useHigherMind } from './HigherMindProvider';
@@ -14,11 +15,108 @@ interface Message {
   timestamp: number;
   references?: string[];
   packet?: ConsciousnessPacket;
+  visualData?: {
+    type: 'chart' | 'metrics' | 'meaning_tree' | null;
+    chartType?: 'bar' | 'radar' | 'pie';
+    title?: string;
+    data?: any[];
+    metrics?: any[];
+    meaningTree?: any[];
+  } | null;
 }
 
 interface CosmicChatProps {
   cosmicData: CosmicData | null;
 }
+
+const VisualDemonstrationRenderer = ({ visualData }: { visualData: any }) => {
+  if (!visualData || !visualData.type) return null;
+
+  const COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#6366f1'];
+
+  return (
+    <div className="mt-4 bg-black/40 border border-white/10 rounded-2xl p-4 overflow-hidden">
+      {visualData.title && (
+        <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+          <Sparkles size={12} className="text-purple-400" />
+          {visualData.title}
+        </h4>
+      )}
+
+      {visualData.type === 'chart' && Array.isArray(visualData.data) && (
+        <div className="h-[200px] w-full mt-2">
+          <ResponsiveContainer width="100%" height="100%">
+            {visualData.chartType === 'radar' ? (
+              <RadarChart data={visualData.data}>
+                <PolarGrid stroke="rgba(255,255,255,0.1)" />
+                <PolarAngleAxis dataKey="name" tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} />
+                <Radar name={visualData.title || "Data"} dataKey="value" stroke="#a855f7" fill="#a855f7" fillOpacity={0.3} />
+                <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }} />
+              </RadarChart>
+            ) : visualData.chartType === 'pie' ? (
+              <PieChart>
+                <Pie data={visualData.data} cx="50%" cy="50%" innerRadius={40} outerRadius={80} paddingAngle={5} dataKey="value">
+                  {visualData.data.map((entry: any, index: number) => (
+                    <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }} />
+              </PieChart>
+            ) : (
+              <BarChart data={visualData.data}>
+                <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} />
+                <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }} />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {visualData.data.map((entry: any, index: number) => (
+                    <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            )}
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {visualData.type === 'metrics' && Array.isArray(visualData.metrics) && (
+        <div className="grid grid-cols-2 gap-3 mt-2">
+          {visualData.metrics.map((metric: any, idx: number) => (
+            <div key={idx} className="bg-white/5 border border-white/5 rounded-xl p-3 flex flex-col justify-between">
+              <span className="text-[9px] uppercase tracking-widest text-stone-400 mb-2">{metric.label}</span>
+              <div className="flex items-end justify-between">
+                <span className="text-xl font-light text-white">{metric.value}</span>
+                {metric.description && <span className="text-[10px] text-stone-500 line-clamp-1 max-w-[60%] text-right">{metric.description}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {visualData.type === 'meaning_tree' && Array.isArray(visualData.meaningTree) && (
+        <div className="relative mt-2 pl-4 border-l border-purple-500/30 space-y-4">
+          {visualData.meaningTree.map((node: any, idx: number) => (
+            <motion.div 
+              key={idx}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.2 }}
+              className="relative"
+            >
+              <div className="absolute -left-[21px] top-1.5 w-2 h-2 bg-purple-500 rounded-full shadow-[0_0_10px_#a855f7]" />
+              <div className="bg-purple-900/10 border border-purple-500/20 rounded-xl p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm font-bold text-purple-300">{node.node}</span>
+                  <GitBranch size={12} className="text-purple-500/50" />
+                </div>
+                <div className="text-xs text-stone-300 mb-1">"{node.translation}"</div>
+                {node.history && <div className="text-[10px] text-stone-500 leading-relaxed">{node.history}</div>}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -136,7 +234,8 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
         role: 'model',
         text: response?.text || "The cosmic signal is weak. Please re-send.",
         timestamp: Date.now(),
-        packet: response?.consciousnessPacket
+        packet: response?.consciousnessPacket,
+        visualData: response?.visualData
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -326,6 +425,10 @@ export const CosmicChat: React.FC<CosmicChatProps> = ({ cosmicData }) => {
                           <div className="prose prose-invert prose-sm max-w-none">
                             {m.text ? <ReactMarkdown>{m.text}</ReactMarkdown> : <span className="italic text-stone-500">Transmission empty...</span>}
                           </div>
+
+                          {m.visualData && m.role === 'model' && (
+                            <VisualDemonstrationRenderer visualData={m.visualData} />
+                          )}
                           
                            {m.role === 'model' && (
                              <div className="absolute -right-12 top-0 flex flex-col gap-1 opacity-0 group-hover/msg:opacity-100 transition-all">

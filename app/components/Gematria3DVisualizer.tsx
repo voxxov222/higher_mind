@@ -106,10 +106,10 @@ export const Gematria3DVisualizer: React.FC<Gematria3DVisualizerProps> = ({ onNo
   });
 
   const handleNodeClick = (char: string, val: number, idx: number) => {
-    if (soundEngine && typeof soundEngine.toneClick === 'function') {
-      soundEngine.toneClick();
-    } else if (soundEngine && typeof soundEngine.neuralClick === 'function') {
-      soundEngine.neuralClick();
+    if (soundEngine && typeof (soundEngine as any).toneClick === 'function') {
+      (soundEngine as any).toneClick();
+    } else if (soundEngine && typeof (soundEngine as any).neuralClick === 'function') {
+      (soundEngine as any).neuralClick();
     }
     
     if (onNodeClick) {
@@ -128,7 +128,7 @@ export const Gematria3DVisualizer: React.FC<Gematria3DVisualizerProps> = ({ onNo
       {/* 1. Coordinate Grid System Base */}
       <group position={[0, -5, 0]}>
         {/* XY Spatial Flat Grid */}
-        <gridHelper args={[24, 12, '#3b82f6', '#1e293b']} position={[0, 0, 0]} opacity={0.15} transparent />
+        <gridHelper args={[24, 12, '#3b82f6', '#1e293b']} position={[0, 0, 0]} {...{ opacity: 0.15, transparent: true } as any} />
       </group>
 
       {/* Coordinate Axes Lines */}
@@ -158,16 +158,16 @@ export const Gematria3DVisualizer: React.FC<Gematria3DVisualizerProps> = ({ onNo
       />
 
       {/* Axis Space Labels */}
-      <Text position={[13, -5, 0]} fontSize={0.35} color="#60a5fa" font="monospace">
+      <Text position={[13, -5, 0]} fontSize={0.35} color="#60a5fa">
         +X ORDINAL
       </Text>
-      <Text position={[-13, -5, 0]} fontSize={0.35} color="#60a5fa" font="monospace">
+      <Text position={[-13, -5, 0]} fontSize={0.35} color="#60a5fa">
         -X ORDINAL
       </Text>
-      <Text position={[0, -5, 13]} fontSize={0.35} color="#a78bfa" font="monospace">
+      <Text position={[0, -5, 13]} fontSize={0.35} color="#a78bfa">
         +Z PHASE
       </Text>
-      <Text position={[0, 8.5, 0]} fontSize={0.35} color="#f472b6" font="monospace">
+      <Text position={[0, 8.5, 0]} fontSize={0.35} color="#f472b6">
         +Y REDUCTION
       </Text>
 
@@ -216,7 +216,6 @@ export const Gematria3DVisualizer: React.FC<Gematria3DVisualizerProps> = ({ onNo
           position={[0, 0, 0]} 
           fontSize={1.1} 
           color="#ffffff" 
-          font="bold"
           anchorX="center" 
           anchorY="middle"
         >
@@ -228,7 +227,6 @@ export const Gematria3DVisualizer: React.FC<Gematria3DVisualizerProps> = ({ onNo
           fontSize={0.26} 
           color="#f472b6" 
           anchorX="center"
-          font="monospace"
         >
           SUM INDEX
         </Text>
@@ -289,7 +287,6 @@ export const Gematria3DVisualizer: React.FC<Gematria3DVisualizerProps> = ({ onNo
                 position={[0, 0.6, 0]}
                 fontSize={0.55}
                 color={node.color}
-                font="monospace"
                 anchorX="center"
                 anchorY="middle"
               >
@@ -301,7 +298,6 @@ export const Gematria3DVisualizer: React.FC<Gematria3DVisualizerProps> = ({ onNo
                 position={[0, -0.45, 0]}
                 fontSize={0.22}
                 color="#64748b"
-                font="monospace"
                 anchorX="center"
                 anchorY="middle"
               >
@@ -330,7 +326,6 @@ export const Gematria3DVisualizer: React.FC<Gematria3DVisualizerProps> = ({ onNo
             transparent
             opacity={0.35}
             // Loop the last node back to first
-            className="constellation-loop"
           />
         )}
         

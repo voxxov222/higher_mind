@@ -71,7 +71,7 @@ export const generateAncestryResearch = async (lastName: string, maidenName?: st
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.5-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -323,7 +323,7 @@ export const fetchCosmicChatResponse = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: 'gemini-3.5-flash',
       contents: [
         ...safeHistory,
         { role: 'user', parts: [{ text: userMessage }] }

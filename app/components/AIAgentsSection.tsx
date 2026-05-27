@@ -13,7 +13,9 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
   const [isSwarmRunning, setIsSwarmRunning] = useState(false);
   const [globalLog, setGlobalLog] = useState<{time: string, msg: string}[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'network' | 'outputs'>('network');
+  const [viewMode, setViewMode] = useState<'network' | 'outputs' | 'database'>('network');
+  const [filter, setFilter] = useState<{category: string | 'All', agentId: string | 'All'}>({category: 'All', agentId: 'All'});
+  const [selectedFinding, setSelectedFinding] = useState<any | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Sync with global swarm engine
@@ -25,6 +27,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
     setIsSwarmRunning(swarmEngine.isRunning);
     setGlobalLog([...swarmEngine.logs]);
     
+    // Create local state for findings to trigger re-renders
     const unsubscribe = swarmEngine.subscribe(() => {
       setAgents([...swarmEngine.agents]);
       setIsSwarmRunning(swarmEngine.isRunning);
@@ -32,6 +35,13 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
     });
     return unsubscribe;
   }, [cosmicData]);
+
+  const filteredFindings = swarmEngine.findingsDatabase.filter(f => 
+    (filter.category === 'All' || f.category === filter.category) &&
+    (filter.agentId === 'All' || f.agentId === filter.agentId)
+  );
+  
+  const categories = Array.from(new Set(swarmEngine.findingsDatabase.map(f => f.category)));
 
   const addAgent = () => {
     const newId = swarmEngine.addAgent();
@@ -74,6 +84,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
              <div className="flex bg-stone-900 border border-white/5 rounded-lg p-1">
                <button onClick={() => setViewMode('network')} className={`px-4 py-1.5 rounded-md text-xs font-mono transition-colors flex items-center gap-2 ${viewMode === 'network' ? 'bg-teal-500/10 text-teal-400' : 'text-stone-500 hover:text-stone-300'}`}><Network className="w-3 h-3" /> Map View</button>
                <button onClick={() => setViewMode('outputs')} className={`px-4 py-1.5 rounded-md text-xs font-mono transition-colors flex items-center gap-2 ${viewMode === 'outputs' ? 'bg-purple-500/10 text-purple-400' : 'text-stone-500 hover:text-stone-300'}`}><ScrollText className="w-3 h-3" /> Agent Outputs</button>
+               <button onClick={() => setViewMode('database')} className={`px-4 py-1.5 rounded-md text-xs font-mono transition-colors flex items-center gap-2 ${viewMode === 'database' ? 'bg-amber-500/10 text-amber-400' : 'text-stone-500 hover:text-stone-300'}`}><Database className="w-3 h-3" /> Database</button>
              </div>
              <button onClick={addAgent} className="px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-lg border border-white/10 flex items-center gap-2 text-xs transition-colors">
                <Plus className="w-4 h-4" /> Add Agent
@@ -95,7 +106,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
             {/* Grid Background */}
             <div className="absolute inset-0 border-[0.5px] border-white/5 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
             
-            {/* Connection Lines & Memory Lines (SVG) */}
+            {/* Connection Lines (SVG) */}
             <svg className="absolute inset-0 pointer-events-none w-full h-full">
               {agents.map(agent => (
                 <g key={`lines-${agent.id}`}>
@@ -128,7 +139,6 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
                   {/* Memory Connections */}
                   {agent.memory.slice(0, 30).map((_, i) => {
                     const angle = (i * 137.5) * (Math.PI / 180); // Fibonacci spiral angle
-                    // Spread them out smoothly
                     const radius = 35 + (i * 2); 
                     const mx = agent.x + 20 + Math.cos(angle) * radius;
                     const my = agent.y + 20 + Math.sin(angle) * radius;
@@ -197,7 +207,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
               }
             `}} />
           </div>
-        ) : (
+        ) : viewMode === 'outputs' ? (
           /* Consolidated Outputs View */
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -236,6 +246,31 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
                    ))}
                    {globalLog.length === 0 && <span className="text-stone-600 italic text-xs">No logs recorded. Initialize swarm.</span>}
                 </div>
+             </div>
+          </div>
+        ) : (
+          /* Database View */
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+             <div className="flex gap-4 items-center bg-stone-900/50 p-4 rounded-xl border border-white/5">
+                <Search className="w-4 h-4 text-amber-400"/>
+                <select className="bg-stone-950 text-xs text-stone-300 border border-white/10 rounded p-1" onChange={(e) => setFilter({...filter, category: e.target.value})}>
+                   <option value="All">All Categories</option>
+                   {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <select className="bg-stone-950 text-xs text-stone-300 border border-white/10 rounded p-1" onChange={(e) => setFilter({...filter, agentId: e.target.value})}>
+                   <option value="All">All Agents</option>
+                   {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                </select>
+             </div>
+             <div className="grid grid-cols-1 gap-2">
+                {filteredFindings.map(f => (
+                   <div key={f.id} className="bg-stone-900/40 p-4 rounded-lg border border-white/5 flex gap-4 text-xs font-mono cursor-pointer hover:bg-stone-900/60 transition-colors" onClick={() => setSelectedFinding(f)}>
+                      <span className="text-amber-500 w-24 shrink-0">[{f.category}]</span>
+                      <span className="text-teal-400 w-32 shrink-0">{f.agentName}</span>
+                      <span className="text-stone-300 flex-1">{f.content}</span>
+                      <span className="text-stone-600 w-20 text-right">{f.timestamp}</span>
+                   </div>
+                ))}
              </div>
           </div>
         )}
@@ -369,6 +404,46 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
                </button>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Finding Detail Modal */}
+      <AnimatePresence>
+        {selectedFinding && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+               onClick={() => setSelectedFinding(null)}>
+             <motion.div 
+               initial={{ opacity: 0, scale: 0.9 }} 
+               animate={{ opacity: 1, scale: 1 }}
+               exit={{ opacity: 0, scale: 0.9 }}
+               className="bg-stone-900 border border-white/10 rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto"
+               onClick={e => e.stopPropagation()}
+             >
+                <div className="flex justify-between items-start mb-4">
+                  <h2 className="text-xl font-bold text-teal-400 font-mono">[{selectedFinding.category}] {selectedFinding.agentName}</h2>
+                  <button onClick={() => setSelectedFinding(null)}><X className="w-5 h-5 text-stone-500 hover:text-white"/></button>
+                </div>
+                
+                <p className="text-stone-300 mb-6 font-mono text-sm leading-relaxed">{selectedFinding.content}</p>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-xs font-mono text-stone-500 mb-2 uppercase">Voice Simulation</h4>
+                    <button className="bg-teal-500/10 text-teal-400 text-xs px-3 py-1.5 rounded-lg border border-teal-500/30 flex items-center gap-2">
+                       <Zap className="w-3 h-3"/> Play Finding Summary
+                    </button>
+                  </div>
+                  
+                  <div>
+                     <h4 className="text-xs font-mono text-stone-500 mb-2 uppercase">References & Links</h4>
+                     <ul className="text-xs font-mono text-stone-300 space-y-1">
+                        {selectedFinding.links?.map((link: string, i: number) => <li key={i}><a href={link} target="_blank" rel="noopener noreferrer" className="text-teal-400 hover:underline">{link}</a></li>)}
+                        {selectedFinding.references?.map((ref: string, i: number) => <li key={i} className="text-stone-500">• {ref}</li>)}
+                     </ul>
+                  </div>
+                </div>
+             </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </motion.div>

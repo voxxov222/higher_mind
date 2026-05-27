@@ -2,6 +2,17 @@ import { CosmicData } from '../types';
 
 export type AgentRole = 'tasks' | 'research' | 'connections' | 'mapping' | 'autonomous';
 
+export interface ResearchFinding {
+  id: string;
+  agentId: string;
+  agentName: string;
+  category: string;
+  content: string;
+  timestamp: string;
+  links?: string[];
+  references?: string[];
+}
+
 export interface Agent {
   id: string;
   name: string;
@@ -24,6 +35,7 @@ export interface SwarmLog {
 
 class SwarmEngine {
   agents: Agent[] = [];
+  findingsDatabase: ResearchFinding[] = [];
   isRunning: boolean = false;
   logs: SwarmLog[] = [];
   listeners: Set<() => void> = new Set();
@@ -38,6 +50,20 @@ class SwarmEngine {
 
   notify() {
     this.listeners.forEach(l => l());
+  }
+
+  addFinding(agentId: string, category: string, content: string) {
+    const agent = this.agents.find(a => a.id === agentId);
+    const newFinding: ResearchFinding = {
+      id: `finding-\${Date.now()}`,
+      agentId,
+      agentName: agent?.name || 'Unknown',
+      category,
+      content,
+      timestamp: new Date().toLocaleTimeString()
+    };
+    this.findingsDatabase = [newFinding, ...this.findingsDatabase].slice(0, 500);
+    this.notify();
   }
 
   setCosmicData(data: CosmicData) {
@@ -168,6 +194,9 @@ class SwarmEngine {
           if (agent.role === 'tasks') findingType = 'Synthesized sub-routine';
           
           const newFinding = `\${findingType} [\${Math.floor(Math.random()*1000)}] aligned with directive.`;
+          
+          const category = agent.role === 'research' ? 'Research' : agent.role === 'connections' ? 'Connections' : 'Operations';
+          this.addFinding(agent.id, category, newFinding);
           
           // Limit memory size
           const newMemory = [newFinding, ...agent.memory].slice(0, 100);

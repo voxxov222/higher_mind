@@ -16,6 +16,22 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
   const [viewMode, setViewMode] = useState<'network' | 'outputs' | 'database'>('network');
   const [filter, setFilter] = useState<{category: string | 'All', agentId: string | 'All'}>({category: 'All', agentId: 'All'});
   const [selectedFinding, setSelectedFinding] = useState<any | null>(null);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState<string>('');
+
+  useEffect(() => {
+     if (typeof window !== 'undefined' && window.speechSynthesis) {
+        const loadVoices = () => {
+           const availableVoices = window.speechSynthesis.getVoices();
+           setVoices(availableVoices);
+           if (availableVoices.length > 0 && !selectedVoice) {
+              setSelectedVoice(availableVoices[0].name);
+           }
+        };
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+     }
+  }, []);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Sync with global swarm engine
@@ -421,7 +437,10 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
              >
                 <div className="flex justify-between items-start mb-4">
                   <h2 className="text-xl font-bold text-teal-400 font-mono">[{selectedFinding.category}] {selectedFinding.agentName}</h2>
-                  <button onClick={() => setSelectedFinding(null)}><X className="w-5 h-5 text-stone-500 hover:text-white"/></button>
+                  <button onClick={() => {
+                     window.speechSynthesis?.cancel();
+                     setSelectedFinding(null);
+                  }}><X className="w-5 h-5 text-stone-500 hover:text-white"/></button>
                 </div>
                 
                 <p className="text-stone-300 mb-6 font-mono text-sm leading-relaxed">{selectedFinding.content}</p>
@@ -429,9 +448,33 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
                 <div className="space-y-4">
                   <div>
                     <h4 className="text-xs font-mono text-stone-500 mb-2 uppercase">Voice Simulation</h4>
-                    <button className="bg-teal-500/10 text-teal-400 text-xs px-3 py-1.5 rounded-lg border border-teal-500/30 flex items-center gap-2">
-                       <Zap className="w-3 h-3"/> Play Finding Summary
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                       <select 
+                          className="bg-stone-950 border border-white/10 text-stone-300 text-xs rounded-lg p-2 focus:ring-teal-500 w-full sm:w-auto flex-1 font-mono"
+                          value={selectedVoice}
+                          onChange={(e) => setSelectedVoice(e.target.value)}
+                       >
+                          {voices.map(voice => (
+                             <option key={voice.name} value={voice.name}>{voice.name} ({voice.lang})</option>
+                          ))}
+                       </select>
+                       <button 
+                          onClick={() => {
+                             if (window.speechSynthesis) {
+                                window.speechSynthesis.cancel();
+                                const utterance = new SpeechSynthesisUtterance(selectedFinding.content);
+                                const voice = voices.find(v => v.name === selectedVoice);
+                                if (voice) utterance.voice = voice;
+                                utterance.pitch = 0.9;
+                                utterance.rate = 1.0;
+                                window.speechSynthesis.speak(utterance);
+                             }
+                          }}
+                          className="bg-teal-500/10 text-teal-400 text-xs px-4 py-2 rounded-lg border border-teal-500/30 flex items-center justify-center gap-2 hover:bg-teal-500/20 transition-colors whitespace-nowrap"
+                       >
+                          <Zap className="w-3 h-3"/> Play Summary
+                       </button>
+                    </div>
                   </div>
                   
                   <div>

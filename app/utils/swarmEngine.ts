@@ -54,13 +54,17 @@ class SwarmEngine {
 
   addFinding(agentId: string, category: string, content: string) {
     const agent = this.agents.find(a => a.id === agentId);
+    // Generate some mock links and references based on category
+    const isResearch = category === 'Research';
     const newFinding: ResearchFinding = {
-      id: `finding-\${Date.now()}`,
+      id: `finding-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
       agentId,
       agentName: agent?.name || 'Unknown',
       category,
       content,
-      timestamp: new Date().toLocaleTimeString()
+      timestamp: new Date().toLocaleTimeString(),
+      links: isResearch ? ['https://en.wikipedia.org/wiki/Astrology', 'https://solarsystem.nasa.gov/'] : undefined,
+      references: isResearch ? ['Journal of Cosmic Studies, Vol 4.', 'Hermetic Kabbalah Principles, Chapter 2'] : ['System Diagnostics Record', 'Process Execution Log']
     };
     this.findingsDatabase = [newFinding, ...this.findingsDatabase].slice(0, 500);
     this.notify();
@@ -110,10 +114,10 @@ class SwarmEngine {
       this.addGlobalLog("System limits reached. Maximum 50 agents allowed in the swarm.");
       return null;
     }
-    const newId = `agent-\${Date.now()}`;
+    const newId = `agent-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const newAgent: Agent = {
       id: newId,
-      name: `Agent \${this.agents.length + 1}`,
+      name: `Agent ${this.agents.length + 1}`,
       instructions: '',
       role: 'tasks',
       status: this.isRunning ? 'running' : 'idle',
@@ -126,7 +130,7 @@ class SwarmEngine {
       y: 100 + Math.random() * 200
     };
     this.agents = [...this.agents, newAgent];
-    this.addGlobalLog(`Agent \${this.agents.length} initialized and added to swarm.`);
+    this.addGlobalLog(`Agent ${this.agents.length} initialized and added to swarm.`);
     this.notify();
     return newId;
   }
@@ -163,7 +167,7 @@ class SwarmEngine {
     const agent = this.agents.find(a => a.id === id);
     if (!agent) return;
     this.updateAgent(id, { level: agent.level + 1 });
-    this.addGlobalLog(`Agent \${agent.name} upgraded to level \${agent.level + 1}.`);
+    this.addGlobalLog(`Agent ${agent.name} upgraded to level ${agent.level + 1}.`);
   }
 
   toggleSwarm() {
@@ -193,7 +197,7 @@ class SwarmEngine {
           if (agent.role === 'connections') findingType = 'Mapped conceptual parallel';
           if (agent.role === 'tasks') findingType = 'Synthesized sub-routine';
           
-          const newFinding = `\${findingType} [\${Math.floor(Math.random()*1000)}] aligned with directive.`;
+          const newFinding = `${findingType} [${Math.floor(Math.random()*1000)}] aligned with directive.`;
           
           const category = agent.role === 'research' ? 'Research' : agent.role === 'connections' ? 'Connections' : 'Operations';
           this.addFinding(agent.id, category, newFinding);
@@ -204,7 +208,7 @@ class SwarmEngine {
           
           // Log globally occasionally
           if (Math.random() > 0.5) {
-            this.logs = [{ time: new Date().toLocaleTimeString(), msg: `[\${agent.name}] \${newFinding}` }, ...this.logs].slice(0, 50);
+            this.logs = [{ time: new Date().toLocaleTimeString(), msg: `[${agent.name}] ${newFinding}` }, ...this.logs].slice(0, 50);
           }
           
           return {

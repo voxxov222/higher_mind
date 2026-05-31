@@ -6,12 +6,11 @@
   "scripts": {
     "dev": "tsx server.ts",
     "build": "remix vite:build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
-    "postbuild": "touch dist/index.html",
     "start": "node dist/server.cjs",
     "lint": "eslint app"
   },
   "dependencies": {
-    "@google/genai": "^1.52.0",
+    "@google/genai": "^2.7.0",
     "@react-three/drei": "^9.105.6",
     "@react-three/fiber": "^8.16.1",
     "@react-three/postprocessing": "^2.16.2",

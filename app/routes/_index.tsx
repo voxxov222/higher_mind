@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-const CosmicScene = lazy(() => import('../components/CosmicScene').then(m => ({ default: m.CosmicScene })));
+import { CosmicScene } from '../components/CosmicScene';
 const SolarSystemScene = lazy(() => import('../components/SolarSystemScene').then(m => ({ default: m.SolarSystemScene })));
 const Dashboard = lazy(() => import('../components/Dashboard').then(m => ({ default: m.Dashboard })));
 const CosmicProfile = lazy(() => import('../components/profile/CosmicProfile'));

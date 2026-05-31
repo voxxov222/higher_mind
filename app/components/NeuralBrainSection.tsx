@@ -180,14 +180,21 @@ const NeuralBrainCore = ({ colorTheme, overdrive, schemaRefine, indexingMode, em
                     <meshStandardMaterial 
                         color={colorTheme.primary} 
                         emissive={colorTheme.primary} 
-                        emissiveIntensity={20} 
+                        emissiveIntensity={40}  // Increased intensity
                         transparent 
-                        opacity={0.3} 
+                        opacity={0.5} 
                         wireframe
                     />
-                    <Sparkles count={100} scale={4} color={colorTheme.primary} speed={1} size={3} />
+                    <Sparkles count={200} scale={5} color={colorTheme.primary} speed={1.5} size={4} />
+                    <pointLight intensity={10} color={colorTheme.primary} />
                 </mesh>
             )}
+            
+            {/* Added Glow Ring */}
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <torusGeometry args={[3.2, 0.02, 16, 100]} />
+                <meshBasicMaterial color={colorTheme.accent} transparent opacity={0.6} />
+            </mesh>
             
             {/* Advanced Script Injection Streams */}
             <group ref={streamsRef} visible={scriptInjection}>
@@ -234,7 +241,7 @@ const NeuralBrainCore = ({ colorTheme, overdrive, schemaRefine, indexingMode, em
 }
 
 
-export default function NeuralBrainSection({ data, setActiveTab }: { data?: any, setActiveTab?: (tab: any) => void }) {
+export default function NeuralBrainSection({ data, setActiveTab, projectedTab, isMinimal }: { data?: any, setActiveTab?: (tab: any) => void, projectedTab?: string, isMinimal?: boolean }) {
     const { thoughts, feelings, experiences, coherence, alignment } = useHigherMind();
     // Persistent Toggles using localStorage
     const [hudActive, setHudActive] = useState(() => {
@@ -563,6 +570,7 @@ export default function NeuralBrainSection({ data, setActiveTab }: { data?: any,
             </AnimatePresence>
 
             {/* Bottom Panel */}
+            {!isMinimal && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-5xl bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 z-30 space-y-6">
                 
                 {/* Advanced Core Toggles Grid */}
@@ -653,6 +661,41 @@ export default function NeuralBrainSection({ data, setActiveTab }: { data?: any,
                     </div>
                 </div>
             </div>
+            )}
+
+            {/* Spatial Projection Overlay - Floating Panels */}
+            <AnimatePresence>
+                {projectedTab && projectedTab !== 'brain' && (
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.9, x: 20 }}
+                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, x: 20 }}
+                        className="absolute top-32 right-8 w-80 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-6 z-40 overflow-hidden shadow-2xl"
+                    >
+                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent animate-pulse" />
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 className="text-[10px] uppercase tracking-[0.3em] text-emerald-400 font-bold mb-1">Spatial Projection</h3>
+                                <div className="text-lg text-white font-light uppercase tracking-widest">{projectedTab.replace('_', ' ')}</div>
+                            </div>
+                            <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400 animate-pulse">
+                                <Zap size={16} />
+                            </div>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            {/* Summary Projection based on tool */}
+                            <ProjectionSummary tab={projectedTab} data={data} />
+                        </div>
+
+                        <div className="mt-8 pt-4 border-t border-white/5">
+                            <p className="text-[9px] text-stone-500 uppercase tracking-widest leading-relaxed italic">
+                                "Mapping {projectedTab} data into global consciousness field..."
+                            </p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Terminal Overlay */}
             <AnimatePresence>
@@ -735,3 +778,85 @@ const QoLToggle = ({ icon, label, active, onClick, color }: any) => {
         </button>
     );
 };
+
+function ProjectionSummary({ tab, data }: { tab: string, data?: any }) {
+    if (!data) return null;
+
+    switch (tab) {
+        case 'numbers':
+        case 'gematria_calc':
+        case 'angel_numbers':
+            return (
+                <div className="space-y-4">
+                    <ProjectionItem label="Life Path" value={data.numerology.lifePath} />
+                    <ProjectionItem label="Expression" value={data.numerology.expression} />
+                    <ProjectionItem label="Soul Urge" value={data.numerology.soulUrge} />
+                </div>
+            );
+        case 'celestial_dna':
+        case 'torus':
+        case 'sky_map':
+        case 'daily':
+            return (
+                <div className="space-y-4">
+                    <ProjectionItem label="Sun" value={data.astrology?.sun?.sign || 'N/A'} subValue={`H${data.astrology?.sun?.house || '?'}`} />
+                    <ProjectionItem label="Moon" value={data.astrology?.moon?.sign || 'N/A'} subValue={`H${data.astrology?.moon?.house || '?'}`} />
+                    <ProjectionItem label="Ascendant" value={data.astrology?.ascendant?.sign || 'N/A'} />
+                </div>
+            );
+        case 'chakras':
+            return (
+                <div className="space-y-4">
+                    <ProjectionItem label="Dominant" value={data.chakras?.[0]?.name || 'N/A'} subValue="Focus Point" />
+                    <ProjectionItem label="Energy State" value="Optimized" />
+                </div>
+            );
+        case 'kabbalah':
+        case 'kabbalistic_numerology':
+        case 'tetragrammaton':
+            return (
+                <div className="space-y-4">
+                    <ProjectionItem label="Primary Sephirah" value={data.kabbalah?.sephirah || 'N/A'} />
+                    <ProjectionItem label="Tree Path" value={data.kabbalah?.path || 'N/A'} />
+                </div>
+            );
+        case 'tarot':
+            return (
+                 <div className="space-y-4">
+                    <ProjectionItem label="Active Arcana" value="The Magician" subValue="Spatial Rank 1" />
+                    <ProjectionItem label="Frequency" value="Quantum / High" />
+                </div>
+            );
+        case 'chinese_zodiac':
+            return (
+                <div className="space-y-4">
+                    <ProjectionItem label="Animal" value="Dragon" subValue="Empirical" />
+                    <ProjectionItem label="Element" value="Fire" />
+                    <ProjectionItem label="Energy" value="Yang" />
+                </div>
+            );
+        case 'freemason33':
+            return (
+                <div className="space-y-4">
+                    <ProjectionItem label="Degree" value="33°" subValue="Master" />
+                    <ProjectionItem label="Vibration" value="Sovereign" />
+                </div>
+            );
+        default:
+            return <div className="text-stone-500 text-[10px] uppercase tracking-widest italic animate-pulse">Synchronizing Neural Metadata...</div>;
+    }
+}
+
+function ProjectionItem({ label, value, subValue }: { label: string, value: any, subValue?: string }) {
+    return (
+        <div className="bg-white/5 border border-white/5 p-3 rounded-2xl relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/50" />
+            <div className="text-[8px] uppercase tracking-widest text-stone-500 mb-1">{label}</div>
+            <div className="flex justify-between items-end">
+                <div className="text-emerald-300 font-medium tracking-wide">{value}</div>
+                {subValue && <div className="text-[9px] text-stone-500 font-mono italic">{subValue}</div>}
+            </div>
+            <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/10 to-transparent" />
+        </div>
+    );
+}

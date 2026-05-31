@@ -22,6 +22,11 @@ interface HigherMindContextType {
   setActiveThemeId: (id: string) => void;
   activeTheme: AstralTheme;
   themes: AstralTheme[];
+  isProjected: boolean;
+  setIsProjected: (projected: boolean) => void;
+  projectedItems: { id: string; type: string; componentName: string; children: React.ReactNode }[];
+  addProjectedItem: (item: { id: string; type: string; componentName: string; children: React.ReactNode }) => void;
+  removeProjectedItem: (id: string) => void;
 }
 
 export interface AIModule {
@@ -37,6 +42,21 @@ const HigherMindContext = createContext<HigherMindContextType | undefined>(undef
 
 export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeThemeId, setActiveThemeIdState] = useState<string>('futuristic');
+  const [isProjected, setIsProjectedState] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('astral_spatial_projection') === 'true';
+    }
+    return false;
+  });
+  const [projectedItems, setProjectedItems] = useState<{ id: string; type: string; componentName: string; children: React.ReactNode }[]>([]);
+
+  const addProjectedItem = (item: { id: string; type: string; componentName: string; children: React.ReactNode }) => {
+    setProjectedItems(prev => [...prev, item]);
+  };
+
+  const removeProjectedItem = (id: string) => {
+    setProjectedItems(prev => prev.filter(i => i.id !== id));
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -46,6 +66,13 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       }
     }
   }, []);
+
+  const setIsProjected = (projected: boolean) => {
+    setIsProjectedState(projected);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('astral_spatial_projection', projected.toString());
+    }
+  };
 
   const setActiveThemeId = (id: string) => {
     setActiveThemeIdState(id);
@@ -188,7 +215,12 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       activeThemeId,
       setActiveThemeId,
       activeTheme,
-      themes
+      themes,
+      isProjected,
+      setIsProjected,
+      projectedItems,
+      addProjectedItem,
+      removeProjectedItem
     }}>
       {children}
     </HigherMindContext.Provider>

@@ -19,7 +19,8 @@ import {
   ChevronRight,
   TrendingUp,
   Cpu,
-  RefreshCw
+  RefreshCw,
+  Orbit as OrbitIcon
 } from 'lucide-react';
 import { useHigherMind } from './HigherMindProvider';
 import { CosmicData } from '../types';
@@ -80,6 +81,120 @@ const getRulerColor = (ruler: string) => {
 };
 
 // --- R3F 3D Components ---
+
+const ZODIAC_SIGNS = [
+  { name: 'Aries', symbol: '♈︎', color: '#ef4444' },
+  { name: 'Taurus', symbol: '♉︎', color: '#10b981' },
+  { name: 'Gemini', symbol: '♊︎', color: '#facc15' },
+  { name: 'Cancer', symbol: '♋︎', color: '#94a3b8' },
+  { name: 'Leo', symbol: '♌︎', color: '#f59e0b' },
+  { name: 'Virgo', symbol: '♍︎', color: '#10b981' },
+  { name: 'Libra', symbol: '♎︎', color: '#f472b6' },
+  { name: 'Scorpio', symbol: '♏︎', color: '#ef4444' },
+  { name: 'Sagittarius', symbol: '♐︎', color: '#a855f7' },
+  { name: 'Capricorn', symbol: '♑︎', color: '#64748b' },
+  { name: 'Aquarius', symbol: '♒︎', color: '#06b6d4' },
+  { name: 'Pisces', symbol: '♓︎', color: '#3b82f6' }
+];
+
+const ZodiacWheelOverlay = ({ data, showZodiac }: { data: CosmicData | null, showZodiac: boolean }) => {
+  const wheelRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (wheelRef.current && showZodiac) {
+      wheelRef.current.rotation.y = state.clock.getElapsedTime() * 0.05;
+    }
+  });
+
+  if (!showZodiac) return null;
+
+  const radius = 8.5;
+  const userSunSign = data?.planets?.find(p => p.name === 'Sun')?.sign || '';
+
+  return (
+    <group ref={wheelRef} position={[0, -2.8, 0]}>
+      {/* Outer Ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[radius - 0.1, radius + 0.1, 128]} />
+        <meshBasicMaterial color="#312e81" transparent opacity={0.3} side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* 12 Zodiac Sections */}
+      {ZODIAC_SIGNS.map((sign, i) => {
+        const angle = (i / 12) * Math.PI * 2;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        const isUserSign = userSunSign.toLowerCase() === sign.name.toLowerCase();
+
+        return (
+          <group key={sign.name} position={[x, 0, z]}>
+            <Text
+              position={[0, 0.5, 0]}
+              fontSize={0.6}
+              color={isUserSign ? sign.color : '#94a3b8'}
+              textAlign="center"
+              rotation={[0, -angle + Math.PI / 2, 0]}
+            >
+              {sign.symbol}
+            </Text>
+            
+            <Text
+              position={[0, -0.2, 0]}
+              fontSize={0.2}
+              color={isUserSign ? '#ffffff' : '#475569'}
+              textAlign="center"
+              rotation={[0, -angle + Math.PI / 2, 0]}
+            >
+              {sign.name.toUpperCase()}
+            </Text>
+
+            {/* Glowing marker for active user sign */}
+            {isUserSign && (
+              <mesh position={[0, 0.1, 0]}>
+                <sphereGeometry args={[0.15, 16, 16]} />
+                <meshStandardMaterial 
+                  color={sign.color} 
+                  emissive={sign.color} 
+                  emissiveIntensity={2} 
+                  toneMapped={false} 
+                />
+              </mesh>
+            )}
+
+            {/* Path line to center */}
+            <Line 
+              points={[new THREE.Vector3(-x, 0, -z).multiplyScalar(0.2), new THREE.Vector3(0, 0, 0)]} 
+              color={isUserSign ? sign.color : '#1e1b4b'} 
+              lineWidth={isUserSign ? 1.5 : 0.5} 
+              transparent 
+              opacity={isUserSign ? 0.6 : 0.1}
+            />
+          </group>
+        );
+      })}
+
+      {/* Connection webs between signs */}
+      {ZODIAC_SIGNS.map((_, i) => {
+        const nextIdx = (i + 1) % 12;
+        const angle1 = (i / 12) * Math.PI * 2;
+        const angle2 = (nextIdx / 12) * Math.PI * 2;
+        return (
+          <Line 
+            key={`ring-link-${i}`}
+            points={[
+              new THREE.Vector3(Math.cos(angle1) * radius, 0, Math.sin(angle1) * radius),
+              new THREE.Vector3(Math.cos(angle2) * radius, 0, Math.sin(angle2) * radius)
+            ]}
+            color="#312e81"
+            lineWidth={1}
+            transparent
+            opacity={0.2}
+          />
+        );
+      })}
+    </group>
+  );
+};
 
 // 3D Spinal Vertebrae representing 33 Degrees
 const SpinalAscent = ({ activeDegree, setActiveDegree, secretionProgress, secretionActive }: any) => {
@@ -167,6 +282,8 @@ const PyramidOfGnosis = ({
   secretionActive, 
   secretionProgress, 
   showTracingBoard, 
+  showZodiac,
+  data,
   activeGematriaColor = '#fbbf24' 
 }: any) => {
   const pyramidRef = useRef<THREE.Group>(null);
@@ -360,6 +477,9 @@ const PyramidOfGnosis = ({
         </mesh>
       </group>
 
+      {/* Zodiac Overlay Integration */}
+      <ZodiacWheelOverlay data={data} showZodiac={showZodiac} />
+
       {/* Grid foundation */}
       <gridHelper args={[18, 18, '#312e81', '#111827']} position={[0, -3.01, 0]} />
     </group>
@@ -431,6 +551,7 @@ export const Freemason33Section = ({ data }: { data: CosmicData | null }) => {
   const [visualMode, setVisualMode] = useState<'pyramid' | 'spine' | 'phoenix'>('pyramid');
   const [activeDegree, setActiveDegree] = useState<number>(33);
   const [showTracingBoard, setShowTracingBoard] = useState(true);
+  const [showZodiac, setShowZodiac] = useState(false);
   
   // Kundalini Secretion states
   const [secretionActive, setSecretionActive] = useState(false);
@@ -600,12 +721,20 @@ export const Freemason33Section = ({ data }: { data: CosmicData | null }) => {
               </button>
               
               {visualMode === 'pyramid' && (
-                <button 
-                  onClick={() => setShowTracingBoard(!showTracingBoard)}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] uppercase font-mono tracking-widest transition-all ${showTracingBoard ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40 font-semibold' : 'hover:bg-white/5 text-stone-500'}`}
-                >
-                  📜 Tracing Board {showTracingBoard ? 'ON' : 'OFF'}
-                </button>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setShowTracingBoard(!showTracingBoard)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] uppercase font-mono tracking-widest transition-all ${showTracingBoard ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40 font-semibold' : 'hover:bg-white/5 text-stone-500'}`}
+                  >
+                    📜 Tracing Board {showTracingBoard ? 'ON' : 'OFF'}
+                  </button>
+                  <button 
+                    onClick={() => setShowZodiac(!showZodiac)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] uppercase font-mono tracking-widest transition-all ${showZodiac ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-400/40 font-semibold' : 'hover:bg-white/5 text-stone-500'}`}
+                  >
+                    ✨ Zodiac Overlay {showZodiac ? 'ON' : 'OFF'}
+                  </button>
+                </div>
               )}
             </div>
 
@@ -668,6 +797,8 @@ export const Freemason33Section = ({ data }: { data: CosmicData | null }) => {
                     secretionActive={secretionActive}
                     secretionProgress={secretionProgress}
                     showTracingBoard={showTracingBoard}
+                    showZodiac={showZodiac}
+                    data={data}
                     activeGematriaColor={gematriaColor}
                   />
                 )}

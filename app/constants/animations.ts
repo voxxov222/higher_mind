@@ -1,0 +1,17 @@
+export const OBJECT_ANIMATIONS = [
+  { id: 'anim-1', name: '360 Spin', type: 'spin' },
+  { id: 'anim-2', name: 'Orbit', type: 'orbit' },
+  { id: 'anim-3', name: 'Pulse', type: 'pulse' },
+  { id: 'anim-4', name: 'Shake', type: 'shake' },
+  { id: 'anim-5', name: 'Wiggle', type: 'wobble' },
+  { id: 'anim-6', name: 'Breathing', type: 'fade', subType: 'breathing' },
+  { id: 'anim-7', name: 'Scale', type: 'scale' },
+  { id: 'anim-8', name: 'Float', type: 'float' },
+  { id: 'anim-9', name: 'Color Shift', type: 'color' },
+  { id: 'anim-10', name: 'Glitch', type: 'glitch' },
+  { id: 'anim-11', name: 'Blur', type: 'blur' },
+  { id: 'anim-12', name: 'Rotate X', type: 'rotateX' },
+  { id: 'anim-13', name: 'Rotate Y', type: 'rotateY' },
+  { id: 'anim-14', name: 'Rotate Z', type: 'rotateZ' },
+  { id: 'anim-15', name: 'Zen Spin', type: 'zen' },
+];

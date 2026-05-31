@@ -9,7 +9,7 @@ import {
   Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, 
   Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, Zap, Upload, Palette, 
   Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box, Key, Cpu,
-  Workflow, Radio, Loader2
+  Workflow, Radio, Loader2, Flame
 } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
@@ -56,7 +56,9 @@ const QuantumEvolutionSection = React.lazy(() => import('./QuantumEvolutionSecti
 const ObsidianVaultSection = React.lazy(() => import('./ObsidianVaultSection').then(m => ({ default: m.ObsidianVaultSection })));
 const ChristSophiaSection = React.lazy(() => import('./ChristSophiaSection').then(m => ({ default: m.ChristSophiaSection })));
 const VibrationalTuningSection = React.lazy(() => import('./VibrationalTuningSection').then(m => ({ default: m.VibrationalTuningSection })));
+const DestinyMatrix = React.lazy(() => import('./DestinyMatrix').then(m => ({ default: m.DestinyMatrix })));
 const CelestialBlueprintSection = React.lazy(() => import('./CelestialBlueprintSection').then(m => ({ default: m.CelestialBlueprintSection })));
+import { ProjectableWidget } from './ProjectableWidget';
 import { useHigherMind } from './HigherMindProvider';
 
 /**
@@ -67,8 +69,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot';
-  setActiveTab: (tab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot') => void;
+  activeTab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix';
+  setActiveTab: (tab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -651,10 +653,12 @@ const SoulBlueprintTab = ({ data, ResearchBox, isReading, handleReadOutLoud, han
 
         <div className="flex flex-col md:flex-row justify-between gap-4">
            {data.torusAnalysis?.soulAge && (
-             <motion.div initial={{opacity: 0, x: -20}} animate={{opacity: 1, x: 0}} transition={{delay: 0.5}} className="bg-sky-950/50 backdrop-blur-md border border-sky-500/30 p-4 rounded-2xl shadow-[0_0_15px_rgba(14,165,233,0.15)] md:min-w-[200px]">
-               <span className="text-[10px] text-sky-400 uppercase tracking-widest font-bold block mb-1">Soul Age</span>
-               <span className="text-xl text-sky-100 font-light">{data.torusAnalysis.soulAge}</span>
-             </motion.div>
+             <ProjectableWidget id="soul-age" type="text" componentName="SoulAge" data={data.torusAnalysis.soulAge}>
+               <motion.div initial={{opacity: 0, x: -20}} animate={{opacity: 1, x: 0}} transition={{delay: 0.5}} className="bg-sky-950/50 backdrop-blur-md border border-sky-500/30 p-4 rounded-2xl shadow-[0_0_15px_rgba(14,165,233,0.15)] md:min-w-[200px]">
+                 <span className="text-[10px] text-sky-400 uppercase tracking-widest font-bold block mb-1">Soul Age</span>
+                 <span className="text-xl text-sky-100 font-light">{data.torusAnalysis.soulAge}</span>
+               </motion.div>
+             </ProjectableWidget>
            )}
            {data.torusAnalysis?.dimensionalFrequency && (
              <motion.div initial={{opacity: 0, x: 20}} animate={{opacity: 1, x: 0}} transition={{delay: 0.6}} className="bg-sky-950/50 backdrop-blur-md border border-sky-500/30 p-4 rounded-2xl shadow-[0_0_15px_rgba(14,165,233,0.15)] md:text-right md:min-w-[200px]">
@@ -1946,7 +1950,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
     }
   };
 
-  const { activeTheme } = useHigherMind();
+  const { activeTheme, isProjected, setIsProjected } = useHigherMind();
   const themeColor = activeTheme.primaryColor;
 
   useEffect(() => {
@@ -1984,6 +1988,20 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
           HIGHER 🧠 MIND
         </h1>
         <div className="flex items-center gap-6">
+          <button 
+            onClick={() => {
+              soundEngine.neuralClick();
+              setIsProjected(!isProjected);
+            }}
+            className={`flex items-center gap-2 px-4 py-2 border rounded-xl transition-all group ${
+              isProjected 
+                ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]" 
+                : "bg-white/5 border-white/10 text-stone-400 hover:bg-white/10"
+            }`}
+          >
+            <Box className={`w-4 h-4 ${isProjected ? "text-emerald-400 animate-pulse" : "text-stone-500"}`} />
+            <span className="text-[10px] uppercase tracking-widest font-bold hidden sm:inline">Spatial Proj</span>
+          </button>
           <button 
             onClick={() => setIsHigherMindSettingsOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded-xl transition-all group"
@@ -2048,6 +2066,28 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             onClick={() => setIsMinimized(false)}
           >
             <Maximize2 className="w-6 h-6 text-white" />
+          </motion.div>
+        ) : isProjected ? (
+          <motion.div 
+            key="spatial-mode-active"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full h-full pointer-events-auto relative"
+          >
+            <NeuralBrainSection data={data} setActiveTab={setActiveTab} projectedTab={activeTab} />
+            
+            {/* Minimal floating tab bar in Spatial Mode */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 flex border border-white/10 p-1.5 gap-2 overflow-x-auto no-scrollbar max-w-[90vw] flex-nowrap bg-black/40 backdrop-blur-xl rounded-2xl z-[100] shadow-2xl">
+                <Tab active={activeTab === 'identity'} tabId="identity" onClick={() => setActiveTab('identity')} icon={<UserIcon className="w-4 h-4"/>}>Identity</Tab>
+                <Tab active={activeTab === 'numbers'} tabId="numbers" onClick={() => setActiveTab('numbers')} icon={<Fingerprint className="w-4 h-4"/>}>Numbers</Tab>
+                <Tab active={activeTab === 'celestial_dna'} tabId="celestial_dna" onClick={() => setActiveTab('celestial_dna')} icon={<Hexagon className="w-4 h-4"/>}>DNA</Tab>
+                <Tab active={activeTab === 'kabbalah'} tabId="kabbalah" onClick={() => setActiveTab('kabbalah')} icon={<Hexagon className="w-4 h-4"/>}>Mysticism</Tab>
+                <Tab active={activeTab === 'chinese_zodiac'} tabId="chinese_zodiac" onClick={() => setActiveTab('chinese_zodiac')} icon={<Flame className="w-4 h-4 text-red-500 animate-pulse"/>}>Dragon</Tab>
+                <Tab active={activeTab === 'tarot'} tabId="tarot" onClick={() => setActiveTab('tarot')} icon={<Sparkles className="w-4 h-4 text-pink-400 animate-pulse"/>}>Tarot</Tab>
+                <Tab active={activeTab === 'freemason33'} tabId="freemason33" onClick={() => setActiveTab('freemason33')} icon={<Sparkles className="w-4 h-4 text-amber-400 animate-pulse"/>}>Masonic</Tab>
+                <Tab active={activeTab === 'brain'} tabId="brain" onClick={() => setActiveTab('brain')} icon={<Brain className="w-4 h-4"/>}>Core</Tab>
+            </div>
           </motion.div>
         ) : (
           <motion.div 
@@ -2183,6 +2223,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'christ_sophia'} tabId="christ_sophia" onClick={() => setActiveTab('christ_sophia')} icon={<Sparkles className="w-4 h-4 text-amber-300 animate-pulse"/>}>Christ-Sophia Gnosis</Tab>
               <Tab active={activeTab === 'tetragrammaton'} tabId="tetragrammaton" onClick={() => setActiveTab('tetragrammaton')} icon={<Hexagon className="w-4 h-4 text-[#fbbf24]"/>}>YHVH HUD</Tab>
               <Tab active={activeTab === 'freemason33'} tabId="freemason33" onClick={() => setActiveTab('freemason33')} icon={<Sparkles className="w-4 h-4 text-amber-400 animate-pulse"/>}>Free Mason 33</Tab>
+              <Tab active={activeTab === 'chinese_zodiac'} tabId="chinese_zodiac" onClick={() => setActiveTab('chinese_zodiac')} icon={<Flame className="w-4 h-4 text-red-500 animate-pulse"/>}>Chinese Zodiac</Tab>
+              <Tab active={activeTab === 'destiny_matrix'} tabId="destiny_matrix" onClick={() => setActiveTab('destiny_matrix')} icon={<Compass className="w-4 h-4 text-emerald-400"/>}>Destiny Matrix</Tab>
               <Tab active={activeTab === 'tarot'} tabId="tarot" onClick={() => setActiveTab('tarot')} icon={<Sparkles className="w-4 h-4 text-pink-400 animate-pulse"/>}>Tarot Arcana</Tab>
               <Tab active={activeTab === 'sandbox'} tabId="sandbox" onClick={() => setActiveTab('sandbox')} icon={<Box className="w-4 h-4 text-emerald-400"/>}>Creative Sandbox</Tab>
               <Tab active={activeTab === 'findings'} tabId="findings" onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
@@ -3300,6 +3342,16 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <Freemason33Section data={data} />
                   </motion.div>
                 )}
+                {activeTab === 'chinese_zodiac' && (
+                  <motion.div key="chinese_zodiac" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
+                    <ChineseZodiacGnosis />
+                  </motion.div>
+                )}
+                {activeTab === 'destiny_matrix' && (
+                  <motion.div key="destiny_matrix" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
+                    <DestinyMatrix data={data} />
+                  </motion.div>
+                )}
                 {activeTab === 'tarot' && (
                   <motion.div key="tarot" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <TarotGnosis />
@@ -3345,6 +3397,8 @@ const playTabHoverSound = (tabId?: string) => {
     case 'kabbalah':
     case 'tetragrammaton':
     case 'freemason33':
+    case 'chinese_zodiac':
+    case 'destiny_matrix':
     case 'tarot':
     case 'christ_sophia':
     case 'kabbalistic_numerology':
@@ -3374,6 +3428,8 @@ const playTabClickSound = (tabId?: string) => {
     case 'kabbalah':
     case 'tetragrammaton':
     case 'freemason33':
+    case 'chinese_zodiac':
+    case 'destiny_matrix':
     case 'tarot':
     case 'christ_sophia':
     case 'kabbalistic_numerology':

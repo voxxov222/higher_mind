@@ -15,6 +15,7 @@ import { CelestialSolarCore, PlanetaryGravityNetwork } from './CelestialSolarCor
 import { Gematria3DVisualizer } from './Gematria3DVisualizer';
 import { X, Minus, Lock, Unlock, Play, Square, Palette, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity as InfinityIcon, Magnet, Shuffle, Waves, Terminal, AlertTriangle } from 'lucide-react';
 import { TerminalOverlay } from './profile/TerminalOverlay';
+import { ProjectedObject3D } from './ProjectedObject3D';
 
 class WebGLErrorBoundary extends Component<{children: ReactNode, fallback?: ReactNode}, {hasError: boolean}> {
   constructor(props: {children: ReactNode, fallback?: ReactNode}) {
@@ -1576,11 +1577,19 @@ const NumerologyGeometria = ({ data, onSelect }: { data: CosmicData, onSelect: (
  * Integrates geometry, lighting, effects, and camera management.
  */
 export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive, mode = 'idle', vortexMode }: CosmicSceneProps) => {
-  const { coherence, alignment, feelings } = useHigherMind();
+  const { coherence, alignment, feelings, projectedItems } = useHigherMind();
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [showBrainMenu, setShowBrainMenu] = useState<{x: number, y: number} | null>(null);
   const touchTimer = useRef<NodeJS.Timeout | null>(null);
   const startPos = useRef<{x: number, y: number}>({x: 0, y: 0});
+
+  // Projection logic
+  const projectedObjects = useMemo(() => {
+    return projectedItems.map((item, i) => ({
+      ...item,
+      position: [i * 2 - (projectedItems.length - 1), 0, 5] as [number, number, number]
+    }));
+  }, [projectedItems]);
 
   const handlePointerDown = (e: any) => {
     e.stopPropagation();
@@ -1675,6 +1684,11 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
           <NavNode position={[15, 0, -15]} title="Synchronicities" active={activeTab === 'patterns'} onClick={() => setActiveTab('patterns')} color="#2dd4bf" />
           <NavNode position={[0, -5, -40]} title="Vortex Sequencing" active={activeTab === 'vortex'} onClick={() => setActiveTab('vortex')} color="#22d3ee" />
           <NavNode position={[-20, 0, 20]} title="Gematria Matrix" active={activeTab === 'gematria_calc'} onClick={() => setActiveTab('gematria_calc')} color="#ec4899" />
+
+          {/* PROJECTED OBJECTS 3D SPACE */}
+          {projectedObjects.map((item) => (
+             <ProjectedObject3D key={item.id} item={item} position={item.position} />
+          ))}
 
           {/* VORTEX 3D SPACE */}
           {activeTab === 'vortex' && (

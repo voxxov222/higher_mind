@@ -35,6 +35,49 @@ export interface CosmicInput {
 }
 
 
+export const generateSoulPathReport = async (cosmicData: CosmicData) => {
+  const ai = getAI();
+  const prompt = `
+  You are an advanced digital mystic and Kabbalistic astrologer.
+  Analyze this user's cosmic profile data to generate a detailed 'Soul Path Report'.
+  Synthesize the Life Path number, planetary dominance, and Kabbalistic tree placement into a cohesive narrative.
+  Dive deep into the cosmic blueprint based on Hermetic Kabbalah and Gematria.
+  Focus on the interconnectedness of these systems and how they shape the user's destiny.
+
+  User Data:
+  Name: ${cosmicData.first_name}
+  Life Path Number: ${cosmicData.numerology.lifePathNumber}
+  Dominant Planet: ${cosmicData.astrology.dominantPlanet}
+  Kabbalistic Mapping: ${JSON.stringify(cosmicData.kabbalah)}
+
+  Return the output as a flat JSON object with the following keys exactly:
+  {
+    "title": "A mystical title for the report",
+    "narrative": "A multi-paragraph, incredibly deep and profound synthesis of their soul path.",
+    "kabbalisticInsights": "Specifically how their energy maps to the Tree of Life in practical terms.",
+    "actionableGuidance": "How they can align with this energy for optimal growth."
+  }
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3.1-pro-preview",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const text = response.text;
+    if (!text) throw new Error("No response generated.");
+
+    return JSON.parse(text);
+  } catch (err: any) {
+    console.error("Soul Path Gen Error:", err);
+    throw new Error("Failed to generate the Soul Path Report", { cause: err });
+  }
+};
+
 // --- ANCESTRY ORIGINS ENGINE ---
 /**
  * generateAncestryResearch

@@ -6,7 +6,7 @@ interface VoiceCommanderProps {
   setActiveTab: (tab: any) => void;
 }
 
-export const VoiceCommander: React.FC<VoiceCommanderProps> = ({ setActiveTab }) => {
+export default function VoiceCommander({ setActiveTab }: VoiceCommanderProps) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [statusText, setStatusText] = useState('Standby');

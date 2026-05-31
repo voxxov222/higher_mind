@@ -43,12 +43,52 @@ class SwarmEngine {
   cosmicData: CosmicData | null = null;
   hasInitialized = false;
 
+  constructor() {
+    this.loadFromStorage();
+  }
+
+  saveToStorage() {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('swarm_agents', JSON.stringify(this.agents));
+        localStorage.setItem('swarm_findings', JSON.stringify(this.findingsDatabase));
+      } catch (e) {
+        console.error("Failed to save swarm to localStorage", e);
+      }
+    }
+  }
+
+  loadFromStorage() {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedAgents = localStorage.getItem('swarm_agents');
+        const savedFindings = localStorage.getItem('swarm_findings');
+        if (savedAgents) {
+            const parsedAgents = JSON.parse(savedAgents);
+            if (Array.isArray(parsedAgents) && parsedAgents.length > 0) {
+                this.agents = parsedAgents;
+                this.hasInitialized = true;
+            }
+        }
+        if (savedFindings) {
+            const parsedFindings = JSON.parse(savedFindings);
+            if (Array.isArray(parsedFindings)) {
+                 this.findingsDatabase = parsedFindings;
+            }
+        }
+      } catch (e) {
+        console.error("Failed to load swarm from localStorage", e);
+      }
+    }
+  }
+
   subscribe(listener: () => void) {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   }
 
   notify() {
+    this.saveToStorage();
     this.listeners.forEach(l => l());
   }
 
@@ -107,6 +147,56 @@ class SwarmEngine {
   addGlobalLog(msg: string) {
     this.logs = [{ time: new Date().toLocaleTimeString(), msg }, ...this.logs].slice(0, 50);
     this.notify();
+  }
+
+  async startTargetedResearch(targetContext: string, cosmicDataString: string) {
+    if (!this.isRunning) this.toggleSwarm();
+    const newId = this.addAgent();
+    if (newId) {
+      this.updateAgent(newId, {
+        name: `Investigator (${targetContext.substring(0, 15)})`,
+        role: 'research',
+        instructions: `Conduct deep research and synthesis on ${targetContext}. Contextually tie it to user's birth data: ${cosmicDataString}.`,
+        x: 150 + Math.random() * 100,
+        y: 150 + Math.random() * 100
+      });
+      this.addGlobalLog(`Launched targeted investigation into: ${targetContext}.`);
+      
+      try {
+        const response = await fetch('/api/targeted-research', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetContext, cosmicDataString })
+        });
+        const data = await response.json();
+        
+        if (data.result) {
+           const logMsg = `Research completed on ${targetContext}.`;
+           this.addGlobalLog(logMsg);
+           this.updateAgent(newId, { 
+             status: 'idle',
+             findings: [...this.agents.find(a => a.id === newId)?.findings || [], logMsg]
+           });
+           
+           // Offload actual generated finding to our swarm database directly securely through Firebase
+           import('../services/swarmService').then(({ saveSwarmFinding }) => {
+               import('../firebase').then(({ auth }) => {
+                   if (auth?.currentUser) {
+                       saveSwarmFinding(auth.currentUser.uid, {
+                           agentId: newId,
+                           agentName: this.agents.find(a => a.id === newId)?.name || 'Investigator',
+                           category: 'targeted_research',
+                           content: data.result,
+                           links: data.links || []
+                       }).catch(console.error);
+                   }
+               });
+           }).catch(console.error);
+        }
+      } catch (err) {
+        console.error("Failed to execute targeted research:", err);
+      }
+    }
   }
 
   addAgent() {

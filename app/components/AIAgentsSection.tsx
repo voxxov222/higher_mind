@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, Square, Network, Database, Plus, Search, GitMerge, Cpu, Trash2, ArrowRight, Brain, Zap, Settings2, Shield, Activity, X, List, ScrollText } from 'lucide-react';
+import { Play, Square, Network, Database, Plus, Search, GitMerge, Cpu, Trash2, ArrowRight, Brain, Zap, Settings2, Shield, Activity, X, List, ScrollText, BookmarkPlus, Archive, Check } from 'lucide-react';
 import { CosmicData } from '../types';
 import { swarmEngine, Agent, AgentRole } from '../utils/swarmEngine';
+import { getSwarmFindings, saveSwarmFinding, updateSwarmFinding, deleteSwarmFinding, SwarmFinding } from '../services/swarmService';
+import { auth } from '../firebase';
 
 interface AIAgentsSectionProps {
   cosmicData: CosmicData;
@@ -35,6 +37,22 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Sync with global swarm engine
+  const [firestoreFindings, setFirestoreFindings] = useState<SwarmFinding[]>([]);
+  const [loadingDb, setLoadingDb] = useState(false);
+
+  useEffect(() => {
+     if (auth.currentUser) {
+        setLoadingDb(true);
+        getSwarmFindings(auth.currentUser.uid).then(res => {
+           setFirestoreFindings(res);
+           setLoadingDb(false);
+        }).catch(e => {
+           console.error("Error fetching swarm findings", e);
+           setLoadingDb(false);
+        });
+     }
+  }, []);
+
   useEffect(() => {
     swarmEngine.setCosmicData(cosmicData);
     
@@ -43,21 +61,48 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
     setIsSwarmRunning(swarmEngine.isRunning);
     setGlobalLog([...swarmEngine.logs]);
     
+    let lastFindingsCount = swarmEngine.findingsDatabase.length;
+
     // Create local state for findings to trigger re-renders
     const unsubscribe = swarmEngine.subscribe(() => {
       setAgents([...swarmEngine.agents]);
       setIsSwarmRunning(swarmEngine.isRunning);
       setGlobalLog([...swarmEngine.logs]);
+
+      if (auth.currentUser && swarmEngine.findingsDatabase.length > lastFindingsCount) {
+         const newFinding = swarmEngine.findingsDatabase[0];
+         if (newFinding) {
+            saveSwarmFinding(auth.currentUser.uid, {
+               agentId: newFinding.agentId,
+               agentName: newFinding.agentName,
+               category: newFinding.category,
+               content: newFinding.content,
+               links: newFinding.links || [],
+               references: newFinding.references || []
+            }).then(() => {
+               getSwarmFindings(auth.currentUser!.uid).then(setFirestoreFindings);
+            });
+         }
+      }
+      lastFindingsCount = swarmEngine.findingsDatabase.length;
     });
     return unsubscribe;
   }, [cosmicData]);
 
-  const filteredFindings = swarmEngine.findingsDatabase.filter(f => 
+  const allFindings = [...firestoreFindings];
+  
+  // Also include memory findings if not logged in
+  if (!auth.currentUser) {
+     allFindings.push(...swarmEngine.findingsDatabase as any);
+  }
+
+  const filteredFindings = allFindings.filter(f => 
+    !f.archived &&
     (filter.category === 'All' || f.category === filter.category) &&
     (filter.agentId === 'All' || f.agentId === filter.agentId)
   );
   
-  const categories = Array.from(new Set(swarmEngine.findingsDatabase.map(f => f.category)));
+  const categories = Array.from(new Set(allFindings.map(f => f.category)));
 
   const addAgent = () => {
     const newId = swarmEngine.addAgent();
@@ -112,6 +157,16 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
                }`}
              >
                {isSwarmRunning ? <><Square className="w-4 h-4" /> Halt Swarm</> : <><Play className="w-4 h-4" /> Run Autonomous Swarm</>}
+             </button>
+             <button
+               onClick={() => {
+                 const identityStr = `${cosmicData.first_name || 'User'} (${cosmicData.birth_date} ${cosmicData.birth_time})`;
+                 swarmEngine.startTargetedResearch(`Public records and ancestral traces for ${cosmicData.first_name || 'the user'}`, identityStr);
+               }}
+               className="px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/40 text-indigo-400 hover:bg-indigo-500/20 rounded-lg flex items-center gap-2 text-xs font-bold transition-all"
+               title="Investigate public databases and records for this identity"
+             >
+               <Search className="w-4 h-4" /> Deep Public Search
              </button>
           </div>
         </div>
@@ -484,6 +539,45 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
                         {selectedFinding.references?.map((ref: string, i: number) => <li key={i} className="text-stone-500">• {ref}</li>)}
                      </ul>
                   </div>
+
+                  {auth.currentUser && !selectedFinding.id.startsWith("finding-") && (
+                     <div className="pt-4 border-t border-white/5 flex gap-2">
+                        <button 
+                           onClick={async () => {
+                              const newHighlight = !selectedFinding.highlighted;
+                              await updateSwarmFinding(selectedFinding.id, { highlighted: newHighlight });
+                              setFirestoreFindings(prev => prev.map(f => f.id === selectedFinding.id ? { ...f, highlighted: newHighlight } : f));
+                              setSelectedFinding({ ...selectedFinding, highlighted: newHighlight });
+                           }}
+                           className={`flex-1 py-2 rounded-lg text-xs font-mono flex items-center justify-center gap-2 transition-colors ${selectedFinding.highlighted ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-stone-800 text-stone-400 hover:text-stone-300 border border-white/5'}`}
+                        >
+                           <BookmarkPlus className="w-4 h-4"/> {selectedFinding.highlighted ? "Highlighted" : "Highlight"}
+                        </button>
+                        <button 
+                           onClick={async () => {
+                              await updateSwarmFinding(selectedFinding.id, { archived: true });
+                              setFirestoreFindings(prev => prev.filter(f => f.id !== selectedFinding.id));
+                              window.speechSynthesis?.cancel();
+                              setSelectedFinding(null);
+                           }}
+                           className="flex-1 py-2 bg-stone-800 hover:bg-stone-700 text-stone-400 border border-white/5 rounded-lg text-xs font-mono flex items-center justify-center gap-2 transition-colors"
+                        >
+                           <Archive className="w-4 h-4"/> Archive
+                        </button>
+                        <button 
+                           onClick={async () => {
+                              await deleteSwarmFinding(selectedFinding.id);
+                              setFirestoreFindings(prev => prev.filter(f => f.id !== selectedFinding.id));
+                              window.speechSynthesis?.cancel();
+                              setSelectedFinding(null);
+                           }}
+                           className="flex-1 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-mono flex items-center justify-center gap-2 transition-colors"
+                        >
+                           <Trash2 className="w-4 h-4"/> Delete
+                        </button>
+                     </div>
+                  )}
+
                 </div>
              </motion.div>
           </div>

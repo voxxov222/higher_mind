@@ -335,6 +335,32 @@ const SIGN_ELEMENTS: Record<string, { type: string; color: string }> = {
   'Pisces': { type: 'Water', color: '#6366f1' },
 };
 
+const OrbitalResonanceRipples = ({ size, color }: { size: number, color: string }) => {
+  const groupRef = useRef<THREE.Group>(null);
+  
+  useFrame(({ clock }) => {
+    if (groupRef.current) {
+       const t = clock.getElapsedTime() * 2;
+       groupRef.current.children.forEach((child, i) => {
+         const scale = 1 + ((t + i * 1.5) % 3) * 0.5;
+         child.scale.set(scale, scale, scale);
+         (child as any).material.opacity = Math.max(0, 0.6 - ((t + i * 1.5) % 3) * 0.2);
+       });
+    }
+  });
+
+  return (
+    <group ref={groupRef} rotation={[-Math.PI / 2, 0, 0]}>
+      {[1, 2, 3].map((r, i) => (
+        <mesh key={`ripple-${i}`}>
+          <ringGeometry args={[size * 1.5 + r * 1.5, size * 1.5 + r * 1.5 + 0.1, 64]} />
+          <meshBasicMaterial color={color} transparent opacity={0.6 - r * 0.15} />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
 interface PlanetProps extends PlanetData {
   onSelect: (p: PlanetData) => void;
   onPlanetClick?: (title: string, content: string) => void;
@@ -342,6 +368,7 @@ interface PlanetProps extends PlanetData {
   astro?: any;
   isStatic?: boolean;
   isBirthChartMode?: boolean;
+  showTracking?: boolean;
 }
 
 const SIGN_ANGLES: Record<string, number> = {
@@ -349,7 +376,7 @@ const SIGN_ANGLES: Record<string, number> = {
   'Libra': 180, 'Scorpio': 210, 'Sagittarius': 240, 'Capricorn': 270, 'Aquarius': 300, 'Pisces': 330
 };
 
-const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, active, astro, isStatic, isBirthChartMode }: PlanetProps) => {
+const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, active, astro, isStatic, isBirthChartMode, showTracking }: PlanetProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
@@ -429,6 +456,10 @@ const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, a
           </Sphere>
         </Trail>
         
+        {active && (
+          <OrbitalResonanceRipples size={size} color={color} />
+        )}
+        
         {name === 'Saturn' && (
           <mesh rotation={[Math.PI / 2.5, 0, 0]}>
             <ringGeometry args={[size * 1.5, size * 2.5, 64]} />
@@ -441,6 +472,22 @@ const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, a
             <sphereGeometry args={[size * 1.05, 64, 64]} />
             <meshStandardMaterial color="#ffffff" transparent opacity={0.2} roughness={0.1} />
           </mesh>
+        )}
+
+        {/* Declination / Drop Line */}
+        {showTracking && (
+          <group position={[0, -5, 0]}>
+             <Line points={[new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 5, 0)]} color={color} transparent opacity={0.3} dashSize={0.5} gapSize={0.5} />
+             <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+               <circleGeometry args={[size * 0.8, 32]} />
+               <meshBasicMaterial color={color} transparent opacity={0.2} />
+             </mesh>
+             {astro?.degree !== undefined && (
+                 <Text position={[0, -1, 0]} fontSize={1} color={color} anchorX="center" anchorY="middle">
+                   {`${Math.floor(astro.degree)}°`}
+                 </Text>
+             )}
+          </group>
         )}
 
         {/* Local Detail Panel for Selected Planet */}
@@ -603,6 +650,88 @@ const HOUSE_DESCRIPTIONS: Record<number, string> = {
   12: 'Subconscious, secrets, spiritual retreat, and karmic endings.',
 };
 
+const AscendantAxis = ({ data }: { data: CosmicData | null }) => {
+  const ascendantSign = data?.natalChart?.ascendantSign;
+  if (!ascendantSign) return null;
+  const angle = SIGN_ANGLES[ascendantSign];
+  if (angle === undefined) return null;
+
+  const rad = (angle * Math.PI) / 180;
+  const length = 160;
+  const start = new THREE.Vector3(0, 0, 0);
+  const end = new THREE.Vector3(Math.cos(-rad) * length, 0, Math.sin(-rad) * length);
+
+  return (
+    <group>
+      {/* Ascendant Line */}
+      <Line points={[start, end]} color="#d97706" lineWidth={2} transparent opacity={0.6} />
+      
+      {/* Descendant Line (Opposite) */}
+      <Line points={[start, new THREE.Vector3(-end.x, 0, -end.z)]} color="#64748b" lineWidth={1} transparent opacity={0.3} dashSize={2} gapSize={2} />
+      
+      {/* Ascendant Marker */}
+      <group position={[end.x * 0.9, 0, end.z * 0.9]}>
+        <mesh rotation={[-Math.PI/2, Math.PI + rad, 0]}>
+          <coneGeometry args={[2, 6, 3]} />
+          <meshBasicMaterial color="#d97706" transparent opacity={0.8} />
+        </mesh>
+        <Text
+          position={[0, 4, 0]}
+          rotation={[-Math.PI / 2, 0, rad + Math.PI / 2]}
+          fontSize={6}
+          color="#d97706"
+        >
+          ASC
+        </Text>
+      </group>
+    </group>
+  );
+};
+
+const CelestialEquator = () => {
+  const config = [
+    { radius: 45, opacity: 0.1, color: '#3b82f6', width: 0.2 },
+    { radius: 85, opacity: 0.05, color: '#10b981', width: 0.5 },
+    { radius: 125, opacity: 0.08, color: '#8b5cf6', width: 0.3 }
+  ];
+
+  return (
+    <group rotation={[-Math.PI / 2, 0, 0]}>
+      {config.map((ring, i) => (
+        <mesh key={i} position={[0, 0, -0.5]}>
+          <ringGeometry args={[ring.radius, ring.radius + ring.width, 128]} />
+          <meshBasicMaterial color={ring.color} transparent opacity={ring.opacity} side={THREE.DoubleSide} />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
+const EclipticPlane = () => {
+  return (
+    <group rotation={[-Math.PI / 2, 0, 0]}>
+       <mesh position={[0, 0, -1]}>
+         <planeGeometry args={[300, 300]} />
+         <meshBasicMaterial color="#ffffff" transparent opacity={0.015} side={THREE.DoubleSide} />
+       </mesh>
+       <Grid 
+         position={[0, 0, -1.01]}
+         args={[300, 300]}
+         cellSize={20}
+         cellThickness={0.5}
+         cellColor="#d97706"
+         sectionSize={100}
+         sectionThickness={1}
+         sectionColor="#d97706"
+         fadeDistance={200}
+         fadeStrength={3}
+         transparent
+         opacity={0.1}
+       />
+    </group>
+  );
+};
+
 // Pure React-Three-Fiber component handling only R3F 3D Canvas Elements
 const SolarSystem3DScene = ({
   data,
@@ -692,7 +821,14 @@ const SolarSystem3DScene = ({
       <ambientLight intensity={0.2} />
       <pointLight position={[100, 100, 100]} intensity={1} color="#ffffff" />
       
-      <AstrologicalHouses data={data} onHouseHover={setHoveredHouse} />
+      {showHouseGuide && (
+        <>
+          <AstrologicalHouses data={data} onHouseHover={setHoveredHouse} />
+          <AscendantAxis data={data} />
+          <CelestialEquator />
+          <EclipticPlane />
+        </>
+      )}
       <AspectLines data={data} onAspectClick={setSelectedAspect} />
       <PlanetaryGravityNetwork planets={mappedPlanetsForGravity} />
       <CelestialDNAHelix />
@@ -831,6 +967,7 @@ const SolarSystem3DScene = ({
             astro={astro}
             isStatic={isStatic}
             isBirthChartMode={false}
+            showTracking={showHouseGuide}
             onSelect={(p) => setSelectedPlanet(p ? planets?.find(item => item.name === p.name) || p : null)} 
             onPlanetClick={onPlanetClick}
           />
@@ -847,6 +984,7 @@ const SolarSystem3DScene = ({
             astro={astro}
             isStatic={isStatic}
             isBirthChartMode={false}
+            showTracking={showHouseGuide}
             onSelect={(p) => setSelectedPlanet(p ? (SPECIAL_POINTS.find(item => item.name === p.name) as any) || p : null)} 
             onPlanetClick={onPlanetClick}
           />

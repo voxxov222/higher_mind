@@ -102,7 +102,10 @@ export const SoulPathSection = ({ data }: { data: any }) => {
   const nodesList = Array.isArray(data.nodes) ? data.nodes : Object.values(data.nodes || {});
   const northNode = nodesList.find((n: any) => n?.name?.toLowerCase().includes('north'));
   const southNode = nodesList.find((n: any) => n?.name?.toLowerCase().includes('south'));
-  const { saveToChat } = useHigherMind();
+  const { saveToChat, cosmicData, saveToVault } = useHigherMind();
+
+  const [report, setReport] = useState<any>(null);
+  const [loadingReport, setLoadingReport] = useState(false);
 
   const handleSaveToChat = () => {
     saveToChat(
@@ -110,6 +113,40 @@ export const SoulPathSection = ({ data }: { data: any }) => {
       `SOUTH NODE (${southNode?.sign || 'Unknown'}): ${southNode?.interpretation || 'Inherent strengths from past incarnations.'}\n\nNORTH NODE (${northNode?.sign || 'Unknown'}): ${northNode?.interpretation || 'The path of spiritual growth.'}${data.akashic ? '\n\nAkashic Echoes: ' + data.akashic.pastLifeThemes + '\n\nSoul Gifts: ' + data.akashic.soulGifts : ''}`,
       'experience'
     );
+  };
+
+  const handleGenerateReport = async () => {
+    setLoadingReport(true);
+    try {
+       const response = await fetch('/api/gemini', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({
+               action: 'generateSoulPathReport',
+               payload: { cosmicData }
+           })
+       });
+       const result = await response.json();
+       if (result && !result.error) {
+           setReport(result);
+           saveToChat(
+             'Soul Path Synthesis Report Logged',
+             `New Soul Path Report Generated: ${result.title}. Insights: ${result.kabbalisticInsights}.`,
+             'experience'
+           );
+           if (saveToVault) {
+             saveToVault(
+               `Soul Path: ${result.title}`,
+               `Deep Synthesis Report:\n\n${result.narrative}\n\nKabbalistic Resonance:\n${result.kabbalisticInsights}\n\nActionable Guidance:\n${result.actionableGuidance}`,
+               'synthesis',
+               ['soul_path', 'kabbalah', 'deep_report']
+             );
+           }
+       }
+    } catch (e) {
+       console.error(e);
+    }
+    setLoadingReport(false);
   };
 
   return (
@@ -122,15 +159,57 @@ export const SoulPathSection = ({ data }: { data: any }) => {
         <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Karmic Journey & Destiny Arc</p>
       </div>
 
-      <div className="absolute top-8 right-8 z-20">
+      <div className="absolute top-8 right-8 z-20 flex gap-4">
+        <button
+          onClick={handleGenerateReport}
+          disabled={loadingReport}
+          className="bg-black/60 backdrop-blur-md border border-fuchsia-500/30 hover:border-fuchsia-500/60 px-4 py-2 rounded-full text-fuchsia-400 hover:text-fuchsia-300 transition-all flex items-center gap-2 shadow-lg"
+        >
+          {loadingReport ? <Sparkles className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          <span className="text-xs uppercase tracking-widest font-bold whitespace-nowrap">{loadingReport ? "Synthesizing..." : "Generate Deep Report"}</span>
+        </button>
+
         <button
           onClick={handleSaveToChat}
-          className="bg-black/60 backdrop-blur-md border border-purple-500/30 hover:border-purple-500/60 p-3 rounded-full text-purple-400 hover:text-purple-300 transition-all flex items-center gap-2 group"
+          className="bg-black/60 backdrop-blur-md border border-purple-500/30 hover:border-purple-500/60 p-3 rounded-full text-purple-400 hover:text-purple-300 transition-all flex items-center gap-2 group shadow-lg"
         >
           <span className="text-[10px] uppercase tracking-widest font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Save to Chat</span>
           <MessageCircle size={20} />
         </button>
       </div>
+
+      {report && (
+        <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-8">
+           <motion.div 
+             initial={{ opacity: 0, scale: 0.95 }}
+             animate={{ opacity: 1, scale: 1 }}
+             className="w-full max-w-4xl max-h-full overflow-y-auto bg-stone-900 border border-purple-500/30 p-8 rounded-3xl shadow-2xl"
+           >
+              <div className="flex justify-between items-start mb-6 border-b border-purple-500/20 pb-4">
+                 <h2 className="text-2xl font-serif text-purple-300">{report.title}</h2>
+                 <button onClick={() => setReport(null)} className="text-stone-400 hover:text-white p-2">Close</button>
+              </div>
+              
+              <div className="space-y-6 text-stone-300 font-serif leading-relaxed">
+                 <div>
+                    <h3 className="text-xs font-mono text-fuchsia-400 uppercase tracking-widest mb-2">Narrative Synthesis</h3>
+                    <p className="whitespace-pre-wrap">{report.narrative}</p>
+                 </div>
+                 
+                 <div className="grid md:grid-cols-2 gap-6 pt-6">
+                     <div className="bg-stone-950 p-6 rounded-2xl border border-stone-800">
+                         <h3 className="text-xs font-mono text-purple-400 uppercase tracking-widest mb-2">Kabbalistic Insights</h3>
+                         <p className="text-sm">{report.kabbalisticInsights}</p>
+                     </div>
+                     <div className="bg-stone-950 p-6 rounded-2xl border border-stone-800">
+                         <h3 className="text-xs font-mono text-emerald-400 uppercase tracking-widest mb-2">Actionable Guidance</h3>
+                         <p className="text-sm">{report.actionableGuidance}</p>
+                     </div>
+                 </div>
+              </div>
+           </motion.div>
+        </div>
+      )}
 
       {/* 3D Visualizer */}
       <div className="h-[55%] w-full relative z-0 cursor-move border-b border-white/5">

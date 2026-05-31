@@ -200,20 +200,61 @@ export const AstrologyDashboard: React.FC<AstrologyDashboardProps> = ({ data, on
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {data.houses.map(h => (
+                  {data.houses.map(h => {
+                    const housePlanets = data.planets?.filter(p => p.house === h.houseNumber) || [];
+                    
+                    return (
                     <div key={h.houseNumber} onClick={() => onDeepDive(`House ${h.houseNumber}: ${h.realmName}`, h.description)} className="bg-black/40 border border-white/10 rounded-3xl p-5 hover:bg-white/5 transition-all cursor-pointer relative overflow-hidden">
                       <div className="absolute -right-4 -top-4 text-6xl font-black text-white/5">{h.houseNumber}</div>
-                      <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">House {h.houseNumber}</span>
+                      <div className="relative z-10 flex flex-col h-full">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">House {h.houseNumber}</span>
+                          </div>
+                          <h4 className="text-lg font-light text-white mb-2">{h.realmName}</h4>
+                          <p className="text-[11px] text-stone-400 leading-relaxed line-clamp-4 mb-4">
+                            {h.description}
+                          </p>
                         </div>
-                        <h4 className="text-lg font-light text-white mb-2">{h.realmName}</h4>
-                        <p className="text-[11px] text-stone-400 leading-relaxed line-clamp-4">
-                          {h.description}
-                        </p>
+                        <div className="mt-auto pt-4 border-t border-white/10">
+                          <h5 className="text-[10px] uppercase tracking-widest text-stone-500 mb-2">Occupying Planets</h5>
+                          {housePlanets.length > 0 ? (
+                            <div className="space-y-4">
+                              <div className="flex flex-wrap gap-2">
+                                {housePlanets.map(p => (
+                                  <span key={p.name} className="px-2 py-1 bg-white/5 rounded-md text-[10px] font-medium" style={{ color: getElementColor(p.sign) }}>
+                                    {p.name} ({p.sign})
+                                  </span>
+                                ))}
+                              </div>
+                              <div className="w-full h-8 relative bg-black/50 rounded-full border border-white/5 overflow-hidden">
+                                <div className="absolute inset-x-0 h-full flex items-center justify-between px-4 opacity-10">
+                                  <span>|</span><span>|</span><span>|</span><span>|</span><span>|</span>
+                                </div>
+                                {housePlanets.map((p, i) => {
+                                  // Spread planets algorithmically across the bar based on degree or index if degree is missing
+                                  const position = p.degree !== undefined ? (p.degree / 30) * 100 : ((i + 1) / (housePlanets.length + 1)) * 100;
+                                  return (
+                                    <div 
+                                      key={`visual-${p.name}`} 
+                                      className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.4)] transition-all"
+                                      style={{ 
+                                        left: `calc(${position}% - 8px)`, 
+                                        backgroundColor: getElementColor(p.sign) || '#ffffff' 
+                                      }}
+                                      title={`${p.name} at ${p.degree || '?'}°`}
+                                    />
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-stone-600 italic">No major planets</span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               )}
             </div>

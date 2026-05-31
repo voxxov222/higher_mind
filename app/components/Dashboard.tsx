@@ -40,12 +40,14 @@ const SoulPathSection = React.lazy(() => import('./SoulPathSection').then(m => (
 const AncestralResearchSection = React.lazy(() => import('./AncestralResearchSection').then(m => ({ default: m.AncestralResearchSection })));
 const CommunityFeed = React.lazy(() => import('./social/CommunityFeed'));
 const LiveMessenger = React.lazy(() => import('./social/LiveMessenger'));
-const HigherMindSettings = React.lazy(() => import('./HigherMindSettings').then(m => ({ default: m.HigherMindSettings })));
 import { getAstralProfile } from '../services/socialService';
 const BirthChartGuide = React.lazy(() => import('./BirthChartGuide'));
 const SandboxSection = React.lazy(() => import('./sandbox/SandboxSection').then(m => ({ default: m.SandboxSection })));
-const VoiceCommander = React.lazy(() => import('./VoiceCommander').then(m => ({ default: m.VoiceCommander })));
+import VoiceCommander from './VoiceCommander';
+import { HigherMindSettings } from './HigherMindSettings';
 const TetragrammatonHUD = React.lazy(() => import('./TetragrammatonHUD').then(m => ({ default: m.TetragrammatonHUD })));
+const Freemason33Section = React.lazy(() => import('./Freemasonry33Section').then(m => ({ default: m.Freemason33Section })));
+const TarotGnosis = React.lazy(() => import('./TarotGnosis').then(m => ({ default: m.TarotGnosis })));
 import { soundEngine } from '../lib/soundEffects';
 const AstralCanvas = React.lazy(() => import('./AstralCanvas').then(m => ({ default: m.AstralCanvas })));
 const AvatarMatrix = React.lazy(() => import('./AvatarMatrix').then(m => ({ default: m.AvatarMatrix })));
@@ -65,8 +67,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution';
-  setActiveTab: (tab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution') => void;
+  activeTab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot';
+  setActiveTab: (tab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -1971,7 +1973,9 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
         onToggleMinimize={() => setIsMinimized(!isMinimized)}
       />
       <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} profileConfig={profileConfig || {} as UserProfileConfig} onUpdateProfile={onUpdateProfile} loadedInputs={loadedInputs} isReading={isReading} handleReadOutLoud={handleReadOutLoud} />
-      <VoiceCommander setActiveTab={setActiveTab} />
+      <React.Suspense fallback={null}>
+        <VoiceCommander setActiveTab={setActiveTab} />
+      </React.Suspense>
 
       {/* Brand Header */}
       <header className="flex justify-between items-center z-10 pointer-events-auto">
@@ -2178,6 +2182,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'evolution'} tabId="evolution" onClick={() => setActiveTab('evolution')} icon={<Cpu className="w-4 h-4 text-blue-500"/>}>Quantum Evolution</Tab>
               <Tab active={activeTab === 'christ_sophia'} tabId="christ_sophia" onClick={() => setActiveTab('christ_sophia')} icon={<Sparkles className="w-4 h-4 text-amber-300 animate-pulse"/>}>Christ-Sophia Gnosis</Tab>
               <Tab active={activeTab === 'tetragrammaton'} tabId="tetragrammaton" onClick={() => setActiveTab('tetragrammaton')} icon={<Hexagon className="w-4 h-4 text-[#fbbf24]"/>}>YHVH HUD</Tab>
+              <Tab active={activeTab === 'freemason33'} tabId="freemason33" onClick={() => setActiveTab('freemason33')} icon={<Sparkles className="w-4 h-4 text-amber-400 animate-pulse"/>}>Free Mason 33</Tab>
+              <Tab active={activeTab === 'tarot'} tabId="tarot" onClick={() => setActiveTab('tarot')} icon={<Sparkles className="w-4 h-4 text-pink-400 animate-pulse"/>}>Tarot Arcana</Tab>
               <Tab active={activeTab === 'sandbox'} tabId="sandbox" onClick={() => setActiveTab('sandbox')} icon={<Box className="w-4 h-4 text-emerald-400"/>}>Creative Sandbox</Tab>
               <Tab active={activeTab === 'findings'} tabId="findings" onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
               <Tab active={activeTab === 'harmonics'} tabId="harmonics" onClick={() => setActiveTab('harmonics')} icon={<BarChart2 className="w-4 h-4"/>}>Harmonics</Tab>
@@ -3289,6 +3295,16 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <TetragrammatonHUD activeTab={activeTab} data={data} />
                   </motion.div>
                 )}
+                {activeTab === 'freemason33' && (
+                  <motion.div key="freemason33" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <Freemason33Section data={data} />
+                  </motion.div>
+                )}
+                {activeTab === 'tarot' && (
+                  <motion.div key="tarot" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <TarotGnosis />
+                  </motion.div>
+                )}
               </AnimatePresence>
               </React.Suspense>
           </div>
@@ -3328,6 +3344,8 @@ const playTabHoverSound = (tabId?: string) => {
       soundEngine.numerologyHover(); break;
     case 'kabbalah':
     case 'tetragrammaton':
+    case 'freemason33':
+    case 'tarot':
     case 'christ_sophia':
     case 'kabbalistic_numerology':
       soundEngine.mysticHover(); break;
@@ -3355,6 +3373,8 @@ const playTabClickSound = (tabId?: string) => {
       soundEngine.numerologyClick(); break;
     case 'kabbalah':
     case 'tetragrammaton':
+    case 'freemason33':
+    case 'tarot':
     case 'christ_sophia':
     case 'kabbalistic_numerology':
       soundEngine.mysticClick(); break;

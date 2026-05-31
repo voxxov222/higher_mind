@@ -67,9 +67,31 @@
         "likes": { "type": "number" }
       },
       "required": ["fromUserId", "fromUsername", "toUserId", "timestamp", "content"]
+    },
+    "SwarmFinding": {
+      "title": "Swarm Finding",
+      "description": "Agent swarm finding",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "agentId": { "type": "string" },
+        "agentName": { "type": "string" },
+        "category": { "type": "string" },
+        "content": { "type": "string" },
+        "timestamp": { "type": "timestamp" },
+        "links": { "type": "array" },
+        "references": { "type": "array" },
+        "archived": { "type": "boolean" },
+        "highlighted": { "type": "boolean" }
+      },
+      "required": ["userId", "agentId", "content", "timestamp"]
     }
   },
   "firestore": {
+    "/swarm_findings/{findingId}": {
+      "schema": { "$ref": "#/entities/SwarmFinding" },
+      "description": "Agent swarm findings index"
+    },
     "/users/{userId}": {
       "schema": { "$ref": "#/entities/UserCosmicProfile" },
       "description": "Stores a user's cosmic reading and inputs."

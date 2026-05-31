@@ -1,5 +1,5 @@
 // --- CORE IMPORTS & THREE.JS FIBER REFS ---
-import React, { useRef, useMemo, useState, useEffect, createContext, useContext } from 'react';
+import React, { useRef, useMemo, useState, useEffect, createContext, useContext, Component, ErrorInfo, ReactNode } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Line, Ring, Sparkles, Stars, Text, Trail, OrbitControls, Html, PerspectiveCamera, Points, PointMaterial } from '@react-three/drei';
 // --- POST-PROCESSING EFFX ---
@@ -13,8 +13,37 @@ import { AstralMind, ThinkingMode } from './AstralMind';
 import { VortexScene } from './VortexSequencingSection';
 import { CelestialSolarCore, PlanetaryGravityNetwork } from './CelestialSolarCore';
 import { Gematria3DVisualizer } from './Gematria3DVisualizer';
-import { X, Minus, Lock, Unlock, Play, Square, Palette, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity as InfinityIcon, Magnet, Shuffle, Waves, Terminal } from 'lucide-react';
+import { X, Minus, Lock, Unlock, Play, Square, Palette, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity as InfinityIcon, Magnet, Shuffle, Waves, Terminal, AlertTriangle } from 'lucide-react';
 import { TerminalOverlay } from './profile/TerminalOverlay';
+
+class WebGLErrorBoundary extends Component<{children: ReactNode, fallback?: ReactNode}, {hasError: boolean}> {
+  constructor(props: {children: ReactNode, fallback?: ReactNode}) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(_: Error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("WebGL Error Boundary Caught:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className="w-full h-full flex flex-col items-center justify-center bg-black/90 text-white p-8 border border-red-500/20 rounded-xl relative z-50">
+           <AlertTriangle className="w-10 h-10 text-red-500 mb-4 animate-pulse" />
+           <p className="text-sm font-mono text-stone-300">WebGL limits reached.</p>
+           <p className="text-xs text-stone-500 mt-2 max-w-sm text-center">Your browser blocked the 3D context due to memory constraints or too many active canvases. Try refreshing.</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 
 /**
  * Procedural Animation Types for Scene Objects
@@ -1601,7 +1630,8 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
 
   return (
     <div className="w-full h-full absolute inset-0 bg-black" id="cosmic-canvas-container">
-    <Canvas id="cosmic-canvas" dpr={[1, 1.5]} gl={{ powerPreference: "high-performance", alpha: false, stencil: false, antialias: false }} camera={{ position: [0, 15, 20], fov: 60 }} className="w-full h-full block">
+    <WebGLErrorBoundary>
+      <Canvas id="cosmic-canvas" dpr={[1, 1.5]} gl={{ powerPreference: "high-performance", alpha: false, stencil: false, antialias: false }} camera={{ position: [0, 15, 20], fov: 60 }} className="w-full h-full block">
       {/* --- SCENE INFRASTRUCTURE --- */}
       <CameraController isPresentationActive={isPresentationActive} activeTab={activeTab} data={data} />
       <fog attach="fog" args={['#000', 5, 50]} />
@@ -1928,6 +1958,7 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
         <Vignette eskil={false} offset={0.1} darkness={1.1} />
       </EffectComposer>
     </Canvas>
+    </WebGLErrorBoundary>
 
     {/* Brain Popup Menu */}
     <AnimatePresence>

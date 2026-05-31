@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sparkles, Compass, Layers, Info, HelpCircle } from 'lucide-react';
+import { X, Sparkles, Compass, Layers, Info, HelpCircle, Brain } from 'lucide-react';
+import { swarmEngine } from '../utils/swarmEngine';
 
 const SIGN_NAMES = [
   'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 
@@ -113,6 +114,7 @@ const SIGN_DETAILS: Record<string, { element: string, ruler: string, archetype: 
 export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) => {
   const [hoveredElement, setHoveredElement] = useState<any>(null);
   const [hoveredHouse, setHoveredHouse] = useState<number | null>(null);
+  const [hoveredAspect, setHoveredAspect] = useState<number | null>(null);
   const [activeInfo, setActiveInfo] = useState<any>(null);
   
   // Setup all bodies
@@ -210,6 +212,8 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
     }
   };
 
+  const [investigating, setInvestigating] = useState<string | null>(null);
+
   // Synthesize custom descriptions on the fly
   const getDynamicPlanetInterpretation = (planetName: string, sign: string, houseNum: number) => {
     const detail = SIGN_DETAILS[sign];
@@ -219,6 +223,17 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
     const houseTopic = HOUSE_MEANINGS[houseNum]?.split(',')[0] || 'your core legacy';
 
     return `This placement filters your ${planetName} energy—which handles your ${PLANET_MEANINGS[planetName]?.split('.')[0].toLowerCase()}—through the vibrational grid of ${sign}. Resonating with the archetype of "${archetype}" within the ${element} elements (governed by ${ruler}), this cosmic pressure releases directly into your ${houseNum}${houseNum === 1 ? 'st' : houseNum === 2 ? 'nd' : houseNum === 3 ? 'rd' : 'th'} House. This ensures that your evolutionary work manifests powerfully in the sector of your life governing ${houseTopic}. Here, you must learn to synthesize and express this unique alignment.`;
+  };
+
+  const handleInvestigate = (context: string) => {
+     let cosmicString = "Unknown birth data";
+     if (data?.natalChart) {
+         cosmicString = `${data.natalChart.firstName || 'User'} born ${data.natalChart.date} at ${data.natalChart.time} in ${data.natalChart.location}`;
+     }
+     swarmEngine.startTargetedResearch(context, cosmicString);
+     
+     setInvestigating(context);
+     setTimeout(() => setInvestigating(null), 3000);
   };
 
   return (
@@ -391,24 +406,39 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
             
             const isRelated = hoveredElement?.name === p1.name || hoveredElement?.name === p2.name || 
                              activeInfo?.name === p1.name || activeInfo?.name === p2.name;
+            const isHovered = hoveredAspect === idx;
+            const midX = (pos1.x + pos2.x) / 2;
+            const midY = (pos1.y + pos2.y) / 2;
             
             return (
-              <g key={`aspect-${idx}`}>
+              <g 
+                key={`aspect-${idx}`}
+                onMouseEnter={() => setHoveredAspect(idx)}
+                onMouseLeave={() => setHoveredAspect(null)}
+                className="cursor-pointer"
+              >
+                {/* Invisible thicker line for easier hovering */}
+                <line
+                  x1={pos1.x} y1={pos1.y}
+                  x2={pos2.x} y2={pos2.y}
+                  stroke="transparent"
+                  strokeWidth="15"
+                />
                 <motion.line 
                   initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ 
                     pathLength: 1, 
-                    opacity: isRelated ? 0.95 : 0.12,
-                    strokeWidth: isRelated ? 3 : 0.5
+                    opacity: isRelated || isHovered ? 0.95 : 0.12,
+                    strokeWidth: isRelated || isHovered ? 3 : 0.5
                   }}
                   transition={{ duration: 1 }}
                   x1={pos1.x} y1={pos1.y}
                   x2={pos2.x} y2={pos2.y}
                   stroke={ASPECT_COLORS[aspect.type] || '#cbd5e1'}
                   strokeDasharray={aspect.type === 'opposition' || aspect.type === 'square' ? '5 3' : 'none'}
-                  style={{ filter: isRelated ? 'url(#glow)' : 'none' }}
+                  style={{ filter: isRelated || isHovered ? 'url(#glow)' : 'none' }}
                 />
-                {isRelated && (
+                {(isRelated || isHovered) && (
                   <circle r="3" fill={ASPECT_COLORS[aspect.type] || '#94a3b8'} style={{ filter: 'url(#glow)' }}>
                     <animateMotion 
                       path={`M ${pos1.x} ${pos1.y} L ${pos2.x} ${pos2.y}`} 
@@ -416,6 +446,14 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
                       repeatCount="indefinite" 
                     />
                   </circle>
+                )}
+                {isHovered && (
+                  <g transform={`translate(${midX}, ${midY})`}>
+                    <rect x="-40" y="-12" width="80" height="24" rx="12" fill="white" stroke={ASPECT_COLORS[aspect.type]} strokeWidth="2" style={{ filter: 'url(#shadow)' }} />
+                    <text x="0" y="1" fontSize="10" fill={ASPECT_COLORS[aspect.type]} textAnchor="middle" dominantBaseline="middle" className="font-bold uppercase tracking-widest font-sans">
+                      {aspect.type}
+                    </text>
+                  </g>
                 )}
               </g>
             );
@@ -650,6 +688,14 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
                           )}
                         </div>
                       </div>
+
+                      <button 
+                        onClick={() => handleInvestigate(`${activeInfo.name} in ${activeInfo.sign} in the ${activeInfo.house} house`)}
+                        className={`w-full mt-4 py-3 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm ${investigating === `${activeInfo.name} in ${activeInfo.sign} in the ${activeInfo.house} house` ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30' : 'bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20 text-[#8b5cf6] border border-[#8b5cf6]/30'}`}
+                      >
+                         <Brain size={14} className={investigating === `${activeInfo.name} in ${activeInfo.sign} in the ${activeInfo.house} house` ? 'animate-pulse' : ''} /> 
+                         {investigating === `${activeInfo.name} in ${activeInfo.sign} in the ${activeInfo.house} house` ? 'SWARM AGENT DEPLOYED TO RESEARCH' : 'DEEP INVESTIGATE PLACEMENT'}
+                      </button>
                     </div>
                   </div>
                 )}
@@ -680,6 +726,14 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
                           {SIGN_MEANINGS[activeInfo.name]}
                         </p>
                       </div>
+
+                      <button 
+                        onClick={() => handleInvestigate(`${activeInfo.name} zodiac sign`)}
+                        className={`w-full mt-4 py-3 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm ${investigating === `${activeInfo.name} zodiac sign` ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30' : 'bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20 text-[#8b5cf6] border border-[#8b5cf6]/30'}`}
+                      >
+                         <Brain size={14} className={investigating === `${activeInfo.name} zodiac sign` ? 'animate-pulse' : ''} /> 
+                         {investigating === `${activeInfo.name} zodiac sign` ? 'SWARM AGENT DEPLOYED TO RESEARCH' : 'DEEP INVESTIGATE ATTRIBUTES'}
+                      </button>
                     </div>
                   </div>
                 )}
@@ -737,6 +791,14 @@ export const ClassicBirthChart = ({ data, selectedPlanet, onPlanetClick }: any) 
                           )}
                         </div>
                       </div>
+
+                      <button 
+                        onClick={() => handleInvestigate(`The ${activeInfo.number}${activeInfo.number === 1 ? 'st' : activeInfo.number === 2 ? 'nd' : activeInfo.number === 3 ? 'rd' : 'th'} House of ${HOUSE_TIERS[activeInfo.number]?.title.replace('House of ', '')}`)}
+                        className={`w-full mt-4 py-3 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm ${investigating === `The ${activeInfo.number}${activeInfo.number === 1 ? 'st' : activeInfo.number === 2 ? 'nd' : activeInfo.number === 3 ? 'rd' : 'th'} House of ${HOUSE_TIERS[activeInfo.number]?.title.replace('House of ', '')}` ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30' : 'bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20 text-[#8b5cf6] border border-[#8b5cf6]/30'}`}
+                      >
+                         <Brain size={14} className={investigating === `The ${activeInfo.number}${activeInfo.number === 1 ? 'st' : activeInfo.number === 2 ? 'nd' : activeInfo.number === 3 ? 'rd' : 'th'} House of ${HOUSE_TIERS[activeInfo.number]?.title.replace('House of ', '')}` ? 'animate-pulse' : ''} /> 
+                         {investigating === `The ${activeInfo.number}${activeInfo.number === 1 ? 'st' : activeInfo.number === 2 ? 'nd' : activeInfo.number === 3 ? 'rd' : 'th'} House of ${HOUSE_TIERS[activeInfo.number]?.title.replace('House of ', '')}` ? 'SWARM AGENT DEPLOYED TO RESEARCH' : 'DEEP INVESTIGATE DOMAIN'}
+                      </button>
                     </div>
                   </div>
                 )}

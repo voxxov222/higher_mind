@@ -120,5 +120,80 @@ export const ASTRAL_THEMES: AstralTheme[] = [
     textStyle: 'text-green-400 font-mono text-sm leading-snug',
     headingStyle: 'font-mono uppercase tracking-widest text-green-300 border-b border-green-500/20 pb-2 mb-3 flex items-center gap-1 before:content-[">_"]',
     effects: { terminalTech: true }
+  },
+  {
+    id: 'ethereal_light',
+    name: 'Ethereal Light',
+    description: 'A luminous, airy environment using soft whites, pearlescent overlays, and delicate gold accents.',
+    primaryColor: '#fcd34d', // amber-300
+    secondaryColor: '#ffffff', // white
+    fontFamily: 'font-sans',
+    bgType: 'aurora',
+    borderStyle: 'glass',
+    glowStyle: 'shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_40px_rgba(252,211,77,0.4)]',
+    cardBg: 'bg-white/10 backdrop-blur-2xl border border-white/40 rounded-[2rem]',
+    textStyle: 'text-stone-800 font-medium tracking-wide',
+    headingStyle: 'font-light tracking-widest text-stone-900 uppercase drop-shadow-md',
+    effects: {}
+  },
+  {
+    id: 'dark_matter',
+    name: 'Dark Matter Void',
+    description: 'Ultra-minimalist void. Deepest blacks, subtle grays, and razor-sharp high-contrast white text.',
+    primaryColor: '#e5e5e5', // neutral-200
+    secondaryColor: '#404040', // neutral-700
+    fontFamily: 'font-mono',
+    bgType: 'none',
+    borderStyle: 'thin',
+    glowStyle: 'shadow-none',
+    cardBg: 'bg-black border border-neutral-800 rounded-none',
+    textStyle: 'text-neutral-400 font-mono text-xs',
+    headingStyle: 'font-mono uppercase tracking-[0.3em] text-white',
+    effects: {}
+  },
+  {
+    id: 'crystalline_matrix',
+    name: 'Crystalline Matrix',
+    description: 'Prismatic, transparent layouts featuring iridescent gradients, sharp angled borders, and icy blues.',
+    primaryColor: '#60a5fa', // blue-400
+    secondaryColor: '#c084fc', // purple-400
+    fontFamily: 'font-sans',
+    bgType: 'particles',
+    borderStyle: 'glass',
+    glowStyle: 'shadow-[0_0_20px_rgba(96,165,250,0.2)] hover:shadow-[0_0_30px_rgba(192,132,252,0.3)]',
+    cardBg: 'bg-gradient-to-br from-blue-900/20 to-purple-900/20 backdrop-blur-md border border-white/20 rounded-xl',
+    textStyle: 'text-blue-100 font-light',
+    headingStyle: 'font-bold uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300',
+    effects: {}
+  },
+  {
+    id: 'obsidian_gold',
+    name: 'Obsidian & Gold',
+    description: 'A premium, grounding aesthetic with heavy jet-black backgrounds and luxurious gold foil accents.',
+    primaryColor: '#fbbf24', // amber-400
+    secondaryColor: '#000000', // black
+    fontFamily: 'font-serif',
+    bgType: 'none',
+    borderStyle: 'thin',
+    glowStyle: 'shadow-xl shadow-amber-900/20',
+    cardBg: 'bg-[#0a0a0a] border border-amber-500/30 rounded-sm',
+    textStyle: 'text-stone-300 font-serif text-sm',
+    headingStyle: 'font-serif uppercase tracking-widest text-amber-500 border-b-2 border-amber-500/20 pb-2 mb-4',
+    effects: {}
+  },
+  {
+    id: 'quantum_fluctuation',
+    name: 'Quantum Fluctuation',
+    description: 'Unstable, shifting geometries with continuous motion, glitching overlays, and energetic cyan bursts.',
+    primaryColor: '#2dd4bf', // teal-400
+    secondaryColor: '#f43f5e', // rose-500
+    fontFamily: 'font-sans',
+    bgType: 'hologram',
+    borderStyle: 'neon',
+    glowStyle: 'shadow-[0_0_15px_rgba(45,212,191,0.4)] animate-pulse',
+    cardBg: 'bg-teal-950/30 backdrop-blur-sm border-2 border-teal-500/50 hover:border-rose-500/50 transition-colors duration-[3000ms]',
+    textStyle: 'text-teal-100 font-medium',
+    headingStyle: 'font-black uppercase tracking-tight text-teal-400 mix-blend-screen',
+    effects: { animated: true }
   }
 ];

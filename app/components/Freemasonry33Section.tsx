@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useHigherMind } from './HigherMindProvider';
 import { CosmicData } from '../types';
+import { MasonicVisualTools } from './MasonicVisualTools';
 
 // The 33 Degrees data array
 const DEGREES_DATA = [
@@ -78,6 +79,13 @@ const getRulerColor = (ruler: string) => {
     case 'Cosmic Logos': return '#f59e0b';
     default: return '#fbbf24';
   }
+};
+
+const degSuffix = (deg: number) => {
+  if (deg === 1) return 'st';
+  if (deg === 2) return 'nd';
+  if (deg === 3) return 'rd';
+  return 'th';
 };
 
 // --- R3F 3D Components ---
@@ -455,25 +463,28 @@ const PyramidOfGnosis = ({
       {/* Floating 33rd Degree Gilded Capstone */}
       <group position={[0, 0.4, 0]}>
         {/* Sacred Eye of Providence/Delta marker */}
-        <mesh position={[0, 3.8, 0]}>
+        <mesh 
+          position={[0, 3.8, 0]}
+          onPointerOver={() => { document.body.style.cursor = 'pointer'; setActiveDegree(33); }}
+        >
           <coneGeometry args={[1.2, 2.2, 4]} />
           <meshStandardMaterial 
-            color="#fbbf24" 
+            color={activeDegree === 33 ? "#ffffff" : "#fbbf24"} 
             emissive="#d97706" 
-            emissiveIntensity={secretionActive ? 3.0 : 1.2} 
+            emissiveIntensity={secretionActive ? 5.0 : (activeDegree === 33 ? 4.0 : 1.2)} 
             wireframe 
           />
         </mesh>
         
         {/* Apex crown sphere */}
-        <Sphere args={[0.25, 16, 16]} position={[0, 4.8, 0]}>
-          <meshStandardMaterial color="#ffffff" emissive="#fbbf24" emissiveIntensity={3} />
+        <Sphere args={[activeDegree === 33 ? 0.35 : 0.25, 16, 16]} position={[0, 4.8, 0]}>
+          <meshStandardMaterial color="#ffffff" emissive="#fbbf24" emissiveIntensity={activeDegree === 33 ? 8 : 3} />
         </Sphere>
         
         {/* Ambient Halo Ring representing Kether */}
         <mesh position={[0, 3.8, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <ringGeometry args={[1.5, 1.55, 64]} />
-          <meshBasicMaterial color="#fbbf24" transparent opacity={0.6} side={THREE.DoubleSide} />
+          <meshBasicMaterial color={activeDegree === 33 ? "#fff" : "#fbbf24"} transparent opacity={activeDegree === 33 ? 0.9 : 0.6} side={THREE.DoubleSide} />
         </mesh>
       </group>
 
@@ -547,7 +558,7 @@ const DoubleHeadedEaglePath = ({ activeDegree }: any) => {
 export const Freemason33Section = ({ data }: { data: CosmicData | null }) => {
   const { thoughts, feelings, experiences, coherence, alignment } = useHigherMind();
   
-  const [activeTab, setActiveTab] = useState<'visuals' | 'degrees' | 'cipher' | 'columns'>('visuals');
+  const [activeTab, setActiveTab] = useState<'visuals' | 'degrees' | 'cipher' | 'columns' | 'tools'>('visuals');
   const [visualMode, setVisualMode] = useState<'pyramid' | 'spine' | 'phoenix'>('pyramid');
   const [activeDegree, setActiveDegree] = useState<number>(33);
   const [showTracingBoard, setShowTracingBoard] = useState(true);
@@ -561,6 +572,7 @@ export const Freemason33Section = ({ data }: { data: CosmicData | null }) => {
   // Masonic Gematria states
   const [cipherInput, setCipherInput] = useState('');
   const [cipherOutput, setCipherOutput] = useState<{ ordinal: number; reduction: number; resonance: boolean } | null>(null);
+  const [showAdvancedGnosis, setShowAdvancedGnosis] = useState(false);
 
   // Focus degree detail
   const currentDegreeDetail = useMemo(() => {
@@ -690,6 +702,13 @@ export const Freemason33Section = ({ data }: { data: CosmicData | null }) => {
           <Cpu className="w-4 h-4" />
           Triple Column Sync
         </button>
+        <button 
+          onClick={() => setActiveTab('tools')}
+          className={`flex items-center gap-2 px-4 py-2 border-b-2 font-mono text-xs uppercase tracking-widest transition-all ${activeTab === 'tools' ? 'border-amber-400 text-amber-300 bg-white/5' : 'border-transparent text-stone-400 hover:text-white'}`}
+        >
+          <Sparkles className="w-4 h-4" />
+          Occult Tools
+        </button>
       </div>
 
       {/* Active Tab Screen Panels */}
@@ -749,8 +768,52 @@ export const Freemason33Section = ({ data }: { data: CosmicData | null }) => {
               </button>
             )}
 
+            {/* Advanced Gnosis Toggle */}
+            <button 
+                onClick={() => setShowAdvancedGnosis(!showAdvancedGnosis)}
+                className={`absolute bottom-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 border font-mono uppercase tracking-widest rounded-xl transition-all text-[10px] ${showAdvancedGnosis ? 'bg-purple-500/20 border-purple-500/50 text-purple-300' : 'bg-black/60 border-white/10 text-stone-400 hover:bg-white/5'}`}
+            >
+                <Sparkles className="w-3.5 h-3.5" />
+                {showAdvancedGnosis ? "Hide Gnosis" : "Unlock 33° Gnosis"}
+            </button>
+
             {/* 3D Canvas element wrapper */}
             <div id="celestial-body-blueprint" className="relative w-full flex-1 min-h-[400px] rounded-3xl overflow-hidden border border-white/5 bg-black/20 mt-12 sm:mt-0">
+              
+              {/* Advanced Gnosis Dashboard Panel */}
+              <AnimatePresence>
+                {showAdvancedGnosis && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    className="absolute inset-4 z-50 bg-black/95 border border-purple-500/30 rounded-2xl p-6 backdrop-blur-sm overflow-y-auto"
+                  >
+                    <h3 className="text-xl font-light text-purple-300 mb-4 tracking-wider uppercase border-b border-purple-500/20 pb-2">33° Sovereign Grand Inspector General: Occult Synthesis</h3>
+                    <div className="space-y-4 text-xs text-stone-300 font-light leading-relaxed">
+                        <p>The 33rd Degree is not merely a rank; it is the Crown of the Scottish Rite, representing the absolute synthesis of all preceding symbols and intellectual constructs. In the occult tradition, it marks the intersection of Kether (The Divine Crown) and the hidden Da'at, where knowledge becomes pure, conscious light.</p>
+                        <p>The Gematria value of 333 (as synthesized here) represents the resonance of the Triple Logos—Creation, Preservation, Destruction—integrated and harmonized. The Inspector General is tasked with overseeing the "Great Work" not as a master of others, but as a master of the inner mechanics of the cosmic engine.</p>
+                        <div className="grid grid-cols-2 gap-4 mt-6">
+                            <div className="border border-white/10 p-4 rounded-xl">
+                                <h4 className="text-[10px] uppercase font-bold text-amber-500 font-mono mb-2">The Apex Geometry</h4>
+                                <p className="text-[10px]">The capstone of the pyramid represents the ego transcended, the point where binary dualities resolve into the unity of the Divine.</p>
+                            </div>
+                            <div className="border border-white/10 p-4 rounded-xl">
+                                <h4 className="text-[10px] uppercase font-bold text-purple-500 font-mono mb-2">Biological Alchemy</h4>
+                                <p className="text-[10px]">Represented by the Kundalini spine, the 33rd degree is the final distillation of the sacred secretion in the brain, unlocking multidimensional perception.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button 
+                        onClick={() => setShowAdvancedGnosis(false)}
+                        className="mt-6 w-full py-2 bg-purple-500/20 border border-purple-500/30 text-purple-300 uppercase font-mono tracking-widest text-[10px] rounded-xl hover:bg-purple-500/30 transition-all"
+                    >
+                        Close Synthesis
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
               {/* Toggleable Masonic Tracing Board HUD Overlay */}
               {showTracingBoard && visualMode === 'pyramid' && (
                 <div className="geometry-overlay absolute inset-0 pointer-events-none z-10 flex flex-col justify-between p-4 bg-[radial-gradient(circle_at_center,_transparent_45%,_rgba(0,0,0,0.6))]">
@@ -843,9 +906,8 @@ export const Freemason33Section = ({ data }: { data: CosmicData | null }) => {
         {/* Right Side Info Boards (Spans 5 Columns) */}
         <div className={`col-span-1 lg:col-span-12 ${activeTab === 'visuals' ? 'lg:col-span-5' : 'lg:col-span-6'} flex flex-col gap-6`}>
           
-          {/* Degree Explorer Details */}
           {activeTab === 'visuals' && (
-            <div className="bg-black/40 border border-white/5 rounded-3xl p-6 flex flex-col justify-between h-full space-y-6">
+            <div className="bg-black/40 border border-white/5 rounded-3xl p-6 flex flex-col justify-start h-full space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div className="flex items-center gap-3">
@@ -854,12 +916,12 @@ export const Freemason33Section = ({ data }: { data: CosmicData | null }) => {
                     </div>
                     <div>
                       <h4 className="text-lg font-light leading-snug">{currentDegreeDetail.name}</h4>
-                      <span className="text-[9px] uppercase font-mono tracking-wider text-amber-400 font-bold">Scottish Rite Gnosis</span>
+                      <span className="text-[9px] uppercase font-mono tracking-wider text-amber-400 font-bold">Scottish Rite Occult Gnosis</span>
                     </div>
                   </div>
                   
                   <div className="text-right">
-                    <div className="text-[10px] font-mono text-stone-500">Gematria Value</div>
+                    <div className="text-[10px] font-mono text-stone-500">Gematria Resonance</div>
                     <div 
                       className="text-md font-mono font-extrabold transition-all duration-300"
                       style={{ color: gematriaColor }}
@@ -869,48 +931,37 @@ export const Freemason33Section = ({ data }: { data: CosmicData | null }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/5 border border-white/10 p-3 rounded-2xl">
-                    <span className="text-[9px] text-stone-500 uppercase tracking-wider font-mono">Planetary Ruler</span>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Sun className="w-4 h-4" style={{ color: getRulerColor(currentDegreeDetail.ruler) }} />
-                      <span className="text-sm font-semibold" style={{ color: getRulerColor(currentDegreeDetail.ruler) }}>
-                        {currentDegreeDetail.ruler}
-                      </span>
+                {/* In-depth Occult Explanatory Content */}
+                <div className="space-y-4 pt-2">
+                    <div className="bg-white/5 border border-white/10 p-4 rounded-xl">
+                      <h5 className="text-[10px] uppercase font-bold text-amber-500 font-mono mb-2">Metaphysical Domain</h5>
+                      <p className="text-xs text-stone-300 leading-relaxed text-light">{currentDegreeDetail.desc}</p>
                     </div>
-                  </div>
-
-                  <div className="bg-white/5 border border-white/10 p-3 rounded-2xl">
-                    <span className="text-[9px] text-stone-500 uppercase tracking-wider font-mono">Kabbalah Path</span>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Zap className="w-4 h-4 text-emerald-400" />
-                      <span className="text-sm font-semibold text-emerald-300">
-                        {currentDegreeDetail.sephirah}
-                      </span>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-purple-900/20 border border-purple-500/20 p-3 rounded-xl">
+                        <h5 className="text-[9px] uppercase font-bold text-purple-400 mb-1">Planetary Ruler</h5>
+                        <p className="text-sm font-mono text-purple-100">{currentDegreeDetail.ruler}</p>
+                      </div>
+                      <div className="bg-indigo-900/20 border border-indigo-500/20 p-3 rounded-xl">
+                        <h5 className="text-[9px] uppercase font-bold text-indigo-400 mb-1">Sephirotic Path</h5>
+                        <p className="text-sm font-mono text-indigo-100">{currentDegreeDetail.sephirah}</p>
+                      </div>
                     </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <h5 className="text-[10px] uppercase font-mono tracking-widest text-stone-400">Esoteric Metaphysics</h5>
-                  <p className="text-xs text-stone-300 leading-relaxed font-light p-4 bg-black/60 rounded-2xl border border-white/5">
-                    {currentDegreeDetail.desc}
-                  </p>
+                    
+                    <div className="border border-white/5 p-4 rounded-xl bg-black/30">
+                       <h5 className="text-[10px] uppercase font-bold text-stone-500 mb-2 font-mono">Occult Synthesis</h5>
+                       <p className="text-xs text-stone-400 italic">"The {currentDegreeDetail.name} degree invites the practitioner to contemplate the intersection of {currentDegreeDetail.ruler} and {currentDegreeDetail.sephirah}, unfolding the mysteries of the {currentDegreeDetail.deg}{degSuffix(currentDegreeDetail.deg)} vibration within the Great Work."</p>
+                    </div>
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* Extra astrological correlations retrieved directly from active user profile */}
-              {data ? (
-                <div className="pt-4 border-t border-white/10 flex items-center gap-3">
-                  <Fingerprint className="w-8 h-8 text-indigo-400" />
-                  <div className="text-left text-xs">
-                    <span className="text-stone-500 font-mono text-[9px] uppercase">Active User Alignment</span>
-                    <p className="text-indigo-200 mt-1">
-                      Your life path matches the {DEGREES_DATA[data.numerology.lifePath % 33].name} (Degree {data.numerology.lifePath}).
-                    </p>
-                  </div>
-                </div>
-              ) : null}
+          {activeTab === 'tools' && (
+            <div className="bg-black/40 border border-white/5 rounded-3xl p-6 flex flex-col justify-start h-full">
+                <h4 className="text-lg font-light leading-snug mb-6">Masonic Visual Intelligence</h4>
+                <MasonicVisualTools />
             </div>
           )}
 

@@ -256,6 +256,26 @@ class SoundEngine {
     this.playNoise(0.1, 0.2, true); // Metallic scrape
     setTimeout(() => this.playTone(150, 'sawtooth', 0.05, 0.1), 100); // Latch
   }
+
+  magic = () => {
+    this.init();
+    if (!this.ctx || this.ctx.state !== 'running') return;
+    this.playTone(852, 'sine', 0.5, 0.2, 963);
+    this.playNoise(0.5, 0.05, true);
+  }
+
+  success = () => {
+    this.init();
+    if (!this.ctx || this.ctx.state !== 'running') return;
+    this.playTone(432, 'triangle', 0.2, 0.2, 528);
+    setTimeout(() => this.playTone(528, 'triangle', 0.4, 0.2), 200);
+  }
+
+  tick = () => {
+    this.init();
+    if (!this.ctx || this.ctx.state !== 'running') return;
+    this.playTone(1200, 'sine', 0.02, 0.05);
+  }
 }
 
 export const soundEngine = new SoundEngine();

@@ -237,7 +237,7 @@ const DnaHelixCore = ({ data, setSelection }: any) => {
     );
 };
 
-export const CelestialDNASection = ({ data, setActiveTab }: { data: any, setActiveTab?: (tab: any) => void }) => {
+export default function CelestialDNASection({ data, setActiveTab }: { data: any, setActiveTab?: (tab: any) => void }) {
     const [selectedNode, setSelectedNode] = useState<any>(null);
     const { saveToChat } = useHigherMind();
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Volume2, Database, Image as ImageIcon, Zap, Globe, Video, Scan, Bolt, Brain, Activity, Settings2, Palette, Eye, ArrowUpRight } from 'lucide-react';
+import { X, Volume2, Database, Image as ImageIcon, Zap, Globe, Video, Scan, Bolt, Brain, Activity, Settings2, Palette, Eye, ArrowUpRight, Play, Sparkles } from 'lucide-react';
 import { useHigherMind, AIModule } from './HigherMindProvider';
 import { soundEngine } from '../lib/soundEffects';
 
@@ -24,6 +24,8 @@ export const HigherMindSettings: React.FC<HigherMindSettingsProps> = ({ isOpen, 
       case 'scan': return <Scan className="w-5 h-5" />;
       case 'bolt': return <Bolt className="w-5 h-5" />;
       case 'brain': return <Brain className="w-5 h-5" />;
+      case 'play': return <Play className="w-5 h-5" />;
+      case 'sparkles': return <Sparkles className="w-5 h-5" />;
       default: return <Zap className="w-5 h-5" />;
     }
   };

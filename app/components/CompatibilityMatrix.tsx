@@ -4,7 +4,7 @@ import { CosmicData } from '../types';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { Heart, HeartCrack, Info, Zap, Activity } from 'lucide-react';
 
-export const CompatibilityMatrix = ({ data }: { data: CosmicData }) => {
+export default function CompatibilityMatrix({ data }: { data: CosmicData }) {
   if (!data?.compatibility) {
     return (
       <div className="p-8 text-center text-stone-400 bg-black/40 rounded-3xl border border-white/10">

@@ -103,7 +103,7 @@ const HumanChakraModel = ({ chakras }: { chakras: ChakraData[] }) => {
   );
 };
 
-export const ChakraScene = ({ data }: { data: CosmicData }) => {
+export default function ChakraScene({ data }: { data: CosmicData }) {
   // If chakras are undefined in older data, generate some default ones based on numerology as a fallback or return null
   if (!data?.chakras || data.chakras.length === 0) {
      return <div className="p-8 text-center text-stone-400">Chakra data requires a new reading. Please regenerate your Cosmic Matrix.</div>;

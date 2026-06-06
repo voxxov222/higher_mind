@@ -1,35 +1,33 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 export const useLongPress = (
-  callback: () => void,
-  ms = 300
+  callback: (e: React.MouseEvent | React.TouchEvent) => void,
+  ms = 500 // Increased slightly to prevent accidental triggers
 ) => {
-  const [isPressing, setIsPressing] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const eventRef = useRef<React.MouseEvent | React.TouchEvent | null>(null);
 
-  useEffect(() => {
-    if (isPressing) {
-      timerRef.current = setTimeout(() => {
-        callback();
-      }, ms);
-    } else {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
+  const start = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    eventRef.current = e;
+    timerRef.current = setTimeout(() => {
+      if (eventRef.current) {
+        callback(eventRef.current);
       }
+    }, ms);
+  }, [callback, ms]);
+
+  const stop = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
     }
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [isPressing, callback, ms]);
+    eventRef.current = null;
+  }, []);
 
   return {
-    onMouseDown: () => setIsPressing(true),
-    onMouseUp: () => setIsPressing(false),
-    onMouseLeave: () => setIsPressing(false),
-    onTouchStart: () => setIsPressing(true),
-    onTouchEnd: () => setIsPressing(false),
+    onMouseDown: start,
+    onMouseUp: stop,
+    onMouseLeave: stop,
+    onTouchStart: start,
+    onTouchEnd: stop,
   };
 };

@@ -103,7 +103,9 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     { id: 'video_spark', name: 'Temporal Motion', icon: 'video', description: 'Fluid state-to-motion generation', enabled: false, category: 'vision' },
     { id: 'document_scanner', name: 'Pattern Analysis', icon: 'scan', description: 'Deep structural meaning extraction from visual inputs', enabled: false, category: 'vision' },
     { id: 'bolt', name: 'Latency Override', icon: 'bolt', description: 'Accelerated synaptic firing for low-latency responses', enabled: true, category: 'system' },
-    { id: 'network_intelligence', name: 'High Thinking', icon: 'brain', description: 'Enhanced multi-layered reasoning lattice', enabled: true, category: 'intelligence' }
+    { id: 'network_intelligence', name: 'High Thinking', icon: 'brain', description: 'Enhanced multi-layered reasoning lattice', enabled: true, category: 'intelligence' },
+    { id: 'auto_pilot', name: 'Animated Auto Pilot', icon: 'play', description: 'Autonomous navigation and dynamic animated orchestration of esoteric UI modules.', enabled: false, category: 'system' },
+    { id: 'intuitive_autonomous', name: 'Intuitive Autonomous', icon: 'sparkles', description: 'Agentic background synthesis and auto-projections based on neural inference.', enabled: false, category: 'intelligence' }
   ]);
 
   const toggleModule = (id: string) => {

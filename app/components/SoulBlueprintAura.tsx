@@ -401,7 +401,7 @@ const AspectLine = ({
     );
 };
 
-export const SoulBlueprintAura = ({ data }: { data?: any }) => {
+export default function SoulBlueprintAura({ data }: { data?: any }) {
   const [selectedBody, setSelectedBody] = useState<string | null>(null);
   const [selectedAspect, setSelectedAspect] = useState<number | null>(null);
 

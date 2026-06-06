@@ -45,9 +45,9 @@ export const generateSoulPathReport = async (cosmicData: CosmicData) => {
   Focus on the interconnectedness of these systems and how they shape the user's destiny.
 
   User Data:
-  Name: ${cosmicData.first_name}
-  Life Path Number: ${cosmicData.numerology.lifePathNumber}
-  Dominant Planet: ${cosmicData.astrology.dominantPlanet}
+  Name: ${cosmicData.nameAnalysis?.first?.name || 'Seeker'}
+  Life Path Number: ${cosmicData.numerology?.lifePath}
+  Dominant Planet: ${cosmicData.planets?.find(p => p.name === 'Sun')?.sign || 'Unknown'}
   Kabbalistic Mapping: ${JSON.stringify(cosmicData.kabbalah)}
 
   Return the output as a flat JSON object with the following keys exactly:
@@ -61,7 +61,7 @@ export const generateSoulPathReport = async (cosmicData: CosmicData) => {
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-2.5-pro",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -366,7 +366,7 @@ export const fetchCosmicChatResponse = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-2.5-flash',
       contents: [
         ...safeHistory,
         { role: 'user', parts: [{ text: userMessage }] }
@@ -933,12 +933,12 @@ export const fetchCelestialBlueprintExplanation = async (
       contents: `
         Analyze the user's cosmic positioning and guide them through a deep, cinematic-mystic explanation of their location in the universe.
         User's Natal profile:
-        - Name: \${cosmicData?.profile?.name || "Seeker"}
-        - Sun Sign: \${cosmicData?.astrology?.sun?.sign || "Unknown"} in House \${cosmicData?.astrology?.sun?.house || "Unknown"}
-        - Ascendant Sign: \${cosmicData?.astrology?.ascendant?.sign || "Unknown"}
+        - Name: ${cosmicData?.nameAnalysis?.first?.name || "Seeker"}
+        - Sun Sign: ${cosmicData?.planets?.find((p: any) => p.name === 'Sun')?.sign || "Unknown"} in House ${cosmicData?.planets?.find((p: any) => p.name === 'Sun')?.house || "Unknown"}
+        - Ascendant Sign: ${cosmicData?.planets?.find((p: any) => p.name === 'Ascendant')?.sign || "Unknown"}
         
-        Current Scale of Consciousness: \${level} Level
-        User's Navigation inquiry: "\${userPrompt}"
+        Current Scale of Consciousness: ${level} Level
+        User's Navigation inquiry: "${userPrompt}"
         
         Create an extremely immersive, sci-fi HUD inspired, but deeply spiritual response (150-250 words) that bridges astronomical truth (e.g. coordinates, movement, velocity, universal addresses) with Hermetic Kabbalistic or Astrological symbolism. Use deep, evocative display metaphors.
         

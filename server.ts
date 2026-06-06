@@ -46,10 +46,10 @@ async function startServer() {
       try {
           const { prompt, type } = req.body;
           const aiClient = getAI();
-          // Based on type, decide model. If 'video', use 'veo-3.1-lite-generate-preview'. If 'image', 'gemini-3.1-flash-image'
+          // Based on type, decide model. If 'video', use 'veo-2.0-generate-001'. If 'image', 'imagen-3.0-generate-002'
           if (type === 'video') {
               const operation = await aiClient.models.generateVideos({
-                  model: 'veo-3.1-lite-generate-preview',
+                  model: 'veo-2.0-generate-001',
                   prompt: prompt,
                   config: {
                       numberOfVideos: 1,
@@ -59,24 +59,15 @@ async function startServer() {
               });
               res.json({ operationName: operation.name });
           } else {
-              const interaction = await aiClient.interactions.create({
-                  model: 'gemini-3.1-flash-image',
-                  input: prompt,
-                  response_modalities: ['image', 'text'],
-                  generation_config: {
-                      image_config: { aspect_ratio: "1:1", image_size: "1K" },
-                  },
+              const response = await aiClient.models.generateImages({
+                  model: 'imagen-3.0-generate-002',
+                  prompt: prompt,
+                  config: { numberOfImages: 1, aspectRatio: '1:1' },
               });
-              // ... extract image ...
               let imageUrl = null;
-              for (const step of interaction.steps) {
-                  if (step.type === 'model_output') {
-                      const imageContent = step.content?.find(c => c.type === 'image');
-                      if (imageContent && imageContent.data) {
-                          imageUrl = `data:${imageContent.mime_type || 'image/png'};base64,${imageContent.data}`;
-                          break;
-                      }
-                  }
+              const generatedImage = response.generatedImages?.[0];
+              if (generatedImage?.image?.imageBytes) {
+                  imageUrl = `data:image/png;base64,${generatedImage.image.imageBytes}`;
               }
               res.json({ imageUrl });
           }

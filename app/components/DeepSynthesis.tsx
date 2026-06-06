@@ -1551,7 +1551,7 @@ const DeepSynthesisInner = ({ data, onPresentationRequest }: { data: CosmicData 
   );
 };
 
-export const DeepSynthesis = (props: { data: CosmicData | null; onPresentationRequest: () => void }) => {
+export default function DeepSynthesis(props: { data: CosmicData | null; onPresentationRequest: () => void }) {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);

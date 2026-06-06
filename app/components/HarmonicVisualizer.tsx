@@ -17,7 +17,7 @@ interface HarmonicVisualizerProps {
   data: CosmicData;
 }
 
-export const HarmonicVisualizer = ({ data }: HarmonicVisualizerProps) => {
+export default function HarmonicVisualizer({ data }: HarmonicVisualizerProps) {
   // --- DATA TRANSFORMATION ---
   
   // 1. Numerology Resonance (Radar)

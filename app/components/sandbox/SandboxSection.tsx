@@ -6,8 +6,9 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars, Float, Sphere, MeshDistortMaterial } from '@react-three/drei';
 import { ReactFlow, Controls, Background, applyNodeChanges, applyEdgeChanges, addEdge, Node, Edge, Connection, NodeChange, EdgeChange, Handle, Position, NodeProps } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { AnimeVisualizer as AnimeVisualizerComponent } from './AnimeVisualizer';
 
-type WidgetType = 'cpu' | 'memory' | 'mind_map' | 'radar_astral' | 'hologram' | 'bio_rhythm' | 'quantum_3d' | 'network_nodes' | 'matrix_stream' | 'activity_log' | 'energy_field' | 'entanglement' | 'image_upload' | 'video_upload' | 'gif_upload' | 'code_snippet' | 'custom_html' | 'live_stats' | 'ai_confidence' | 'cosmic_weather' | 'deep_learning' | 'frequency_monitor' | 'synaptic_coherence' | 'hud_crosshair' | 'global_vortex' | 'neural_plasticity' | 'quantum_entanglement' | 'holographic_storage' | 'astral_projection' | 'multiverse_gateway';
+type WidgetType = 'cpu' | 'memory' | 'mind_map' | 'radar_astral' | 'hologram' | 'bio_rhythm' | 'quantum_3d' | 'network_nodes' | 'matrix_stream' | 'activity_log' | 'energy_field' | 'entanglement' | 'image_upload' | 'video_upload' | 'gif_upload' | 'code_snippet' | 'custom_html' | 'live_stats' | 'ai_confidence' | 'cosmic_weather' | 'deep_learning' | 'frequency_monitor' | 'synaptic_coherence' | 'hud_crosshair' | 'global_vortex' | 'neural_plasticity' | 'quantum_entanglement' | 'holographic_storage' | 'astral_projection' | 'multiverse_gateway' | 'anime_visualizer';
 
 interface Widget {
   id: string;
@@ -43,6 +44,7 @@ const WIDGET_CATALOG: { type: WidgetType, title: string, icon: React.ReactNode, 
   { type: 'holographic_storage', title: 'Holographic Storage', icon: <HardDrive className="w-4 h-4" />, defaultSize: '1x2' },
   { type: 'astral_projection', title: 'Astral Projection', icon: <Video className="w-4 h-4" />, defaultSize: '2x2' },
   { type: 'multiverse_gateway', title: 'Multiverse Gateway', icon: <Box className="w-4 h-4" />, defaultSize: '2x2' },
+  { type: 'anime_visualizer', title: 'Anime Engine', icon: <Zap className="w-4 h-4 text-cyan-400" />, defaultSize: '2x2' },
 ];
 
 function CloudLightning() {
@@ -298,6 +300,7 @@ function WidgetContent({ widget }: { widget: Widget }) {
         case 'activity_log': return <ActivityLogWidget />;
         case 'network_nodes': return <NetworkNodesWidget />;
         case 'global_vortex': return <Quantum3DWidget />;
+        case 'anime_visualizer': return <AnimeVisualizerComponent />;
         case 'frequency_monitor': return <BioRhythmWidget />;
         case 'ai_confidence': return <RadarAstralWidget />;
         case 'cosmic_weather': return <MatrixWidget />;

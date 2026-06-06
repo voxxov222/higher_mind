@@ -2,33 +2,39 @@
 import * as React from 'react';
 import { useState, useRef, useEffect, ReactNode } from 'react';
 import * as d3 from 'd3';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { CosmicData, UserProfileConfig } from '../types';
 import { 
-  Sparkles, Moon, Sun, Star, Activity, Hexagon, Fingerprint, Network, Menu, X, 
+  Sparkles, Moon, Sun, Star, Activity, Hexagon, Fingerprint, Network, Menu, X, GripHorizontal,
   Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, 
   Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, Zap, Upload, Palette, 
   Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box, Key, Cpu,
-  Workflow, Radio, Loader2, Flame
+  Workflow, Radio, Loader2, Flame, Orbit, Hash, Map, Triangle, LibraryBig, History
 } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, Pie, PieChart as RechartsPieChart, CartesianGrid
 } from 'recharts';
 // --- SERVICE INTEGRATIONS ---
-import { fetchTimelineDepth, fetchTimelineDeepDiveOption, fetchGeneralDeepDive } from '../services/geminiService';
+import { fetchTimelineDepth, fetchTimelineDeepDiveOption, fetchGeneralDeepDive, fetchCosmicChatResponse } from '../services/geminiService';
 import { User } from 'firebase/auth';
 
 // --- DYNAMICALLY IMPORTED COMPONENTS ---
-const DeepSynthesis = React.lazy(() => import('./DeepSynthesis').then(m => ({ default: m.DeepSynthesis })));
-const HarmonicVisualizer = React.lazy(() => import('./HarmonicVisualizer').then(m => ({ default: m.HarmonicVisualizer })));
-const ChakraScene = React.lazy(() => import('./ChakraScene').then(m => ({ default: m.ChakraScene })));
-const CompatibilityMatrix = React.lazy(() => import('./CompatibilityMatrix').then(m => ({ default: m.CompatibilityMatrix })));
-const SoulBlueprintAura = React.lazy(() => import('./SoulBlueprintAura').then(m => ({ default: m.SoulBlueprintAura })));
-const CelestialDNASection = React.lazy(() => import('./CelestialDNASection').then(m => ({ default: m.CelestialDNASection })));
-const AlignmentSection = React.lazy(() => import('./AlignmentSection').then(m => ({ default: m.AlignmentSection })));
+const DeepSynthesis = React.lazy(() => import('./DeepSynthesis'));
+const HarmonicVisualizer = React.lazy(() => import('./HarmonicVisualizer'));
+const ChakraScene = React.lazy(() => import('./ChakraScene'));
+const CompatibilityMatrix = React.lazy(() => import('./CompatibilityMatrix'));
+const SoulBlueprintAura = React.lazy(() => import('./SoulBlueprintAura'));
+const CelestialDNASection = React.lazy(() => import('./CelestialDNASection'));
+const DailyCosmicPulse = React.lazy(() => import('./DailyCosmicPulse').then(m => ({ default: m.DailyCosmicPulse })));
+const HolographicProfile = React.lazy(() => import('./HolographicProfile').then(m => ({ default: m.HolographicProfile })));
+const StarChart3D = React.lazy(() => import('./StarChart3D').then(m => ({ default: m.StarChart3D })));
+const EgyptianPyramidAlignment = React.lazy(() => import('./EgyptianPyramid').then(m => ({ default: m.EgyptianPyramidAlignment })));
+const HolographicNotebook = React.lazy(() => import('./HolographicNotebook').then(m => ({ default: m.HolographicNotebook })));
 const AIAgentsSection = React.lazy(() => import('./AIAgentsSection').then(m => ({ default: m.AIAgentsSection })));
+const PastLifeEchoes = React.lazy(() => import('./PastLifeEchoes').then(m => ({ default: m.PastLifeEchoes })));
 const NeuralBrainSection = React.lazy(() => import('./NeuralBrainSection'));
+const GematriaHUD = React.lazy(() => import('./GematriaHUD').then(m => ({ default: m.GematriaHUD })));
 const CosmicCodex = React.lazy(() => import('./CosmicCodex').then(m => ({ default: m.CosmicCodex })));
 const AIEvolutionStream = React.lazy(() => import('./AIEvolutionStream').then(m => ({ default: m.AIEvolutionStream })));
 const AngelNumbersSection = React.lazy(() => import('./AngelNumbersSection').then(m => ({ default: m.AngelNumbersSection })));
@@ -48,13 +54,17 @@ import { HigherMindSettings } from './HigherMindSettings';
 const TetragrammatonHUD = React.lazy(() => import('./TetragrammatonHUD').then(m => ({ default: m.TetragrammatonHUD })));
 const Freemason33Section = React.lazy(() => import('./Freemasonry33Section').then(m => ({ default: m.Freemason33Section })));
 const TarotGnosis = React.lazy(() => import('./TarotGnosis').then(m => ({ default: m.TarotGnosis })));
+const ChineseZodiacGnosis = React.lazy(() => import('./ChineseZodiacGnosis').then(m => ({ default: m.ChineseZodiacGnosis })));
 import { soundEngine } from '../lib/soundEffects';
 const AstralCanvas = React.lazy(() => import('./AstralCanvas').then(m => ({ default: m.AstralCanvas })));
 const AvatarMatrix = React.lazy(() => import('./AvatarMatrix').then(m => ({ default: m.AvatarMatrix })));
 
 const QuantumEvolutionSection = React.lazy(() => import('./QuantumEvolutionSection').then(m => ({ default: m.QuantumEvolutionSection })));
 const ObsidianVaultSection = React.lazy(() => import('./ObsidianVaultSection').then(m => ({ default: m.ObsidianVaultSection })));
+const CelestialSphereSection = React.lazy(() => import('./CelestialSphereSection').then(m => ({ default: m.CelestialSphereSection })));
 const ChristSophiaSection = React.lazy(() => import('./ChristSophiaSection').then(m => ({ default: m.ChristSophiaSection })));
+const HolographicRainbowSection = React.lazy(() => import('./HolographicRainbowSection').then(m => ({ default: m.HolographicRainbowSection })));
+const FlowerOfLifeSection = React.lazy(() => import('./FlowerOfLifeSection').then(m => ({ default: m.FlowerOfLifeSection })));
 const VibrationalTuningSection = React.lazy(() => import('./VibrationalTuningSection').then(m => ({ default: m.VibrationalTuningSection })));
 const DestinyMatrix = React.lazy(() => import('./DestinyMatrix').then(m => ({ default: m.DestinyMatrix })));
 const CelestialBlueprintSection = React.lazy(() => import('./CelestialBlueprintSection').then(m => ({ default: m.CelestialBlueprintSection })));
@@ -69,8 +79,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix';
-  setActiveTab: (tab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix') => void;
+  activeTab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes';
+  setActiveTab: (tab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -466,7 +476,7 @@ const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedI
  * Floating menu for high-level actions: Sign In, Export, Capture, and external links.
  * [UTILITY & SYSTEM ACTIONS]
  */
-const ActionMenu = ({ user, data, onSignIn, onSignOut, onEditProfile, profileConfig, isMinimized, onToggleMinimize }: { user: User | null, data: CosmicData | null, onSignIn: () => void, onSignOut: () => void, onEditProfile: () => void, profileConfig?: UserProfileConfig, isMinimized: boolean, onToggleMinimize: () => void }) => {
+const ActionMenu = ({ user, data, onSignIn, onSignOut, onEditProfile, profileConfig, layoutMode, onSetLayoutMode }: { user: User | null, data: CosmicData | null, onSignIn: () => void, onSignOut: () => void, onEditProfile: () => void, profileConfig?: UserProfileConfig, layoutMode: 'minimized' | 'half' | 'full', onSetLayoutMode: (mode: 'minimized' | 'half' | 'full') => void }) => {
   const [open, setOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -558,10 +568,18 @@ const ActionMenu = ({ user, data, onSignIn, onSignOut, onEditProfile, profileCon
                  </>
               )}
               {data && (
-                <button onClick={() => { setOpen(false); onToggleMinimize(); }} className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-stone-200 transition-colors w-full text-left text-sm font-medium">
-                   {isMinimized ? <Maximize2 className="w-4 h-4 text-blue-400" /> : <Minimize2 className="w-4 h-4 text-orange-400" />}
-                   {isMinimized ? 'Expand Insight Box' : 'Minimize Insight Box'}
-                </button>
+                <div className="flex flex-col gap-1 border-b border-white/10 pb-2 mb-2">
+                  <div className="px-4 py-2 text-[10px] text-stone-400 font-mono uppercase tracking-widest">Workspace Layout</div>
+                  <button onClick={() => { setOpen(false); onSetLayoutMode('minimized'); }} className={`flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl transition-colors w-full text-left text-sm font-medium ${layoutMode === 'minimized' ? 'bg-white/10 text-white' : 'text-stone-300'}`}>
+                     <Minimize2 className="w-4 h-4 text-orange-400" /> Minimized
+                  </button>
+                  <button onClick={() => { setOpen(false); onSetLayoutMode('half'); }} className={`flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl transition-colors w-full text-left text-sm font-medium ${layoutMode === 'half' ? 'bg-white/10 text-white' : 'text-stone-300'}`}>
+                     <Minimize2 className="w-4 h-4 text-sky-400 rotate-90" /> Half Page
+                  </button>
+                  <button onClick={() => { setOpen(false); onSetLayoutMode('full'); }} className={`flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl transition-colors w-full text-left text-sm font-medium ${layoutMode === 'full' ? 'bg-white/10 text-white' : 'text-stone-300'}`}>
+                     <Maximize2 className="w-4 h-4 text-blue-400" /> Full Page
+                  </button>
+                </div>
               )}
               <button onClick={handleCaptureImage} className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-stone-200 transition-colors w-full text-left text-sm font-medium">
                  <Camera className="w-4 h-4 text-purple-400" /> Capture Image
@@ -1682,7 +1700,9 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
   
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedTimelineEvent, setSelectedTimelineEvent] = useState<any>(null);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [layoutMode, setLayoutMode] = useState<'minimized' | 'half' | 'full'>('half');
+  const dragControls = useDragControls();
+  const [isGematriaHUDOpen, setIsGematriaHUDOpen] = useState(false);
 
   const [deepDiveData, setDeepDiveData] = useState<{ 
     title: string; 
@@ -1759,7 +1779,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
       // Split into sentences for better reliability to avoid Chrome 15-second cutoff
       // This regex captures chunks up to punctuation or new lines, including the punctuation
       const sentenceRegex = /[^.!?\n]+[.!?\n]*/g;
-      let sentences = cleanText.match(sentenceRegex);
+      let sentences: string[] = cleanText.match(sentenceRegex) || [];
       
       if (!sentences || sentences.length === 0) {
           sentences = [cleanText];
@@ -1845,7 +1865,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
 
   useEffect(() => {
     // Un-minimize when a tab is selected
-    setIsMinimized(false);
+    setLayoutMode('half');
   }, [activeTab]);
 
   // --- DEEP DIVE & RESEARCH LOGIC ---
@@ -1950,8 +1970,37 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
     }
   };
 
-  const { activeTheme, isProjected, setIsProjected } = useHigherMind();
+  const { activeTheme, isProjected, setIsProjected, aiModules } = useHigherMind();
   const themeColor = activeTheme.primaryColor;
+
+  // Auto Pilot Engine
+  useEffect(() => {
+    const autoPilot = aiModules.find(m => m.id === 'auto_pilot')?.enabled;
+    if (autoPilot && data) {
+      const tabsToCycle = ['avatar_matrix', 'torus', 'soul_path', 'brain', 'synthesis', 'flower_of_life', 'destiny_matrix', 'celestial_dna', 'harmonics'];
+      let currentIdx = tabsToCycle.indexOf(activeTab);
+      
+      const interval = setInterval(() => {
+        currentIdx = (currentIdx + 1) % tabsToCycle.length;
+        setActiveTab(tabsToCycle[currentIdx] as any);
+      }, 15000); // cycle every 15 seconds
+      
+      return () => clearInterval(interval);
+    }
+  }, [aiModules, activeTab, data]);
+
+  // Intuitive Autonomous Engine
+  useEffect(() => {
+    const intuitive = aiModules.find(m => m.id === 'intuitive_autonomous')?.enabled;
+    if (intuitive && data) {
+      // Periodically trigger a random deep insight popup or subtle notification
+      const interval = setInterval(() => {
+        handleGeneralDeepDive('Autonomous Insight Generated', 'A spontaneous cosmic synchronization was detected in your background matrix.');
+      }, 60000); // 60 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [aiModules, data]);
 
   useEffect(() => {
     if (loadedInputs) {
@@ -1973,13 +2022,19 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
         onSignOut={onSignOut} 
         onEditProfile={() => setIsProfileModalOpen(true)} 
         profileConfig={profileConfig} 
-        isMinimized={isMinimized}
-        onToggleMinimize={() => setIsMinimized(!isMinimized)}
+        layoutMode={layoutMode}
+        onSetLayoutMode={setLayoutMode}
       />
       <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} profileConfig={profileConfig || {} as UserProfileConfig} onUpdateProfile={onUpdateProfile} loadedInputs={loadedInputs} isReading={isReading} handleReadOutLoud={handleReadOutLoud} />
       <React.Suspense fallback={null}>
         <VoiceCommander setActiveTab={setActiveTab} />
       </React.Suspense>
+
+      {isGematriaHUDOpen && (
+        <React.Suspense fallback={null}>
+          <GematriaHUD onClose={() => setIsGematriaHUDOpen(false)} defaultText={name} />
+        </React.Suspense>
+      )}
 
       {/* Brand Header */}
       <header className="flex justify-between items-center z-10 pointer-events-auto">
@@ -1987,7 +2042,21 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
           <Hexagon style={{ color: themeColor }} />
           HIGHER 🧠 MIND
         </h1>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 sm:gap-6">
+          <button 
+            onClick={() => {
+              soundEngine.neuralClick();
+              setIsGematriaHUDOpen(!isGematriaHUDOpen);
+            }}
+            className={`flex items-center gap-2 px-4 py-2 border rounded-xl transition-all group ${
+              isGematriaHUDOpen 
+                ? "bg-blue-500/20 border-blue-500/50 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.3)]" 
+                : "bg-white/5 border-white/10 text-stone-400 hover:bg-white/10"
+            }`}
+          >
+            <Hash className={`w-4 h-4 ${isGematriaHUDOpen ? "text-blue-400 animate-pulse" : "text-stone-500"}`} />
+            <span className="text-[10px] uppercase tracking-widest font-bold hidden sm:inline">Holo-Gematria</span>
+          </button>
           <button 
             onClick={() => {
               soundEngine.neuralClick();
@@ -2058,12 +2127,15 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               </button>
             </form>
           </motion.div>
-        ) : isMinimized ? (
+        ) : layoutMode === 'minimized' ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
+            drag
+            dragMomentum={false}
             className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full p-3 shadow-2xl cursor-pointer hover:bg-white/10 transition-colors mx-auto sm:mx-0 sm:ml-0 w-max"
-            onClick={() => setIsMinimized(false)}
+            onClick={() => setLayoutMode('half')}
+            title="Expand Workspace"
           >
             <Maximize2 className="w-6 h-6 text-white" />
           </motion.div>
@@ -2093,7 +2165,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`pointer-events-auto w-full max-w-xl h-full max-h-[80vh] flex flex-col overflow-hidden relative mx-auto sm:mx-0 sm:ml-0 transition-all duration-500 ${
+            drag
+            dragListener={false}
+            dragControls={dragControls}
+            dragMomentum={false}
+            className={`pointer-events-auto resize min-w-[320px] min-h-[400px] flex flex-col overflow-hidden relative transition-[background,border] duration-500 ${layoutMode === 'full' ? 'w-full max-w-[calc(100vw-2rem)] md:max-w-7xl h-[95vh] mx-auto' : 'w-full max-w-xl h-[80vh] mx-auto sm:mx-0 sm:ml-0'} ${
               activeTheme.cardBg
             } ${
               activeTheme.fontFamily
@@ -2181,15 +2257,34 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               </div>
             )}
 
-            <button 
-              onClick={() => setIsMinimized(true)}
-              className="absolute top-4 right-4 z-20 bg-black/50 hover:bg-white/10 p-2 rounded-full border border-white/10 text-stone-400 hover:text-white transition-colors"
-            >
-              <Minimize2 className="w-4 h-4" />
-            </button>
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 cursor-grab active:cursor-grabbing p-1 opacity-50 hover:opacity-100 transition-opacity" onPointerDown={(e) => dragControls.start(e)} title="Drag to move">
+              <GripHorizontal className="w-5 h-5 text-white" />
+            </div>
+
+            <div className="absolute top-4 right-4 z-20 flex gap-2">
+              <button 
+                onClick={() => setLayoutMode(layoutMode === 'full' ? 'half' : 'full')}
+                className="bg-black/50 hover:bg-white/10 p-2 rounded-full border border-white/10 text-stone-400 hover:text-white transition-colors"
+                title={layoutMode === 'full' ? 'Exit Full Screen' : 'Full Screen'}
+              >
+                <Maximize2 className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setLayoutMode('minimized')}
+                className="bg-black/50 hover:bg-white/10 p-2 rounded-full border border-white/10 text-stone-400 hover:text-white transition-colors"
+                title="Minimize"
+              >
+                <Minimize2 className="w-4 h-4" />
+              </button>
+            </div>
             <div className="flex border-b border-white/10 p-2 gap-2 overflow-x-auto no-scrollbar pr-14 flex-nowrap shrink-0">
               <Tab active={activeTab === 'avatar_matrix'} tabId="avatar_matrix" onClick={() => setActiveTab('avatar_matrix')} icon={<UserIcon className="w-4 h-4 text-emerald-400 animate-pulse"/>}>Avatar Core Summary</Tab>
               <Tab active={activeTab === 'identity'} tabId="identity" onClick={() => setActiveTab('identity')} icon={<UserIcon className="w-4 h-4"/>}>My Identity</Tab>
+              <Tab active={activeTab === 'holographic_profile'} tabId="holographic_profile" onClick={() => setActiveTab('holographic_profile')} icon={<Sparkles className="w-4 h-4 text-purple-400"/>}>Holo-Profile</Tab>
+              <Tab active={activeTab === 'egyptian'} tabId="egyptian" onClick={() => setActiveTab('egyptian')} icon={<Triangle className="w-4 h-4 text-yellow-500"/>}>Egyptian Matrix</Tab>
+              <Tab active={activeTab === 'notebook'} tabId="notebook" onClick={() => setActiveTab('notebook')} icon={<LibraryBig className="w-4 h-4 text-indigo-400"/>}>Holo-Notebook</Tab>
+              <Tab active={activeTab === 'past_life_echoes'} tabId="past_life_echoes" onClick={() => setActiveTab('past_life_echoes')} icon={<History className="w-4 h-4 text-fuchsia-400"/>}>Past Life Echoes</Tab>
+              <Tab active={activeTab === 'star_chart'} tabId="star_chart" onClick={() => setActiveTab('star_chart')} icon={<Map className="w-4 h-4 text-teal-400"/>}>Star Chart</Tab>
               <Tab active={activeTab === 'torus'} tabId="torus" onClick={() => setActiveTab('torus')} icon={<Activity className="w-4 h-4"/>}>Soul Blueprint</Tab>
               <Tab active={activeTab === 'soul_path'} tabId="soul_path" onClick={() => setActiveTab('soul_path')} icon={<Compass className="w-4 h-4"/>}>Soul Path</Tab>
               <Tab active={activeTab === 'brain'} tabId="brain" onClick={() => setActiveTab('brain')} icon={<Brain className="w-4 h-4"/>}>Neural Core</Tab>
@@ -2216,6 +2311,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'gematria_calc'} tabId="gematria_calc" onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
               <Tab active={activeTab === 'golden_ratio'} tabId="golden_ratio" onClick={() => setActiveTab('golden_ratio')} icon={<Grid className="w-4 h-4 text-amber-500" />}>Kathara Grid</Tab>
               <Tab active={activeTab === 'sky_map'} tabId="sky_map" onClick={() => setActiveTab('sky_map')} icon={<Compass className="w-4 h-4 text-indigo-400"/>}>Atlas Sky Map</Tab>
+              <Tab active={activeTab === 'celestial_sphere'} tabId="celestial_sphere" onClick={() => setActiveTab('celestial_sphere')} icon={<Orbit className="w-4 h-4 text-fuchsia-400"/>}>Celestial Sphere</Tab>
               <Tab active={activeTab === 'celestial_blueprint'} tabId="celestial_blueprint" onClick={() => setActiveTab('celestial_blueprint')} icon={<Compass className="w-4 h-4 text-emerald-400 animate-pulse"/>}>Celestial Blueprint</Tab>
               <Tab active={activeTab === 'obsidian'} tabId="obsidian" onClick={() => setActiveTab('obsidian')} icon={<BookOpen className="w-4 h-4 text-purple-400"/>}>Akashic Vault</Tab>
               <Tab active={activeTab === 'codex'} tabId="codex" onClick={() => setActiveTab('codex')} icon={<Search className="w-4 h-4 text-emerald-400"/>}>Cosmic Codex</Tab>
@@ -2223,6 +2319,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'christ_sophia'} tabId="christ_sophia" onClick={() => setActiveTab('christ_sophia')} icon={<Sparkles className="w-4 h-4 text-amber-300 animate-pulse"/>}>Christ-Sophia Gnosis</Tab>
               <Tab active={activeTab === 'tetragrammaton'} tabId="tetragrammaton" onClick={() => setActiveTab('tetragrammaton')} icon={<Hexagon className="w-4 h-4 text-[#fbbf24]"/>}>YHVH HUD</Tab>
               <Tab active={activeTab === 'freemason33'} tabId="freemason33" onClick={() => setActiveTab('freemason33')} icon={<Sparkles className="w-4 h-4 text-amber-400 animate-pulse"/>}>Free Mason 33</Tab>
+              <Tab active={activeTab === 'holographic_rainbow'} tabId="holographic_rainbow" onClick={() => setActiveTab('holographic_rainbow')} icon={<Sparkles className="w-4 h-4 text-purple-400 animate-pulse"/>}>Holographic Rainbow</Tab>
+              <Tab active={activeTab === 'flower_of_life'} tabId="flower_of_life" onClick={() => setActiveTab('flower_of_life')} icon={<Hexagon className="w-4 h-4 text-cyan-400 animate-pulse"/>}>Flower of Life Matrix</Tab>
               <Tab active={activeTab === 'chinese_zodiac'} tabId="chinese_zodiac" onClick={() => setActiveTab('chinese_zodiac')} icon={<Flame className="w-4 h-4 text-red-500 animate-pulse"/>}>Chinese Zodiac</Tab>
               <Tab active={activeTab === 'destiny_matrix'} tabId="destiny_matrix" onClick={() => setActiveTab('destiny_matrix')} icon={<Compass className="w-4 h-4 text-emerald-400"/>}>Destiny Matrix</Tab>
               <Tab active={activeTab === 'tarot'} tabId="tarot" onClick={() => setActiveTab('tarot')} icon={<Sparkles className="w-4 h-4 text-pink-400 animate-pulse"/>}>Tarot Arcana</Tab>
@@ -2965,6 +3063,46 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                   </motion.div>
                 )}
 
+                {activeTab === 'holographic_profile' && (
+                  <motion.div key="holographic_profile" initial={{opacity: 0, scale: 0.98}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.98}} transition={{duration: 0.5}} className="w-full h-full min-h-[800px]">
+                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-white/5"><div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" /></div>}>
+                      <HolographicProfile />
+                    </React.Suspense>
+                  </motion.div>
+                )}
+
+                {activeTab === 'star_chart' && (
+                  <motion.div key="star_chart" initial={{opacity: 0, scale: 0.98}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.98}} transition={{duration: 0.5}} className="w-full h-full min-h-[800px]">
+                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-white/5"><div className="w-12 h-12 border-4 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" /></div>}>
+                      <StarChart3D />
+                    </React.Suspense>
+                  </motion.div>
+                )}
+
+                {activeTab === 'egyptian' && (
+                  <motion.div key="egyptian" initial={{opacity: 0, scale: 0.98}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.98}} transition={{duration: 0.5}} className="w-full h-full min-h-[800px]">
+                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-yellow-900/30"><div className="w-12 h-12 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full animate-spin" /></div>}>
+                      <EgyptianPyramidAlignment />
+                    </React.Suspense>
+                  </motion.div>
+                )}
+
+                {activeTab === 'notebook' && (
+                  <motion.div key="notebook" initial={{opacity: 0, scale: 0.98}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.98}} transition={{duration: 0.5}} className="w-full h-full min-h-[800px]">
+                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-indigo-900/30"><div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" /></div>}>
+                      <HolographicNotebook />
+                    </React.Suspense>
+                  </motion.div>
+                )}
+
+                {activeTab === 'past_life_echoes' && (
+                  <motion.div key="past_life_echoes" initial={{opacity: 0, scale: 0.98}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.98}} transition={{duration: 0.5}} className="w-full h-full min-h-[800px]">
+                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-fuchsia-900/30"><div className="w-12 h-12 border-4 border-fuchsia-500/30 border-t-fuchsia-500 rounded-full animate-spin" /></div>}>
+                      <PastLifeEchoes userData={data} />
+                    </React.Suspense>
+                  </motion.div>
+                )}
+
                 {activeTab === 'torus' && (
                   <motion.div key="torus" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 text-stone-200 font-light leading-relaxed relative min-h-[70vh]">
                     <SoulBlueprintTab 
@@ -3265,7 +3403,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'alignment' && (
                   <motion.div key="alignment" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="h-full min-h-[700px]">
                     <React.Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="w-8 h-8 text-teal-400 animate-spin" /></div>}>
-                      <AlignmentSection cosmicData={data} />
+                      <DailyCosmicPulse />
                     </React.Suspense>
                   </motion.div>
                 )}
@@ -3290,6 +3428,13 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'sky_map' && (
                   <motion.div key="sky_map" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <SkyMapSection />
+                  </motion.div>
+                )}
+                {activeTab === 'celestial_sphere' && (
+                  <motion.div key="celestial_sphere" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full min-h-[800px]">
+                    <React.Suspense fallback={<div className="flex h-full w-full justify-center items-center"><div className="w-8 h-8 rounded-full border-t border-indigo-400 animate-spin"></div></div>}>
+                      <CelestialSphereSection data={data} />
+                    </React.Suspense>
                   </motion.div>
                 )}
                 {activeTab === 'celestial_blueprint' && (
@@ -3340,6 +3485,17 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'freemason33' && (
                   <motion.div key="freemason33" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <Freemason33Section data={data} />
+                  </motion.div>
+                )}
+
+                {activeTab === 'holographic_rainbow' && (
+                  <motion.div key="holographic_rainbow" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <HolographicRainbowSection />
+                  </motion.div>
+                )}
+                {activeTab === 'flower_of_life' && (
+                  <motion.div key="flower_of_life" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <FlowerOfLifeSection />
                   </motion.div>
                 )}
                 {activeTab === 'chinese_zodiac' && (

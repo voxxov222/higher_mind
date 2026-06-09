@@ -2,6 +2,13 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { Thought, Feeling, Experience, SynapticCluster, ConsciousnessPacket, UserProfileConfig, AstralTheme } from '../types';
 import { ASTRAL_THEMES } from '../utils/themes';
 
+export interface CosmicContextConfig {
+  enabled: boolean;
+  type: 'lunar' | 'transit';
+  transit: string;
+  blurIntensity: 'low' | 'medium' | 'high';
+}
+
 interface HigherMindContextType {
   thoughts: Thought[];
   feelings: Feeling[];
@@ -27,6 +34,10 @@ interface HigherMindContextType {
   projectedItems: { id: string; type: string; componentName: string; children: React.ReactNode }[];
   addProjectedItem: (item: { id: string; type: string; componentName: string; children: React.ReactNode }) => void;
   removeProjectedItem: (id: string) => void;
+  cosmicContext: CosmicContextConfig;
+  setCosmicContext: (ctx: Partial<CosmicContextConfig>) => void;
+  cosmicData: CosmicData | null;
+  setCosmicData: (data: CosmicData | null) => void;
 }
 
 export interface AIModule {
@@ -81,8 +92,138 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
-  const activeTheme = ASTRAL_THEMES.find(t => t.id === activeThemeId) || ASTRAL_THEMES[0];
+  // Cosmic Context State
+  const [cosmicContext, setCosmicContextState] = useState<CosmicContextConfig>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('astral_cosmic_context');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    return {
+      enabled: false,
+      type: 'lunar',
+      transit: 'mercury_retrograde',
+      blurIntensity: 'medium',
+    };
+  });
+
+  const setCosmicContext = (updates: Partial<CosmicContextConfig>) => {
+    setCosmicContextState(prev => {
+      const next = { ...prev, ...updates };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('astral_cosmic_context', JSON.stringify(next));
+      }
+      return next;
+    });
+  };
+
+  // Lunar Phase Finder
+  const getLunarPhase = (date: Date) => {
+    const knownNewMoon = new Date('2000-01-06T18:14:00Z').getTime();
+    const msDiff = date.getTime() - knownNewMoon;
+    const days = msDiff / (1000 * 60 * 60 * 24);
+    const cycle = 29.530588853;
+    const phaseIndex = (days / cycle) % 1;
+    const finalIndex = phaseIndex < 0 ? phaseIndex + 1 : phaseIndex;
+
+    if (finalIndex < 0.03 || finalIndex >= 0.97) {
+      return { name: "New Moon", phase: "new", primary: "#9ca3af", secondary: "#1e1b4b", desc: "Dark Void & Quiet Seed", label: "VOID", freq: 174 };
+    } else if (finalIndex >= 0.03 && finalIndex < 0.22) {
+      return { name: "Waxing Crescent", phase: "waxing_crescent", primary: "#10b981", secondary: "#115e59", desc: "Emerging Light & Intention Spark", label: "EMERGE", freq: 285 };
+    } else if (finalIndex >= 0.22 && finalIndex < 0.28) {
+      return { name: "First Quarter", phase: "first_quarter", primary: "#06b6d4", secondary: "#4338ca", desc: "Instigation, Tension & Decision Point", label: "DECISION", freq: 396 };
+    } else if (finalIndex >= 0.28 && finalIndex < 0.47) {
+      return { name: "Waxing Gibbous", phase: "waxing_gibbous", primary: "#a855f7", secondary: "#db2777", desc: "Refining & Core Focus", label: "ABSORB", freq: 417 };
+    } else if (finalIndex >= 0.47 && finalIndex < 0.53) {
+      return { name: "Full Moon", phase: "full", primary: "#fef08a", secondary: "#f5f5f5", desc: "Full Cosmic Connection & Manifestation", label: "SUMMIT", freq: 528 };
+    } else if (finalIndex >= 0.53 && finalIndex < 0.72) {
+      return { name: "Waning Gibbous", phase: "waning_gibbous", primary: "#8b5cf6", secondary: "#4f46e5", desc: "Gratitude, Sharing & Release", label: "SHED", freq: 639 };
+    } else if (finalIndex >= 0.72 && finalIndex < 0.78) {
+      return { name: "Last Quarter", phase: "last_quarter", primary: "#ef4444", secondary: "#d97706", desc: "Inner Audit & Re-evaluating Path", label: "AUDIT", freq: 741 };
+    } else {
+      return { name: "Waning Crescent", phase: "waning_crescent", primary: "#14b8a6", secondary: "#020617", desc: "Total Surrender & Deep Slumber", label: "SURRENDER", freq: 852 };
+    }
+  };
+
+  // Astrological Transits Options
+  const TRANSITS_CONFIG: Record<string, { name: string; primary: string; secondary: string; desc: string; label: string; freq: number }> = {
+    mercury_retrograde: {
+      name: "Mercury Retrograde",
+      primary: "#38bdf8", // Sky blue glow
+      secondary: "#f97316", // Mercury ginger/amber
+      desc: "Time for introspection, back-ups, and reviewing cosmic coordinates.",
+      label: "COGNITIVE REST",
+      freq: 741
+    },
+    saturn_return: {
+      name: "Saturn Return",
+      primary: "#eab308", // Golden amber
+      secondary: "#18181b", // Midnight coal
+      desc: "Major threshold crossing, demanding discipline and structured alignment.",
+      label: "BLUEPRINT LOCK",
+      freq: 417
+    },
+    venus_trine: {
+      name: "Venus Trine",
+      primary: "#f472b6", // Rose gold
+      secondary: "#059669", // Vibrant emerald
+      desc: "Sacred aesthetic harmony, deep connection, and beautiful sonic alignment.",
+      label: "HARMONIC FLOW",
+      freq: 528
+    },
+    jupiter_conjunction: {
+      name: "Jupiter Conjunction",
+      primary: "#c084fc", // Radiant amethyst
+      secondary: "#eab308", // Shimmering gold
+      desc: "Quantum portal trigger, offering cosmic fortune and dynamic synchronization.",
+      label: "EXPANSION",
+      freq: 963
+    }
+  };
+
+  const baseActiveTheme = ASTRAL_THEMES.find(t => t.id === activeThemeId) || ASTRAL_THEMES[0];
   const themes = ASTRAL_THEMES;
+
+  const activeTheme = React.useMemo(() => {
+    if (!cosmicContext.enabled) return baseActiveTheme;
+
+    let overlay;
+    if (cosmicContext.type === 'lunar') {
+      overlay = getLunarPhase(new Date());
+    } else {
+      overlay = TRANSITS_CONFIG[cosmicContext.transit] || TRANSITS_CONFIG.mercury_retrograde;
+    }
+
+    // Dynamic blur class override
+    let blurClass = 'backdrop-blur-md bg-stone-950/45';
+    let borderWeight = 'border';
+    if (cosmicContext.blurIntensity === 'low') {
+      blurClass = 'backdrop-blur-sm bg-stone-900/40';
+      borderWeight = 'border';
+    } else if (cosmicContext.blurIntensity === 'high') {
+      blurClass = 'backdrop-blur-[24px] bg-black/60';
+      borderWeight = 'border-2';
+    }
+
+    return {
+      ...baseActiveTheme,
+      name: `${baseActiveTheme.name} ✦ ${overlay.name}`,
+      primaryColor: overlay.primary,
+      secondaryColor: overlay.secondary,
+      cardBg: `${blurClass} ${borderWeight} border-white/15`,
+      glowStyle: `shadow-[0_0_22px_${overlay.primary}30] hover:shadow-[0_0_38px_${overlay.primary}60] duration-1000`,
+      effects: {
+        ...baseActiveTheme.effects,
+        cosmicModified: true,
+        cosmicDetails: overlay
+      }
+    } as any;
+  }, [baseActiveTheme, cosmicContext]);
 
   const [thoughts, setThoughts] = useState<Thought[]>([]);
 
@@ -93,6 +234,7 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [alignment, setAlignment] = useState(0.7);
   const [savedMessages, setSavedMessages] = useState<{ id: string; title: string; content: string; type: string }[]>([]);
   const [userData, setUserData] = useState<UserProfileConfig | null>(null);
+  const [cosmicData, setCosmicData] = useState<CosmicData | null>(null);
 
   const [aiModules, setAiModules] = useState<AIModule[]>([
     { id: 'audio_spark', name: 'Voice Matrix', icon: 'volume-2', description: 'Real-time consciousness-to-frequency conversion', enabled: true, category: 'audio' },
@@ -222,7 +364,11 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setIsProjected,
       projectedItems,
       addProjectedItem,
-      removeProjectedItem
+      removeProjectedItem,
+      cosmicContext,
+      setCosmicContext,
+      cosmicData,
+      setCosmicData
     }}>
       {children}
     </HigherMindContext.Provider>

@@ -8,9 +8,11 @@ import { motion, AnimatePresence } from 'motion/react';
 interface IdeaNode {
     id: string;
     text: string;
-    type: 'gematria' | 'hermetic' | 'custom';
+    type: 'gematria' | 'hermetic' | 'custom' | 'agent' | 'image' | 'file';
     position: [number, number, number];
     color: string;
+    animationType: string;
+    fileUrl?: string;
 }
 
 interface IdeaLink {
@@ -22,10 +24,95 @@ interface IdeaLink {
 const COLORS = {
     gematria: '#a855f7', // purple
     hermetic: '#eab308', // yellow
-    custom: '#38bdf8'    // cyan
+    custom: '#38bdf8',   // cyan
+    agent: '#ef4444',    // red
+    image: '#10b981',    // emerald
+    file: '#6366f1'      // indigo
 };
 
-const NodeObject = ({ node, isPlaying, updatePosition, connectMode, onNodeClick, activeNodeId }: { node: IdeaNode, isPlaying: boolean, updatePosition: (id: string, pos: [number, number, number]) => void, connectMode: string | null, onNodeClick: (id: string) => void, activeNodeId: string | null }) => {
+const ANIMATIONS = [
+    'float', 'spin-y', 'spin-x', 'spin-z', 'orbit', 'shake', 'zig-zag', 'pulse-scale', 
+    'pop-in-out', 'zoom', 'flash', 'explosion', 'lighting', 'fall', 'bounce', 'pendulum', 
+    'heartbeat', 'spiral-up', 'spiral-down', 'figure-eight', 'breathe', 'jitter', 'glitch', 
+    'wave-y', 'wave-x', 'wave-z', 'twister', 'vortex', 'jelly', 'wobble', 'flip', 'elastic', 
+    'hover-fast', 'sway', 'nod', 'roll', 'teleport', 'shiver', 'dance', 'tremor', 'whirlwind', 
+    'magnet', 'pulsing-star', 'orbit-fast', 'drunk', 'levitate', 'drop', 'hyper-spin', 'orbit-z', 'orbit-x'
+];
+
+const applyAnimation = (ref: THREE.Mesh | null, state: any, type: string, initialPos: [number, number, number], id: string) => {
+    if (!ref) return;
+    const t = state.clock.elapsedTime;
+    const offset = parseInt(id) || 0;
+    
+    // Reset defaults
+    ref.position.set(...initialPos);
+    ref.rotation.set(0, 0, 0);
+    ref.scale.set(1, 1, 1);
+    const material = ref.material as THREE.MeshStandardMaterial;
+    if (material) {
+        material.emissiveIntensity = 0.5;
+        material.opacity = 0.8;
+    }
+
+    switch(type) {
+        case 'float': ref.position.y += Math.sin(t * 2 + offset) * 0.2; break;
+        case 'spin-y': ref.rotation.y = t; break;
+        case 'spin-x': ref.rotation.x = t; break;
+        case 'spin-z': ref.rotation.z = t; break;
+        case 'orbit': 
+            ref.position.x = initialPos[0] + Math.cos(t + offset);
+            ref.position.z = initialPos[2] + Math.sin(t + offset);
+            break;
+        case 'shake': ref.position.x += (Math.random() - 0.5) * 0.1; break;
+        case 'zig-zag': ref.position.x += Math.sin(t * 5) * 0.5; ref.position.y += Math.cos(t * 5) * 0.5; break;
+        case 'pulse-scale': { const s = 1 + Math.sin(t * 3) * 0.5; ref.scale.set(s,s,s); break; }
+        case 'pop-in-out': { const s = Math.abs(Math.sin(t)); ref.scale.set(s,s,s); break; }
+        case 'zoom': { const s = 1 + Math.sin(t * 2) * 1; ref.scale.set(s,s,s); break; }
+        case 'flash': if(material) material.emissiveIntensity = Math.random() > 0.5 ? 5 : 0; break;
+        case 'explosion': { const s = Math.exp(-((t*2)%2)); ref.scale.set(s*3,s*3,s*3); if(material) material.opacity = s; break; }
+        case 'lighting': if(material) material.emissiveIntensity = Math.random() * 3; break;
+        case 'fall': ref.position.y = initialPos[1] + 2 - ((t * 4) % 4); break;
+        case 'bounce': ref.position.y += Math.abs(Math.sin(t * 3)); break;
+        case 'pendulum': ref.rotation.z = Math.sin(t * 2) * 0.5; ref.position.x += Math.sin(t * 2) * 0.5; break;
+        case 'heartbeat': { const s = 1 + Math.pow(Math.sin(t * 4), 6) * 0.4; ref.scale.set(s,s,s); break; }
+        case 'spiral-up': ref.position.x += Math.cos(t*3); ref.position.z += Math.sin(t*3); ref.position.y += (t % 2); break;
+        case 'spiral-down': ref.position.x += Math.cos(t*3); ref.position.z += Math.sin(t*3); ref.position.y -= (t % 2); break;
+        case 'figure-eight': ref.position.x += Math.sin(t)*2; ref.position.y += Math.sin(t*2); break;
+        case 'breathe': { const s = 1 + Math.sin(t) * 0.2; ref.scale.set(s,s,s); if(material) material.emissiveIntensity = s; break; }
+        case 'jitter': ref.position.set(initialPos[0]+(Math.random()-0.5)*0.2, initialPos[1]+(Math.random()-0.5)*0.2, initialPos[2]+(Math.random()-0.5)*0.2); break;
+        case 'glitch': if(Math.random() < 0.1) ref.position.set(initialPos[0]+(Math.random()-0.5), initialPos[1]+(Math.random()-0.5), initialPos[2]); break;
+        case 'wave-y': ref.position.y += Math.sin(t * 4 + initialPos[0]) * 0.5; break;
+        case 'wave-x': ref.position.x += Math.sin(t * 4 + initialPos[1]) * 0.5; break;
+        case 'wave-z': ref.position.z += Math.sin(t * 4 + initialPos[0]) * 0.5; break;
+        case 'twister': ref.rotation.y = t * 5; ref.scale.x = 0.5 + Math.abs(Math.sin(t)); break;
+        case 'vortex': ref.position.x += Math.cos(t*5)*(1+Math.sin(t)); ref.position.z += Math.sin(t*5)*(1+Math.sin(t)); break;
+        case 'jelly': ref.scale.set(1+Math.sin(t*5)*0.2, 1-Math.sin(t*5)*0.2, 1+Math.sin(t*5)*0.2); break;
+        case 'wobble': ref.rotation.set(Math.sin(t*2)*0.2, Math.cos(t*3)*0.2, Math.sin(t*4)*0.2); break;
+        case 'flip': ref.rotation.x = Math.floor(t % 2) * Math.PI; break;
+        case 'elastic': ref.position.y += Math.sin(t * 10) * Math.exp(-((t*2)%2)); break;
+        case 'hover-fast': ref.position.y += Math.sin(t * 10) * 0.1; break;
+        case 'sway': ref.rotation.z = Math.sin(t) * 0.3; break;
+        case 'nod': ref.rotation.x = Math.sin(t*3) * 0.3; break;
+        case 'roll': ref.rotation.x = t; ref.position.z += Math.sin(t); break;
+        case 'teleport': if (Math.floor(t*2) % 2 === 0) ref.position.x += 1; else ref.position.x -= 1; break;
+        case 'shiver': ref.rotation.z = (Math.random()-0.5)*0.2; break;
+        case 'dance': ref.position.y += Math.abs(Math.sin(t*5)); ref.rotation.y += Math.sin(t*2); break;
+        case 'tremor': ref.position.y += (Math.random()-0.5)*0.1; ref.position.x += (Math.random()-0.5)*0.1; break;
+        case 'whirlwind': ref.position.x += Math.cos(t*10)*0.5; ref.position.y += t%2; ref.position.z += Math.sin(t*10)*0.5; break;
+        case 'magnet': ref.position.x += Math.sin(t)*0.5; ref.position.y += Math.cos(t)*0.5; break;
+        case 'pulsing-star': { const s = 1 + Math.sin(t*10)*0.1; ref.scale.set(s,s,s); if(material) material.emissiveIntensity = Math.random() > 0.5 ? 2 : 0.5; break; }
+        case 'orbit-fast': ref.position.x = initialPos[0] + Math.cos(t*4 + offset)*2; ref.position.y = initialPos[1] + Math.sin(t*4 + offset)*2; break;
+        case 'drunk': ref.position.x += Math.sin(t)*0.5; ref.position.y += Math.sin(t*0.5)*0.5; ref.rotation.z = Math.sin(t*0.2)*0.2; break;
+        case 'levitate': ref.position.y = initialPos[1] + Math.min(t%4, 2); break;
+        case 'drop': ref.position.y = initialPos[1] + 2 - Math.min(t%2 * 4, 2); break;
+        case 'hyper-spin': ref.rotation.y = t * 20; ref.rotation.x = t * 10; break;
+        case 'orbit-z': ref.position.y = initialPos[1] + Math.max(Math.cos(t), 0); ref.position.x = initialPos[0] + Math.sin(t); break;
+        case 'orbit-x': ref.position.y = initialPos[1] + Math.sin(t); ref.position.z = initialPos[2] + Math.cos(t); break;
+        default: ref.position.y += Math.sin(t * 2 + offset) * 0.05; break;
+    }
+};
+
+const NodeObject = ({ node, isPlaying, updatePosition, connectMode, onNodeClick, activeNodeId, updateNodeAnimation }: { node: IdeaNode, isPlaying: boolean, updatePosition: (id: string, pos: [number, number, number]) => void, connectMode: string | null, onNodeClick: (id: string) => void, activeNodeId: string | null, updateNodeAnimation: (id: string, ani: string) => void }) => {
     const meshRef = useRef<THREE.Mesh>(null);
     const [hovered, setHovered] = useState(false);
     const { camera, size, raycaster } = useThree();
@@ -39,7 +126,7 @@ const NodeObject = ({ node, isPlaying, updatePosition, connectMode, onNodeClick,
     // Dynamic floating effect when not dragging/playing
     useFrame((state) => {
         if (!isDragging && !isPlaying && meshRef.current) {
-            meshRef.current.position.y += Math.sin(state.clock.elapsedTime * 2 + parseInt(node.id)) * 0.002;
+            applyAnimation(meshRef.current, state, node.animationType, node.position, node.id);
         }
     });
 
@@ -57,17 +144,35 @@ const NodeObject = ({ node, isPlaying, updatePosition, connectMode, onNodeClick,
                     onNodeClick(node.id);
                 }}
             >
-                <sphereGeometry args={[isSelected ? 0.6 : 0.4, 32, 32]} />
+                {node.type === 'image' && node.fileUrl ? (
+                   <planeGeometry args={[1, 1]} />
+                ) : node.type === 'file' ? (
+                   <boxGeometry args={[0.5, 0.6, 0.1]} />
+                ) : node.type === 'agent' ? (
+                   <octahedronGeometry args={[isSelected ? 0.6 : 0.4]} />
+                ) : (
+                   <sphereGeometry args={[isSelected ? 0.6 : 0.4, 32, 32]} />
+                )}
+                
                 <meshStandardMaterial 
                     color={node.color} 
                     emissive={node.color}
                     emissiveIntensity={hovered || isSelected ? 2 : 0.5}
                     transparent
                     opacity={0.8}
-                    wireframe={isConnectTarget}
+                    wireframe={isConnectTarget || node.type === 'agent'}
                 />
+                
                 <pointLight color={node.color} intensity={isSelected ? 2 : 1} distance={5} />
             </mesh>
+
+            {node.type === 'image' && node.fileUrl && !isPlaying && (
+                <Html position={[0, 0, 0]} transform>
+                    <div className="w-16 h-16 pointer-events-none rounded overflow-hidden opacity-80 border border-emerald-400">
+                        <img src={node.fileUrl} alt={node.text} className="w-full h-full object-cover" />
+                    </div>
+                </Html>
+            )}
 
             {!isPlaying && (
                 <Html position={[0, -0.8, 0]} center zIndexRange={[100, 0]}>
@@ -123,7 +228,8 @@ const NotebookScene = ({
     onNodeClick, 
     connectMode, 
     updateNodePosition,
-    isPlaying
+    isPlaying,
+    updateNodeAnimation
 }: any) => {
     const { camera } = useThree();
 
@@ -170,6 +276,7 @@ const NotebookScene = ({
                     connectMode={connectMode}
                     onNodeClick={onNodeClick}
                     activeNodeId={activeNodeId}
+                    updateNodeAnimation={updateNodeAnimation}
                 />
             ))}
 
@@ -187,23 +294,26 @@ const NotebookScene = ({
 
 export const HolographicNotebook = () => {
     const [nodes, setNodes] = useState<IdeaNode[]>([
-        { id: '1', text: 'All is Mind; The Universe is Mental.', type: 'hermetic', position: [0, 2, 0], color: COLORS.hermetic },
-        { id: '2', text: 'Gematria: LOVE (54) resonating with 528Hz', type: 'gematria', position: [-3, -1, 0], color: COLORS.gematria },
-        { id: '3', text: 'My Soul Path number is 7.', type: 'custom', position: [3, -1, 0], color: COLORS.custom }
+        { id: '1', text: 'All is Mind; The Universe is Mental.', type: 'hermetic', position: [0, 2, 0], color: COLORS.hermetic, animationType: 'float' },
+        { id: '2', text: 'Gematria: LOVE (54) resonating with 528Hz', type: 'gematria', position: [-3, -1, 0], color: COLORS.gematria, animationType: 'float' },
+        { id: '3', text: 'My Soul Path number is 7.', type: 'custom', position: [3, -1, 0], color: COLORS.custom, animationType: 'float' },
+        { id: '4', text: 'Seraphim Agent Protocol', type: 'agent', position: [0, -3, 0], color: COLORS.agent, animationType: 'shiver' }
     ]);
     const [links, setLinks] = useState<IdeaLink[]>([
         { id: 'l1', source: '1', target: '2' },
-        { id: 'l2', source: '2', target: '3' }
+        { id: 'l2', source: '2', target: '3' },
+        { id: 'l3', source: '3', target: '4' }
     ]);
     
     const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
-    const [connectMode, setConnectMode] = useState<string | null>(null); // Stores ID of node initiating connection
+    const [connectMode, setConnectMode] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     
     const [inputText, setInputText] = useState('');
-    const [inputType, setInputType] = useState<'custom'|'gematria'|'hermetic'>('custom');
+    const [inputType, setInputType] = useState<IdeaNode['type']>('custom');
     
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Presentation logic
     useEffect(() => {
@@ -230,7 +340,8 @@ export const HolographicNotebook = () => {
             text: inputText,
             type: inputType,
             position: [(Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8, (Math.random() - 0.5) * 4],
-            color: COLORS[inputType]
+            color: COLORS[inputType],
+            animationType: inputType === 'agent' ? 'orbit-fast' : 'spin-y'
         };
         
         setNodes([...nodes, newNode]);
@@ -259,6 +370,39 @@ export const HolographicNotebook = () => {
         setNodes(nodes.map(n => n.id === id ? { ...n, position: newPos } : n));
     };
 
+    const updateNodeAnimation = (id: string, animation: string) => {
+        setNodes(nodes.map(n => n.id === id ? { ...n, animationType: animation } : n));
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const newNodes = Array.from(e.target.files).map((file, idx) => {
+                const isImage = file.type.startsWith('image/');
+                const url = URL.createObjectURL(file);
+                
+                return {
+                    id: Date.now().toString() + idx,
+                    text: file.name,
+                    type: (isImage ? 'image' : 'file') as IdeaNode['type'],
+                    position: [(Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8, (Math.random() - 0.5) * 4] as [number, number, number],
+                    color: isImage ? COLORS.image : COLORS.file,
+                    animationType: isImage ? 'hover-fast' : 'spin-y',
+                    fileUrl: url
+                };
+            });
+            setNodes(prev => [...prev, ...newNodes]);
+            if (activeNodeId) {
+                // Link new files to active node automatically if selected
+                const newLinks = newNodes.map(n => ({
+                    id: `l_${Date.now()}_${Math.random()}`,
+                    source: activeNodeId,
+                    target: n.id
+                }));
+                setLinks(prev => [...prev, ...newLinks]);
+            }
+        }
+    };
+
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         const text = e.dataTransfer.getData('text/plain');
@@ -268,9 +412,13 @@ export const HolographicNotebook = () => {
                 text: text,
                 type: 'custom',
                 position: [(Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8, 0],
-                color: COLORS.custom
+                color: COLORS.custom,
+                animationType: 'pop-in-out'
             };
             setNodes([...nodes, newNode]);
+        } else if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            // Re-use file upload logic by mocking event
+            handleFileUpload({ target: { files: e.dataTransfer.files } } as any);
         }
     };
 
@@ -328,6 +476,7 @@ export const HolographicNotebook = () => {
                         connectMode={connectMode}
                         updateNodePosition={updateNodePosition}
                         isPlaying={isPlaying}
+                        updateNodeAnimation={updateNodeAnimation}
                     />
                 </Canvas>
             </div>
@@ -353,6 +502,18 @@ export const HolographicNotebook = () => {
                                     <p className="text-sm text-zinc-300 font-sans mb-4">
                                         {nodes.find(n => n.id === activeNodeId)?.text}
                                     </p>
+                                    <div className="mb-4">
+                                        <label className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1 block">Animation</label>
+                                        <select 
+                                            value={nodes.find(n => n.id === activeNodeId)?.animationType || 'float'}
+                                            onChange={(e) => updateNodeAnimation(activeNodeId, e.target.value)}
+                                            className="w-full bg-zinc-900 border border-white/5 text-zinc-300 text-xs font-mono rounded px-2 py-1 focus:outline-none focus:border-indigo-500"
+                                        >
+                                            {ANIMATIONS.map(anim => (
+                                                <option key={anim} value={anim}>{anim}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                     <div className="flex gap-2">
                                         <button 
                                             onClick={() => setConnectMode(activeNodeId)}
@@ -388,31 +549,50 @@ export const HolographicNotebook = () => {
                         </AnimatePresence>
 
                         {/* Add Node Form */}
-                        <form onSubmit={addNode} className="flex gap-2 bg-black/60 backdrop-blur-md p-2 rounded-xl border border-white/10 pointer-events-auto w-full md:w-auto">
-                            <select 
-                                value={inputType} 
-                                onChange={(e) => setInputType(e.target.value as any)}
-                                className="bg-zinc-900 border border-white/5 text-zinc-300 text-xs font-mono rounded px-2 focus:outline-none focus:border-indigo-500"
-                            >
-                                <option value="custom">Custom Insight</option>
-                                <option value="gematria">Gematria Log</option>
-                                <option value="hermetic">Hermetic Axiom</option>
-                            </select>
+                        <div className="flex gap-2 items-center pointer-events-auto">
+                            <form onSubmit={addNode} className="flex gap-2 bg-black/60 backdrop-blur-md p-2 rounded-xl border border-white/10 w-full md:w-auto">
+                                <select 
+                                    value={inputType} 
+                                    onChange={(e) => setInputType(e.target.value as any)}
+                                    className="bg-zinc-900 border border-white/5 text-zinc-300 text-xs font-mono rounded px-2 focus:outline-none focus:border-indigo-500"
+                                >
+                                    <option value="custom">Custom Insight</option>
+                                    <option value="gematria">Gematria Log</option>
+                                    <option value="hermetic">Hermetic Axiom</option>
+                                    <option value="agent">AI Node Agent</option>
+                                </select>
+                                <input 
+                                    type="text"
+                                    value={inputText}
+                                    onChange={(e) => setInputText(e.target.value)}
+                                    placeholder="Add a new thought or drop text here..."
+                                    className="bg-zinc-900 border border-white/5 text-white text-sm rounded px-3 py-2 focus:outline-none focus:border-indigo-500 min-w-[200px] md:min-w-[300px]"
+                                />
+                                <button 
+                                    type="submit"
+                                    disabled={!inputText.trim()}
+                                    className="px-3 bg-indigo-600/30 hover:bg-indigo-600/50 disabled:opacity-50 text-indigo-300 border border-indigo-500/30 rounded flex items-center justify-center transition-colors"
+                                    title="Add Node"
+                                >
+                                    <Plus size={16} />
+                                </button>
+                            </form>
                             <input 
-                                type="text"
-                                value={inputText}
-                                onChange={(e) => setInputText(e.target.value)}
-                                placeholder="Add a new thought or drop text here..."
-                                className="bg-zinc-900 border border-white/5 text-white text-sm rounded px-3 py-2 focus:outline-none focus:border-indigo-500 min-w-[200px] md:min-w-[300px]"
+                                type="file" 
+                                multiple 
+                                accept="image/*,.txt,.pdf,.csv,.json,.glb,.gltf,.obj" 
+                                ref={fileInputRef} 
+                                className="hidden" 
+                                onChange={handleFileUpload} 
                             />
                             <button 
-                                type="submit"
-                                disabled={!inputText.trim()}
-                                className="px-3 bg-indigo-600/30 hover:bg-indigo-600/50 disabled:opacity-50 text-indigo-300 border border-indigo-500/30 rounded flex items-center justify-center transition-colors"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="p-3 bg-emerald-600/20 border border-emerald-500/30 hover:bg-emerald-600/40 text-emerald-400 rounded-xl transition-colors backdrop-blur-md"
+                                title="Upload File/Image"
                             >
                                 <Plus size={16} />
                             </button>
-                        </form>
+                        </div>
 
                     </div>
                 </div>

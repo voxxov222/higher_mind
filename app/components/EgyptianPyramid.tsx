@@ -80,42 +80,46 @@ const PyramidGeometry: React.FC<{ position: [number, number, number], scale: num
 };
 
 const CelestialAlignmentNetwork = ({ chronosSync }: { chronosSync: 'current' | 'ancient' }) => {
-    const groupRef = useRef<THREE.Group>(null);
+    const parentGroupRef = useRef<THREE.Group>(null);
     useFrame((state, delta) => {
-        if (groupRef.current) {
+        if (parentGroupRef.current) {
             // Simulate precession of the equinoxes: 
             // In ancient epoch, rotation is 0 for perfect alignment. 
             // In current epoch, Orion has shifted significantly.
             const targetRotationZ = chronosSync === 'ancient' ? 0 : 0.8;
             const targetRotationY = chronosSync === 'ancient' ? 0 : 0.4;
             
-            groupRef.current.rotation.z += (targetRotationZ - groupRef.current.rotation.z) * 2 * delta;
-            groupRef.current.rotation.y += (targetRotationY - groupRef.current.rotation.y) * 2 * delta;
+            parentGroupRef.current.rotation.z += (targetRotationZ - parentGroupRef.current.rotation.z) * 2 * delta;
+            parentGroupRef.current.rotation.y += (targetRotationY - parentGroupRef.current.rotation.y) * 2 * delta;
         }
     });
 
     return (
         <group>
-            {/* Draw lines from Orion's Belt to Pyramids */}
+            {/* The single parent rotating group for Orion's Belt stars */}
+            <group ref={parentGroupRef}>
+                {ORION_STARS.map((star, i) => (
+                    <group key={i} position={star.pos as [number, number, number]}>
+                        <mesh>
+                            <sphereGeometry args={[0.15, 16, 16]} />
+                            <meshBasicMaterial color="#ffffff" />
+                            <pointLight color="#ffffff" intensity={2} distance={20} />
+                        </mesh>
+                        <Text position={[0, 0.5, 0]} fontSize={0.3} color="#93c5fd">
+                            {star.name}
+                        </Text>
+                    </group>
+                ))}
+            </group>
+
+            {/* Connecting lines & Pyramids (which do NOT rotate) */}
             {ORION_STARS.map((star, i) => {
                 const pyX = (i - 1) * 4;
                 const pyZ = (i - 1) * -1;
                 return (
                     <group key={i}>
-                        {/* Star Group that rotates with Precession */}
-                        <group ref={groupRef}>
-                            <mesh position={star.pos as [number, number, number]}>
-                                <sphereGeometry args={[0.15, 16, 16]} />
-                                <meshBasicMaterial color="#ffffff" />
-                                <pointLight color="#ffffff" intensity={2} distance={20} />
-                            </mesh>
-                            <Text position={[star.pos[0], star.pos[1] + 0.5, star.pos[2]]} fontSize={0.3} color="#93c5fd">
-                                {star.name}
-                            </Text>
-                        </group>
-                        
-                        {/* Connecting Line (dynamic) */}
-                        <DynamicLine starPos={star.pos as [number, number, number]} pyPos={[pyX, 1, pyZ]} groupRef={groupRef} />
+                        {/* Connecting Line (dynamic) to the star inside the rotating parent */}
+                        <DynamicLine starPos={star.pos as [number, number, number]} pyPos={[pyX, 1, pyZ]} parentGroupRef={parentGroupRef} />
 
                         {/* Pyramid */}
                         <PyramidGeometry position={[pyX, 0, pyZ]} scale={i === 0 ? 2 : i === 1 ? 1.8 : 1.2} label={star.alignment} />
@@ -126,13 +130,21 @@ const CelestialAlignmentNetwork = ({ chronosSync }: { chronosSync: 'current' | '
     );
 };
 
-const DynamicLine = ({ starPos, pyPos, groupRef }: { starPos: [number, number, number], pyPos: [number, number, number], groupRef: React.RefObject<THREE.Group> }) => {
+const DynamicLine = ({ starPos, pyPos, parentGroupRef }: { starPos: [number, number, number], pyPos: [number, number, number], parentGroupRef: React.RefObject<THREE.Group> }) => {
     const lineRef = useRef<any>();
     
     useFrame(() => {
-        if (groupRef.current && lineRef.current) {
-            const worldStarPos = new THREE.Vector3(...starPos).applyMatrix4(groupRef.current.matrixWorld);
-            lineRef.current.setPoints([worldStarPos, pyPos]);
+        if (parentGroupRef.current && lineRef.current) {
+            const worldStarPos = new THREE.Vector3(...starPos).applyMatrix4(parentGroupRef.current.matrixWorld);
+            if (lineRef.current.geometry && lineRef.current.geometry.setPositions) {
+                lineRef.current.geometry.setPositions([
+                    worldStarPos.x, worldStarPos.y, worldStarPos.z,
+                    pyPos[0], pyPos[1], pyPos[2]
+                ]);
+                if (lineRef.current.computeLineDistances) {
+                    lineRef.current.computeLineDistances();
+                }
+            }
         }
     });
 

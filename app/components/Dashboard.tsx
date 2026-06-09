@@ -30,6 +30,10 @@ const DailyCosmicPulse = React.lazy(() => import('./DailyCosmicPulse').then(m =>
 const HolographicProfile = React.lazy(() => import('./HolographicProfile').then(m => ({ default: m.HolographicProfile })));
 const StarChart3D = React.lazy(() => import('./StarChart3D').then(m => ({ default: m.StarChart3D })));
 const EgyptianPyramidAlignment = React.lazy(() => import('./EgyptianPyramid').then(m => ({ default: m.EgyptianPyramidAlignment })));
+const SynapticWebVisualizer = React.lazy(() => import('./SynapticWebVisualizer').then(m => ({ default: m.SynapticWebVisualizer })));
+const NeuralSynapticViz = React.lazy(() => import('./NeuralSynapticViz').then(m => ({ default: m.NeuralSynapticViz })));
+const AstraeaOracle = React.lazy(() => import('./AstraeaOracle').then(m => ({ default: m.AstraeaOracle })));
+const CosmicCanvas = React.lazy(() => import('./CosmicCanvas').then(m => ({ default: m.CosmicCanvas })));
 const HolographicNotebook = React.lazy(() => import('./HolographicNotebook').then(m => ({ default: m.HolographicNotebook })));
 const AIAgentsSection = React.lazy(() => import('./AIAgentsSection').then(m => ({ default: m.AIAgentsSection })));
 const PastLifeEchoes = React.lazy(() => import('./PastLifeEchoes').then(m => ({ default: m.PastLifeEchoes })));
@@ -46,14 +50,17 @@ const SoulPathSection = React.lazy(() => import('./SoulPathSection').then(m => (
 const AncestralResearchSection = React.lazy(() => import('./AncestralResearchSection').then(m => ({ default: m.AncestralResearchSection })));
 const CommunityFeed = React.lazy(() => import('./social/CommunityFeed'));
 const LiveMessenger = React.lazy(() => import('./social/LiveMessenger'));
+const KarmaLedger = React.lazy(() => import('./KarmaLedger').then(m => ({ default: m.KarmaLedger })));
 import { getAstralProfile } from '../services/socialService';
 const BirthChartGuide = React.lazy(() => import('./BirthChartGuide'));
 const SandboxSection = React.lazy(() => import('./sandbox/SandboxSection').then(m => ({ default: m.SandboxSection })));
+const QuantumFluid = React.lazy(() => import('./QuantumFluid').then(m => ({ default: m.QuantumFluid })));
 import VoiceCommander from './VoiceCommander';
 import { HigherMindSettings } from './HigherMindSettings';
 const TetragrammatonHUD = React.lazy(() => import('./TetragrammatonHUD').then(m => ({ default: m.TetragrammatonHUD })));
 const Freemason33Section = React.lazy(() => import('./Freemasonry33Section').then(m => ({ default: m.Freemason33Section })));
 const TarotGnosis = React.lazy(() => import('./TarotGnosis').then(m => ({ default: m.TarotGnosis })));
+const TarotHologram = React.lazy(() => import('./TarotHologram').then(m => ({ default: m.TarotHologram })));
 const ChineseZodiacGnosis = React.lazy(() => import('./ChineseZodiacGnosis').then(m => ({ default: m.ChineseZodiacGnosis })));
 import { soundEngine } from '../lib/soundEffects';
 const AstralCanvas = React.lazy(() => import('./AstralCanvas').then(m => ({ default: m.AstralCanvas })));
@@ -68,8 +75,11 @@ const FlowerOfLifeSection = React.lazy(() => import('./FlowerOfLifeSection').the
 const VibrationalTuningSection = React.lazy(() => import('./VibrationalTuningSection').then(m => ({ default: m.VibrationalTuningSection })));
 const DestinyMatrix = React.lazy(() => import('./DestinyMatrix').then(m => ({ default: m.DestinyMatrix })));
 const CelestialBlueprintSection = React.lazy(() => import('./CelestialBlueprintSection').then(m => ({ default: m.CelestialBlueprintSection })));
+const JarvisHUD = React.lazy(() => import('./JarvisHUD').then(m => ({ default: m.JarvisHUD })));
+const AstrologyEngine = React.lazy(() => import('./AstrologyEngine').then(m => ({ default: m.AstrologyEngine })));
 import { ProjectableWidget } from './ProjectableWidget';
 import { useHigherMind } from './HigherMindProvider';
+import { HoloSideDrawer } from './HoloSideDrawer';
 
 /**
  * Interface for DashboardProps
@@ -79,8 +89,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes';
-  setActiveTab: (tab: 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes') => void;
+  activeTab: 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine';
+  setActiveTab: (tab: 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -1702,7 +1712,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
   const [selectedTimelineEvent, setSelectedTimelineEvent] = useState<any>(null);
   const [layoutMode, setLayoutMode] = useState<'minimized' | 'half' | 'full'>('half');
   const dragControls = useDragControls();
-  const [isGematriaHUDOpen, setIsGematriaHUDOpen] = useState(false);
+  const [isHoloDrawerOpen, setIsHoloDrawerOpen] = useState(false);
+  const [holoDrawerTool, setHoloDrawerTool] = useState<'gematria' | 'chakra' | 'karma'>('gematria');
 
   const [deepDiveData, setDeepDiveData] = useState<{ 
     title: string; 
@@ -1977,7 +1988,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
   useEffect(() => {
     const autoPilot = aiModules.find(m => m.id === 'auto_pilot')?.enabled;
     if (autoPilot && data) {
-      const tabsToCycle = ['avatar_matrix', 'torus', 'soul_path', 'brain', 'synthesis', 'flower_of_life', 'destiny_matrix', 'celestial_dna', 'harmonics'];
+      const tabsToCycle = ['avatar_matrix', 'torus', 'soul_path', 'brain', 'synthesis', 'flower_of_life', 'destiny_matrix', 'celestial_dna', 'harmonics', 'quantum_fluid'];
       let currentIdx = tabsToCycle.indexOf(activeTab);
       
       const interval = setInterval(() => {
@@ -2027,14 +2038,26 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
       />
       <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} profileConfig={profileConfig || {} as UserProfileConfig} onUpdateProfile={onUpdateProfile} loadedInputs={loadedInputs} isReading={isReading} handleReadOutLoud={handleReadOutLoud} />
       <React.Suspense fallback={null}>
-        <VoiceCommander setActiveTab={setActiveTab} />
+        <VoiceCommander 
+          setActiveTab={setActiveTab} 
+          openHoloDrawer={(tool) => {
+            if (tool === null) {
+              setIsHoloDrawerOpen(false);
+            } else {
+              setHoloDrawerTool(tool);
+              setIsHoloDrawerOpen(true);
+            }
+          }}
+        />
       </React.Suspense>
 
-      {isGematriaHUDOpen && (
-        <React.Suspense fallback={null}>
-          <GematriaHUD onClose={() => setIsGematriaHUDOpen(false)} defaultText={name} />
-        </React.Suspense>
-      )}
+      <HoloSideDrawer 
+        isOpen={isHoloDrawerOpen} 
+        onClose={() => setIsHoloDrawerOpen(false)} 
+        data={data} 
+        activeTool={holoDrawerTool}
+        setActiveTool={setHoloDrawerTool}
+      />
 
       {/* Brand Header */}
       <header className="flex justify-between items-center z-10 pointer-events-auto">
@@ -2046,16 +2069,16 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
           <button 
             onClick={() => {
               soundEngine.neuralClick();
-              setIsGematriaHUDOpen(!isGematriaHUDOpen);
+              setIsHoloDrawerOpen(!isHoloDrawerOpen);
             }}
             className={`flex items-center gap-2 px-4 py-2 border rounded-xl transition-all group ${
-              isGematriaHUDOpen 
-                ? "bg-blue-500/20 border-blue-500/50 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.3)]" 
+              isHoloDrawerOpen 
+                ? "bg-purple-500/20 border-purple-500/50 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.3)]" 
                 : "bg-white/5 border-white/10 text-stone-400 hover:bg-white/10"
             }`}
           >
-            <Hash className={`w-4 h-4 ${isGematriaHUDOpen ? "text-blue-400 animate-pulse" : "text-stone-500"}`} />
-            <span className="text-[10px] uppercase tracking-widest font-bold hidden sm:inline">Holo-Gematria</span>
+            <Activity className={`w-4 h-4 ${isHoloDrawerOpen ? "text-purple-400 animate-pulse" : "text-stone-500"}`} />
+            <span className="text-[10px] uppercase tracking-widest font-bold hidden sm:inline">Holo-Drawer</span>
           </button>
           <button 
             onClick={() => {
@@ -2278,11 +2301,14 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               </button>
             </div>
             <div className="flex border-b border-white/10 p-2 gap-2 overflow-x-auto no-scrollbar pr-14 flex-nowrap shrink-0">
+              <Tab active={activeTab === 'astraea'} tabId="astraea" onClick={() => setActiveTab('astraea')} icon={<Moon className="w-4 h-4 text-pink-400 animate-pulse"/>}>Astraea Oracle</Tab>
               <Tab active={activeTab === 'avatar_matrix'} tabId="avatar_matrix" onClick={() => setActiveTab('avatar_matrix')} icon={<UserIcon className="w-4 h-4 text-emerald-400 animate-pulse"/>}>Avatar Core Summary</Tab>
               <Tab active={activeTab === 'identity'} tabId="identity" onClick={() => setActiveTab('identity')} icon={<UserIcon className="w-4 h-4"/>}>My Identity</Tab>
               <Tab active={activeTab === 'holographic_profile'} tabId="holographic_profile" onClick={() => setActiveTab('holographic_profile')} icon={<Sparkles className="w-4 h-4 text-purple-400"/>}>Holo-Profile</Tab>
               <Tab active={activeTab === 'egyptian'} tabId="egyptian" onClick={() => setActiveTab('egyptian')} icon={<Triangle className="w-4 h-4 text-yellow-500"/>}>Egyptian Matrix</Tab>
               <Tab active={activeTab === 'notebook'} tabId="notebook" onClick={() => setActiveTab('notebook')} icon={<LibraryBig className="w-4 h-4 text-indigo-400"/>}>Holo-Notebook</Tab>
+              <Tab active={activeTab === 'synaptic_web'} tabId="synaptic_web" onClick={() => setActiveTab('synaptic_web')} icon={<Network className="w-4 h-4 text-emerald-400"/>}>Synaptic Web</Tab>
+              <Tab active={activeTab === 'cosmic_canvas'} tabId="cosmic_canvas" onClick={() => setActiveTab('cosmic_canvas')} icon={<Globe className="w-4 h-4 text-rose-400"/>}>Cosmic Canvas</Tab>
               <Tab active={activeTab === 'past_life_echoes'} tabId="past_life_echoes" onClick={() => setActiveTab('past_life_echoes')} icon={<History className="w-4 h-4 text-fuchsia-400"/>}>Past Life Echoes</Tab>
               <Tab active={activeTab === 'star_chart'} tabId="star_chart" onClick={() => setActiveTab('star_chart')} icon={<Map className="w-4 h-4 text-teal-400"/>}>Star Chart</Tab>
               <Tab active={activeTab === 'torus'} tabId="torus" onClick={() => setActiveTab('torus')} icon={<Activity className="w-4 h-4"/>}>Soul Blueprint</Tab>
@@ -2307,7 +2333,9 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'vibrational_tuning'} tabId="vibrational_tuning" onClick={() => setActiveTab('vibrational_tuning')} icon={<Radio className="w-4 h-4 text-fuchsia-400 animate-pulse"/>}>Vibrational Tuning</Tab>
               <Tab active={activeTab === 'alignment'} tabId="alignment" onClick={() => setActiveTab('alignment')} icon={<Radio className="w-4 h-4 text-teal-400 animate-pulse"/>}>Alignment</Tab>
               <Tab active={activeTab === 'ai_agents'} tabId="ai_agents" onClick={() => setActiveTab('ai_agents')} icon={<Cpu className="w-4 h-4 text-emerald-400"/>}>AI Agents Swarm</Tab>
-              <Tab active={activeTab === 'astral_canvas'} tabId="astral_canvas" onClick={() => setActiveTab('astral_canvas')} icon={<Workflow className="w-4 h-4 text-purple-400 animate-pulse"/>}>Research Canvas</Tab>
+              <Tab active={activeTab === 'jarvis_os'} tabId="jarvis_os" onClick={() => { soundEngine.click(); setActiveTab('jarvis_os'); }} icon={<Cpu className="w-4 h-4 text-cyan-400 animate-pulse"/>}>Jarvis OS</Tab>
+              <Tab active={activeTab === 'astrology_engine'} tabId="astrology_engine" onClick={() => { soundEngine.click(); setActiveTab('astrology_engine'); }} icon={<Compass className="w-4 h-4 text-indigo-400 animate-pulse"/>}>Astrology Engine</Tab>
+              <Tab active={activeTab === 'astral_canvas'} tabId="astral_canvas" onClick={() => setActiveTab('astral_canvas')} icon={<Workflow className="w-4 h-4 text-purple-400 animate-pulse"/>}>AI Agent Canvas</Tab>
               <Tab active={activeTab === 'gematria_calc'} tabId="gematria_calc" onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
               <Tab active={activeTab === 'golden_ratio'} tabId="golden_ratio" onClick={() => setActiveTab('golden_ratio')} icon={<Grid className="w-4 h-4 text-amber-500" />}>Kathara Grid</Tab>
               <Tab active={activeTab === 'sky_map'} tabId="sky_map" onClick={() => setActiveTab('sky_map')} icon={<Compass className="w-4 h-4 text-indigo-400"/>}>Atlas Sky Map</Tab>
@@ -2325,8 +2353,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'destiny_matrix'} tabId="destiny_matrix" onClick={() => setActiveTab('destiny_matrix')} icon={<Compass className="w-4 h-4 text-emerald-400"/>}>Destiny Matrix</Tab>
               <Tab active={activeTab === 'tarot'} tabId="tarot" onClick={() => setActiveTab('tarot')} icon={<Sparkles className="w-4 h-4 text-pink-400 animate-pulse"/>}>Tarot Arcana</Tab>
               <Tab active={activeTab === 'sandbox'} tabId="sandbox" onClick={() => setActiveTab('sandbox')} icon={<Box className="w-4 h-4 text-emerald-400"/>}>Creative Sandbox</Tab>
+              <Tab active={activeTab === 'quantum_fluid'} tabId="quantum_fluid" onClick={() => setActiveTab('quantum_fluid')} icon={<Box className="w-4 h-4 text-cyan-400 animate-pulse"/>}>Quantum Fluid WebGPU</Tab>
+              <Tab active={activeTab === 'neural_synaptic'} tabId="neural_synaptic" onClick={() => setActiveTab('neural_synaptic')} icon={<Network className="w-4 h-4 text-indigo-400 animate-pulse"/>}>Neural Synaptic D3</Tab>
               <Tab active={activeTab === 'findings'} tabId="findings" onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
               <Tab active={activeTab === 'harmonics'} tabId="harmonics" onClick={() => setActiveTab('harmonics')} icon={<BarChart2 className="w-4 h-4"/>}>Harmonics</Tab>
+              <Tab active={activeTab === 'karma_ledger'} tabId="karma_ledger" onClick={() => setActiveTab('karma_ledger')} icon={<History className="w-4 h-4 text-emerald-400" />}>Karma Ledger</Tab>
             </div>
             
             <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/20">
@@ -2645,6 +2676,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'harmonics' && (
                   <motion.div key="harmonics" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="h-full">
                      <HarmonicVisualizer data={data} />
+                  </motion.div>
+                )}
+                {activeTab === 'karma_ledger' && (
+                  <motion.div key="karma_ledger" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="h-full">
+                     <KarmaLedger />
                   </motion.div>
                 )}
                 {activeTab === 'akashic' && (
@@ -3066,7 +3102,12 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'holographic_profile' && (
                   <motion.div key="holographic_profile" initial={{opacity: 0, scale: 0.98}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.98}} transition={{duration: 0.5}} className="w-full h-full min-h-[800px]">
                     <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-white/5"><div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" /></div>}>
-                      <HolographicProfile />
+                      <HolographicProfile 
+                        user={user} 
+                        onSignIn={onSignIn} 
+                        data={data} 
+                        loadedInputs={loadedInputs} 
+                      />
                     </React.Suspense>
                   </motion.div>
                 )}
@@ -3099,6 +3140,30 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                   <motion.div key="past_life_echoes" initial={{opacity: 0, scale: 0.98}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.98}} transition={{duration: 0.5}} className="w-full h-full min-h-[800px]">
                     <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-fuchsia-900/30"><div className="w-12 h-12 border-4 border-fuchsia-500/30 border-t-fuchsia-500 rounded-full animate-spin" /></div>}>
                       <PastLifeEchoes userData={data} />
+                    </React.Suspense>
+                  </motion.div>
+                )}
+
+                {activeTab === 'synaptic_web' && (
+                  <motion.div key="synaptic_web" initial={{opacity: 0, scale: 0.98}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.98}} transition={{duration: 0.5}} className="w-full h-full min-h-[800px]">
+                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-zinc-950 rounded-3xl border border-indigo-900/30"><div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" /></div>}>
+                      <SynapticWebVisualizer userData={data} />
+                    </React.Suspense>
+                  </motion.div>
+                )}
+
+                {activeTab === 'neural_synaptic' && (
+                  <motion.div key="neural_synaptic" initial={{opacity: 0, scale: 0.98}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.98}} transition={{duration: 0.5}} className="w-full h-full min-h-[800px]">
+                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-zinc-950 rounded-3xl border border-indigo-900/30"><div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" /></div>}>
+                      <NeuralSynapticViz data={data} />
+                    </React.Suspense>
+                  </motion.div>
+                )}
+
+                {activeTab === 'cosmic_canvas' && (
+                  <motion.div key="cosmic_canvas" initial={{opacity: 0, scale: 0.98}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.98}} transition={{duration: 0.5}} className="w-full h-full min-h-[800px]">
+                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-zinc-950 rounded-3xl border border-pink-905/30"><div className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-500 rounded-full animate-spin" /></div>}>
+                      <CosmicCanvas />
                     </React.Suspense>
                   </motion.div>
                 )}
@@ -3462,6 +3527,13 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <SandboxSection />
                   </motion.div>
                 )}
+                {activeTab === 'quantum_fluid' && (
+                  <motion.div key="quantum_fluid" initial={{opacity: 0, scale: 0.95}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.95}} className="w-full h-full min-h-[800px]">
+                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-white/5"><div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" /></div>}>
+                      <QuantumFluid />
+                    </React.Suspense>
+                  </motion.div>
+                )}
                 {activeTab === 'obsidian' && (
                   <motion.div key="obsidian" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
                     <ObsidianVaultSection />
@@ -3493,6 +3565,13 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <HolographicRainbowSection />
                   </motion.div>
                 )}
+                {activeTab === 'astraea' && (
+                  <motion.div key="astraea" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="h-full">
+                    <React.Suspense fallback={<div className="flex h-[600px] w-full items-center justify-center bg-zinc-950 rounded-3xl border border-pink-500/10"><div className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-500 rounded-full animate-spin" /></div>}>
+                      <AstraeaOracle />
+                    </React.Suspense>
+                  </motion.div>
+                )}
                 {activeTab === 'flower_of_life' && (
                   <motion.div key="flower_of_life" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <FlowerOfLifeSection />
@@ -3510,7 +3589,19 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 )}
                 {activeTab === 'tarot' && (
                   <motion.div key="tarot" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
-                    <TarotGnosis />
+                    <React.Suspense fallback={<div className="flex h-[600px] w-full items-center justify-center bg-zinc-950 rounded-3xl border border-cyan-500/10"><div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" /></div>}>
+                      <TarotHologram cosmicData={data} />
+                    </React.Suspense>
+                  </motion.div>
+                )}
+                {activeTab === 'astrology_engine' && (
+                  <motion.div key="astrology_engine" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
+                    <AstrologyEngine data={data} />
+                  </motion.div>
+                )}
+                {activeTab === 'jarvis_os' && (
+                  <motion.div key="jarvis_os" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full">
+                    <JarvisHUD data={data} setActiveTab={setActiveTab} />
                   </motion.div>
                 )}
               </AnimatePresence>

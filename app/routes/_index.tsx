@@ -38,7 +38,7 @@ export default function Index() {
   }, []);
   const [state, setState] = useState<AppState>(AppState.IDLE);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile'>('torus');
+  const [activeTab, setActiveTab] = useState<'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine'>('torus');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -107,12 +107,16 @@ export default function Index() {
     if (user) await updateProfileConfig(user.uid, config);
   };
 
-  const { setUserData } = useHigherMind();
+  const { setUserData, setCosmicData } = useHigherMind();
   useEffect(() => {
     if (profileConfig) {
       setUserData(profileConfig);
     }
   }, [profileConfig, setUserData]);
+
+  useEffect(() => {
+    setCosmicData(data);
+  }, [data, setCosmicData]);
 
   const handleSpeak = (title: string, content: string) => {
     setExternalDeepDive({ title, content });

@@ -1,0 +1,664 @@
+
+/app/applet/app/components/AIAgentsSection.tsx
+   3:80   warning  'ArrowRight' is defined but never used          @typescript-eslint/no-unused-vars
+   3:115  warning  'Shield' is defined but never used              @typescript-eslint/no-unused-vars
+   3:136  warning  'List' is defined but never used                @typescript-eslint/no-unused-vars
+   3:177  warning  'Check' is defined but never used               @typescript-eslint/no-unused-vars
+  41:10   warning  'loadingDb' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/AIEvolutionStream.tsx
+    1:27  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+    3:10  warning  'Sparkles' is defined but never used   @typescript-eslint/no-unused-vars
+    3:20  warning  'Zap' is defined but never used        @typescript-eslint/no-unused-vars
+    3:70  warning  'Send' is defined but never used       @typescript-eslint/no-unused-vars
+    3:83  warning  'Globe' is defined but never used      @typescript-eslint/no-unused-vars
+  160:32  warning  'idx' is defined but never used        @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/AlignmentSection.tsx
+  2:18  warning  'AnimatePresence' is defined but never used  @typescript-eslint/no-unused-vars
+  4:25  warning  'Text' is defined but never used             @typescript-eslint/no-unused-vars
+  4:38  warning  'Line' is defined but never used             @typescript-eslint/no-unused-vars
+  4:44  warning  'Sphere' is defined but never used           @typescript-eslint/no-unused-vars
+  6:55  warning  'Waves' is defined but never used            @typescript-eslint/no-unused-vars
+  6:69  warning  'Music' is defined but never used            @typescript-eslint/no-unused-vars
+  6:76  warning  'Zap' is defined but never used              @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/AncestralResearchSection.tsx
+  1:35  warning  'useMemo' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/AngelNumbersSection.tsx
+  3:16  warning  'Search' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/AstralCanvas.tsx
+    18:3   warning  'BaseEdge' is defined but never used                @typescript-eslint/no-unused-vars
+    33:3   warning  'Zap' is defined but never used                     @typescript-eslint/no-unused-vars
+    34:3   warning  'Save' is defined but never used                    @typescript-eslint/no-unused-vars
+    40:3   warning  'Flame' is defined but never used                   @typescript-eslint/no-unused-vars
+    41:3   warning  'Sun' is defined but never used                     @typescript-eslint/no-unused-vars
+    42:3   warning  'Moon' is defined but never used                    @typescript-eslint/no-unused-vars
+    44:3   warning  'Download' is defined but never used                @typescript-eslint/no-unused-vars
+    46:3   warning  'X' is defined but never used                       @typescript-eslint/no-unused-vars
+    50:3   warning  'Link' is defined but never used                    @typescript-eslint/no-unused-vars
+    55:3   warning  'Settings' is defined but never used                @typescript-eslint/no-unused-vars
+    56:3   warning  'HelpCircle' is defined but never used              @typescript-eslint/no-unused-vars
+   153:7   warning  'ResonanceEdge' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  1145:14  warning  'e' is defined but never used                       @typescript-eslint/no-unused-vars
+  1340:13  warning  'base64FakeWav' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  1479:11  warning  'ChatbotNodeProps' is defined but never used        @typescript-eslint/no-unused-vars
+  1733:16  warning  'e' is defined but never used                       @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/AstralMind.tsx
+  6:10  warning  'Thought' is defined but never used     @typescript-eslint/no-unused-vars
+  6:28  warning  'Experience' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/AstrologyDashboard.tsx
+  3:75  warning  'Layers' is defined but never used               @typescript-eslint/no-unused-vars
+  5:10  warning  'ResponsiveContainer' is defined but never used  @typescript-eslint/no-unused-vars
+  5:31  warning  'RadarChart' is defined but never used           @typescript-eslint/no-unused-vars
+  5:43  warning  'PolarGrid' is defined but never used            @typescript-eslint/no-unused-vars
+  5:54  warning  'PolarAngleAxis' is defined but never used       @typescript-eslint/no-unused-vars
+  5:70  warning  'PolarRadiusAxis' is defined but never used      @typescript-eslint/no-unused-vars
+  5:87  warning  'Radar' is defined but never used                @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/BirthChartGuide.tsx
+  3:20  warning  'Info' is defined but never used     @typescript-eslint/no-unused-vars
+  3:54  warning  'Network' is defined but never used  @typescript-eslint/no-unused-vars
+  3:78  warning  'Moon' is defined but never used     @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/CelestialBlueprintSection.tsx
+     1:27  warning  'useEffect' is defined but never used              @typescript-eslint/no-unused-vars
+     3:52  warning  'Sparkles' is defined but never used               @typescript-eslint/no-unused-vars
+     7:15  warning  'Moon' is defined but never used                   @typescript-eslint/no-unused-vars
+     8:3   warning  'Search' is defined but never used                 @typescript-eslint/no-unused-vars
+     8:24  warning  'Info' is defined but never used                   @typescript-eslint/no-unused-vars
+     8:30  warning  'Eye' is defined but never used                    @typescript-eslint/no-unused-vars
+     8:35  warning  'EyeOff' is defined but never used                 @typescript-eslint/no-unused-vars
+     8:43  warning  'Navigation' is defined but never used             @typescript-eslint/no-unused-vars
+     8:55  warning  'ChevronRight' is defined but never used           @typescript-eslint/no-unused-vars
+     9:3   warning  'HelpCircle' is defined but never used             @typescript-eslint/no-unused-vars
+     9:26  warning  'BarChart2' is defined but never used              @typescript-eslint/no-unused-vars
+    21:68  warning  'locationCoords' is defined but never used         @typescript-eslint/no-unused-vars
+   661:7   warning  'MovingPlanet' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  1026:13  warning  'state' is defined but never used                  @typescript-eslint/no-unused-vars
+  1545:59  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/CelestialDNASection.tsx
+    3:31  warning  'Sphere' is defined but never used  @typescript-eslint/no-unused-vars
+    3:39  warning  'Trail' is defined but never used   @typescript-eslint/no-unused-vars
+  167:39  warning  'i' is defined but never used       @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/CelestialSolarCore.tsx
+   4:55  warning  'Trail' is defined but never used  @typescript-eslint/no-unused-vars
+  93:30  warning  'i' is defined but never used      @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/CelestialSphereSection.tsx
+   4:45  warning  'Sphere' is defined but never used      @typescript-eslint/no-unused-vars
+   6:10  warning  'Navigation' is defined but never used  @typescript-eslint/no-unused-vars
+   6:22  warning  'Focus' is defined but never used       @typescript-eslint/no-unused-vars
+   6:29  warning  'ZoomIn' is defined but never used      @typescript-eslint/no-unused-vars
+   6:37  warning  'ZoomOut' is defined but never used     @typescript-eslint/no-unused-vars
+   6:46  warning  'Maximize' is defined but never used    @typescript-eslint/no-unused-vars
+  73:15  warning  'state' is defined but never used       @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/ChakraScene.tsx
+  1:35  warning  'useMemo' is defined but never used  @typescript-eslint/no-unused-vars
+  3:31  warning  'Sphere' is defined but never used   @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/ChineseZodiacGnosis.tsx
+    1:27  warning  'useMemo' is defined but never used                   @typescript-eslint/no-unused-vars
+    4:10  warning  'motion' is defined but never used                    @typescript-eslint/no-unused-vars
+    4:18  warning  'AnimatePresence' is defined but never used           @typescript-eslint/no-unused-vars
+    8:3   warning  'RotateCw' is defined but never used                  @typescript-eslint/no-unused-vars
+    9:3   warning  'Moon' is defined but never used                      @typescript-eslint/no-unused-vars
+   10:3   warning  'Sun' is defined but never used                       @typescript-eslint/no-unused-vars
+   13:3   warning  'Wind' is defined but never used                      @typescript-eslint/no-unused-vars
+   16:3   warning  'ChevronRight' is defined but never used              @typescript-eslint/no-unused-vars
+   17:3   warning  'Info' is defined but never used                      @typescript-eslint/no-unused-vars
+   18:3   warning  'Calendar' is defined but never used                  @typescript-eslint/no-unused-vars
+  172:7   warning  'ElementalNode' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  303:10  warning  'showCalculation' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/ChristSophiaSection.tsx
+  4:21  warning  'Compass' is defined but never used       @typescript-eslint/no-unused-vars
+  5:49  warning  'ArrowUpRight' is defined but never used  @typescript-eslint/no-unused-vars
+  5:63  warning  'Zap' is defined but never used           @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/ConsciousnessMonitor.tsx
+    3:55  warning  'MessageSquare' is defined but never used  @typescript-eslint/no-unused-vars
+   71:47  warning  'i' is defined but never used              @typescript-eslint/no-unused-vars
+  106:47  warning  'i' is defined but never used              @typescript-eslint/no-unused-vars
+  140:47  warning  'i' is defined but never used              @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/ConsciousnessStreams.tsx
+  31:3   warning  'coherence' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  47:11  warning  'types' is assigned a value but never used      @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/CosmicAudio.tsx
+  88:41  warning  'i' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/CosmicChat.tsx
+    3:87   warning  'User' is defined but never used                @typescript-eslint/no-unused-vars
+    3:123  warning  'Activity' is defined but never used            @typescript-eslint/no-unused-vars
+    3:133  warning  'Compass' is defined but never used             @typescript-eslint/no-unused-vars
+    3:142  warning  'Globe' is defined but never used               @typescript-eslint/no-unused-vars
+    5:53   warning  'YAxis' is defined but never used               @typescript-eslint/no-unused-vars
+    5:108  warning  'PolarRadiusAxis' is defined but never used     @typescript-eslint/no-unused-vars
+  132:37   warning  'alignment' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/CosmicCodex.tsx
+  3:16  warning  'X' is defined but never used         @typescript-eslint/no-unused-vars
+  3:19  warning  'Sun' is defined but never used       @typescript-eslint/no-unused-vars
+  3:24  warning  'Moon' is defined but never used      @typescript-eslint/no-unused-vars
+  3:56  warning  'Shield' is defined but never used    @typescript-eslint/no-unused-vars
+  3:72  warning  'Wind' is defined but never used      @typescript-eslint/no-unused-vars
+  3:78  warning  'Droplets' is defined but never used  @typescript-eslint/no-unused-vars
+  3:88  warning  'Flame' is defined but never used     @typescript-eslint/no-unused-vars
+  3:95  warning  'Mountain' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/CosmicScene.tsx
+     4:80  warning  'PerspectiveCamera' is defined but never used      @typescript-eslint/no-unused-vars
+    16:48  warning  'Palette' is defined but never used                @typescript-eslint/no-unused-vars
+    26:35  warning  '_' is defined but never used                      @typescript-eslint/no-unused-vars
+    70:21  warning  'rotations' is assigned a value but never used     @typescript-eslint/no-unused-vars
+   143:7   warning  'objectStates' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   450:22  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+   498:75  warning  'meaning' is defined but never used                @typescript-eslint/no-unused-vars
+   652:3   warning  'data' is defined but never used                   @typescript-eslint/no-unused-vars
+   964:33  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+   971:40  warning  'i' is defined but never used                      @typescript-eslint/no-unused-vars
+   979:33  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+  1469:24  warning  'i' is defined but never used                      @typescript-eslint/no-unused-vars
+  1718:31  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+  1738:31  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+  1812:29  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+  1827:31  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+  1881:31  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+  1904:31  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+  1928:31  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+  1953:31  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/CosmicSummary.tsx
+  2:54  warning  'AnimatePresence' is defined but never used  @typescript-eslint/no-unused-vars
+  4:8   warning  'Star' is defined but never used             @typescript-eslint/no-unused-vars
+  5:26  warning  'Cpu' is defined but never used              @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/DailyCosmicPulse.tsx
+    4:13  warning  'Zap' is defined but never used                           @typescript-eslint/no-unused-vars
+    4:18  warning  'Lock' is defined but never used                          @typescript-eslint/no-unused-vars
+    4:24  warning  'Shield' is defined but never used                        @typescript-eslint/no-unused-vars
+    4:38  warning  'Sun' is defined but never used                           @typescript-eslint/no-unused-vars
+    4:43  warning  'Star' is defined but never used                          @typescript-eslint/no-unused-vars
+    4:49  warning  'Clock' is defined but never used                         @typescript-eslint/no-unused-vars
+    5:43  warning  'VolumeX' is defined but never used                       @typescript-eslint/no-unused-vars
+    5:66  warning  'Smartphone' is defined but never used                    @typescript-eslint/no-unused-vars
+    6:3   warning  'BookOpen' is defined but never used                      @typescript-eslint/no-unused-vars
+   89:23  warning  'activeTheme' is assigned a value but never used          @typescript-eslint/no-unused-vars
+   92:10  warning  'isOracleUnlocked' is assigned a value but never used     @typescript-eslint/no-unused-vars
+   92:28  warning  'setIsOracleUnlocked' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  167:18  warning  'e' is defined but never used                             @typescript-eslint/no-unused-vars
+  327:18  warning  '_' is defined but never used                             @typescript-eslint/no-unused-vars
+  339:16  warning  '_' is defined but never used                             @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/Dashboard.tsx
+    49:7    warning  'CommunityFeed' is assigned a value but never used             @typescript-eslint/no-unused-vars
+    50:7    warning  'LiveMessenger' is assigned a value but never used             @typescript-eslint/no-unused-vars
+    65:7    warning  'QuantumEvolutionSection' is assigned a value but never used   @typescript-eslint/no-unused-vars
+   106:74   warning  'loadedInputs' is defined but never used                       @typescript-eslint/no-unused-vars
+   421:35   warning  'i' is defined but never used                                  @typescript-eslint/no-unused-vars
+   972:145  warning  'data' is defined but never used                               @typescript-eslint/no-unused-vars
+  1109:40   warning  'e' is defined but never used                                  @typescript-eslint/no-unused-vars
+  1118:40   warning  'e' is defined but never used                                  @typescript-eslint/no-unused-vars
+  1132:13   warning  'e' is defined but never used                                  @typescript-eslint/no-unused-vars
+  1137:40   warning  'e' is defined but never used                                  @typescript-eslint/no-unused-vars
+  1209:92   warning  'e' is defined but never used                                  @typescript-eslint/no-unused-vars
+  1217:94   warning  'e' is defined but never used                                  @typescript-eslint/no-unused-vars
+  1225:93   warning  'e' is defined but never used                                  @typescript-eslint/no-unused-vars
+  1233:99   warning  'e' is defined but never used                                  @typescript-eslint/no-unused-vars
+  1468:60   warning  'e' is defined but never used                                  @typescript-eslint/no-unused-vars
+  1482:58   warning  'e' is defined but never used                                  @typescript-eslint/no-unused-vars
+  1721:10   warning  'selectedRecipientId' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  1722:10   warning  'selectedRecipientProfile' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  1733:9    warning  'handleSelectUser' is assigned a value but never used          @typescript-eslint/no-unused-vars
+  3652:7    warning  'AstrologyCharts' is assigned a value but never used           @typescript-eslint/no-unused-vars
+  3794:7    warning  'CelestialDetailBox' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  3853:7    warning  'PointBox' is assigned a value but never used                  @typescript-eslint/no-unused-vars
+  3866:47   warning  'dob' is defined but never used                                @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/DeepSynthesis.tsx
+    9:14  warning  'VolumeX' is defined but never used          @typescript-eslint/no-unused-vars
+   26:3   warning  'EdgeProps' is defined but never used        @typescript-eslint/no-unused-vars
+   27:3   warning  'BaseEdge' is defined but never used         @typescript-eslint/no-unused-vars
+   28:3   warning  'getBezierPath' is defined but never used    @typescript-eslint/no-unused-vars
+   33:49  warning  'PolarRadiusAxis' is defined but never used  @typescript-eslint/no-unused-vars
+   34:3   warning  'AreaChart' is defined but never used        @typescript-eslint/no-unused-vars
+   34:14  warning  'Area' is defined but never used             @typescript-eslint/no-unused-vars
+   34:20  warning  'XAxis' is defined but never used            @typescript-eslint/no-unused-vars
+   34:27  warning  'YAxis' is defined but never used            @typescript-eslint/no-unused-vars
+   34:34  warning  'Tooltip' is defined but never used          @typescript-eslint/no-unused-vars
+   34:43  warning  'CartesianGrid' is defined but never used    @typescript-eslint/no-unused-vars
+   36:22  warning  'MindMapNode' is defined but never used      @typescript-eslint/no-unused-vars
+   62:9   warning  'type' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  163:14  warning  'e' is defined but never used                @typescript-eslint/no-unused-vars
+  215:38  warning  'event' is defined but never used            @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/DestinyMatrix.tsx
+    3:10  warning  'Sparkles' is defined but never used    @typescript-eslint/no-unused-vars
+    3:20  warning  'Info' is defined but never used        @typescript-eslint/no-unused-vars
+    3:42  warning  'Zap' is defined but never used         @typescript-eslint/no-unused-vars
+    3:64  warning  'Eye' is defined but never used         @typescript-eslint/no-unused-vars
+    3:79  warning  'Share2' is defined but never used      @typescript-eslint/no-unused-vars
+    5:16  warning  'Float' is defined but never used       @typescript-eslint/no-unused-vars
+    5:43  warning  'Sparkles3D' is defined but never used  @typescript-eslint/no-unused-vars
+    5:55  warning  'Line' is defined but never used        @typescript-eslint/no-unused-vars
+  154:58  warning  'data' is defined but never used        @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/EgyptianPyramid.tsx
+   2:28  warning  'useThree' is defined but never used        @typescript-eslint/no-unused-vars
+   5:35  warning  'Map' is defined but never used             @typescript-eslint/no-unused-vars
+   5:93  warning  'ArrowRight' is defined but never used      @typescript-eslint/no-unused-vars
+  49:11  warning  'edges' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/FlowerOfLifeSection.tsx
+  3:39  warning  'Text' is defined but never used  @typescript-eslint/no-unused-vars
+  6:33  warning  'Info' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/Freemasonry33Section.tsx
+    8:3   warning  'Sword' is defined but never used                    @typescript-eslint/no-unused-vars
+   10:3   warning  'Zap' is defined but never used                      @typescript-eslint/no-unused-vars
+   11:3   warning  'Activity' is defined but never used                 @typescript-eslint/no-unused-vars
+   12:3   warning  'BookOpen' is defined but never used                 @typescript-eslint/no-unused-vars
+   13:3   warning  'Fingerprint' is defined but never used              @typescript-eslint/no-unused-vars
+   16:3   warning  'Sun' is defined but never used                      @typescript-eslint/no-unused-vars
+   20:3   warning  'TrendingUp' is defined but never used               @typescript-eslint/no-unused-vars
+   22:3   warning  'RefreshCw' is defined but never used                @typescript-eslint/no-unused-vars
+   23:12  warning  'OrbitIcon' is defined but never used                @typescript-eslint/no-unused-vars
+  306:9   warning  'height' is assigned a value but never used          @typescript-eslint/no-unused-vars
+  307:9   warning  'capstoneHeight' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  501:34  warning  'activeDegree' is defined but never used             @typescript-eslint/no-unused-vars
+  559:55  warning  'alignment' is assigned a value but never used       @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/Gematria3DVisualizer.tsx
+    3:32  warning  'Float' is defined but never used                   @typescript-eslint/no-unused-vars
+    5:31  warning  'calculateGematriaValue' is defined but never used  @typescript-eslint/no-unused-vars
+  270:32  warning  'e' is defined but never used                       @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/GematriaCalculatorSection.tsx
+    6:3   warning  'Search' is defined but never used  @typescript-eslint/no-unused-vars
+    9:3   warning  'Copy' is defined but never used    @typescript-eslint/no-unused-vars
+  339:59  warning  'i' is defined but never used       @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/GematriaHUD.tsx
+  2:18  warning  'AnimatePresence' is defined but never used  @typescript-eslint/no-unused-vars
+  6:10  warning  'Calculator' is defined but never used       @typescript-eslint/no-unused-vars
+  6:61  warning  'Move' is defined but never used             @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/GematriaVisualizerD3.tsx
+    4:3   warning  'Compass' is defined but never used           @typescript-eslint/no-unused-vars
+    8:3   warning  'Zap' is defined but never used               @typescript-eslint/no-unused-vars
+   12:3   warning  'Info' is defined but never used              @typescript-eslint/no-unused-vars
+   30:85  warning  'activeCiphers' is defined but never used     @typescript-eslint/no-unused-vars
+  510:11  warning  'padding' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/GoldenRatioSection.tsx
+  3:19  warning  'Maximize2' is defined but never used  @typescript-eslint/no-unused-vars
+  3:40  warning  'Zap' is defined but never used        @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/HarmonicVisualizer.tsx
+    2:19  warning  'useState' is defined but never used                   @typescript-eslint/no-unused-vars
+   10:59  warning  'PieChartIcon' is defined but never used               @typescript-eslint/no-unused-vars
+   33:9   warning  'signDistribution' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  327:47  warning  'i' is defined but never used                          @typescript-eslint/no-unused-vars
+  374:23  warning  'i' is defined but never used                          @typescript-eslint/no-unused-vars
+  454:75  warning  '_' is defined but never used                          @typescript-eslint/no-unused-vars
+  454:78  warning  'i' is defined but never used                          @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/HigherMindSettings.tsx
+  3:120  warning  'Eye' is defined but never used       @typescript-eslint/no-unused-vars
+  3:166  warning  'Sliders' is defined but never used   @typescript-eslint/no-unused-vars
+  4:25   warning  'AIModule' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/HolographicNotebook.tsx
+    1:35  warning  'useMemo' is defined but never used                       @typescript-eslint/no-unused-vars
+    5:41  warning  'GripHorizontal' is defined but never used                @typescript-eslint/no-unused-vars
+  115:40  warning  'updatePosition' is defined but never used                @typescript-eslint/no-unused-vars
+  115:96  warning  'updateNodeAnimation' is defined but never used           @typescript-eslint/no-unused-vars
+  118:13  warning  'camera' is assigned a value but never used               @typescript-eslint/no-unused-vars
+  118:21  warning  'size' is assigned a value but never used                 @typescript-eslint/no-unused-vars
+  118:27  warning  'raycaster' is assigned a value but never used            @typescript-eslint/no-unused-vars
+  121:24  warning  'setIsDragging' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  122:11  warning  'planeIntersectPoint' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  124:11  warning  'plane' is assigned a value but never used                @typescript-eslint/no-unused-vars
+  244:23  warning  'lookAtTarget' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  247:23  warning  'currentLookAt' is assigned a value but never used        @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/HolographicProfile.tsx
+   6:42  warning  'Map' is defined but never used              @typescript-eslint/no-unused-vars
+   6:64  warning  'ImageIcon' is defined but never used        @typescript-eslint/no-unused-vars
+  11:11  warning  'camera' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/HolographicRainbowSection.tsx
+  3:25  warning  'SpotLight' is defined but never used  @typescript-eslint/no-unused-vars
+  3:36  warning  'Text' is defined but never used       @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/HyperNexus.tsx
+   1:26  warning  'useRef' is defined but never used             @typescript-eslint/no-unused-vars
+   1:44  warning  'useEffect' is defined but never used          @typescript-eslint/no-unused-vars
+   3:24  warning  'Center' is defined but never used             @typescript-eslint/no-unused-vars
+   3:32  warning  'Html' is defined but never used               @typescript-eslint/no-unused-vars
+   5:18  warning  'AnimatePresence' is defined but never used    @typescript-eslint/no-unused-vars
+   6:10  warning  'Box' is defined but never used                @typescript-eslint/no-unused-vars
+   6:15  warning  'Hexagon' is defined but never used            @typescript-eslint/no-unused-vars
+   6:24  warning  'Network' is defined but never used            @typescript-eslint/no-unused-vars
+   6:48  warning  'ChevronRight' is defined but never used       @typescript-eslint/no-unused-vars
+   6:62  warning  'ChevronLeft' is defined but never used        @typescript-eslint/no-unused-vars
+   6:75  warning  'Layers' is defined but never used             @typescript-eslint/no-unused-vars
+  80:11  warning  'lifePath' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/InfographicExportMenu.tsx
+  2:18  warning  'AnimatePresence' is defined but never used  @typescript-eslint/no-unused-vars
+  3:10  warning  'Download' is defined but never used         @typescript-eslint/no-unused-vars
+  3:50  warning  'Film' is defined but never used             @typescript-eslint/no-unused-vars
+  3:59  warning  'ChevronDown' is defined but never used      @typescript-eslint/no-unused-vars
+  3:72  warning  'Check' is defined but never used            @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/JarvisHUD.tsx
+   2:18  warning  'AnimatePresence' is defined but never used           @typescript-eslint/no-unused-vars
+   4:8   warning  'MicOff' is defined but never used                    @typescript-eslint/no-unused-vars
+   4:35  warning  'Clock' is defined but never used                     @typescript-eslint/no-unused-vars
+   4:42  warning  'Sliders' is defined but never used                   @typescript-eslint/no-unused-vars
+   4:69  warning  'Play' is defined but never used                      @typescript-eslint/no-unused-vars
+   5:13  warning  'ShieldAlert' is defined but never used               @typescript-eslint/no-unused-vars
+   5:26  warning  'Link' is defined but never used                      @typescript-eslint/no-unused-vars
+   5:32  warning  'RotateCw' is defined but never used                  @typescript-eslint/no-unused-vars
+   5:66  warning  'Sparkles' is defined but never used                  @typescript-eslint/no-unused-vars
+  16:35  warning  'setActiveTab' is defined but never used              @typescript-eslint/no-unused-vars
+  23:10  warning  'systemOnline' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  23:24  warning  'setSystemOnline' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/KarmaLedger.tsx
+  121:18  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/MasonicVisualTools.tsx
+  2:125  warning  'Tooltip' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/NatalChartAdvanced.tsx
+    3:36  warning  'Ring' is defined but never used    @typescript-eslint/no-unused-vars
+    3:59  warning  'Float' is defined but never used   @typescript-eslint/no-unused-vars
+   80:68  warning  'onSave' is defined but never used  @typescript-eslint/no-unused-vars
+  284:93  warning  'onSave' is defined but never used  @typescript-eslint/no-unused-vars
+  359:96  warning  'onSave' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/NatalChartRenderer.tsx
+  1:17  warning  'useRef' is defined but never used         @typescript-eslint/no-unused-vars
+  1:25  warning  'useMemo' is defined but never used        @typescript-eslint/no-unused-vars
+  1:34  warning  'useState' is defined but never used       @typescript-eslint/no-unused-vars
+  2:10  warning  'useFrame' is defined but never used       @typescript-eslint/no-unused-vars
+  3:10  warning  'Line' is defined but never used           @typescript-eslint/no-unused-vars
+  3:16  warning  'Text' is defined but never used           @typescript-eslint/no-unused-vars
+  3:22  warning  'Html' is defined but never used           @typescript-eslint/no-unused-vars
+  3:28  warning  'Sphere' is defined but never used         @typescript-eslint/no-unused-vars
+  3:36  warning  'Trail' is defined but never used          @typescript-eslint/no-unused-vars
+  3:43  warning  'Float' is defined but never used          @typescript-eslint/no-unused-vars
+  3:50  warning  'Sparkles' is defined but never used       @typescript-eslint/no-unused-vars
+  3:60  warning  'Ring' is defined but never used           @typescript-eslint/no-unused-vars
+  4:13  warning  'THREE' is defined but never used          @typescript-eslint/no-unused-vars
+  5:10  warning  'motion' is defined but never used         @typescript-eslint/no-unused-vars
+  7:38  warning  'data' is defined but never used           @typescript-eslint/no-unused-vars
+  7:44  warning  'onPlanetClick' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/NeuralBrainSection.tsx
+    3:25   warning  'Html' is defined but never used                   @typescript-eslint/no-unused-vars
+    6:84   warning  'Eye' is defined but never used                    @typescript-eslint/no-unused-vars
+    6:89   warning  'ArrowLeft' is defined but never used              @typescript-eslint/no-unused-vars
+    6:117  warning  'Power' is defined but never used                  @typescript-eslint/no-unused-vars
+  245:57   warning  'alignment' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  247:23   warning  'setHudActive' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/ObsidianVaultSection.tsx
+    2:10   warning  'motion' is defined but never used           @typescript-eslint/no-unused-vars
+    2:18   warning  'AnimatePresence' is defined but never used  @typescript-eslint/no-unused-vars
+    3:27   warning  'File' is defined but never used             @typescript-eslint/no-unused-vars
+    3:43   warning  'Share2' is defined but never used           @typescript-eslint/no-unused-vars
+    3:69   warning  'Zap' is defined but never used              @typescript-eslint/no-unused-vars
+    3:74   warning  'Save' is defined but never used             @typescript-eslint/no-unused-vars
+    3:96   warning  'Settings' is defined but never used         @typescript-eslint/no-unused-vars
+    3:106  warning  'ChevronRight' is defined but never used     @typescript-eslint/no-unused-vars
+  249:30   warning  'node' is defined but never used             @typescript-eslint/no-unused-vars
+  257:30   warning  'node' is defined but never used             @typescript-eslint/no-unused-vars
+  258:31   warning  'node' is defined but never used             @typescript-eslint/no-unused-vars
+  259:31   warning  'node' is defined but never used             @typescript-eslint/no-unused-vars
+  260:31   warning  'node' is defined but never used             @typescript-eslint/no-unused-vars
+  261:31   warning  'node' is defined but never used             @typescript-eslint/no-unused-vars
+  362:33   warning  'event' is defined but never used            @typescript-eslint/no-unused-vars
+  362:40   warning  'd' is defined but never used                @typescript-eslint/no-unused-vars
+  367:32   warning  'event' is defined but never used            @typescript-eslint/no-unused-vars
+  367:39   warning  'd' is defined but never used                @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/PastLifeEchoes.tsx
+   1:27  warning  'useMemo' is defined but never used   @typescript-eslint/no-unused-vars
+   3:19  warning  'Waves' is defined but never used     @typescript-eslint/no-unused-vars
+   3:26  warning  'Flame' is defined but never used     @typescript-eslint/no-unused-vars
+   3:33  warning  'Wind' is defined but never used      @typescript-eslint/no-unused-vars
+   3:39  warning  'Mountain' is defined but never used  @typescript-eslint/no-unused-vars
+  33:43  warning  'label' is defined but never used     @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/ProjectableWidget.tsx
+   1:27   warning  'useRef' is defined but never used  @typescript-eslint/no-unused-vars
+   5:10   warning  'Box' is defined but never used     @typescript-eslint/no-unused-vars
+  16:106  warning  'data' is defined but never used    @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/ProjectedObject3D.tsx
+  3:10  warning  'motion' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/QuantumEvolutionSection.tsx
+  3:10  warning  'Network' is defined but never used   @typescript-eslint/no-unused-vars
+  3:29  warning  'Sparkles' is defined but never used  @typescript-eslint/no-unused-vars
+  3:39  warning  'Brain' is defined but never used     @typescript-eslint/no-unused-vars
+  3:46  warning  'Code' is defined but never used      @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/SkyMapSection.tsx
+  3:32  warning  'Html' is defined but never used    @typescript-eslint/no-unused-vars
+  3:44  warning  'Sphere' is defined but never used  @typescript-eslint/no-unused-vars
+  6:10  warning  'Rocket' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/SolarSystemScene.tsx
+     2:37  warning  'useEffect' is defined but never used               @typescript-eslint/no-unused-vars
+     4:25  warning  'Float' is defined but never used                   @typescript-eslint/no-unused-vars
+     8:16  warning  'Info' is defined but never used                    @typescript-eslint/no-unused-vars
+     8:31  warning  'BookOpen' is defined but never used                @typescript-eslint/no-unused-vars
+     8:52  warning  'Cpu' is defined but never used                     @typescript-eslint/no-unused-vars
+     8:69  warning  'Terminal' is defined but never used                @typescript-eslint/no-unused-vars
+     9:3   warning  'MousePointer2' is defined but never used           @typescript-eslint/no-unused-vars
+     9:18  warning  'ChevronRight' is defined but never used            @typescript-eslint/no-unused-vars
+     9:32  warning  'Binary' is defined but never used                  @typescript-eslint/no-unused-vars
+  1053:43  warning  'j' is defined but never used                       @typescript-eslint/no-unused-vars
+  1127:57  warning  'onResearch' is defined but never used              @typescript-eslint/no-unused-vars
+  1127:69  warning  'onSave' is defined but never used                  @typescript-eslint/no-unused-vars
+  1144:10  warning  'isAuraOpen' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  1144:22  warning  'setIsAuraOpen' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  1169:14  warning  'error' is defined but never used                   @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/SoulBlueprintAura.tsx
+  2:28  warning  'useThree' is defined but never used       @typescript-eslint/no-unused-vars
+  4:44  warning  'Points' is defined but never used         @typescript-eslint/no-unused-vars
+  4:52  warning  'PointMaterial' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/SplashScreen.tsx
+  1:28  warning  'useState' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/StarChart3D.tsx
+    5:10  warning  'motion' is defined but never used           @typescript-eslint/no-unused-vars
+  114:13  warning  'camera' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/SynapticWebVisualizer.tsx
+    1:44  warning  'useEffect' is defined but never used          @typescript-eslint/no-unused-vars
+    2:28  warning  'useThree' is defined but never used           @typescript-eslint/no-unused-vars
+    3:31  warning  'Line' is defined but never used               @typescript-eslint/no-unused-vars
+    3:44  warning  'Text' is defined but never used               @typescript-eslint/no-unused-vars
+    5:10  warning  'Brain' is defined but never used              @typescript-eslint/no-unused-vars
+    5:26  warning  'Upload' is defined but never used             @typescript-eslint/no-unused-vars
+    5:34  warning  'FileText' is defined but never used           @typescript-eslint/no-unused-vars
+    5:44  warning  'Sparkles' is defined but never used           @typescript-eslint/no-unused-vars
+    5:64  warning  'File' is defined but never used               @typescript-eslint/no-unused-vars
+    5:70  warning  'Compass' is defined but never used            @typescript-eslint/no-unused-vars
+    5:79  warning  'Code' is defined but never used               @typescript-eslint/no-unused-vars
+   73:11  warning  'lineRefs' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  180:40  warning  'strength' is defined but never used           @typescript-eslint/no-unused-vars
+  180:60  warning  'theme' is defined but never used              @typescript-eslint/no-unused-vars
+  223:22  warning  'delta' is defined but never used              @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/SynthesisCore3D.tsx
+  47:21  warning  'sizes' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/TarotGnosis.tsx
+    4:10  warning  'motion' is defined but never used              @typescript-eslint/no-unused-vars
+    4:18  warning  'AnimatePresence' is defined but never used     @typescript-eslint/no-unused-vars
+    9:3   warning  'VolumeX' is defined but never used             @typescript-eslint/no-unused-vars
+   14:3   warning  'Sun' is defined but never used                 @typescript-eslint/no-unused-vars
+   15:3   warning  'Moon' is defined but never used                @typescript-eslint/no-unused-vars
+   18:3   warning  'ArrowRight' is defined but never used          @typescript-eslint/no-unused-vars
+   20:3   warning  'HelpCircle' is defined but never used          @typescript-eslint/no-unused-vars
+   23:3   warning  'Layers' is defined but never used              @typescript-eslint/no-unused-vars
+  438:11  warning  'baseAngle' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  688:17  warning  'setPitch' is assigned a value but never used   @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/TetragrammatonHUD.tsx
+    3:56  warning  'Plane' is defined but never used            @typescript-eslint/no-unused-vars
+    5:18  warning  'AnimatePresence' is defined but never used  @typescript-eslint/no-unused-vars
+  121:32  warning  'isHovered' is defined but never used        @typescript-eslint/no-unused-vars
+  240:46  warning  'i' is defined but never used                @typescript-eslint/no-unused-vars
+  310:37  warning  'activeTab' is defined but never used        @typescript-eslint/no-unused-vars
+  310:48  warning  'data' is defined but never used             @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/VibrationalTuningSection.tsx
+   1:35  warning  'useMemo' is defined but never used       @typescript-eslint/no-unused-vars
+   6:41  warning  'Send' is defined but never used          @typescript-eslint/no-unused-vars
+   6:52  warning  'Wind' is defined but never used          @typescript-eslint/no-unused-vars
+   6:83  warning  'Shield' is defined but never used        @typescript-eslint/no-unused-vars
+  27:40  warning  'frequencyStr' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/VoiceCommander.tsx
+   15:9   warning  'visualizerContainerRef' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  141:18  warning  'e' is defined but never used                                @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/VortexSequencingSection.tsx
+  213:31  warning  'i' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/profile/CosmicProfile.tsx
+   5:9   warning  'Settings' is defined but never used                  @typescript-eslint/no-unused-vars
+   6:3   warning  'Palette' is defined but never used                   @typescript-eslint/no-unused-vars
+   7:3   warning  'Github' is defined but never used                    @typescript-eslint/no-unused-vars
+   7:11  warning  'Music' is defined but never used                     @typescript-eslint/no-unused-vars
+   7:18  warning  'Video' is defined but never used                     @typescript-eslint/no-unused-vars
+   7:25  warning  'Star' is defined but never used                      @typescript-eslint/no-unused-vars
+   7:42  warning  'MessageSquare' is defined but never used             @typescript-eslint/no-unused-vars
+   8:43  warning  'Save' is defined but never used                      @typescript-eslint/no-unused-vars
+   9:3   warning  'Users' is defined but never used                     @typescript-eslint/no-unused-vars
+   9:10  warning  'Users2' is defined but never used                    @typescript-eslint/no-unused-vars
+  23:53  warning  'updateWidget' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  23:67  warning  'addWidget' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  23:78  warning  'removeWidget' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  24:10  warning  'activeLayout' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  24:24  warning  'setActiveLayout' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/profile/ProfileEditor.tsx
+   4:9   warning  'Check' is defined but never used                    @typescript-eslint/no-unused-vars
+   4:16  warning  'X' is defined but never used                        @typescript-eslint/no-unused-vars
+   4:29  warning  'BookOpen' is defined but never used                 @typescript-eslint/no-unused-vars
+   5:3   warning  'MapPin' is defined but never used                   @typescript-eslint/no-unused-vars
+   5:11  warning  'Clock' is defined but never used                    @typescript-eslint/no-unused-vars
+   5:18  warning  'Star' is defined but never used                     @typescript-eslint/no-unused-vars
+   6:14  warning  'Info' is defined but never used                     @typescript-eslint/no-unused-vars
+   6:27  warning  'Heart' is defined but never used                    @typescript-eslint/no-unused-vars
+   7:3   warning  'Shield' is defined but never used                   @typescript-eslint/no-unused-vars
+   7:11  warning  'Globe' is defined but never used                    @typescript-eslint/no-unused-vars
+   7:18  warning  'Send' is defined but never used                     @typescript-eslint/no-unused-vars
+  24:7   warning  'MASTER_NUMBERS' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/profile/SoulAvatar.tsx
+  2:18  warning  'useMemo' is defined but never used  @typescript-eslint/no-unused-vars
+  4:32  warning  'Sphere' is defined but never used   @typescript-eslint/no-unused-vars
+  4:81  warning  'Stars' is defined but never used    @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/profile/TerminalOverlay.tsx
+    2:18   warning  'AnimatePresence' is defined but never used  @typescript-eslint/no-unused-vars
+    3:78   warning  'Play' is defined but never used             @typescript-eslint/no-unused-vars
+    3:93   warning  'Sparkles' is defined but never used         @typescript-eslint/no-unused-vars
+    3:103  warning  'Database' is defined but never used         @typescript-eslint/no-unused-vars
+    7:31   warning  'AreaChart' is defined but never used        @typescript-eslint/no-unused-vars
+    7:42   warning  'Area' is defined but never used             @typescript-eslint/no-unused-vars
+    7:48   warning  'XAxis' is defined but never used            @typescript-eslint/no-unused-vars
+    7:55   warning  'YAxis' is defined but never used            @typescript-eslint/no-unused-vars
+    7:62   warning  'CartesianGrid' is defined but never used    @typescript-eslint/no-unused-vars
+    7:88   warning  'RechartsTooltip' is defined but never used  @typescript-eslint/no-unused-vars
+  116:22   warning  'e' is defined but never used                @typescript-eslint/no-unused-vars
+  121:18   warning  'error' is defined but never used            @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/sandbox/SandboxSection.tsx
+  4:48   warning  'XAxis' is defined but never used            @typescript-eslint/no-unused-vars
+  4:55   warning  'YAxis' is defined but never used            @typescript-eslint/no-unused-vars
+  4:110  warning  'PolarRadiusAxis' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/social/CommunityFeed.tsx
+  4:43  warning  'Send' is defined but never used               @typescript-eslint/no-unused-vars
+  5:3   warning  'Search' is defined but never used             @typescript-eslint/no-unused-vars
+  5:11  warning  'Filter' is defined but never used             @typescript-eslint/no-unused-vars
+  5:25  warning  'BookOpen' is defined but never used           @typescript-eslint/no-unused-vars
+  5:35  warning  'Zap' is defined but never used                @typescript-eslint/no-unused-vars
+  5:40  warning  'Moon' is defined but never used               @typescript-eslint/no-unused-vars
+  5:46  warning  'Sun' is defined but never used                @typescript-eslint/no-unused-vars
+  6:3   warning  'Layout' is defined but never used             @typescript-eslint/no-unused-vars
+  6:11  warning  'Compass' is defined but never used            @typescript-eslint/no-unused-vars
+  6:20  warning  'Star' is defined but never used               @typescript-eslint/no-unused-vars
+  6:29  warning  'Info' is defined but never used               @typescript-eslint/no-unused-vars
+  8:25  warning  'UserProfileConfig' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/social/LiveMessenger.tsx
+    2:18  warning  'AnimatePresence' is defined but never used   @typescript-eslint/no-unused-vars
+    4:9   warning  'User' is defined but never used              @typescript-eslint/no-unused-vars
+    4:15  warning  'Search' is defined but never used            @typescript-eslint/no-unused-vars
+    4:23  warning  'MessageSquare' is defined but never used     @typescript-eslint/no-unused-vars
+    5:3   warning  'Moon' is defined but never used              @typescript-eslint/no-unused-vars
+    5:9   warning  'Sun' is defined but never used               @typescript-eslint/no-unused-vars
+    5:23  warning  'Zap' is defined but never used               @typescript-eslint/no-unused-vars
+    5:31  warning  'Info' is defined but never used              @typescript-eslint/no-unused-vars
+    9:44  warning  'markAsRead' is defined but never used        @typescript-eslint/no-unused-vars
+   11:8   warning  'HolographicPanel' is defined but never used  @typescript-eslint/no-unused-vars
+  124:32  warning  'i' is defined but never used                 @typescript-eslint/no-unused-vars
+
+/app/applet/app/components/social/Wall.tsx
+  3:10  warning  'Send' is defined but never used               @typescript-eslint/no-unused-vars
+  3:25  warning  'ImageIcon' is defined but never used          @typescript-eslint/no-unused-vars
+  4:20  warning  'UserProfileConfig' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/firebase.ts
+  4:70   warning  'collection' is defined but never used  @typescript-eslint/no-unused-vars
+  4:82   warning  'query' is defined but never used       @typescript-eslint/no-unused-vars
+  4:89   warning  'where' is defined but never used       @typescript-eslint/no-unused-vars
+  4:96   warning  'getDocs' is defined but never used     @typescript-eslint/no-unused-vars
+  4:105  warning  'Timestamp' is defined but never used   @typescript-eslint/no-unused-vars
+
+/app/applet/app/hooks/useLongPress.ts
+  1:10  warning  'useState' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/routes/_index.tsx
+   7:10  warning  'Canvas' is defined but never used  @typescript-eslint/no-unused-vars
+  88:69  warning  'e' is defined but never used       @typescript-eslint/no-unused-vars
+  89:71  warning  'e' is defined but never used       @typescript-eslint/no-unused-vars
+  99:14  warning  'err' is defined but never used     @typescript-eslint/no-unused-vars
+
+/app/applet/app/services/gemini.server.ts
+  386:14  warning  'e' is defined but never used           @typescript-eslint/no-unused-vars
+  404:3   warning  'cosmicData' is defined but never used  @typescript-eslint/no-unused-vars
+  464:3   warning  'cosmicData' is defined but never used  @typescript-eslint/no-unused-vars
+  527:3   warning  'cosmicData' is defined but never used  @typescript-eslint/no-unused-vars
+  679:3   warning  'cosmicData' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/services/socialService.ts
+  16:14  warning  'auth' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/applet/app/services/swarmService.ts
+  2:14  warning  'auth' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 503 problems (0 errors, 503 warnings)
+

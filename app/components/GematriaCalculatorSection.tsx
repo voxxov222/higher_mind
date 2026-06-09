@@ -17,11 +17,13 @@ import {
 } from 'lucide-react';
 import { GematriaCipher, calculateAllCiphers, reduceNumber } from '../utils/gematria';
 import { Gematria3DVisualizer } from './Gematria3DVisualizer';
+import { GematriaVisualizerD3 } from './GematriaVisualizerD3';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 
 export const GematriaCalculatorSection = () => {
   const [input, setInput] = useState('');
+  const [visualizerType, setVisualizerType] = useState<'3d' | 'interactive'>('interactive');
 
   React.useEffect(() => {
     window.dispatchEvent(new CustomEvent('gematria_input_change', { detail: input }));
@@ -243,29 +245,56 @@ export const GematriaCalculatorSection = () => {
           </div>
         </div>
 
-          {/* 3D Visualization Matrix */}
-          <div className="bg-stone-950/40 border border-white/10 rounded-[2.5rem] h-[500px] relative overflow-hidden backdrop-blur-xl shadow-2xl group">
-             <div className="absolute top-8 left-8 z-10 pointer-events-none">
-                 <span className="text-[10px] text-blue-400 uppercase tracking-[0.4em] font-bold block mb-1">Spatial Projection</span>
-                 <h3 className="text-xl text-white font-light uppercase tracking-widest">Alphanumeric Vortex</h3>
-             </div>
-             
-             <div className="absolute inset-0 cursor-grab active:cursor-grabbing">
-                <Canvas camera={{ position: [0, 5, 20], fov: 45 }}>
-                   <ambientLight intensity={0.5} />
-                   <pointLight position={[10, 10, 10]} intensity={1.5} />
-                   <Gematria3DVisualizer />
-                   <OrbitControls enableZoom={true} enablePan={false} maxPolarAngle={Math.PI / 1.5} minPolarAngle={Math.PI / 4} />
-                </Canvas>
-             </div>
-
-             <div className="absolute bottom-8 right-8 z-10 bg-black/60 backdrop-blur-md border border-white/10 p-4 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                <p className="text-[9px] text-stone-400 uppercase tracking-widest leading-relaxed">
-                   Nodes represent characters. Radius mapping → Ordinal value.<br/>
-                   Elevation mapping → Kabbalistic reduction index.
-                </p>
-             </div>
+          {/* Projection Modes Deck */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-stone-900/40 border border-white/10 rounded-2xl p-4 gap-4">
+            <div>
+               <span className="text-[9px] text-blue-400 uppercase tracking-[0.3em] font-bold block">VIBRATIONAL PROJECTION</span>
+               <span className="text-xs text-stone-300 font-bold uppercase tracking-wider">Select Mathematical Projection Engine</span>
+            </div>
+            <div className="flex bg-black/40 border border-white/5 rounded-xl p-1 gap-1">
+               <button
+                 type="button"
+                 onClick={() => setVisualizerType('interactive')}
+                 className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${visualizerType === 'interactive' ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30' : 'text-stone-500 hover:text-stone-300'}`}
+               >
+                  Sonic & Geometric Seals
+               </button>
+               <button
+                 type="button"
+                 onClick={() => setVisualizerType('3d')}
+                 className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${visualizerType === '3d' ? 'bg-blue-400/20 text-blue-300 border border-blue-400/30' : 'text-stone-500 hover:text-stone-300'}`}
+               >
+                  3D Orbital Constellation
+               </button>
+            </div>
           </div>
+
+          {visualizerType === 'interactive' ? (
+            <GematriaVisualizerD3 phrase={input} activeCiphers={activeCiphers} />
+          ) : (
+            <div className="bg-stone-950/40 border border-white/10 rounded-[2.5rem] h-[500px] relative overflow-hidden backdrop-blur-xl shadow-2xl group">
+               <div className="absolute top-8 left-8 z-10 pointer-events-none">
+                   <span className="text-[10px] text-blue-400 uppercase tracking-[0.4em] font-bold block mb-1">Spatial Projection</span>
+                   <h3 className="text-xl text-white font-light uppercase tracking-widest">Alphanumeric Vortex</h3>
+               </div>
+               
+               <div className="absolute inset-0 cursor-grab active:cursor-grabbing">
+                  <Canvas camera={{ position: [0, 5, 20], fov: 45 }}>
+                     <ambientLight intensity={0.5} />
+                     <pointLight position={[10, 10, 10]} intensity={1.5} />
+                     <Gematria3DVisualizer />
+                     <OrbitControls enableZoom={true} enablePan={false} maxPolarAngle={Math.PI / 1.5} minPolarAngle={Math.PI / 4} />
+                  </Canvas>
+               </div>
+
+               <div className="absolute bottom-8 right-8 z-10 bg-black/60 backdrop-blur-md border border-white/10 p-4 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                  <p className="text-[9px] text-stone-400 uppercase tracking-widest leading-relaxed">
+                     Nodes represent characters. Radius mapping → Ordinal value.<br/>
+                     Elevation mapping → Kabbalistic reduction index.
+                  </p>
+               </div>
+            </div>
+          )}
         </div>
 
         {/* Info & History Sidebar */}

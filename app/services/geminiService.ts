@@ -8,20 +8,42 @@ export interface CosmicInput {
 }
 
 const apiProxy = async (action: string, payload: any) => {
-  const response = await fetch("/api/gemini", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action, payload })
-  });
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error || `Failed to fetch ${action}`);
+  try {
+    const response = await fetch("/api/gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, payload })
+    });
+    
+    const contentType = response.headers.get("content-type") || "";
+    if (!response.ok) {
+      if (contentType.includes("application/json")) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || `Failed to fetch ${action} (${response.status})`);
+      } else {
+        const text = await response.text().catch(() => "");
+        throw new Error(`Server error (${response.status}) when fetching ${action}: ${text.substring(0, 120) || "HTML response"}`);
+      }
+    }
+    
+    if (!contentType.includes("application/json")) {
+      const text = await response.text().catch(() => "");
+      throw new Error(`Expected JSON from server for ${action}, but received HTML/text: ${text.substring(0, 120) || "HTML content"}`);
+    }
+    
+    return await response.json();
+  } catch (err: any) {
+    console.error(`apiProxy error for ${action}:`, err);
+    throw err;
   }
-  return response.json();
 };
 
 export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData> => {
    return apiProxy("fetchCosmicReading", input);
+};
+
+export const fetchAstrologyNatalDetails = async (input: { name: string; birthDate: string; birthTime: string; location: string }): Promise<any> => {
+  return apiProxy("fetchAstrologyNatalDetails", input);
 };
 
 export const fetchCosmicChatResponse = async (
@@ -73,3 +95,34 @@ export const streamGeminiChat = async (messages: {role: string, text: string}[],
     onChunk(decoder.decode(value, { stream: true }));
   }
 };
+
+export const fetchGroundedTransitAlerts = async (cosmicData: CosmicData | null): Promise<{
+  overallStatus: string;
+  alerts: Array<{
+    id: string;
+    title: string;
+    date: string;
+    astrologicalEvent: string;
+    relevance: "High" | "Moderate" | "Low";
+    affectedSpiritualCenter: string;
+    details: string;
+    groundingSource: string;
+    sourceUrl: string;
+    vibrationHz: number;
+    vocalScript: string;
+    coordinates: string;
+  }>;
+}> => {
+  return apiProxy("fetchGroundedTransitAlerts", { cosmicData });
+};
+
+export const parseVoiceBirthDetails = async (transcript: string): Promise<{
+  name: string;
+  birthDate: string;
+  birthTime: string;
+  location: string;
+}> => {
+  return apiProxy("parseVoiceBirthDetails", { transcript });
+};
+
+

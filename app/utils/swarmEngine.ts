@@ -319,6 +319,28 @@ class SwarmEngine {
       this.intervalId = null;
     }
   }
+
+  clearAll() {
+    this.stopLoop();
+    this.agents = [];
+    this.findingsDatabase = [];
+    this.logs = [];
+    this.isRunning = false;
+    this.hasInitialized = false;
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('swarm_agents');
+      localStorage.removeItem('swarm_findings');
+    }
+    this.notify();
+  }
+
+  wipeDatabase() {
+    this.findingsDatabase = [];
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('swarm_findings');
+    }
+    this.notify();
+  }
 }
 
 export const swarmEngine = new SwarmEngine();

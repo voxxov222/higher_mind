@@ -11,6 +11,7 @@
         "input": { "type": "object" },
         "cosmicData": { "type": "object" },
         "profileConfig": { "type": "object" },
+        "holographicConfig": { "type": "object" },
         "astrology": { "type": "object" },
         "bio": { "type": "object" },
         "updatedAt": { "type": "timestamp" }

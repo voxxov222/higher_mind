@@ -61,7 +61,7 @@ export const generateSoulPathReport = async (cosmicData: CosmicData) => {
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.0-flash-exp",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -75,6 +75,45 @@ export const generateSoulPathReport = async (cosmicData: CosmicData) => {
   } catch (err: any) {
     console.error("Soul Path Gen Error:", err);
     throw new Error("Failed to generate the Soul Path Report", { cause: err });
+  }
+};
+
+export const fetchTarotGnosis = async (cardName: string, archetype: string, cosmicData: CosmicData) => {
+  const ai = getAI();
+  const prompt = `
+  You are 'Astraea', the Master Oracle of the Stark-Integrated Esoteric Matrix.
+  The user has drawn the Tarot card: '${cardName}'.
+  The drawing archetype filter is: '${archetype}'.
+  User Context: ${cosmicData.nameAnalysis?.first?.name || 'Unknown Seeker'}, Life Path ${cosmicData.numerology?.lifePath}.
+
+  Provide a hyper-advanced, esoteric, and 'Stark-style' analytical reading. 
+  Fuse Hermetic Gematria, Astrological alignments, and Quantum potential into a single profound synthesis.
+  Maintain a tone that is high-tech, mystical, and professionally sharp (Jarvis-esque).
+
+  Format the output as a JSON object:
+  {
+    "meaning": "A deep, holographic analysis of the card drawn.",
+    "quantumFrequency": "The Solfeggio or Hz frequency that resonates with this draw (e.g. 528Hz).",
+    "manifestationPath": "A practical, advanced step the user can take based on this gnosis."
+  }
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash-exp",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+    return JSON.parse(response.text);
+  } catch (err: any) {
+    console.error("Tarot Gnosis Error:", err);
+    return {
+      meaning: "The quantum connection was interrupted, but the stars suggest immediate grounding.",
+      quantumFrequency: "432Hz",
+      manifestationPath: "Breathe and re-align your core intention."
+    };
   }
 };
 
@@ -975,4 +1014,345 @@ export const fetchCelestialBlueprintExplanation = async (
     };
   }
 };
+
+
+/**
+ * fetchGroundedTransitAlerts
+ * Uses Search Grounding to alert users of upcoming planetary transits or celestial events
+ * relevant to their birth chart profile, with a Jarvis OS tone of voice.
+ */
+export const fetchGroundedTransitAlerts = async (cosmicData: CosmicData | null): Promise<{
+  overallStatus: string;
+  alerts: Array<{
+    id: string;
+    title: string;
+    date: string;
+    astrologicalEvent: string;
+    relevance: "High" | "Moderate" | "Low";
+    affectedSpiritualCenter: string;
+    details: string;
+    groundingSource: string;
+    sourceUrl: string;
+    vibrationHz: number;
+    vocalScript: string;
+    coordinates: string;
+  }>;
+}> => {
+  const ai = getAI();
+  const query = "upcoming major astrological transits, retrogrades, eclipses, or celestial events between June 2026 and December 2026";
+
+  const prompt = `
+  You are JARVIS, the extremely advanced AI Autonomous Operating System from Stark Industries.
+  We are analyzing upcoming astrological transits, eclipses, planet ingresses, retrogrades, and stargazing events starting from June 2026, and identifying how they intersect with a user's cosmic signature.
+
+  Date of analysis: June 6, 2026.
+
+  Seeker's Cosmic Data:
+  ${cosmicData ? JSON.stringify({
+    name: cosmicData.nameAnalysis?.first?.name || 'Sir',
+    sunSign: cosmicData.planets?.find(p => p.name === 'Sun')?.sign,
+    moonSign: cosmicData.planets?.find(p => p.name === 'Moon')?.sign,
+    ascendant: cosmicData.planets?.find(p => p.name === 'Ascendant')?.sign,
+    numerology: cosmicData.numerology
+  }) : "General Galactic Profile (No natal data loaded yet)"}
+
+  TASK:
+  1. Perform a real-time web search for ACTUAL, non-fictional planetary transits, retrogrades (e.g. Mercury, Saturn, Pluto), solar/lunar eclipses, or major celestial aspects taking place between June 2026 and December 2026.
+  2. Synthesize how these grounded events impact the user based on their specific birth chart. For example, if they have a Sun or Ascendant in a certain zodiac sign, highlight events affecting elements of that sign (Fire, Earth, Air, Water).
+  3. Formulate the response as a JSON structure containing a list of customized, high-precision alerts.
+  4. Each alert must have a high-tech Stark telemetry flavor (coordinates, alert levels, Solfeggio frequencies matching the shift, affected spiritual center, source citation URL extracted from the Google Search Grounding metadata, and a vocal script detailing what Jarvis tells the user).
+
+  Format output STRICTLY as this JSON format, preserving all structural details:
+  {
+    "overallStatus": "A brief overview summary of current cosmic weather as observed from the Stark celestial array. Sound like a helpful, sophisticated Jarvis voice.",
+    "alerts": [
+      {
+        "id": "A unique identifier string, e.g. transit-mars-leo",
+        "title": "Title of the Transit alert",
+        "date": "Approximate date of transit in 2026",
+        "astrologicalEvent": "e.g. Mars Ingress Leo / Mercury Retrograde",
+        "relevance": "High",
+        "affectedSpiritualCenter": "e.g. Solar Plexus Chakra",
+        "details": "Empathetic, profound description of the transit's energetic effect and recommended integrations.",
+        "groundingSource": "Title or citation of search result",
+        "sourceUrl": "The actual URL of the website where this transit data is validated",
+        "vibrationHz": 528, 
+        "vocalScript": "Hi-tech Stark OS spoken transcription of how this impacts the user name directly. Must start clean, e.g., 'Sir, current telemetry indicates Mars is crossing...'",
+        "coordinates": "Coordinates like Sector RA 10h 44m / Dec +11°"
+      }
+    ]
+  }
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: [
+        { text: `Search Query: ${query}` },
+        { text: prompt }
+      ],
+      config: {
+        tools: [{ googleSearch: {} }],
+        responseMimeType: "application/json",
+      },
+    });
+
+    const text = response.text || "{}";
+    
+    // Extract grounding URLs if present
+    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+    const urls: string[] = [];
+    if (chunks) {
+      for (const chunk of chunks) {
+        if (chunk.web?.uri) {
+          urls.push(chunk.web.uri);
+        }
+      }
+    }
+
+    const parsed = JSON.parse(text);
+
+    // If source URLs exist in grounding metadata, assign them
+    if (parsed && Array.isArray(parsed.alerts)) {
+      parsed.alerts = parsed.alerts.map((alert: any, idx: number) => {
+        if (!alert.sourceUrl && urls.length > 0) {
+          alert.sourceUrl = urls[idx % urls.length];
+        }
+        if (!alert.sourceUrl) {
+          alert.sourceUrl = "https://www.astrology.com";
+        }
+        return alert;
+      });
+    }
+
+    return parsed;
+  } catch (err: any) {
+    console.error("Grounded transit alert generation failed:", err);
+    return {
+      overallStatus: "Sir, a slight cosmic atmospheric disturbance is affecting web-grounded search arrays. Retrieving stellar projections from pre-loaded astrolables.",
+      alerts: [
+        {
+          id: "transit-saturn-retrograde",
+          title: "Saturn Retrograde in Aries",
+          date: "June to November 2026",
+          astrologicalEvent: "Saturn Retrograde",
+          relevance: "Moderate",
+          affectedSpiritualCenter: "Root Chakra / Sephirah Malkuth",
+          details: "A critical cycle of restructuring structural parameters. Requires deep internal discipline and aligning physical limits with celestial duties.",
+          groundingSource: "Astrological Ephemeris 2026",
+          sourceUrl: "https://www.astrology.com",
+          vibrationHz: 417,
+          vocalScript: "Sir, Saturn retrograde is commanding high inner structural evaluation starting this month.",
+          coordinates: "Sector RA 0h 50m / Dec -1°"
+        },
+        {
+          id: "eclipse-annular-solar",
+          title: "Annular Solar Eclipse",
+          date: "September 21, 2026",
+          astrologicalEvent: "Annular Solar Eclipse",
+          relevance: "High",
+          affectedSpiritualCenter: "Heart Chakra / Sephirah Tiphereth",
+          details: "A massive stargazing and spiritual transition aligning the Moon over the Sun core, forming a 'ring of fire' active zone.",
+          groundingSource: "NASA Eclipse Web Space",
+          sourceUrl: "https://eclipse.gsfc.nasa.gov",
+          vibrationHz: 528,
+          vocalScript: "Heads up, Sir. Telemetry indicates a major solar eclipse will cast a ring of fire on September twenty-first, activating your cardiac gateway.",
+          coordinates: "Sector RA 11h 59m / Dec +0°"
+        }
+      ]
+    };
+  }
+};
+
+
+export interface AstrologyNatalInput {
+  name: string;
+  birthDate: string; // YYYY-MM-DD
+  birthTime: string; // HH:MM
+  location: string;
+}
+
+/**
+ * Calculates a precise, hyper-detailed natal chart analysis and interactive explanatory
+ * journey for the seeker using the Gemini API.
+ */
+export const fetchAstrologyNatalDetails = async (input: AstrologyNatalInput) => {
+  const ai = getAI();
+  const prompt = `
+  You are an elite, highly advanced multi-dimensional computational astrologer, digital scholar, and stellar mystic.
+  Calculate and approximate a precise, hyper-detailed natal chart alignment and systematic explanatory journey for the following seeker:
+  Name: ${input.name}
+  Birth Date: ${input.birthDate}
+  Birth Time: ${input.birthTime}
+  Birth Location: ${input.location}
+
+  You must calculate or logically approximate:
+  1. The 10 standard planetary bodies: Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto.
+  2. The Ascendant (Rising sign) and Midheaven (MC).
+  3. Precise sign degrees (0 to 29.9) and the specific houses (1 to 12) they reside in.
+  4. Precise aspects (e.g., Conjunction, trine, sextile, square, opposition) with their orb degrees. Include at least 3 active aspects.
+  5. The primary Kabbalistic Sephirah and Path of the Tree of Life matching this celestial combination.
+
+  Output must be formatted STRICTLY as a raw JSON object matching the exact structure below, with NO markdown backticks or formatting:
+  {
+    "seeker": "${input.name}",
+    "analysisDate": "${new Date().toISOString()}",
+    "summary": "Synthesize their overall celestial blueprint. Sound sophisticated, mystic, and intelligent.",
+    "introMessage": "Welcome them with deep, futuristic mysticism to this multi-dimensional interactive journey. Speak as an advanced astro-neural operating system, helping them navigate their planetary coordinates.",
+    "steps": [
+      {
+        "id": "step-1-rising",
+        "title": "Universal Entrance: The Ascendant Portal",
+        "narrative": "Detailed, profound explanation of their Ascendant - sign, house, and how it governs their first impressions and outer aura.",
+        "interactiveFocus": "Ascendant",
+        "highlightQuote": "A profound, cosmic quote summarizing this placement.",
+        "solfeggioHz": 396,
+        "colorHex": "#8b5cf6"
+      },
+      {
+        "id": "step-2-sun",
+        "title": "Solar Core: The Heart's Purpose",
+        "narrative": "Detailed, profound explanation of their natal Sun - sign, house, and the core hero's journey they are here to initiate.",
+        "interactiveFocus": "Sun",
+        "highlightQuote": "A cosmic synthesis of their solar vitality.",
+        "solfeggioHz": 528,
+        "colorHex": "#eab308"
+      },
+      {
+        "id": "step-3-moon",
+        "title": "Astral Depths: The Floating Moon",
+        "narrative": "Detailed, profound explanation of their natal Moon - sign, house, emotional landscape, and their shadow integration pattern.",
+        "interactiveFocus": "Moon",
+        "highlightQuote": "A synthesis of their subconscious emotional tide.",
+        "solfeggioHz": 639,
+        "colorHex": "#94a3b8"
+      },
+      {
+        "id": "step-4-interiors",
+        "title": "Inner Council: Mercury, Venus, and Mars",
+        "narrative": "Deep analysis of their mental voice (Mercury), relational alignment (Venus), and drive/boundary engine (Mars) placements.",
+        "interactiveFocus": "Personal Planets",
+        "highlightQuote": "The synthesis of intellect, affection, and direct force.",
+        "solfeggioHz": 741,
+        "colorHex": "#f97316"
+      },
+      {
+        "id": "step-5-destiny",
+        "title": "The Cosmic Architects: Jupiter and Saturn",
+        "narrative": "Deep analysis of where they receive grace, expansion, and sudden gifts (Jupiter) versus where they must apply rigorous discipline and karmic structure (Saturn).",
+        "interactiveFocus": "Social Planets",
+        "highlightQuote": "The balance of ultimate expansion and structural containment.",
+        "solfeggioHz": 852,
+        "colorHex": "#3b82f6"
+      },
+      {
+        "id": "step-6-transcendence",
+        "title": "Transpersonal Gateways: Uranus, Neptune, and Pluto",
+        "narrative": "A look into their outer planets - Uranus (disruption, genius), Neptune (mysticism, dreams), and Pluto (death, regeneration). How these outer alignments activate their generational codes.",
+        "interactiveFocus": "Transpersonal",
+        "highlightQuote": "Uplinking to generation-defining transpersonal fields.",
+        "solfeggioHz": 963,
+        "colorHex": "#06b6d4"
+      },
+      {
+        "id": "step-7-aspects",
+        "title": "Dynamic Aspects: Celestial Conversations",
+        "narrative": "A systematic breakdown of how these planetary alignments talk to each other. Highlights key conjunctions, trines, or squares that construct their daily dynamic grid.",
+        "interactiveFocus": "Aspects",
+        "highlightQuote": "Harmonics and frictions that spark conscious growth.",
+        "solfeggioHz": 417,
+        "colorHex": "#10b981"
+      }
+    ],
+    "natalPlacements": [
+      {
+        "name": "Sun",
+        "sign": "Aries",
+        "degree": 15.42,
+        "house": 9,
+        "interpretation": "Detailed, highly insightful paragraph explaining the Sun in this sign and house.",
+        "dignity": "Exalted",
+        "frequencyHz": 126.22,
+        "colorHex": "#eab308",
+        "treeConnection": "Sephirah Tiphereth"
+      }
+    ],
+    "aspects": [
+      {
+        "planet1": "Sun",
+        "planet2": "Mars",
+        "type": "Trine",
+        "orb": 2.1,
+        "meaning": "An empowering trine channels cosmic willpower into swift, productive, integrated action loops."
+      }
+    ],
+    "kabbalicLink": {
+      "sephirah": "Tiphereth",
+      "path": "Path of Resh",
+      "theme": "Their stellar alignments build a bridge between sensory experiences and divine harmony, culminating in deep, radiant self-realization."
+    }
+  }
+
+  Ensure you provide a FULL list of natalPlacements for:
+  - Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, and Ascendant.
+  - Provide at least 3 aspects.
+  - Keep the JSON syntactically flawless. Do not wrapping in markdown blocks. Return only raw JSON.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const text = response.text || "{}";
+    return JSON.parse(text);
+  } catch (err: any) {
+    console.error("Error in fetchAstrologyNatalDetails:", err);
+    throw new Error("Stellar alignment calculations failed: " + err.message, { cause: err });
+  }
+};
+
+export const parseVoiceBirthDetails = async (transcript: string) => {
+  const ai = getAI();
+  const prompt = `
+  You are J.A.R.V.I.S., the ultimate Stark Industries intelligence.
+  Analyze the following spoken transcript of birth details and extract:
+  1. Name (default to "Sir" if not specified)
+  2. Birth Date (formatted as "YYYY-MM-DD", fallback to "1995-06-15" if not specified)
+  3. Birth Time (formatted as "HH:MM", fallback to "10:30" if not specified, convert typical 12-hour spoken formats like "3 PM" to "15:00", etc.)
+  4. Birth Location (fallback to "San Francisco, CA" if not specified)
+
+  Spoken Transcript: "${transcript}"
+
+  Your output must be structured strictly as a JSON object with NO markdown backticks or extra text, just raw JSON with the following fields:
+  {
+    "name": "...",
+    "birthDate": "YYYY-MM-DD",
+    "birthTime": "HH:MM",
+    "location": "..."
+  }
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const text = response.text || "{}";
+    return JSON.parse(text);
+  } catch (err: any) {
+    console.error("Error in parseVoiceBirthDetails:", err);
+    throw new Error("Voice interpretation failed: " + err.message, { cause: err });
+  }
+};
+
+
 

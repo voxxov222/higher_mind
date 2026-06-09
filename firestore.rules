@@ -45,7 +45,7 @@ service cloud.firestore {
 
       allow update: if isOwner(userId) && isValidId(userId) 
         && isValidUserCosmicProfile(incoming()) 
-        && incoming().diff(existing()).affectedKeys().hasOnly(['userId', 'username', 'displayName', 'input', 'cosmicData', 'profileConfig', 'astrology', 'bio', 'updatedAt']);
+        && incoming().diff(existing()).affectedKeys().hasOnly(['userId', 'username', 'displayName', 'input', 'cosmicData', 'profileConfig', 'holographicConfig', 'astrology', 'bio', 'updatedAt']);
 
       allow delete: if false;
     }

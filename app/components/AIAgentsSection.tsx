@@ -158,6 +158,18 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
              >
                {isSwarmRunning ? <><Square className="w-4 h-4" /> Halt Swarm</> : <><Play className="w-4 h-4" /> Run Autonomous Swarm</>}
              </button>
+             <button 
+               onClick={() => {
+                 if (window.confirm("ARE YOU SURE SIR? THIS WILL ERASE THE CURRENT AGENT MATRIX.")) {
+                   swarmEngine.clearAll();
+                   setSelectedAgentId(null);
+                 }
+               }} 
+               className="px-3 py-1.5 bg-rose-950/20 hover:bg-rose-950/40 text-rose-400 rounded-lg border border-rose-500/30 flex items-center gap-2 text-xs transition-colors"
+               title="Decommission all agents and clear memory"
+             >
+               <Trash2 className="w-4 h-4" /> Clear Matrix
+             </button>
              <button
                onClick={() => {
                  const identityStr = `${cosmicData.first_name || 'User'} (${cosmicData.birth_date} ${cosmicData.birth_time})`;
@@ -332,6 +344,16 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
                    <option value="All">All Agents</option>
                    {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
+                <button 
+                  onClick={() => {
+                    if (window.confirm("Wipe all locally stored intelligence findings?")) {
+                      swarmEngine.wipeDatabase();
+                    }
+                  }}
+                  className="ml-auto px-3 py-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded text-[10px] uppercase font-bold hover:bg-rose-500/20 transition-colors"
+                >
+                  Wipe Intel
+                </button>
              </div>
              <div className="grid grid-cols-1 gap-2">
                 {filteredFindings.map(f => (

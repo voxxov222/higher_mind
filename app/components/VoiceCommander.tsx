@@ -4,9 +4,10 @@ import { Mic, Activity, X } from 'lucide-react';
 
 interface VoiceCommanderProps {
   setActiveTab: (tab: any) => void;
+  openHoloDrawer?: (tool: 'gematria' | 'chakra' | 'karma' | null) => void;
 }
 
-export default function VoiceCommander({ setActiveTab }: VoiceCommanderProps) {
+export default function VoiceCommander({ setActiveTab, openHoloDrawer }: VoiceCommanderProps) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [statusText, setStatusText] = useState('Standby');
@@ -77,7 +78,19 @@ export default function VoiceCommander({ setActiveTab }: VoiceCommanderProps) {
     let responseText = '';
 
     // Command matching logic
-    if (lowerCmd.includes('torus') || lowerCmd.includes('field')) {
+    if (lowerCmd.includes('reset') || lowerCmd.includes('home') || lowerCmd.includes('clear') || Math.max(lowerCmd.indexOf('minimize'), lowerCmd.indexOf('close')) > -1 && lowerCmd.includes('drawer')) {
+      setActiveTab('planets'); // Go back to planets/cosmos state
+      openHoloDrawer?.(null); // Close the holo drawer
+      handled = true; responseText = 'Resetting interface to core view of the Cosmos.';
+    } else if (lowerCmd.includes('drawer') || lowerCmd.includes('hud') || (lowerCmd.includes('open') && (lowerCmd.includes('karma') || lowerCmd.includes('gematria') || lowerCmd.includes('chakra')))) {
+      if (lowerCmd.includes('karma') || lowerCmd.includes('ledger')) {
+        openHoloDrawer?.('karma'); handled = true; responseText = 'Opening Holographic Drawer to Karma Ledger.';
+      } else if (lowerCmd.includes('chakra') || lowerCmd.includes('energy')) {
+        openHoloDrawer?.('chakra'); handled = true; responseText = 'Opening Holographic Drawer to Prana and Chakras.';
+      } else {
+        openHoloDrawer?.('gematria'); handled = true; responseText = 'Opening Holographic Drawer to Gematria Utilities.';
+      }
+    } else if (lowerCmd.includes('torus') || lowerCmd.includes('field')) {
       setActiveTab('torus'); handled = true; responseText = 'Accessing Torus Field Dynamics.';
     } else if (lowerCmd.includes('planets') || lowerCmd.includes('solar system')) {
       setActiveTab('planets'); handled = true; responseText = 'Initializing planetary alignment sequence.';

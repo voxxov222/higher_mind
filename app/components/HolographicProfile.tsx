@@ -3,8 +3,14 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Float, Text, Stars, MeshDistortMaterial, Line } from '@react-three/drei';
 import * as THREE from 'three';
-import { Sparkles, User, Settings, Hash, Map } from 'lucide-react';
+import { 
+  Sparkles, User as UserIcon, Settings, Hash, Map, Upload, Image as ImageIcon, 
+  FileText, X, RefreshCw, Database, CloudLightning, ShieldAlert, Sparkle, Loader2 
+} from 'lucide-react';
 import { calculateAllCiphers } from '../utils/gematria';
+import { soundEngine } from '../lib/soundEffects';
+import { type User as FirebaseUser } from 'firebase/auth';
+import { type CosmicData } from '../types';
 
 const ZodiacConstellations: React.FC<{ visible: boolean; color: string }> = ({ visible, color }) => {
   const meshRef = useRef<THREE.Group>(null);
@@ -425,7 +431,14 @@ const FrequencyWaveGraph: React.FC<{ history: number[]; color: string }> = ({ hi
   );
 };
 
-export const HolographicProfile: React.FC = () => {
+interface HolographicProfileProps {
+  user?: FirebaseUser | null;
+  onSignIn?: () => void;
+  data?: CosmicData | null;
+  loadedInputs?: any;
+}
+
+export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, onSignIn, data, loadedInputs }) => {
   const [selectedZodiac, setSelectedZodiac] = useState(ZODIAC_SIGNS[0]);
   const [selectedPlanet, setSelectedPlanet] = useState(PLANETS[0]);
   const [selectedAura, setSelectedAura] = useState(AURAS[0]);
@@ -440,18 +453,219 @@ export const HolographicProfile: React.FC = () => {
   const [showOrbitalPath, setShowOrbitalPath] = useState(true);
   const [showMoons, setShowMoons] = useState(true);
 
-  useEffect(() => {
-    if (gematriaText.trim() !== "") {
-        const results = calculateAllCiphers(gematriaText);
-        const standardResult = results.find(r => r.cipher === 'Standard');
-        if (standardResult && standardResult.value > 0) {
-            setGematriaHistory(prev => {
-                const next = [...prev, standardResult.value];
-                return next.slice(-100); 
-            });
+  // File Upload State & Handlers
+  const [uploadedFiles, setUploadedFiles] = useState<{name: string, type: 'image' | 'text', url: string, content?: string}[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files).map(file => {
+        const isImage = file.type.startsWith('image/');
+        const url = URL.createObjectURL(file);
+        
+        const fileObj: {name: string, type: 'image'|'text', url: string, content?: string} = {
+            name: file.name,
+            type: isImage ? 'image' : 'text',
+            url: url
+        };
+
+        if (!isImage) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target?.result as string;
+                setUploadedFiles(prev => prev.map(f => f.url === url ? {...f, content: text} : f));
+            };
+            reader.readAsText(file);
         }
+
+        return fileObj;
+      });
+      setUploadedFiles(prev => [...prev, ...newFiles]);
     }
-  }, [gematriaText]);
+  };
+
+  const removeFile = (url: string) => {
+    setUploadedFiles(prev => prev.filter(f => f.url !== url));
+  };
+
+  // Firestore Sync & State
+  const [isSaving, setIsSaving] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'loading' | 'synced' | 'error'>('idle');
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
+
+  // Auto-align visual parameters with computed natal chart
+  const alignWithNatalChart = () => {
+    if (!data) return;
+    
+    // Find Sun sign from natal chart
+    const sunPlanet = data.planets?.find((p: any) => p.name === 'Sun');
+    if (sunPlanet && sunPlanet.sign) {
+      const matchedZodiac = ZODIAC_SIGNS.find(z => z.name.toLowerCase() === sunPlanet.sign.toLowerCase());
+      if (matchedZodiac) {
+        setSelectedZodiac(matchedZodiac);
+      }
+    }
+
+    // Find dominant or first planet from natal chart
+    if (data.planets && data.planets.length > 0) {
+      const activePlanetName = data.planets[0].name;
+      const matchedPlanet = PLANETS.find(p => p.name.toLowerCase() === activePlanetName.toLowerCase());
+      if (matchedPlanet) {
+        setSelectedPlanet(matchedPlanet);
+      }
+    }
+  };
+
+  // Harmonize on data load
+  useEffect(() => {
+    if (data) {
+      alignWithNatalChart();
+    }
+  }, [data]);
+
+  // Load existing Holographic profile configuration
+  useEffect(() => {
+    let active = true;
+    const fetchHoloConfig = async () => {
+      if (!user) {
+        setSyncStatus('idle');
+        return;
+      }
+      setSyncStatus('loading');
+      try {
+        const { doc, getDoc } = await import('firebase/firestore');
+        const { db } = await import('../firebase');
+        const docRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && active) {
+          const docData = docSnap.data();
+          const hc = docData.holographicConfig;
+          if (hc) {
+            if (hc.selectedZodiacId) {
+              const matchingZodiac = ZODIAC_SIGNS.find(z => z.id === hc.selectedZodiacId);
+              if (matchingZodiac) setSelectedZodiac(matchingZodiac);
+            }
+            if (hc.selectedPlanetId) {
+              const matchingPlanet = PLANETS.find(p => p.id === hc.selectedPlanetId);
+              if (matchingPlanet) setSelectedPlanet(matchingPlanet);
+            }
+            if (hc.selectedAuraId) {
+              const matchingAura = AURAS.find(a => a.id === hc.selectedAuraId);
+              if (matchingAura) setSelectedAura(matchingAura);
+            }
+            if (hc.selectedGeometryId) {
+              const matchingGeom = GEOMETRIES.find(g => g.id === hc.selectedGeometryId);
+              if (matchingGeom) setSelectedGeometry(matchingGeom);
+            }
+            if (hc.gematriaText !== undefined) setGematriaText(hc.gematriaText);
+            if (hc.showConstellations !== undefined) setShowConstellations(hc.showConstellations);
+            if (hc.orbitalSpeed !== undefined) setOrbitalSpeed(hc.orbitalSpeed);
+            if (hc.showOrbitalPath !== undefined) setShowOrbitalPath(hc.showOrbitalPath);
+            if (hc.showMoons !== undefined) setShowMoons(hc.showMoons);
+            if (hc.uploadedFiles !== undefined) {
+              // Convert saved relative info back to visual files state (with local placeholder object URLs)
+              setUploadedFiles(hc.uploadedFiles.map((uf: any) => ({
+                ...uf,
+                url: uf.url || '#'
+              })));
+            }
+            setSyncStatus('synced');
+            if (docData.updatedAt) {
+              try {
+                const date = docData.updatedAt.toDate ? docData.updatedAt.toDate() : new Date(docData.updatedAt);
+                setLastSyncedAt(date.toLocaleString());
+              } catch {
+                setLastSyncedAt(new Date().toLocaleString());
+              }
+            }
+          } else {
+            setSyncStatus('synced');
+            alignWithNatalChart();
+          }
+        } else {
+          setSyncStatus('idle');
+          alignWithNatalChart();
+        }
+      } catch (err) {
+        console.error("Failed to load Holographic Profile from Firestore:", err);
+        setSyncStatus('error');
+      }
+    };
+
+    fetchHoloConfig();
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  // Save/Sync Holographic state to Firestore
+  const handleSaveHoloProfile = async () => {
+    if (!user) {
+      if (onSignIn) {
+        onSignIn();
+      }
+      return;
+    }
+
+    setIsSaving(true);
+    setSyncStatus('loading');
+    soundEngine.scan();
+
+    try {
+      const { doc, setDoc, serverTimestamp } = await import('firebase/firestore');
+      const { db } = await import('../firebase');
+
+      const configToSave = {
+        selectedZodiacId: selectedZodiac.id,
+        selectedPlanetId: selectedPlanet.id,
+        selectedAuraId: selectedAura.id,
+        selectedGeometryId: selectedGeometry.id,
+        gematriaText,
+        showConstellations,
+        orbitalSpeed,
+        showOrbitalPath,
+        showMoons,
+        uploadedFiles: uploadedFiles.map(f => ({
+          name: f.name,
+          type: f.type,
+          content: f.content || ''
+        }))
+      };
+
+      const payload: any = {
+        userId: user.uid,
+        holographicConfig: configToSave,
+        updatedAt: serverTimestamp()
+      };
+
+      if (loadedInputs) {
+        payload.input = loadedInputs;
+      }
+      if (data) {
+        payload.cosmicData = data;
+      }
+
+      await setDoc(doc(db, 'users', user.uid), payload, { merge: true });
+
+      setSyncStatus('synced');
+      setLastSyncedAt(new Date().toLocaleString());
+      setIsSaving(false);
+      soundEngine.neuralClick();
+      
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance("Stark profile integrated. Cloud decryption deck is secured.");
+        utterance.rate = 1.1;
+        window.speechSynthesis.speak(utterance);
+      }
+    } catch (err) {
+      console.error("Critical: Failed to sync Holographic Profile:", err);
+      setSyncStatus('error');
+      setIsSaving(false);
+    }
+  };
+  
+  
 
   return (
     <div className="flex flex-col h-full bg-zinc-950 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden font-sans">
@@ -515,6 +729,183 @@ export const HolographicProfile: React.FC = () => {
           >
             <Settings size={20} />
           </button>
+        </div>
+
+        {/* File Upload / Context Panel */}
+        <div className="absolute top-36 left-8 w-72 pointer-events-auto">
+            <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-2xl">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Upload size={16} className="text-emerald-400" /> Identity Data
+                    </h3>
+                    <div className="text-[10px] text-zinc-500 uppercase tracking-widest">{uploadedFiles.length} files</div>
+                </div>
+                
+                <input 
+                    type="file" 
+                    multiple 
+                    ref={fileInputRef}
+                    className="hidden" 
+                    onChange={handleFileUpload}
+                    accept="image/*,.txt,.pdf,.csv,.json"
+                />
+                
+                <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full py-3 mb-4 rounded-xl border border-dashed border-white/20 bg-white/5 hover:bg-white/10 transition-colors flex flex-col items-center justify-center gap-2 text-zinc-400 hover:text-white group"
+                >
+                    <Upload size={20} className="group-hover:-translate-y-1 transition-transform" />
+                    <span className="text-xs font-mono">Upload images or text</span>
+                </button>
+
+                <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+                    {uploadedFiles.map((file, i) => (
+                        <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-black/40 border border-white/5 relative group">
+                            {file.type === 'image' ? (
+                                <div className="w-8 h-8 rounded-md bg-zinc-900 border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
+                                    <img src={file.url} alt={file.name} className="w-full h-full object-cover" />
+                                </div>
+                            ) : (
+                                <div className="w-8 h-8 rounded-md bg-zinc-900 border border-white/10 flex items-center justify-center shrink-0">
+                                    <FileText size={14} className="text-blue-400" />
+                                </div>
+                            )}
+                            <div className="flex-1 min-w-0 pr-6">
+                                <div className="text-xs text-white truncate">{file.name}</div>
+                                <div className="text-[9px] text-zinc-500 uppercase">{file.type}</div>
+                            </div>
+                            <button 
+                                onClick={() => removeFile(file.url)}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md bg-red-500/10 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-500/20"
+                            >
+                                <X size={12} />
+                            </button>
+                        </div>
+                    ))}
+                    {uploadedFiles.length === 0 && (
+                        <div className="text-[10px] text-zinc-600 italic text-center p-2">
+                            Upload natal charts, numerology reports, or identity images for the AI to synthesize.
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+
+        {/* Stark J.A.R.V.I.S. Cloud Sync & Astrological Handshake Panel */}
+        <div className="absolute top-[490px] left-8 w-72 pointer-events-auto">
+            <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden group">
+                {/* Glowing decorative tech lines */}
+                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-500/50 to-transparent" />
+                
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Database size={16} className="text-purple-400" /> Quantum Sync Core
+                    </h3>
+                    <div className="flex items-center gap-1">
+                        <span className={`w-1.5 h-1.5 rounded-full ${user ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400 animate-pulse'}`} />
+                        <span className="text-[9px] font-mono text-zinc-500 uppercase">{user ? 'Online' : 'Local'}</span>
+                    </div>
+                </div>
+
+                {!user ? (
+                    <div className="space-y-3">
+                        <div className="rounded-xl border border-amber-500/15 bg-amber-500/5 p-3 text-xs text-amber-300">
+                            <div className="flex items-center gap-2 font-semibold mb-1">
+                                <ShieldAlert size={14} className="text-amber-400" /> SECURITY LOCK ACTIVE
+                            </div>
+                            Authenticate with your J.A.R.V.I.S. Core to serialize and save your coordinates permanently.
+                        </div>
+                        <button
+                            onClick={onSignIn}
+                            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold tracking-widest uppercase transition-all duration-300 border border-purple-500/20 text-white shadow-lg shadow-purple-500/10 hover:shadow-purple-500/25 cursor-pointer flex items-center justify-center gap-2"
+                        >
+                            <CloudLightning size={14} className="animate-bounce" /> AUTHORIZE NODE
+                        </button>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        <div className="rounded-xl bg-zinc-900/50 border border-white/5 p-3 space-y-1.5 font-mono text-[10px] text-zinc-400">
+                            <div className="text-zinc-200 font-semibold flex items-center justify-between text-xs mb-1">
+                                <span className="truncate">Deck: {user.displayName || user.email?.split('@')[0]}</span>
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">AGENT</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-zinc-500">Node Sync:</span>
+                                <span className={
+                                    syncStatus === 'synced' ? 'text-emerald-400 font-semibold' :
+                                    syncStatus === 'loading' ? 'text-purple-400 font-semibold' :
+                                    syncStatus === 'error' ? 'text-red-400 font-semibold' : 'text-zinc-300'
+                                }>
+                                    {syncStatus === 'synced' ? 'SECURED' :
+                                     syncStatus === 'loading' ? 'SYNCING...' :
+                                     syncStatus === 'error' ? 'MISALIGNED' : 'OFFLINE'}
+                                </span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-zinc-500">Last Synced:</span>
+                                <span className="text-zinc-300">{lastSyncedAt || 'No Cloud Record'}</span>
+                            </div>
+                        </div>
+
+                        {/* Birth Details Handshake */}
+                        {loadedInputs || data ? (
+                            <div className="rounded-xl bg-purple-950/20 border border-purple-500/10 p-3 space-y-1.5 font-mono text-[10px] text-purple-200">
+                                <div className="text-white font-semibold flex items-center gap-1.5 text-xs mb-1">
+                                    <Sparkle size={12} className="text-purple-400 animate-spin-slow" /> Birth Decryption Key
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-purple-400/70">Name:</span>
+                                    <span className="text-white truncate max-w-[150px]">{loadedInputs?.name || 'N/A'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-purple-400/70">Sun Sign:</span>
+                                    <span className="text-white">
+                                        {data?.planets?.find((p: any) => p.name === 'Sun')?.sign || 'Leo'}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-purple-400/70">Dominant:</span>
+                                    <span className="text-white">
+                                        {data?.planets?.[0]?.name || 'Sun'}
+                                    </span>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="rounded-xl border border-dashed border-white/10 p-3 text-[10px] text-zinc-500 italic text-center">
+                                Compute your natal chart in the main engine to pair your birth blueprint.
+                            </div>
+                        )}
+
+                        <div className="flex gap-2">
+                            {data && (
+                                <button
+                                    onClick={alignWithNatalChart}
+                                    title="Harmonize visual geometry with calculated birth alignments instantly"
+                                    className="flex-1 py-2 px-1 rounded-xl bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 text-[10px] transition-all flex items-center justify-center gap-1 text-zinc-400 font-mono cursor-pointer"
+                                // Remove relative references to alignWithNatalChart error if exists
+                                >
+                                    <RefreshCw size={12} /> HARMONIZE
+                                </button>
+                            )}
+                            <button
+                                onClick={handleSaveHoloProfile}
+                                disabled={isSaving}
+                                className={`flex-[2] py-2 px-2 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-bold text-[10px] tracking-wider uppercase transition-all duration-300 border border-purple-500/20 shadow-lg shadow-purple-500/10 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50`}
+                            >
+                                {isSaving ? (
+                                    <>
+                                        <Loader2 size={12} className="animate-spin" /> COMMITTING...
+                                    </>
+                                ) : (
+                                    <>
+                                        <CloudLightning size={12} /> COMMIT TO CLOUD
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
 
         {/* Configuration Panel */}

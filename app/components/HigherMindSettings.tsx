@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Volume2, Database, Image as ImageIcon, Zap, Globe, Video, Scan, Bolt, Brain, Activity, Settings2, Palette, Eye, ArrowUpRight, Play, Sparkles } from 'lucide-react';
+import { X, Volume2, Database, Image as ImageIcon, Zap, Globe, Video, Scan, Bolt, Brain, Activity, Settings2, Palette, Eye, ArrowUpRight, Play, Sparkles, Moon, Sun, Sliders } from 'lucide-react';
 import { useHigherMind, AIModule } from './HigherMindProvider';
 import { soundEngine } from '../lib/soundEffects';
 
@@ -10,7 +10,7 @@ interface HigherMindSettingsProps {
 }
 
 export const HigherMindSettings: React.FC<HigherMindSettingsProps> = ({ isOpen, onClose }) => {
-  const { aiModules, toggleModule, activeThemeId, setActiveThemeId, themes } = useHigherMind();
+  const { aiModules, toggleModule, activeThemeId, setActiveThemeId, themes, cosmicContext, setCosmicContext } = useHigherMind();
   const [activePanel, setActivePanel] = useState<'modules' | 'themes'>('modules');
 
   const getIcon = (iconName: string) => {
@@ -150,8 +150,155 @@ export const HigherMindSettings: React.FC<HigherMindSettingsProps> = ({ isOpen, 
                     })}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {themes.map(theme => (
+                  <div className="space-y-6">
+                    {/* Cosmic Context Alignment Control Deck */}
+                    <div className="p-6 rounded-[2rem] border border-white/10 bg-gradient-to-b from-stone-900/40 to-black/60 shadow-2xl relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                        <Moon className="w-24 h-24 text-white" />
+                      </div>
+
+                      <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20 text-indigo-400">
+                            <Sparkles className="w-5 h-5 animate-spin" style={{ animationDuration: '6s' }} />
+                          </div>
+                          <div>
+                            <h3 className="text-white text-sm font-bold uppercase tracking-widest">Cosmic Context Shift</h3>
+                            <p className="text-[9px] text-stone-500 uppercase tracking-widest mt-0.5 animate-pulse">Atmospheric Dynamic Modulator</p>
+                          </div>
+                        </div>
+
+                        {/* Toggle switch */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            soundEngine.click();
+                            setCosmicContext({ enabled: !cosmicContext.enabled });
+                          }}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            cosmicContext.enabled ? 'bg-indigo-500' : 'bg-stone-800'
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-205 ease-in-out ${
+                              cosmicContext.enabled ? 'translate-x-5' : 'translate-x-0'
+                            }`}
+                          />
+                        </button>
+                      </div>
+
+                      {cosmicContext.enabled ? (
+                        <div className="space-y-4">
+                          {/* Modulator Source Type Selector */}
+                          <div>
+                            <span className="text-[9px] text-stone-500 font-bold uppercase tracking-wider block mb-2">Modulation Engine</span>
+                            <div className="grid grid-cols-2 gap-2 bg-black/40 p-1 border border-white/5 rounded-xl">
+                              <button
+                                type="button"
+                                onClick={() => { soundEngine.click(); setCosmicContext({ type: 'lunar' }); }}
+                                className={`py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                                  cosmicContext.type === 'lunar'
+                                    ? 'bg-indigo-500/25 text-indigo-300 border border-indigo-500/30'
+                                    : 'text-stone-500 hover:text-stone-300'
+                                }`}
+                              >
+                                <Moon className="w-3.5 h-3.5" />
+                                Lunar Phase
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => { soundEngine.click(); setCosmicContext({ type: 'transit' }); }}
+                                className={`py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                                  cosmicContext.type === 'transit'
+                                    ? 'bg-purple-500/25 text-purple-300 border border-purple-500/30'
+                                    : 'text-stone-500 hover:text-stone-300'
+                                }`}
+                              >
+                                <Sun className="w-3.5 h-3.5" />
+                                Stellar Transit
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Source Specific Customizer */}
+                          {cosmicContext.type === 'lunar' ? (
+                            <div className="p-4 bg-indigo-950/15 border border-indigo-500/10 rounded-2xl space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[8px] text-indigo-400 font-bold uppercase tracking-[0.25em]">VIBRATION METRIC</span>
+                                <span className="text-[9px] text-indigo-300 font-mono font-bold uppercase tracking-widest bg-indigo-500/10 px-2 py-0.5 border border-indigo-500/20 rounded-md">
+                                  LUNAR SYNC
+                                </span>
+                              </div>
+                              <div className="space-y-1">
+                                <span className="text-sm font-light text-stone-200 block">
+                                  Calculated Lunar Resonance: <strong className="text-indigo-400 font-normal">Active</strong>
+                                </span>
+                                <p className="text-[10px] text-stone-400 leading-relaxed italic">
+                                  "The dynamic moon cycle is mapped continuously onto standard color scales, giving your workspace celestial fluidity."
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <span className="text-[9px] text-stone-400 font-bold uppercase tracking-wider block mb-1">Active Astrological Transit Aspect</span>
+                              <div className="grid grid-cols-2 gap-2">
+                                {[
+                                  { id: 'mercury_retrograde', name: 'Mercury Retrograde', color: '#38bdf8' },
+                                  { id: 'saturn_return', name: 'Saturn Return', color: '#eab308' },
+                                  { id: 'venus_trine', name: 'Venus Trine', color: '#f472b6' },
+                                  { id: 'jupiter_conjunction', name: 'Jupiter Conjunction', color: '#c084fc' }
+                                ].map(t => (
+                                  <button
+                                    key={t.id}
+                                    type="button"
+                                    onClick={() => { soundEngine.click(); setCosmicContext({ transit: t.id }); }}
+                                    className={`p-3 rounded-[1.25rem] border text-left transition-all ${
+                                      cosmicContext.transit === t.id
+                                        ? 'bg-purple-500/10 border-purple-500/30 shadow-lg'
+                                        : 'bg-transparent border-white/5 opacity-50 hover:opacity-85'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: t.color }} />
+                                      <span className="text-[10px] font-bold uppercase tracking-wider text-white truncate">{t.name}</span>
+                                    </div>
+                                    <span className="text-[8px] text-stone-500 block uppercase font-mono">Calibrate Transit</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Blur Intensity Slider */}
+                          <div>
+                            <span className="text-[9px] text-stone-400 font-bold uppercase tracking-wider block mb-2">Atmospheric Blur Level</span>
+                            <div className="grid grid-cols-3 gap-2 bg-black/20 p-1 border border-white/5 rounded-xl font-mono">
+                              {(['low', 'medium', 'high'] as const).map(level => (
+                                <button
+                                  key={level}
+                                  type="button"
+                                  onClick={() => { soundEngine.click(); setCosmicContext({ blurIntensity: level }); }}
+                                  className={`py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
+                                    cosmicContext.blurIntensity === level
+                                      ? 'bg-stone-100 text-stone-900 shadow-sm font-bold'
+                                      : 'text-stone-400 hover:text-stone-200'
+                                  }`}
+                                >
+                                  {level}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-stone-500 leading-relaxed font-light">
+                          Enable Cosmic Context Shift to dynamically overlay custom celestial vibrations, customized dual-color ranges, and atmospheric glass blur scales mapped directly onto real-time shifting lunar phases or user-selected stellar transits.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {themes.map(theme => (
                       <motion.button
                         key={theme.id}
                         whileHover={{ scale: 1.02 }}
@@ -219,6 +366,7 @@ export const HigherMindSettings: React.FC<HigherMindSettingsProps> = ({ isOpen, 
                         </div>
                       </motion.button>
                     ))}
+                    </div>
                   </div>
                 )}
               </div>

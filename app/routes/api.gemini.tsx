@@ -8,9 +8,12 @@ export async function action({ request }: ActionFunctionArgs) {
   }
   
   try {
-    const { action, payload } = await request.json();
+    const { action, payload: rawPayload } = await request.json();
+    const payload = rawPayload || {};
     
     switch (action) {
+      case "fetchAstrologyNatalDetails":
+        return json(await geminiServer.fetchAstrologyNatalDetails(payload));
       case "fetchCosmicReading":
         return json(await geminiServer.fetchCosmicReading(payload));
       case "fetchCosmicChatResponse":
@@ -31,6 +34,12 @@ export async function action({ request }: ActionFunctionArgs) {
         return json(await geminiServer.fetchCelestialBlueprintExplanation(payload.level, payload.userPrompt, payload.cosmicData));
       case "generateSoulPathReport":
         return json(await geminiServer.generateSoulPathReport(payload.cosmicData));
+      case "fetchTarotGnosis":
+        return json(await geminiServer.fetchTarotGnosis(payload.cardName, payload.archetype, payload.cosmicData));
+      case "fetchGroundedTransitAlerts":
+        return json(await geminiServer.fetchGroundedTransitAlerts(payload.cosmicData));
+      case "parseVoiceBirthDetails":
+        return json(await geminiServer.parseVoiceBirthDetails(payload.transcript));
       default:
         return json({ error: "Unknown action" }, { status: 400 });
     }

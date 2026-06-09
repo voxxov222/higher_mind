@@ -19,15 +19,13 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
   
-  app.use(express.json());
-
   // Static directory for generated image assets
-  app.use("/assets/images", express.static("/src/assets/images"));
+  app.use("/assets/images", express.static(path.join(process.cwd(), "src/assets/images")));
 
   // API to retrieve the path/URL of the generated mystical zodiac illustration
   app.get("/api/zodiac-illustration", (req, res) => {
       try {
-          const dir = "/src/assets/images";
+          const dir = path.join(process.cwd(), "src/assets/images");
           if (fs.existsSync(dir)) {
               const files = fs.readdirSync(dir);
               const imageFile = files.find(f => f.startsWith("zodiac_celestial_") && f.endsWith(".png"));
@@ -42,7 +40,7 @@ async function startServer() {
       }
   });
 
-  app.post("/api/generate-media", async (req, res) => {
+  app.post("/api/generate-media", express.json(), async (req, res) => {
       try {
           const { prompt, type } = req.body;
           const aiClient = getAI();
@@ -102,8 +100,8 @@ async function startServer() {
     const distPath = path.join(process.cwd(), "dist/client");
     app.use(express.static(distPath, { immutable: true, maxAge: "1y" }));
     
-    // Updated: Load the bundled server.cjs
-    const build = await import(path.join(process.cwd(), "dist/server.cjs"));
+    // Updated: Load the bundled Remix server build
+    const build = await import(path.join(process.cwd(), "dist/server/index.js"));
     
     app.all("*", (req, res, next) => {
         return createRequestHandler({

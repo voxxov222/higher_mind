@@ -2017,6 +2017,24 @@ const AstralCanvasInner = ({ cosmicData }: AstralCanvasProps) => {
     }
   };
 
+  const handleResetActiveCanvas = () => {
+    if (window.confirm("ARE YOU SURE? THIS WILL DISSOLVE THE CURRENT QUANTUM MAPPING AND RETURN TO ROOT SOURCE.")) {
+      const initNode: Node<CanvasNodeData> = {
+        id: `chatbot_${Date.now()}`,
+        type: 'chatbotNode',
+        position: { x: 300, y: 150 },
+        data: {
+          id: `chatbot_${Date.now()}`,
+          title: 'Ascension Synthesizer',
+          cosmicData,
+          updateNodeData,
+        }
+      };
+      setNodes([initNode]);
+      setEdges([]);
+    }
+  };
+
   if (!isClient) return null;
 
   return (
@@ -2048,15 +2066,34 @@ const AstralCanvasInner = ({ cosmicData }: AstralCanvasProps) => {
 
           <button
             onClick={() => handleCreateNewCanvas()}
-            className="flex items-center gap-1 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs px-3 py-2 rounded-xl transition-all shadow-md active:scale-95 shrink-0"
+            className="flex items-center gap-1.5 bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white font-bold text-[10px] uppercase tracking-widest px-4 py-2 rounded-xl transition-all border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] active:scale-95 shrink-0"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">New Canvas</span>
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>New Matrix</span>
           </button>
         </div>
 
         {/* Node Creators Toolbar */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Advanced Operations */}
+          <div className="flex items-center gap-1.5 pr-3 border-r border-white/10 mr-1">
+            <button
+              onClick={handleResetActiveCanvas}
+              className="group flex items-center gap-1.5 px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl transition-all"
+              title="Reset current canvas to root state"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-rose-400 group-hover:rotate-180 transition-transform duration-500" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-300">Reset Flux</span>
+            </button>
+            <button
+              onClick={handleClearNodes}
+              className="flex items-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all"
+              title="Wipe all nodes from current view"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-zinc-400" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Wipe grid</span>
+            </button>
+          </div>
           <button
             onClick={() => handleAddNode('noteNode')}
             className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-purple-500/30 text-white text-xs px-3 py-2 rounded-xl transition-all"
@@ -2139,24 +2176,6 @@ const AstralCanvasInner = ({ cosmicData }: AstralCanvasProps) => {
           </button>
 
           <div className="h-6 w-[1px] bg-white/10 mx-1" />
-
-          {/* Delete active Canvas document */}
-          <button
-            onClick={(e) => handleDeleteCanvas(activeCanvasId, e)}
-            disabled={canvases.length <= 1}
-            className="p-2 border border-white/10 hover:border-red-500/30 hover:bg-red-500/10 rounded-xl text-white/55 hover:text-red-400 transition-all disabled:opacity-30 disabled:hover:bg-transparent"
-            title="Delete Canvas Document"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-
-          {/* Clear Current State */}
-          <button
-            onClick={handleClearNodes}
-            className="flex items-center gap-1 text-[11px] font-bold text-white/50 hover:text-white uppercase px-2 py-1 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 font-mono transition-all"
-          >
-            Clear Canvas
-          </button>
         </div>
       </div>
 

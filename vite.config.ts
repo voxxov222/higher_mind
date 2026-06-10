@@ -15,7 +15,6 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       remix({
-        buildDirectory: "dist",
         future: {
           v3_fetcherPersist: true,
           v3_relativeSplatPath: true,

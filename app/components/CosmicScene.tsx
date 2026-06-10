@@ -1577,7 +1577,7 @@ const NumerologyGeometria = ({ data, onSelect }: { data: CosmicData, onSelect: (
  * Integrates geometry, lighting, effects, and camera management.
  */
 export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPresentationActive, mode = 'idle', vortexMode }: CosmicSceneProps) => {
-  const { coherence, alignment, feelings, projectedItems } = useHigherMind();
+  const { coherence, alignment, feelings, projectedItems, activeTheme } = useHigherMind();
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [showBrainMenu, setShowBrainMenu] = useState<{x: number, y: number} | null>(null);
   const touchTimer = useRef<NodeJS.Timeout | null>(null);
@@ -1643,9 +1643,10 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
       <Canvas id="cosmic-canvas" dpr={[1, 1.5]} gl={{ powerPreference: "high-performance", alpha: false, stencil: false, antialias: false }} camera={{ position: [0, 15, 20], fov: 60 }} className="w-full h-full block">
       {/* --- SCENE INFRASTRUCTURE --- */}
       <CameraController isPresentationActive={isPresentationActive} activeTab={activeTab} data={data} />
-      <fog attach="fog" args={['#000', 5, 50]} />
-      <ambientLight intensity={0.2} />
-      <pointLight position={[0, 0, 0]} intensity={2} color="#ffffff" />
+      <fog attach="fog" args={[activeTheme.lighting?.ambientColor || '#000', 5, 50]} />
+      <ambientLight intensity={activeTheme.lighting?.ambientIntensity || 0.2} color={activeTheme.lighting?.ambientColor || '#ffffff'} />
+      <pointLight position={[0, 0, 0]} intensity={activeTheme.lighting?.pointIntensity || 2} color={activeTheme.lighting?.point1Color || '#ffffff'} />
+      <pointLight position={[10, 10, -5]} intensity={(activeTheme.lighting?.pointIntensity || 2) / 2} color={activeTheme.lighting?.point2Color || '#ffffff'} />
       
       {/* Lightened particle fields for mobile performance */}
       <Stars radius={100} depth={50} count={150} factor={4} saturation={0} fade />

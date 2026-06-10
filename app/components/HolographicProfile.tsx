@@ -5,12 +5,16 @@ import { OrbitControls, Float, Text, Stars, MeshDistortMaterial, Line } from '@r
 import * as THREE from 'three';
 import { 
   Sparkles, User as UserIcon, Settings, Hash, Map, Upload, Image as ImageIcon, 
-  FileText, X, RefreshCw, Database, CloudLightning, ShieldAlert, Sparkle, Loader2 
+  FileText, X, RefreshCw, Database, CloudLightning, ShieldAlert, Sparkle, Loader2,
+  Cpu, Moon, Hexagon, Zap, Heart, Activity, Pin, Radio, ExternalLink
 } from 'lucide-react';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart as RechartsPieChart, Pie, Cell, Tooltip as RechartsTooltip } from 'recharts';
 import { calculateAllCiphers } from '../utils/gematria';
 import { soundEngine } from '../lib/soundEffects';
 import { type User as FirebaseUser } from 'firebase/auth';
 import { type CosmicData } from '../types';
+import { useHigherMind } from './HigherMindProvider';
+import { TikTokLivePortal } from './TikTokLivePortal';
 
 const ZodiacConstellations: React.FC<{ visible: boolean; color: string }> = ({ visible, color }) => {
   const meshRef = useRef<THREE.Group>(null);
@@ -438,7 +442,136 @@ interface HolographicProfileProps {
   loadedInputs?: any;
 }
 
+// ----- Widget Renderer Component -----
+const ProfileWidgetRenderer = ({ widget, onRemove }: { widget: any, onRemove: (id: string) => void }) => {
+    const { componentName, data, type } = widget;
+    
+    // Fallback UI or specific UI based on componentName
+    let renderContent: React.ReactNode;
+
+    if (componentName === 'Planetary Power Radar') {
+        renderContent = (
+            <div className="h-48 w-full p-2 relative pointer-events-none">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+                  <PolarGrid stroke="#ffffff10" />
+                  <PolarAngleAxis dataKey="name" tick={{ fill: '#a8a29e', fontSize: 8 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} stroke="none" />
+                  <Radar name="Planetary Power" dataKey="strength" stroke="#a855f7" fill="#a855f7" fillOpacity={0.4} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+        );
+    } else if (componentName === 'Elements Balance') {
+        const ELEMENT_COLORS: any = { Fire: '#f87171', Earth: '#fbbf24', Air: '#60a5fa', Water: '#34d399' };
+        renderContent = (
+            <div className="h-48 w-full relative pointer-events-none">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsPieChart>
+                    <Pie data={data} cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5} dataKey="value" stroke="none">
+                      {data.map((entry: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={ELEMENT_COLORS[entry.name]} />
+                      ))}
+                    </Pie>
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                    <span className="text-[10px] text-white font-bold opacity-50">BALANCE</span>
+                </div>
+            </div>
+        );
+    } else if (componentName === 'SoulAge') {
+        renderContent = (
+            <div className="p-4 flex flex-col items-center justify-center text-center">
+                <div className="text-3xl font-serif text-white mb-2 pb-2 border-b border-white/10 uppercase tracking-[0.2em]">{data}</div>
+                <div className="text-xs text-white/50 tracking-widest uppercase">Computed Soul Age</div>
+            </div>
+        );
+    } else if (componentName === 'AIAgent') {
+        const roleColor = data.role === 'analyst' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' :
+                          data.role === 'mystic' ? 'text-purple-400 border-purple-500/20 bg-purple-500/10' :
+                          data.role === 'guide' ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10' :
+                          'text-amber-400 border-amber-500/20 bg-amber-500/10';
+        renderContent = (
+            <div className={`p-4 rounded-xl border flex flex-col items-center justify-center gap-3 ${roleColor}`}>
+                <Cpu size={24} className="animate-pulse" />
+                <div className="font-mono text-xs font-bold uppercase tracking-widest">{data.name}</div>
+                <div className="text-[9px] uppercase tracking-widest opacity-70">Lvl {data.level} {data.role}</div>
+            </div>
+        );
+    } else if (componentName === 'PlanetCard') {
+        renderContent = (
+            <div className="p-4 flex flex-col items-start bg-black/40 rounded-xl border border-white/5">
+                <div className="flex items-center gap-2 mb-2 w-full border-b border-white/10 pb-2">
+                    <span className="text-2xl" style={{ color: '#' + Math.floor(Math.random()*16777215).toString(16) }}>{data.symbol}</span>
+                    <span className="text-sm font-bold text-white uppercase tracking-widest">{data.name}</span>
+                </div>
+                <div className="text-xs text-white/70 font-mono">Sign: <span className="text-white">{data.sign}</span></div>
+                <div className="text-xs text-white/70 font-mono">House: <span className="text-white">{data.house}</span></div>
+                <div className="text-xs text-white/70 font-mono">Degree: <span className="text-white">{data.degree}</span></div>
+            </div>
+        );
+    } else if (componentName === 'Astraea Wisdom') {
+        renderContent = (
+            <div className="p-4 space-y-4 text-center">
+                <span className="text-[10px] text-pink-500/60 uppercase tracking-[0.4em] font-mono">Archetype: {data.archetype}</span>
+                <p className="text-sm font-serif text-white italic">"{data.text}"</p>
+                <div className="flex gap-2 justify-center">
+                    <div className="px-2 py-1 bg-pink-500/5 rounded flex items-center gap-1 border border-pink-500/20">
+                        <Heart size={10} className="text-pink-500" />
+                        <span className="text-[8px] text-white font-mono">{data.energy}</span>
+                    </div>
+                </div>
+            </div>
+        );
+    } else if (componentName === 'Lunar Phase') {
+        renderContent = (
+            <div className="p-4 flex flex-col items-center gap-2">
+                <Moon size={24} className="text-indigo-300" />
+                <div className="text-xs font-bold text-white uppercase tracking-widest">{data.phase}</div>
+            </div>
+        );
+    } else if (componentName === 'Vibrational Harmony') {
+        renderContent = (
+            <div className="p-4 flex flex-col items-center gap-2">
+                <Hexagon size={24} className="text-indigo-300" />
+                <div className="text-xs font-bold text-white uppercase tracking-widest">{data.freq}</div>
+            </div>
+        );
+    } else if (componentName === 'Active Transit') {
+        renderContent = (
+            <div className="p-4 flex flex-col items-center gap-2">
+                <Activity size={24} className="text-indigo-300" />
+                <div className="text-xs font-bold text-white uppercase tracking-widest">{data.transit}</div>
+            </div>
+        );
+    } else {
+        renderContent = (
+            <div className="p-4 text-[10px] text-zinc-500 font-mono whitespace-pre-wrap truncate">
+                {JSON.stringify(data)}
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl p-2 relative group overflow-hidden pointer-events-auto shadow-xl">
+            <button 
+                onClick={(e) => { e.stopPropagation(); onRemove(widget.id); }}
+                className="absolute top-2 right-2 p-1 bg-red-500/20 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity rounded z-10 hover:bg-red-500/40"
+            >
+                <X size={12} />
+            </button>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent" />
+            <div className="pt-3 px-2 pb-1 text-[9px] uppercase tracking-[0.2em] text-zinc-400 font-bold border-b border-white/5 mb-2">
+                {componentName}
+            </div>
+            {renderContent}
+        </div>
+    );
+};
+
 export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, onSignIn, data, loadedInputs }) => {
+  const { userData, removeProfileWidget } = useHigherMind();
   const [selectedZodiac, setSelectedZodiac] = useState(ZODIAC_SIGNS[0]);
   const [selectedPlanet, setSelectedPlanet] = useState(PLANETS[0]);
   const [selectedAura, setSelectedAura] = useState(AURAS[0]);
@@ -446,6 +579,9 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
   const [gematriaText, setGematriaText] = useState("");
   const [gematriaHistory, setGematriaHistory] = useState<number[]>([144, 432, 528, 963, 111, 777, 888, 333, 444, 555]);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [tiktokHandle, setTiktokHandle] = useState("@enterupted");
+  const [tiktokLiveActive, setTiktokLiveActive] = useState(true);
+  const [isTikTokOpen, setIsTikTokOpen] = useState(false);
   
   // New State variables for requested features
   const [showConstellations, setShowConstellations] = useState(false);
@@ -562,6 +698,8 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
             if (hc.orbitalSpeed !== undefined) setOrbitalSpeed(hc.orbitalSpeed);
             if (hc.showOrbitalPath !== undefined) setShowOrbitalPath(hc.showOrbitalPath);
             if (hc.showMoons !== undefined) setShowMoons(hc.showMoons);
+            if (hc.tiktokHandle !== undefined) setTiktokHandle(hc.tiktokHandle);
+            if (hc.tiktokLiveActive !== undefined) setTiktokLiveActive(hc.tiktokLiveActive);
             if (hc.uploadedFiles !== undefined) {
               // Convert saved relative info back to visual files state (with local placeholder object URLs)
               setUploadedFiles(hc.uploadedFiles.map((uf: any) => ({
@@ -625,6 +763,8 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
         orbitalSpeed,
         showOrbitalPath,
         showMoons,
+        tiktokHandle,
+        tiktokLiveActive,
         uploadedFiles: uploadedFiles.map(f => ({
           name: f.name,
           type: f.type,
@@ -723,12 +863,23 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
             </p>
           </div>
           
-          <button 
-            onClick={() => setIsConfigOpen(!isConfigOpen)}
-            className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-zinc-400 hover:text-white"
-          >
-            <Settings size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => { soundEngine.charge(); setIsTikTokOpen(true); }}
+              className="p-3 bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/35 rounded-xl transition-all text-pink-400 hover:text-white flex items-center gap-2 text-xs font-mono uppercase font-bold tracking-wider relative overflow-hidden shadow-[0_0_15px_rgba(236,72,153,0.15)] hover:shadow-[0_0_25px_rgba(236,72,153,0.3)] cursor-pointer"
+            >
+              <Radio size={16} className="text-pink-400 animate-pulse" />
+              <span>TikTok Live</span>
+              {tiktokLiveActive && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-pink-500 rounded-full animate-ping" />}
+            </button>
+
+            <button 
+              onClick={() => { soundEngine.select(); setIsConfigOpen(!isConfigOpen); }}
+              className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-zinc-400 hover:text-white cursor-pointer"
+            >
+              <Settings size={20} />
+            </button>
+          </div>
         </div>
 
         {/* File Upload / Context Panel */}
@@ -908,6 +1059,86 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
             </div>
         </div>
 
+        {/* Stark TikTok Broadcast HUD Panel */}
+        <div className="absolute top-36 left-[340px] w-72 pointer-events-auto hidden xl:block">
+            <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-pink-500/50 to-transparent" />
+                
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Radio size={16} className="text-pink-400 animate-pulse" /> TikTok Spacetime
+                    </h3>
+                    <div className="flex items-center gap-1">
+                        <span className={`w-1.5 h-1.5 rounded-full ${tiktokLiveActive ? 'bg-pink-400 animate-ping' : 'bg-zinc-600'}`} />
+                        <span className="text-[9px] font-mono text-zinc-500 uppercase">{tiktokLiveActive ? 'Live' : 'Off'}</span>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    {/* TikTok User Account Node */}
+                    <div className="rounded-xl bg-zinc-900/50 border border-white/5 p-3 space-y-1.5 font-mono text-[10px] text-zinc-400">
+                      <div className="text-zinc-200 font-semibold flex items-center justify-between text-xs mb-1">
+                        <span className="truncate">Node: {tiktokHandle}</span>
+                        <a 
+                          href={`https://www.tiktok.com/@${tiktokHandle.replace('@', '')}`}
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="text-[9px] text-pink-400 hover:text-pink-300 flex items-center gap-1"
+                        >
+                          Profile <ExternalLink size={8} />
+                        </a>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Streaming Status:</span>
+                        <span className={tiktokLiveActive ? 'text-pink-400 font-bold' : 'text-zinc-500'}>
+                          {tiktokLiveActive ? 'ACTIVE BROADCAST' : 'STANDBY'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Simulating active feed view */}
+                    {tiktokLiveActive ? (
+                      <div className="p-3 bg-pink-950/20 border border-pink-500/15 rounded-xl text-center space-y-3 relative overflow-hidden">
+                        {/* Scanline design effect */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-pink-500/5 to-transparent h-1/2 w-full animate-pulse pointer-events-none" />
+                        
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="w-2 h-2 bg-pink-500 rounded-full animate-ping" />
+                          <span className="text-[10px] font-mono font-bold tracking-widest text-pink-300 uppercase">STREAMING TO PROFILE</span>
+                        </div>
+                        <p className="text-[9px] text-zinc-400 leading-normal">
+                          Live video stream feed & active FaceTime handshakes are live on your profile coordinates page.
+                        </p>
+                        
+                        <button
+                          onClick={() => { soundEngine.charge(); setIsTikTokOpen(true); }}
+                          className="w-full py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 font-bold text-[10px] tracking-wider uppercase rounded-xl border border-pink-500/20 text-white shadow-lg cursor-pointer transition-all"
+                        >
+                          Launch FaceTime Arena
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-white/10 p-4 text-[10px] text-zinc-500 italic text-center space-y-2.5">
+                        <p>TikTok live feed is currently in standby mode on your profile configuration.</p>
+                        <button
+                          onClick={() => { soundEngine.select(); setTiktokLiveActive(true); }}
+                          className="px-3 py-1.5 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-400 font-sans text-[9px] uppercase font-bold text-center mx-auto hover:bg-pink-500/20 transition-all cursor-pointer block"
+                        >
+                          Enable Live Stream
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Visual metrics lines */}
+                    <div className="rounded-xl border border-white/5 bg-black/40 p-2 text-[8px] font-mono text-zinc-600 flex justify-between items-center select-none">
+                      <span>SYNC INDEX: 0.985</span>
+                      <span>FREQ: 528HZ</span>
+                      <span>GRID_COHERENT: YES</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {/* Configuration Panel */}
         <AnimatePresence>
           {isConfigOpen && (
@@ -1051,10 +1282,64 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
                     ))}
                   </div>
                 </div>
+
+                <div className="pt-4 border-t border-white/5 space-y-4">
+                  <label className="text-xs font-mono text-pink-500 uppercase tracking-wider block flex items-center gap-1.5">
+                    <Radio size={12} className="text-pink-400 animate-pulse" /> TikTok Integration
+                  </label>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-[10px] font-mono text-zinc-500 uppercase block mb-1.5">TikTok Handle</span>
+                      <input 
+                        type="text" 
+                        value={tiktokHandle}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setTiktokHandle(val.startsWith('@') ? val : '@' + val);
+                        }}
+                        placeholder="@enterupted"
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500/50 transition-colors font-mono"
+                      />
+                    </div>
+
+                    <div className="flex justify-between items-center bg-white/5 border border-white/5 p-2 rounded-xl">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] text-zinc-300 font-sans block font-semibold">Live Broadcast Feed</span>
+                        <span className="text-[8px] text-zinc-500 block font-mono">Stream active video on profile</span>
+                      </div>
+                      <button 
+                        onClick={() => { soundEngine.select(); setTiktokLiveActive(!tiktokLiveActive); }}
+                        className={`px-2.5 py-1.5 rounded-lg text-[9px] font-mono border transition-all cursor-pointer font-bold ${tiktokLiveActive ? 'bg-pink-500/20 text-pink-300 border-pink-500/30' : 'bg-zinc-900 text-zinc-500 border-white/5 hover:text-zinc-400'}`}
+                      >
+                        {tiktokLiveActive ? 'ACTIVE' : 'STANDBY'}
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => { soundEngine.charge(); setIsTikTokOpen(true); }}
+                      className="w-full py-2 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 hover:text-white rounded-xl border border-pink-500/20 font-mono text-[9px] uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Radio size={12} className="animate-pulse" /> Launch FaceTime Arena
+                    </button>
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Pinned Widgets Deck */}
+        {userData?.profileWidgets && userData.profileWidgets.length > 0 && (
+          <div className="absolute md:top-24 top-20 right-4 md:right-8 w-[calc(100%-2rem)] md:w-80 max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-150px)] overflow-y-auto pointer-events-auto custom-scrollbar space-y-4" style={{ display: isConfigOpen ? 'none' : 'block' }}>
+            <div className="flex items-center gap-2 mb-2 text-zinc-500 font-mono text-[10px] uppercase tracking-widest px-2">
+               <Pin size={12} className="text-amber-400 animate-pulse" /> Synced Intelligence Deck ({userData.profileWidgets.length})
+            </div>
+            {userData.profileWidgets.map(widget => (
+              <ProfileWidgetRenderer key={widget.id} widget={widget} onRemove={removeProfileWidget} />
+            ))}
+          </div>
+        )}
         
         {/* Active Selection Display */}
         <div className="mt-auto pointer-events-auto">
@@ -1083,6 +1368,28 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
           </div>
         </div>
       </div>
+
+      {/* TikTok Live FaceTime Spacetime Arena Overlay */}
+      <TikTokLivePortal 
+        isOpen={isTikTokOpen}
+        onClose={() => setIsTikTokOpen(false)}
+        user={user}
+        holographicConfig={{
+          tiktokHandle,
+          tiktokLiveActive
+        }}
+        onSaveConfig={(updatedConfig) => {
+          if (updatedConfig.tiktokHandle !== undefined) {
+            setTiktokHandle(updatedConfig.tiktokHandle);
+          }
+          if (updatedConfig.tiktokLiveActive !== undefined) {
+            setTiktokLiveActive(updatedConfig.tiktokLiveActive);
+          }
+          setTimeout(() => {
+            handleSaveHoloProfile();
+          }, 200);
+        }}
+      />
     </div>
   );
 };

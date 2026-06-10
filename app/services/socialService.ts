@@ -20,21 +20,71 @@ import { CommunityPost, Message, UserProfileConfig, WallPost } from '../types';
 
 export const getAstralProfile = async (userId: string): Promise<UserProfileConfig | null> => {
   const path = `users/${userId}`;
+  let localBackup: any = null;
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(`cosmic_backup_${userId}`);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.profileConfig) {
+          localBackup = parsed.profileConfig;
+        }
+      } catch (e) {
+        console.warn("Failed to parse local stored backup config", e);
+      }
+    }
+  }
+
   try {
     const docRef = doc(db, 'users', userId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return docSnap.data().profileConfig as UserProfileConfig;
+      const data = docSnap.data();
+      const profile = data.profileConfig as UserProfileConfig;
+      if (typeof window !== 'undefined' && profile) {
+        const existing = localStorage.getItem(`cosmic_backup_${userId}`);
+        let parsed: any = {};
+        if (existing) {
+          try { 
+            parsed = JSON.parse(existing); 
+          } catch (e) {
+            console.warn("Failed to parse local backup before merge", e);
+          }
+        }
+        localStorage.setItem(`cosmic_backup_${userId}`, JSON.stringify({
+          ...parsed,
+          profileConfig: profile,
+          updatedAt: new Date().toISOString()
+        }));
+      }
+      return profile;
     }
-    return null;
+    return localBackup;
   } catch (error) {
-    handleFirestoreError(error, OperationType.GET, path);
-    return null;
+    console.warn(`Firestore getAstralProfile offline fallback for path ${path}:`, error);
+    return localBackup;
   }
 };
 
 export const saveAstralProfile = async (userId: string, profile: UserProfileConfig): Promise<void> => {
   const path = `users/${userId}`;
+  if (typeof window !== 'undefined') {
+    const existing = localStorage.getItem(`cosmic_backup_${userId}`);
+    let parsed: any = {};
+    if (existing) {
+      try { 
+        parsed = JSON.parse(existing); 
+      } catch (e) {
+        console.warn("Failed to parse local backup during save", e);
+      }
+    }
+    localStorage.setItem(`cosmic_backup_${userId}`, JSON.stringify({
+      ...parsed,
+      profileConfig: profile,
+      updatedAt: new Date().toISOString()
+    }));
+  }
+
   try {
     const docRef = doc(db, 'users', userId);
     await setDoc(docRef, {
@@ -45,7 +95,7 @@ export const saveAstralProfile = async (userId: string, profile: UserProfileConf
       updatedAt: serverTimestamp()
     }, { merge: true });
   } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, path);
+    console.warn(`Firestore saveAstralProfile offline fallback for path ${path}:`, error);
   }
 };
 

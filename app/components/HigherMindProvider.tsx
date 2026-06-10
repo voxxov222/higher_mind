@@ -31,13 +31,15 @@ interface HigherMindContextType {
   themes: AstralTheme[];
   isProjected: boolean;
   setIsProjected: (projected: boolean) => void;
-  projectedItems: { id: string; type: string; componentName: string; children: React.ReactNode }[];
-  addProjectedItem: (item: { id: string; type: string; componentName: string; children: React.ReactNode }) => void;
+  projectedItems: { id: string; type: string; componentName: string; children: React.ReactNode; config?: any }[];
+  addProjectedItem: (item: { id: string; type: string; componentName: string; children: React.ReactNode; config?: any }) => void;
   removeProjectedItem: (id: string) => void;
   cosmicContext: CosmicContextConfig;
   setCosmicContext: (ctx: Partial<CosmicContextConfig>) => void;
   cosmicData: CosmicData | null;
   setCosmicData: (data: CosmicData | null) => void;
+  addProfileWidget: (widget: { id: string; type: string; componentName: string; data: any }) => void;
+  removeProfileWidget: (id: string) => void;
 }
 
 export interface AIModule {
@@ -52,16 +54,16 @@ export interface AIModule {
 const HigherMindContext = createContext<HigherMindContextType | undefined>(undefined);
 
 export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [activeThemeId, setActiveThemeIdState] = useState<string>('futuristic');
+  const [activeThemeId, setActiveThemeIdState] = useState<string>('galactic_core');
   const [isProjected, setIsProjectedState] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('astral_spatial_projection') === 'true';
     }
     return false;
   });
-  const [projectedItems, setProjectedItems] = useState<{ id: string; type: string; componentName: string; children: React.ReactNode }[]>([]);
+  const [projectedItems, setProjectedItems] = useState<{ id: string; type: string; componentName: string; children: React.ReactNode; config?: any }[]>([]);
 
-  const addProjectedItem = (item: { id: string; type: string; componentName: string; children: React.ReactNode }) => {
+  const addProjectedItem = (item: { id: string; type: string; componentName: string; children: React.ReactNode; config?: any }) => {
     setProjectedItems(prev => [...prev, item]);
   };
 
@@ -236,6 +238,30 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [userData, setUserData] = useState<UserProfileConfig | null>(null);
   const [cosmicData, setCosmicData] = useState<CosmicData | null>(null);
 
+  const addProfileWidget = (widget: { id: string; type: string; componentName: string; data: any }) => {
+    setUserData(prev => {
+      if (!prev) return prev;
+      const currentArray = prev.profileWidgets || [];
+      // Replace if exists, or push
+      const existingIdx = currentArray.findIndex(w => w.id === widget.id);
+      const newArray = [...currentArray];
+      if (existingIdx !== -1) {
+        newArray[existingIdx] = widget;
+      } else {
+        newArray.push(widget);
+      }
+      return { ...prev, profileWidgets: newArray };
+    });
+  };
+
+  const removeProfileWidget = (id: string) => {
+    setUserData(prev => {
+      if (!prev) return prev;
+      if (!prev.profileWidgets) return prev;
+      return { ...prev, profileWidgets: prev.profileWidgets.filter(w => w.id !== id) };
+    });
+  };
+
   const [aiModules, setAiModules] = useState<AIModule[]>([
     { id: 'audio_spark', name: 'Voice Matrix', icon: 'volume-2', description: 'Real-time consciousness-to-frequency conversion', enabled: true, category: 'audio' },
     { id: 'auth_db', name: 'Identity Vault', icon: 'database', description: 'Secure permanent storage for soul signatures', enabled: true, category: 'system' },
@@ -368,7 +394,9 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       cosmicContext,
       setCosmicContext,
       cosmicData,
-      setCosmicData
+      setCosmicData,
+      addProfileWidget,
+      removeProfileWidget
     }}>
       {children}
     </HigherMindContext.Provider>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Moon, Sun, Star, Compass, Activity, Globe, Sparkles, Navigation, Layers, Flame, Droplets, Wind, Hexagon, Info } from 'lucide-react';
 import { CosmicData } from '../types';
+import { ProjectableWidget } from './ProjectableWidget';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { AstrologyReferenceModal } from './AstrologyReferenceModal';
 
@@ -169,24 +170,26 @@ export const AstrologyDashboard: React.FC<AstrologyDashboardProps> = ({ data, on
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {data.planets.map(p => (
-                  <div key={p.name} onClick={() => onDeepDive(p.name, p.meaning || '')} className="bg-black/40 border border-white/10 rounded-3xl p-5 hover:bg-white/5 transition-all cursor-pointer group">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h4 className="text-lg font-light text-white flex items-center gap-2">
-                          <span className="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 text-xs font-bold" style={{ color: getElementColor(p.sign) }}>
-                            {p.name.charAt(0)}
-                          </span>
-                          {p.name}
-                        </h4>
-                        <div className="text-[10px] uppercase tracking-widest text-stone-500 mt-1 pl-10">
-                          {p.sign} • {Math.floor(p.degree)}° • House {p.house}
+                  <ProjectableWidget key={p.name} id={`planet-card-${p.name}`} type="card" componentName="PlanetCard" data={p}>
+                    <div onClick={() => onDeepDive(p.name, p.meaning || '')} className="bg-black/40 border border-white/10 rounded-3xl p-5 hover:bg-white/5 transition-all cursor-pointer group">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="text-lg font-light text-white flex items-center gap-2">
+                            <span className="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 text-xs font-bold" style={{ color: getElementColor(p.sign) }}>
+                              {p.name.charAt(0)}
+                            </span>
+                            {p.name}
+                          </h4>
+                          <div className="text-[10px] uppercase tracking-widest text-stone-500 mt-1 pl-10">
+                            {p.sign} • {Math.floor(p.degree)}° • House {p.house}
+                          </div>
                         </div>
                       </div>
+                      <p className="text-xs text-stone-400 pl-10 line-clamp-3 leading-relaxed group-hover:text-stone-300 transition-colors">
+                        {p.meaning}
+                      </p>
                     </div>
-                    <p className="text-xs text-stone-400 pl-10 line-clamp-3 leading-relaxed group-hover:text-stone-300 transition-colors">
-                      {p.meaning}
-                    </p>
-                  </div>
+                  </ProjectableWidget>
                 ))}
               </div>
             </div>

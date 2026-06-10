@@ -9,7 +9,7 @@ import {
   Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, 
   Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, Zap, Upload, Palette, 
   Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box, Key, Cpu,
-  Workflow, Radio, Loader2, Flame, Orbit, Hash, Map, Triangle, LibraryBig, History
+  Workflow, Radio, Loader2, Flame, Orbit, Hash, Map, Triangle, LibraryBig, History, Layers, LayoutGrid, Pin
 } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
@@ -77,9 +77,12 @@ const DestinyMatrix = React.lazy(() => import('./DestinyMatrix').then(m => ({ de
 const CelestialBlueprintSection = React.lazy(() => import('./CelestialBlueprintSection').then(m => ({ default: m.CelestialBlueprintSection })));
 const JarvisHUD = React.lazy(() => import('./JarvisHUD').then(m => ({ default: m.JarvisHUD })));
 const AstrologyEngine = React.lazy(() => import('./AstrologyEngine').then(m => ({ default: m.AstrologyEngine })));
+const NineDimensionsSection = React.lazy(() => import('./NineDimensionsSection').then(m => ({ default: m.NineDimensionsSection })));
 import { ProjectableWidget } from './ProjectableWidget';
 import { useHigherMind } from './HigherMindProvider';
 import { HoloSideDrawer } from './HoloSideDrawer';
+import { WidgetGallerySidebar } from './WidgetGallerySidebar';
+import { WorkspaceWidgets } from './WorkspaceWidgets';
 
 /**
  * Interface for DashboardProps
@@ -89,8 +92,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine';
-  setActiveTab: (tab: 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine') => void;
+  activeTab: 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine' | '9d_creation';
+  setActiveTab: (tab: 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine' | '9d_creation') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -1714,6 +1717,50 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
   const dragControls = useDragControls();
   const [isHoloDrawerOpen, setIsHoloDrawerOpen] = useState(false);
   const [holoDrawerTool, setHoloDrawerTool] = useState<'gematria' | 'chakra' | 'karma'>('gematria');
+  const [isWidgetGalleryOpen, setIsWidgetGalleryOpen] = useState(false);
+  const [activeWorkspaceWidgets, setActiveWorkspaceWidgets] = useState<Array<{
+    id: string;
+    type: string;
+    componentName: string;
+    data: any;
+    position?: { x: number; y: number };
+  }>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('astral_workspace_widgets');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('astral_workspace_widgets', JSON.stringify(activeWorkspaceWidgets));
+    }
+  }, [activeWorkspaceWidgets]);
+
+  const handleSpawnWidget = (widgetId: string, componentName: string, defaultData: any) => {
+    soundEngine.charge();
+    const existing = activeWorkspaceWidgets.some(w => w.id === widgetId);
+    if (!existing) {
+      setActiveWorkspaceWidgets(prev => [
+        ...prev,
+        {
+          id: widgetId,
+          type: 'widget',
+          componentName,
+          data: defaultData,
+          position: { x: Math.random() * 80 + 20, y: Math.random() * 80 + 20 }
+        }
+      ]);
+    } else {
+      setActiveWorkspaceWidgets(prev => prev.map(w => w.id === widgetId ? { ...w, position: { x: Math.random() * 80 + 20, y: Math.random() * 80 + 30 } } : w));
+    }
+  };
+
+  const handleRemoveWorkspaceWidget = (widgetId: string) => {
+    soundEngine.deactivate();
+    setActiveWorkspaceWidgets(prev => prev.filter(w => w.id !== widgetId));
+  };
 
   const [deepDiveData, setDeepDiveData] = useState<{ 
     title: string; 
@@ -1981,7 +2028,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
     }
   };
 
-  const { activeTheme, isProjected, setIsProjected, aiModules } = useHigherMind();
+  const { activeTheme, isProjected, setIsProjected, aiModules, userData, addProfileWidget, removeProfileWidget } = useHigherMind();
   const themeColor = activeTheme.primaryColor;
 
   // Auto Pilot Engine
@@ -2059,6 +2106,21 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
         setActiveTool={setHoloDrawerTool}
       />
 
+      <WidgetGallerySidebar
+        isOpen={isWidgetGalleryOpen}
+        onClose={() => setIsWidgetGalleryOpen(false)}
+        onSpawnWidget={handleSpawnWidget}
+        onPinToProfile={(id, type, componentName, wdata) => {
+          addProfileWidget({ id, type, componentName, data: wdata });
+        }}
+        profileWidgets={userData?.profileWidgets || []}
+        onRemoveProfileWidget={(id) => {
+          removeProfileWidget(id);
+        }}
+        activeWorkspaceWidgets={activeWorkspaceWidgets}
+        onRemoveWorkspaceWidget={handleRemoveWorkspaceWidget}
+      />
+
       {/* Brand Header */}
       <header className="flex justify-between items-center z-10 pointer-events-auto">
         <h1 className="text-3xl font-light text-white tracking-widest drop-shadow-lg flex items-center gap-3">
@@ -2066,6 +2128,20 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
           HIGHER 🧠 MIND
         </h1>
         <div className="flex items-center gap-4 sm:gap-6">
+          <button 
+            onClick={() => {
+              soundEngine.neuralClick();
+              setIsWidgetGalleryOpen(!isWidgetGalleryOpen);
+            }}
+            className={`flex items-center gap-2 px-4 py-2 border rounded-xl transition-all group ${
+              isWidgetGalleryOpen 
+                ? "bg-amber-500/20 border-amber-500/50 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
+                : "bg-white/5 border-white/10 text-stone-400 hover:bg-white/10"
+            }`}
+          >
+            <LayoutGrid className={`w-4 h-4 ${isWidgetGalleryOpen ? "text-amber-400 animate-pulse" : "text-stone-500"}`} />
+            <span className="text-[10px] uppercase tracking-widest font-bold hidden sm:inline">Widgets Deck</span>
+          </button>
           <button 
             onClick={() => {
               soundEngine.neuralClick();
@@ -2211,12 +2287,12 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             {/* --- PREMIUM THEMATIC ACCENTS & INTERACTIVE CORE OVERLAYS --- */}
             
             {/* A: Retro Terminal Overlay */}
-            {activeTheme.id === 'cyber_terminal' && (
+            {activeTheme.effects.terminalTech && (
               <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-[99] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,3px_100%]" />
             )}
 
             {/* B: Interactive Node Resonance Panel */}
-            {activeTheme.id === 'interactive_tuning' && (
+            {activeTheme.effects.interactive && (
               <div className="bg-sky-500/5 border-b border-sky-500/15 p-3 flex items-center justify-between gap-4 select-none shrink-0 text-sky-400 z-10">
                 <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider">
                   <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
@@ -2237,7 +2313,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             )}
 
             {/* C: Modular Draggable HUD */}
-            {activeTheme.id === 'drag_and_drop' && (
+            {activeTheme.effects.dragAndDrop && (
               <div className="bg-indigo-500/5 border-b border-indigo-500/10 p-3 flex items-center justify-between shrink-0 text-indigo-400 z-10">
                 <div className="flex items-center gap-1.5 font-sans text-[10px] uppercase tracking-wider font-bold">
                   <span className="w-2 h-2 rounded bg-indigo-500 animate-pulse" />
@@ -2250,7 +2326,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             )}
 
             {/* D: Solfeggio Micro Sound visualizer */}
-            {activeTheme.id === 'solfeggio_harmony' && (
+            {activeTheme.effects.solfeggio && (
               <div className="bg-amber-500/5 border-b border-amber-500/10 p-3 flex items-center justify-between shrink-0 text-amber-500 z-10">
                 <div className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-wider font-bold">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -2266,14 +2342,14 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             )}
 
             {/* E: Antique Alchemy Seals */}
-            {activeTheme.id === 'sacred_alchemist' && (
+            {activeTheme.effects.ancientSymbolic && (
               <div className="bg-stone-900/40 border-b border-amber-900/30 p-2 text-center text-[10px] font-serif uppercase tracking-[0.2em] italic text-amber-500/60 font-bold shrink-0 z-10">
                 ☉ Hermetic Synthesis Portal ☽
               </div>
             )}
 
             {/* F: Dynamic Kinetic Orbits elements */}
-            {activeTheme.id === 'advanced_animated' && (
+            {activeTheme.effects.animated && (
               <div className="absolute top-0 right-10 w-24 h-24 rounded-full border border-pink-500/5 pointer-events-none animate-spin z-10" style={{ animationDuration: '30s' }}>
                 <div className="absolute top-0 left-12 w-1.5 h-1.5 rounded-full bg-cyan-400/60 blur-[1px]" />
                 <div className="absolute bottom-12 left-0 w-1 h-1 rounded-full bg-pink-400/60 blur-[1px]" />
@@ -2358,6 +2434,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'findings'} tabId="findings" onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
               <Tab active={activeTab === 'harmonics'} tabId="harmonics" onClick={() => setActiveTab('harmonics')} icon={<BarChart2 className="w-4 h-4"/>}>Harmonics</Tab>
               <Tab active={activeTab === 'karma_ledger'} tabId="karma_ledger" onClick={() => setActiveTab('karma_ledger')} icon={<History className="w-4 h-4 text-emerald-400" />}>Karma Ledger</Tab>
+              <Tab active={activeTab === '9d_creation'} tabId="9d_creation" onClick={() => setActiveTab('9d_creation')} icon={<Layers className="w-4 h-4 text-amber-500 animate-pulse" />}>9D Conscious Creation</Tab>
             </div>
             
             <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/20">
@@ -3599,6 +3676,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <AstrologyEngine data={data} />
                   </motion.div>
                 )}
+                {activeTab === '9d_creation' && (
+                  <motion.div key="9d_creation" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
+                    <NineDimensionsSection />
+                  </motion.div>
+                )}
                 {activeTab === 'jarvis_os' && (
                   <motion.div key="jarvis_os" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full">
                     <JarvisHUD data={data} setActiveTab={setActiveTab} />
@@ -3626,6 +3708,18 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
       />
 
       <HigherMindSettings isOpen={isHigherMindSettingsOpen} onClose={() => setIsHigherMindSettingsOpen(false)} />
+
+      <WorkspaceWidgets
+        widgets={activeWorkspaceWidgets}
+        onRemoveWidget={handleRemoveWorkspaceWidget}
+        onPinToProfile={(id, type, componentName, wdata) => {
+          addProfileWidget({ id, type, componentName, data: wdata });
+        }}
+        profileWidgets={userData?.profileWidgets || []}
+        onRemoveProfileWidget={(id) => {
+          removeProfileWidget(id);
+        }}
+      />
 
     </div>
   );
@@ -3744,84 +3838,88 @@ const AstrologyCharts = ({ planets }: { planets: any[] }) => {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="h-64 w-full bg-black/20 rounded-2xl border border-white/5 p-2">
-          <h4 className="text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-2 pl-4 pt-2">Power Radar</h4>
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-              <PolarGrid stroke="#ffffff10" />
-              <PolarAngleAxis dataKey="name" tick={{ fill: '#a8a29e', fontSize: 9 }} />
-              <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} stroke="none" />
-              <Radar
-                name="Planetary Power"
-                dataKey="strength"
-                stroke="#a855f7"
-                fill="#a855f7"
-                fillOpacity={0.2}
-              />
-              <RechartsTooltip 
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload;
-                    return (
-                      <div className="bg-black/90 backdrop-blur-xl border border-white/10 p-3 rounded-xl shadow-2xl">
-                        <p className="text-xs font-bold text-white mb-1 uppercase tracking-widest">{data.name}</p>
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: data.color }} />
-                          <p className="text-[10px] text-stone-400">Power: <span className="text-white">{data.strength}/10</span></p>
+        <ProjectableWidget id="radar-power" type="chart" componentName="Planetary Power Radar" data={radarData}>
+          <div className="h-64 w-full bg-black/20 rounded-2xl border border-white/5 p-2 pt-6">
+            <h4 className="text-[10px] absolute top-2 left-4 z-10 uppercase tracking-[0.2em] text-stone-500 mb-2 pt-2">Power Radar</h4>
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                <PolarGrid stroke="#ffffff10" />
+                <PolarAngleAxis dataKey="name" tick={{ fill: '#a8a29e', fontSize: 9 }} />
+                <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} stroke="none" />
+                <Radar
+                  name="Planetary Power"
+                  dataKey="strength"
+                  stroke="#a855f7"
+                  fill="#a855f7"
+                  fillOpacity={0.2}
+                />
+                <RechartsTooltip 
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-black/90 backdrop-blur-xl border border-white/10 p-3 rounded-xl shadow-2xl">
+                          <p className="text-xs font-bold text-white mb-1 uppercase tracking-widest">{data.name}</p>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: data.color }} />
+                            <p className="text-[10px] text-stone-400">Power: <span className="text-white">{data.strength}/10</span></p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="h-64 w-full bg-black/20 rounded-2xl border border-white/5 p-2">
-          <h4 className="text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-2 pl-4 pt-2">Elemental Balance</h4>
-          <ResponsiveContainer width="100%" height="100%">
-            <RechartsPieChart>
-              <Pie
-                data={elementData}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={70}
-                paddingAngle={5}
-                dataKey="value"
-                stroke="none"
-              >
-                {elementData.map((entry: any, index) => (
-                  <Cell key={`cell-${index}`} fill={ELEMENT_COLORS[entry.name]} />
-                ))}
-              </Pie>
-              <RechartsTooltip 
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0];
-                    return (
-                      <div className="bg-black/90 backdrop-blur-xl border border-white/10 p-3 rounded-xl shadow-2xl">
-                        <p className="text-xs font-bold text-white mb-1 uppercase tracking-widest">{data.name}</p>
-                        <p className="text-[10px] text-stone-400">Markers: <span className="text-white">{data.value}</span></p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-            </RechartsPieChart>
-          </ResponsiveContainer>
-          <div className="flex justify-center gap-4 -mt-8 relative z-10">
-             {Object.entries(ELEMENT_COLORS).map(([name, color]: [string, any]) => (
-               <div key={name} className="flex items-center gap-1">
-                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
-                 <span className="text-[8px] text-stone-500 uppercase tracking-tighter">{name}</span>
-               </div>
-             ))}
+                      );
+                    }
+                    return null;
+                  }}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
           </div>
-        </div>
+        </ProjectableWidget>
+
+        <ProjectableWidget id="pie-elements" type="chart" componentName="Elements Balance" data={elementData}>
+          <div className="h-64 w-full bg-black/20 rounded-2xl border border-white/5 p-2 pt-6">
+            <h4 className="text-[10px] absolute top-2 left-4 z-10 uppercase tracking-[0.2em] text-stone-500 mb-2 pt-2">Elemental Balance</h4>
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsPieChart>
+                <Pie
+                  data={elementData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={70}
+                  paddingAngle={5}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {elementData.map((entry: any, index) => (
+                    <Cell key={`cell-${index}`} fill={ELEMENT_COLORS[entry.name]} />
+                  ))}
+                </Pie>
+                <RechartsTooltip 
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0];
+                      return (
+                        <div className="bg-black/90 backdrop-blur-xl border border-white/10 p-3 rounded-xl shadow-2xl">
+                          <p className="text-xs font-bold text-white mb-1 uppercase tracking-widest">{data.name}</p>
+                          <p className="text-[10px] text-stone-400">Markers: <span className="text-white">{data.value}</span></p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+              </RechartsPieChart>
+            </ResponsiveContainer>
+            <div className="flex justify-center gap-4 -mt-8 relative z-10">
+               {Object.entries(ELEMENT_COLORS).map(([name, color]: [string, any]) => (
+                 <div key={name} className="flex items-center gap-1">
+                   <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
+                   <span className="text-[8px] text-stone-500 uppercase tracking-tighter">{name}</span>
+                 </div>
+               ))}
+            </div>
+          </div>
+        </ProjectableWidget>
       </div>
     </div>
   );

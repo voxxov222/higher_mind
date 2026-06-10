@@ -7,6 +7,8 @@ import {
 import { fetchGroundedTransitAlerts } from '../services/geminiService';
 import { CosmicData } from '../types';
 import { soundEngine } from '../lib/soundEffects';
+import { Canvas } from '@react-three/fiber';
+import { JarvisCore3D } from './JarvisCore3D';
 
 interface JarvisHUDProps {
   data: CosmicData | null;
@@ -343,67 +345,31 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
             </div>
           </div>
 
-          {/* Rotating Celestial Hologram Rings */}
-          <div className="relative w-48 h-48 my-2 flex items-center justify-center cursor-pointer z-10 hover:scale-105 transition-transform" onClick={triggerTransitFetch}>
+          {/* Advanced Holographic 3D Core */}
+          <div 
+            className="relative w-full flex-1 my-2 min-h-[200px] flex justify-center items-center cursor-pointer z-10" 
+            onClick={triggerTransitFetch}
+            title="Click to trigger orbital scan"
+          >
+            <div className="absolute inset-0 pointer-events-none">
+                <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+                    {/* The 3D Component */}
+                    <JarvisCore3D isSpeaking={isJarvisSpeaking} isProcessing={loading} />
+                </Canvas>
+            </div>
             
-            {/* Outermost Ring (Counter-Clockwise) */}
+            {/* Center Core Button overlay */}
             <motion.div 
-              className="absolute inset-0 border-2 border-dashed border-cyan-500/30 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.2)]"
-              animate={{ rotate: -360 }}
-              transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
-            />
-
-            {/* Scanning Line Ring */}
-            <motion.div 
-              className="absolute inset-2 border border-cyan-400/10 rounded-full"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
-            >
-               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-4 bg-cyan-400 shadow-[0_0_10px_rgba(6,182,212,1)]" />
-            </motion.div>
-
-            {/* Middle telemetry Ring with ticks (Clockwise) */}
-            <motion.div 
-              className="absolute p-3 border border-indigo-400/30 rounded-full flex items-center justify-center"
-              style={{ width: '85%', height: '85%' }}
-              animate={{ rotate: 360 }}
-              transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
-            >
-              <div className="w-full h-full border-t-2 border-b-2 border-r border-indigo-400/40 rounded-full" />
-            </motion.div>
-
-            {/* Inner dynamic wave Ring */}
-            <motion.div 
-              className="absolute border border-teal-500/40 rounded-full flex items-center justify-center"
-              style={{ width: '60%', height: '60%' }}
-              animate={{ scale: [1, 1.05, 1], rotate: -180 }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              {/* Spinning scanning line */}
-              <div className="w-1 h-full bg-gradient-to-t from-transparent via-cyan-400 to-transparent opacity-80" />
-            </motion.div>
-
-            {/* Center Core Button */}
-            <motion.div 
-              className={`w-14 h-14 rounded-full flex items-center justify-center backdrop-blur-md border border-cyan-400/60 shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all ${loading ? 'bg-cyan-500/20' : 'bg-slate-900/90'}`}
+              className={`absolute w-14 h-14 rounded-full flex items-center justify-center backdrop-blur-md border shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all z-20 ${loading ? 'bg-cyan-500/20 border-cyan-400' : 'bg-slate-900/40 border-cyan-500/30'}`}
               animate={loading ? { scale: [1, 1.15, 1] } : {}}
               transition={{ duration: 1.5, repeat: Infinity }}
             >
               {loading ? (
                 <RefreshCw className="w-6 h-6 text-cyan-400 animate-spin" />
               ) : (
-                <Globe className="w-6 h-6 text-cyan-400 animate-pulse" />
+                <Globe className="w-6 h-6 text-cyan-400/80 animate-pulse" />
               )}
             </motion.div>
-
-            {/* Concentric scan ripples */}
-            {isJarvisSpeaking && (
-              <motion.div 
-                className="absolute inset-0 border-2 border-cyan-400/60 rounded-full"
-                animate={{ scale: [1, 1.6], opacity: [0.8, 0] }}
-                transition={{ duration: 1.2, repeat: Infinity, ease: 'easeOut' }}
-              />
-            )}
           </div>
 
           {/* Quick HUD Metrics */}

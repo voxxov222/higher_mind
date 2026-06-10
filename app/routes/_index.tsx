@@ -107,12 +107,26 @@ export default function Index() {
     if (user) await updateProfileConfig(user.uid, config);
   };
 
-  const { setUserData, setCosmicData } = useHigherMind();
+  const { userData, setUserData, setCosmicData, activeTheme } = useHigherMind();
+  
   useEffect(() => {
     if (profileConfig) {
-      setUserData(profileConfig);
+      // Prevents infinite loop if we just updated userData 
+      if (!userData || JSON.stringify(userData.profileWidgets) === JSON.stringify(profileConfig.profileWidgets)) {
+        setUserData(profileConfig);
+      }
     }
-  }, [profileConfig, setUserData]);
+  }, [profileConfig]);
+
+  useEffect(() => {
+    if (userData && user && profileConfig) {
+      if (JSON.stringify(userData.profileWidgets) !== JSON.stringify(profileConfig.profileWidgets)) {
+        const newConfig = { ...profileConfig, profileWidgets: userData.profileWidgets } as UserProfileConfig;
+        setProfileConfig(newConfig);
+        updateProfileConfig(user.uid, newConfig).catch(console.error);
+      }
+    }
+  }, [userData?.profileWidgets, user]);
 
   useEffect(() => {
     setCosmicData(data);
@@ -154,7 +168,7 @@ export default function Index() {
   if (isSplashVisible) return <SplashScreen onComplete={() => setIsSplashVisible(false)} />;
 
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden font-sans">
+    <div className="relative w-full h-screen overflow-hidden font-sans" style={{ background: activeTheme?.lighting?.backgroundStyle || 'black' }}>
       <AnimatePresence mode="wait">
         {viewMode === 'blueprint' ? (
           <motion.div

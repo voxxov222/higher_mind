@@ -276,6 +276,24 @@ class SoundEngine {
     if (!this.ctx || this.ctx.state !== 'running') return;
     this.playTone(1200, 'sine', 0.02, 0.05);
   }
+
+  charge = () => {
+    this.init();
+    if (!this.ctx || this.ctx.state !== 'running') return;
+    this.playTone(800, 'sine', 0.15, 0.25, 1200);
+  }
+
+  back = () => {
+    this.init();
+    if (!this.ctx || this.ctx.state !== 'running') return;
+    this.playTone(600, 'sine', 0.1, 0.15, 300);
+  }
+
+  deactivate = () => {
+    this.init();
+    if (!this.ctx || this.ctx.state !== 'running') return;
+    this.playTone(400, 'sawtooth', 0.2, 0.1, 100);
+  }
 }
 
 export const soundEngine = new SoundEngine();

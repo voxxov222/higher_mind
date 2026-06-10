@@ -355,6 +355,12 @@ export interface UserProfileConfig {
     timestamp: number;
     tags?: string[];
   }[];
+  profileWidgets?: Array<{
+    id: string;
+    type: string;
+    componentName: string;
+    data: any;
+  }>;
 }
 
 export interface AstralTheme {
@@ -378,6 +384,14 @@ export interface AstralTheme {
     solfeggio?: boolean;
     ancientSymbolic?: boolean;
     terminalTech?: boolean;
+  };
+  lighting?: {
+    ambientColor: string;
+    ambientIntensity: number;
+    point1Color: string;
+    point2Color: string;
+    pointIntensity: number;
+    backgroundStyle: string;
   };
 }
 

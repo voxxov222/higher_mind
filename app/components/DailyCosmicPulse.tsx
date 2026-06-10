@@ -8,6 +8,7 @@ import {
 import { useHigherMind } from './HigherMindProvider';
 import { fetchCosmicChatResponse } from '../services/geminiService';
 import { soundEngine } from '../lib/soundEffects';
+import { ProjectableWidget } from './ProjectableWidget';
 
 interface ResourceItem {
   name: string;
@@ -540,34 +541,40 @@ export const DailyCosmicPulse: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Lunar Phase */}
-              <div className="space-y-1.5 relative">
+              <ProjectableWidget id="daily-lunar-phase" type="widget" componentName="Lunar Phase" data={{ phase: currentLunarPhaseName }}>
+               <div className="space-y-1.5 relative">
                 <span className="text-[9px] text-indigo-400 font-bold font-mono tracking-widest block uppercase">Astronomical Rhythms</span>
                 <div className="flex items-center gap-2.5">
                   <Moon className="w-5 h-5 text-indigo-300" />
                   <span className="text-sm font-bold text-white tracking-wide truncate">{currentLunarPhaseName}</span>
                 </div>
                 <p className="text-[10px] text-stone-400 leading-normal">Lunar gravitational scales affecting somatic emotion embeddings.</p>
-              </div>
+               </div>
+              </ProjectableWidget>
 
               {/* Solfeggio Vibration */}
-              <div className="space-y-1.5 relative border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6">
+              <ProjectableWidget id="daily-solfeggio" type="widget" componentName="Vibrational Harmony" data={{ freq: "528 Hz Healing Zone" }}>
+               <div className="space-y-1.5 relative border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6">
                 <span className="text-[9px] text-indigo-400 font-bold font-mono tracking-widest block uppercase">Vibrational Harmony</span>
                 <div className="flex items-center gap-2.5">
                   <Hexagon className="w-5 h-5 text-indigo-300 animate-pulse" />
                   <span className="text-sm font-bold text-white tracking-wide">528 Hz Healing Zone</span>
                 </div>
                 <p className="text-[10px] text-stone-400 leading-normal">Optimized Solfeggio sound metrics mapped to daily alignment.</p>
-              </div>
+               </div>
+              </ProjectableWidget>
 
               {/* Transit Target Aspect */}
-              <div className="space-y-1.5 relative border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6">
+              <ProjectableWidget id="daily-transit-current" type="widget" componentName="Active Transit" data={{ transit: activeTransitName }}>
+               <div className="space-y-1.5 relative border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6">
                 <span className="text-[9px] text-indigo-400 font-bold font-mono tracking-widest block uppercase">Active Transit aspect</span>
                 <div className="flex items-center gap-2.5">
                   <Activity className="w-5 h-5 text-indigo-300" />
                   <span className="text-sm font-bold text-white tracking-wide truncate">{activeTransitName}</span>
                 </div>
                 <p className="text-[10px] text-stone-400 leading-normal">Astrological pressure threshold indicating conscious limits.</p>
-              </div>
+               </div>
+              </ProjectableWidget>
             </div>
           </div>
 

@@ -10,15 +10,14 @@ const app = initializeApp(firebaseConfig);
 
 let firestoreInstance;
 try {
-  // Use initializeFirestore with long-polling for better reliability in proxy environments
   firestoreInstance = initializeFirestore(app, {
-    experimentalForceLongPolling: true,
+    experimentalAutoDetectLongPolling: true,
   }, firebaseConfig.firestoreDatabaseId || undefined);
 } catch (error) {
   console.warn("Retrying Firestore initialization with default settings...", error);
   try {
     firestoreInstance = initializeFirestore(app, {
-      experimentalForceLongPolling: true,
+      experimentalAutoDetectLongPolling: true,
     });
   } catch (err) {
     console.error("Critical: Firestore failed to initialize completely", err);
@@ -107,6 +106,23 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 export const saveCosmicProfile = async (userId: string, data: CosmicData, rawInput: {name: string, date: string, time: string, location: string}) => {
   const path = `users/${userId}`;
   try {
+    if (typeof window !== 'undefined') {
+      const existing = localStorage.getItem(`cosmic_backup_${userId}`);
+      let parsed: any = {};
+      if (existing) {
+        try { 
+          parsed = JSON.parse(existing); 
+        } catch (e) {
+          console.warn("Failed to parse existing backup data", e);
+        }
+      }
+      localStorage.setItem(`cosmic_backup_${userId}`, JSON.stringify({
+        ...parsed,
+        input: rawInput,
+        cosmicData: data,
+        updatedAt: new Date().toISOString()
+      }));
+    }
     await setDoc(doc(db, "users", userId), {
       userId,
       input: rawInput,
@@ -114,7 +130,7 @@ export const saveCosmicProfile = async (userId: string, data: CosmicData, rawInp
       updatedAt: serverTimestamp()
     }, { merge: true });
   } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, path);
+    console.warn(`Firestore save delayed or failed for path ${path} (operating in offline-capable mode):`, error);
   }
 };
 
@@ -123,16 +139,32 @@ export const saveCosmicProfile = async (userId: string, data: CosmicData, rawInp
  */
 export const getCosmicProfile = async (userId: string): Promise<{input: any, cosmicData: CosmicData, profileConfig?: UserProfileConfig} | null> => {
   const path = `users/${userId}`;
+  let localBackup: any = null;
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(`cosmic_backup_${userId}`);
+    if (stored) {
+      try {
+        localBackup = JSON.parse(stored);
+      } catch (e) {
+        console.warn("Failed to parse stored local backup", e);
+      }
+    }
+  }
+
   try {
     const docSnap = await getDoc(doc(db, "users", userId));
     if (docSnap.exists()) {
       const data = docSnap.data();
-      return { input: data.input, cosmicData: data.cosmicData, profileConfig: data.profileConfig };
+      const loaded = { input: data.input, cosmicData: data.cosmicData, profileConfig: data.profileConfig };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`cosmic_backup_${userId}`, JSON.stringify(loaded));
+      }
+      return loaded;
     }
-    return null;
+    return localBackup;
   } catch (error) {
-    handleFirestoreError(error, OperationType.GET, path);
-    return null;
+    console.warn(`Firestore get failed for path ${path} (operating in offline-capable mode), using local cache:`, error);
+    return localBackup;
   }
 };
 
@@ -141,6 +173,23 @@ export const getCosmicProfile = async (userId: string): Promise<{input: any, cos
  */
 export const updateProfileConfig = async (userId: string, profileConfig: UserProfileConfig) => {
   const path = `users/${userId}`;
+  if (typeof window !== 'undefined') {
+    const existing = localStorage.getItem(`cosmic_backup_${userId}`);
+    let parsed: any = {};
+    if (existing) {
+      try { 
+        parsed = JSON.parse(existing); 
+      } catch (e) {
+        console.warn("Failed to parse local config backup", e);
+      }
+    }
+    localStorage.setItem(`cosmic_backup_${userId}`, JSON.stringify({
+      ...parsed,
+      profileConfig,
+      updatedAt: new Date().toISOString()
+    }));
+  }
+
   try {
     const docRef = doc(db, "users", userId);
     const docSnap = await getDoc(docRef);
@@ -159,7 +208,7 @@ export const updateProfileConfig = async (userId: string, profileConfig: UserPro
       });
     }
   } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, path);
+    console.warn(`Firestore profile update delayed or failed for path ${path} (operating in offline-capable mode):`, error);
   }
 };
 
@@ -171,12 +220,9 @@ async function testConnection(retries = 3) {
       return;
     } catch (error) {
       if (i === retries - 1) {
-        console.error("Firebase connection failed after retries:", error);
-        if(error instanceof Error && error.message.includes('the client is offline')) {
-          console.error("Please check your Firebase configuration. You may need to accept terms in the Firebase setup UI.");
-        }
+        console.log("Firebase is running in offline mode. Resilient local fallback active.");
       } else {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
     }
   }

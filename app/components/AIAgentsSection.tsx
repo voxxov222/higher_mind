@@ -5,6 +5,7 @@ import { CosmicData } from '../types';
 import { swarmEngine, Agent, AgentRole } from '../utils/swarmEngine';
 import { getSwarmFindings, saveSwarmFinding, updateSwarmFinding, deleteSwarmFinding, SwarmFinding } from '../services/swarmService';
 import { auth } from '../firebase';
+import { ProjectableWidget } from './ProjectableWidget';
 
 interface AIAgentsSectionProps {
   cosmicData: CosmicData;
@@ -14,8 +15,50 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
   const [agents, setAgents] = useState<Agent[]>([]);
   const [isSwarmRunning, setIsSwarmRunning] = useState(false);
   const [globalLog, setGlobalLog] = useState<{time: string, msg: string}[]>([]);
+  const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const [uptime, setUptime] = useState(0);
   const [viewMode, setViewMode] = useState<'network' | 'outputs' | 'database'>('network');
+
+  // Sync with global swarm engine
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isSwarmRunning) {
+        interval = setInterval(() => setUptime(prev => prev + 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isSwarmRunning]);
+
+  const formatUptime = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  const selectAllAgents = () => {
+      setSelectedAgentIds(agents.map(a => a.id));
+  };
+
+  const deleteSelectedAgents = () => {
+      if (window.confirm(`Delete ${selectedAgentIds.length} selected agents?`)) {
+          selectedAgentIds.forEach(id => swarmEngine.deleteAgent(id));
+          setSelectedAgentIds([]);
+          if (selectedAgentIds.includes(selectedAgentId || '')) {
+              setSelectedAgentId(null);
+          }
+      }
+  };
+
+  const getRoleColor = (role: string) => {
+      switch (role) {
+          case 'research': return 'text-blue-400 border-blue-400 bg-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.5)] ring-blue-400';
+          case 'tasks': return 'text-amber-400 border-amber-400 bg-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.5)] ring-amber-400';
+          case 'connections': return 'text-purple-400 border-purple-400 bg-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.5)] ring-purple-400';
+          case 'mapping': return 'text-emerald-400 border-emerald-400 bg-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.5)] ring-emerald-400';
+          case 'autonomous': return 'text-rose-400 border-rose-400 bg-rose-500/20 shadow-[0_0_20px_rgba(244,63,94,0.5)] ring-rose-400';
+          default: return 'text-teal-400 border-teal-400 bg-teal-500/20 shadow-[0_0_20px_rgba(45,212,191,0.5)] ring-teal-400';
+      }
+  };
   const [filter, setFilter] = useState<{category: string | 'All', agentId: string | 'All'}>({category: 'All', agentId: 'All'});
   const [selectedFinding, setSelectedFinding] = useState<any | null>(null);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -150,6 +193,23 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
              <button onClick={addAgent} className="px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-lg border border-white/10 flex items-center gap-2 text-xs transition-colors">
                <Plus className="w-4 h-4" /> Add Agent
              </button>
+             <div className="flex bg-stone-900 border border-white/5 rounded-lg p-1 gap-1">
+               <button 
+                 onClick={selectAllAgents}
+                 className="px-3 py-1.5 hover:bg-stone-800 text-stone-400 hover:text-white rounded-md text-xs font-mono transition-colors"
+                 title="Select All Agents"
+               >
+                 Select All
+               </button>
+               {selectedAgentIds.length > 0 && (
+                 <button 
+                   onClick={deleteSelectedAgents}
+                   className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-md border border-rose-500/30 flex items-center gap-2 text-xs transition-colors"
+                 >
+                   <Trash2 className="w-3 h-3" /> Delete ({selectedAgentIds.length})
+                 </button>
+               )}
+             </div>
              <button 
                onClick={() => swarmEngine.toggleSwarm()} 
                className={`px-4 py-1.5 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-lg ${
@@ -158,14 +218,18 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
              >
                {isSwarmRunning ? <><Square className="w-4 h-4" /> Halt Swarm</> : <><Play className="w-4 h-4" /> Run Autonomous Swarm</>}
              </button>
+             <div className="px-3 py-1.5 bg-stone-900 border border-white/5 rounded-lg text-xs font-mono text-stone-400 flex items-center gap-2">
+                <Activity className="w-4 h-4" /> Uptime: {formatUptime(uptime)}
+             </div>
              <button 
                onClick={() => {
                  if (window.confirm("ARE YOU SURE SIR? THIS WILL ERASE THE CURRENT AGENT MATRIX.")) {
                    swarmEngine.clearAll();
                    setSelectedAgentId(null);
+                   setSelectedAgentIds([]);
                  }
                }} 
-               className="px-3 py-1.5 bg-rose-950/20 hover:bg-rose-950/40 text-rose-400 rounded-lg border border-rose-500/30 flex items-center gap-2 text-xs transition-colors"
+               className="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-stone-400 rounded-lg border border-white/5 flex items-center gap-2 text-xs transition-colors"
                title="Decommission all agents and clear memory"
              >
                <Trash2 className="w-4 h-4" /> Clear Matrix
@@ -260,21 +324,31 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
                 })}
                 
                 {/* Main Agent Avatar */}
-                <div
-                  onMouseDown={() => handleDragStart(agent.id)}
-                  onClick={() => setSelectedAgentId(agent.id)}
-                  className={`absolute w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-shadow ${
-                    selectedAgentId === agent.id ? 'ring-2 ring-teal-400 shadow-[0_0_20px_rgba(45,212,191,0.5)] z-20' : 'hover:ring-2 hover:ring-white/20 z-10'
-                  } ${agent.status === 'running' ? 'bg-teal-500/20 border-teal-400' : 'bg-stone-800 border-white/20'} border-2 backdrop-blur-md`}
-                  style={{ left: agent.x + 20, top: agent.y + 20 }}
-                >
-                  <Cpu className={`w-5 h-5 ${agent.status === 'running' ? 'text-teal-400 animate-pulse' : 'text-stone-400'}`} />
-                  
-                  {/* Agent Label */}
-                  <div className="absolute top-12 whitespace-nowrap bg-stone-900/80 px-2 py-1 rounded text-[10px] text-stone-300 font-mono border border-white/10 pointer-events-none">
-                    {agent.name} <span className="text-teal-400">[Lvl {agent.level}]</span>
-                  </div>
-                </div>
+                  <ProjectableWidget id={`agent-${agent.id}`} type="ai_agent" componentName="AIAgent" data={agent}>
+                    <div
+                      onMouseDown={(e) => { e.stopPropagation(); handleDragStart(agent.id); }}
+                      onClick={(e) => {
+                          e.stopPropagation();
+                          if (e.metaKey || e.shiftKey || e.ctrlKey) {
+                              setSelectedAgentIds(prev => prev.includes(agent.id) ? prev.filter(x => x !== agent.id) : [...prev, agent.id]);
+                          } else {
+                              setSelectedAgentId(agent.id);
+                              setSelectedAgentIds([agent.id]);
+                          }
+                      }}
+                      className={`absolute w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-shadow ${
+                        selectedAgentId === agent.id || selectedAgentIds.includes(agent.id) ? 'ring-2 z-20 ' + getRoleColor(agent.role) : 'hover:ring-2 hover:ring-white/20 z-10 ' + (agent.status === 'running' ? getRoleColor(agent.role).replace('shadow', '') : 'bg-stone-800 border-white/20 text-stone-400')
+                      } border-2 backdrop-blur-md`}
+                      style={{ left: agent.x + 20, top: agent.y + 20 }}
+                    >
+                      <Cpu className={`w-5 h-5 ${agent.status === 'running' ? 'animate-pulse' : ''}`} />
+                      
+                      {/* Agent Label */}
+                      <div className="absolute top-12 whitespace-nowrap bg-stone-900/80 px-2 py-1 rounded text-[10px] text-stone-300 font-mono border border-white/10 pointer-events-none">
+                        {agent.name} <span className="text-teal-400">[Lvl {agent.level}]</span>
+                      </div>
+                    </div>
+                  </ProjectableWidget>
               </React.Fragment>
             ))}
             

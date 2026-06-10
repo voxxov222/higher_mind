@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Moon, Star, Heart, Flower2, Zap, Activity } from 'lucide-react';
+import { ProjectableWidget } from './ProjectableWidget';
 
 interface OracleMessage {
   id: number;
@@ -134,46 +135,48 @@ export const AstraeaOracle: React.FC = () => {
                 <span className="text-xs text-pink-400 font-mono tracking-[0.3em] uppercase animate-pulse">Scanning Akashic Patterns...</span>
               </motion.div>
             ) : currentOracle ? (
-              <motion.div 
-                key="message"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="space-y-8 px-6"
-              >
-                <div>
-                  <span className="text-[10px] text-pink-500/60 uppercase tracking-[0.4em] mb-4 block font-mono">Archetype: {currentOracle.archetype}</span>
-                  <p className="text-3xl font-serif text-white leading-tight italic decoration-pink-500/20 underline underline-offset-8">
-                    "{currentOracle.text}"
-                  </p>
-                </div>
-                
-                <div className="flex gap-4 justify-center">
-                  <motion.div 
-                    initial={{ x: -10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                    className="px-4 py-2 bg-pink-500/5 border border-pink-500/20 rounded-2xl flex items-center gap-3 backdrop-blur-md"
-                  >
-                    <Heart size={14} className="text-pink-500" />
-                    <div className="text-left">
-                      <span className="text-[8px] text-pink-300/40 uppercase block">Essence</span>
-                      <span className="text-[10px] text-white font-mono uppercase tracking-widest">{currentOracle.energy}</span>
-                    </div>
-                  </motion.div>
-                  <motion.div 
-                    initial={{ x: 10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="px-4 py-2 bg-purple-500/5 border border-purple-500/20 rounded-2xl flex items-center gap-3 backdrop-blur-md"
-                  >
-                    <Zap size={14} className="text-amber-400" />
-                    <div className="text-left">
-                      <span className="text-[8px] text-purple-300/40 uppercase block">Tone</span>
-                      <span className="text-[10px] text-white font-mono uppercase tracking-widest">{currentOracle.frequency}</span>
-                    </div>
-                  </motion.div>
-                </div>
-              </motion.div>
+              <ProjectableWidget id="oracle-wisdom" type="widget" componentName="Astraea Wisdom" data={currentOracle}>
+                <motion.div 
+                  key="message"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="space-y-8 px-6 pb-4"
+                >
+                  <div>
+                    <span className="text-[10px] text-pink-500/60 uppercase tracking-[0.4em] mb-4 block font-mono">Archetype: {currentOracle.archetype}</span>
+                    <p className="text-3xl font-serif text-white leading-tight italic decoration-pink-500/20 underline underline-offset-8">
+                      "{currentOracle.text}"
+                    </p>
+                  </div>
+                  
+                  <div className="flex gap-4 justify-center">
+                    <motion.div 
+                      initial={{ x: -10, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                      className="px-4 py-2 bg-pink-500/5 border border-pink-500/20 rounded-2xl flex items-center gap-3 backdrop-blur-md"
+                    >
+                      <Heart size={14} className="text-pink-500" />
+                      <div className="text-left">
+                        <span className="text-[8px] text-pink-300/40 uppercase block">Essence</span>
+                        <span className="text-[10px] text-white font-mono uppercase tracking-widest">{currentOracle.energy}</span>
+                      </div>
+                    </motion.div>
+                    <motion.div 
+                      initial={{ x: 10, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                      className="px-4 py-2 bg-purple-500/5 border border-purple-500/20 rounded-2xl flex items-center gap-3 backdrop-blur-md"
+                    >
+                      <Zap size={14} className="text-amber-400" />
+                      <div className="text-left">
+                        <span className="text-[8px] text-purple-300/40 uppercase block">Tone</span>
+                        <span className="text-[10px] text-white font-mono uppercase tracking-widest">{currentOracle.frequency}</span>
+                      </div>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              </ProjectableWidget>
             ) : (
               <motion.div 
                 key="empty"

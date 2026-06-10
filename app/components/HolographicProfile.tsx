@@ -546,9 +546,27 @@ const ProfileWidgetRenderer = ({ widget, onRemove }: { widget: any, onRemove: (i
             </div>
         );
     } else {
+        // Generic Data Renderer for any new widget type
         renderContent = (
-            <div className="p-4 text-[10px] text-zinc-500 font-mono whitespace-pre-wrap truncate">
-                {JSON.stringify(data)}
+            <div className="p-4 flex flex-col gap-2">
+                <style>{`
+                    .generic-widget-scroll::-webkit-scrollbar { width: 4px; }
+                    .generic-widget-scroll::-webkit-scrollbar-track { background: transparent; }
+                    .generic-widget-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+                `}</style>
+                <div className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest border-b border-white/10 pb-1 mb-1 shadow-[0_0_10px_rgba(255,255,255,0.05)_inset]">DATA STREAM</div>
+                <div className="max-h-[120px] overflow-y-auto generic-widget-scroll space-y-2">
+                    {typeof data === 'object' && data !== null ? (
+                        Object.entries(data).map(([k, v]) => (
+                            <div key={k} className="flex flex-col bg-white/5 p-1.5 rounded border border-white/[0.02]">
+                                <span className="text-[8px] text-indigo-300 font-mono uppercase tracking-wider">{k}</span>
+                                <span className="text-xs text-white break-words">{String(v)}</span>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-sm text-white font-serif italic text-center p-2">{String(data)}</div>
+                    )}
+                </div>
             </div>
         );
     }

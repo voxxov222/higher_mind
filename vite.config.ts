@@ -4,7 +4,6 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, ".", "");
   return {
     server: {
       port: 3000,
@@ -15,6 +14,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       remix({
+        buildDirectory: "dist",
         future: {
           v3_fetcherPersist: true,
           v3_relativeSplatPath: true,

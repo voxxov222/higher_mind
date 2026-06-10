@@ -78,6 +78,9 @@ const CelestialBlueprintSection = React.lazy(() => import('./CelestialBlueprintS
 const JarvisHUD = React.lazy(() => import('./JarvisHUD').then(m => ({ default: m.JarvisHUD })));
 const AstrologyEngine = React.lazy(() => import('./AstrologyEngine').then(m => ({ default: m.AstrologyEngine })));
 const NineDimensionsSection = React.lazy(() => import('./NineDimensionsSection').then(m => ({ default: m.NineDimensionsSection })));
+const SoulFrequencyRadar = React.lazy(() => import('./SoulFrequencyRadar').then(m => ({ default: m.SoulFrequencyRadar })));
+const AstralDreamLog = React.lazy(() => import('./AstralDreamLog').then(m => ({ default: m.AstralDreamLog })));
+const KarmaEngine = React.lazy(() => import('./KarmaEngine').then(m => ({ default: m.KarmaEngine })));
 import { ProjectableWidget } from './ProjectableWidget';
 import { useHigherMind } from './HigherMindProvider';
 import { HoloSideDrawer } from './HoloSideDrawer';
@@ -2433,6 +2436,9 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'neural_synaptic'} tabId="neural_synaptic" onClick={() => setActiveTab('neural_synaptic')} icon={<Network className="w-4 h-4 text-indigo-400 animate-pulse"/>}>Neural Synaptic D3</Tab>
               <Tab active={activeTab === 'findings'} tabId="findings" onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
               <Tab active={activeTab === 'harmonics'} tabId="harmonics" onClick={() => setActiveTab('harmonics')} icon={<BarChart2 className="w-4 h-4"/>}>Harmonics</Tab>
+              <Tab active={activeTab === 'soul_frequency_radar'} tabId="soul_frequency_radar" onClick={() => setActiveTab('soul_frequency_radar')} icon={<Radio className="w-4 h-4 text-cyan-500 animate-pulse" />}>Soul Radar</Tab>
+              <Tab active={activeTab === 'astral_dream_log'} tabId="astral_dream_log" onClick={() => setActiveTab('astral_dream_log')} icon={<Moon className="w-4 h-4 text-violet-400" />}>Dream Log</Tab>
+              <Tab active={activeTab === 'karma_engine'} tabId="karma_engine" onClick={() => setActiveTab('karma_engine')} icon={<Zap className="w-4 h-4 text-amber-500" />}>Karma Engine</Tab>
               <Tab active={activeTab === 'karma_ledger'} tabId="karma_ledger" onClick={() => setActiveTab('karma_ledger')} icon={<History className="w-4 h-4 text-emerald-400" />}>Karma Ledger</Tab>
               <Tab active={activeTab === '9d_creation'} tabId="9d_creation" onClick={() => setActiveTab('9d_creation')} icon={<Layers className="w-4 h-4 text-amber-500 animate-pulse" />}>9D Conscious Creation</Tab>
             </div>
@@ -2758,6 +2764,21 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'karma_ledger' && (
                   <motion.div key="karma_ledger" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="h-full">
                      <KarmaLedger />
+                  </motion.div>
+                )}
+                {activeTab === 'karma_engine' && (
+                  <motion.div key="karma_engine" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="h-full">
+                     <KarmaEngine />
+                  </motion.div>
+                )}
+                {activeTab === 'soul_frequency_radar' && (
+                  <motion.div key="soul_frequency_radar" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="h-full">
+                     <SoulFrequencyRadar />
+                  </motion.div>
+                )}
+                {activeTab === 'astral_dream_log' && (
+                  <motion.div key="astral_dream_log" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="h-full">
+                     <AstralDreamLog />
                   </motion.div>
                 )}
                 {activeTab === 'akashic' && (

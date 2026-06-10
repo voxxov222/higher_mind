@@ -8,7 +8,7 @@ import { ReactFlow, Controls, Background, applyNodeChanges, applyEdgeChanges, ad
 import '@xyflow/react/dist/style.css';
 import { AnimeVisualizer as AnimeVisualizerComponent } from './AnimeVisualizer';
 
-type WidgetType = 'cpu' | 'memory' | 'mind_map' | 'radar_astral' | 'hologram' | 'bio_rhythm' | 'quantum_3d' | 'network_nodes' | 'matrix_stream' | 'activity_log' | 'energy_field' | 'entanglement' | 'image_upload' | 'video_upload' | 'gif_upload' | 'code_snippet' | 'custom_html' | 'live_stats' | 'ai_confidence' | 'cosmic_weather' | 'deep_learning' | 'frequency_monitor' | 'synaptic_coherence' | 'hud_crosshair' | 'global_vortex' | 'neural_plasticity' | 'quantum_entanglement' | 'holographic_storage' | 'astral_projection' | 'multiverse_gateway' | 'anime_visualizer';
+type WidgetType = 'cpu' | 'memory' | 'mind_map' | 'radar_astral' | 'hologram' | 'bio_rhythm' | 'quantum_3d' | 'network_nodes' | 'matrix_stream' | 'activity_log' | 'energy_field' | 'entanglement' | 'image_upload' | 'video_upload' | 'gif_upload' | 'code_snippet' | 'custom_html' | 'live_stats' | 'ai_confidence' | 'cosmic_weather' | 'deep_learning' | 'frequency_monitor' | 'synaptic_coherence' | 'hud_crosshair' | 'global_vortex' | 'neural_plasticity' | 'quantum_entanglement' | 'holographic_storage' | 'astral_projection' | 'multiverse_gateway' | 'anime_visualizer' | 'adv_problem_solver' | 'ai_thinking_matrix';
 
 interface Widget {
   id: string;
@@ -45,6 +45,8 @@ const WIDGET_CATALOG: { type: WidgetType, title: string, icon: React.ReactNode, 
   { type: 'astral_projection', title: 'Astral Projection', icon: <Video className="w-4 h-4" />, defaultSize: '2x2' },
   { type: 'multiverse_gateway', title: 'Multiverse Gateway', icon: <Box className="w-4 h-4" />, defaultSize: '2x2' },
   { type: 'anime_visualizer', title: 'Anime Engine', icon: <Zap className="w-4 h-4 text-cyan-400" />, defaultSize: '2x2' },
+  { type: 'adv_problem_solver', title: 'Advanced Problem Solving', icon: <Brain className="w-4 h-4 text-fuchsia-400" />, defaultSize: '2x2' },
+  { type: 'ai_thinking_matrix', title: 'AI Thinking Engine', icon: <Network className="w-4 h-4 text-fuchsia-500" />, defaultSize: '2x2' },
 ];
 
 function CloudLightning() {
@@ -310,6 +312,8 @@ function WidgetContent({ widget }: { widget: Widget }) {
         case 'holographic_storage': return <HologramHUDWidget />;
         case 'astral_projection': return <MindMapWidget />;
         case 'multiverse_gateway': return <Quantum3DWidget />;
+        case 'adv_problem_solver': return <AdvancedProblemSolverWidget />;
+        case 'ai_thinking_matrix': return <AIThinkingMatrixWidget />;
         case 'media_upload':
         case 'image_upload':
         case 'video_upload':
@@ -581,6 +585,64 @@ function NetworkNodesWidget() {
                  <path d="M 20% 20% L 30% 70% L 80% 40% L 70% 80% Z" fill="none" stroke="rgba(255,255,255,0.1)" strokeDasharray="4 4" />
              </svg>
              <span className="uppercase tracking-widest bg-black/50 px-2 rounded-lg backdrop-blur-sm z-10 border border-white/10">Active Neural Web</span>
+        </div>
+    );
+}
+
+function AdvancedProblemSolverWidget() {
+    const [progress, setProgress] = useState(0);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setProgress(prev => prev >= 100 ? 0 : prev + 1);
+        }, 100);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="w-full h-full flex flex-col justify-center items-center p-4 relative font-mono text-[10px] text-fuchsia-400">
+            <h3 className="mb-4 text-xs font-bold uppercase tracking-widest border-b border-fuchsia-500/30 pb-1 w-full text-center">AI Quantum Problem Solver</h3>
+            <div className="w-full bg-white/5 rounded-xl border border-white/10 h-32 relative overflow-hidden flex flex-col justify-end p-2 gap-2">
+                <div className="flex justify-between w-full opacity-70">
+                    <span>Synthesizing Variables...</span>
+                    <span>{progress}%</span>
+                </div>
+                <div className="w-full h-2 bg-black rounded-full overflow-hidden border border-white/5 relative">
+                    <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-fuchsia-600 to-indigo-500 shadow-[0_0_10px_rgba(217,70,239,0.8)] transition-all ease-linear" style={{ width: `${progress}%` }} />
+                </div>
+                <div className="mt-2 text-[8px] opacity-50 flex justify-between">
+                    <span>Active Branches: {Math.floor(Math.random() * 1000 + 400)}</span>
+                    <span>Nodes Evaluated: {Math.floor(progress * 8000)}</span>
+                </div>
+            </div>
+            <div className="absolute top-4 left-4 w-2 h-2 rounded-full bg-fuchsia-500 animate-ping" />
+        </div>
+    );
+}
+
+function AIThinkingMatrixWidget() {
+    const data = Array.from({length: 20}).map((_, i) => ({ name: i, uv: Math.random() * 200, pv: Math.random() * 300, amt: Math.random() * 400 }));
+    
+    return (
+        <div className="w-full h-full p-2 flex flex-col">
+            <div className="text-center w-full uppercase text-[10px] tracking-widest font-bold text-fuchsia-300 mb-2 font-mono drop-shadow-[0_0_5px_rgba(192,38,211,0.5)]">
+                Autonomous Thinking Architecture
+            </div>
+            <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                    <defs>
+                        <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#c026d3" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#c026d3" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                        </linearGradient>
+                    </defs>
+                    <Area type="monotone" dataKey="uv" stroke="#c026d3" fillOpacity={1} fill="url(#colorUv)" isAnimationActive={false} />
+                    <Area type="monotone" dataKey="pv" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorPv)" isAnimationActive={false} />
+                </AreaChart>
+            </ResponsiveContainer>
         </div>
     );
 }

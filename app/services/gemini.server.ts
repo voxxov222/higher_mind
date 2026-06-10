@@ -61,7 +61,7 @@ export const generateSoulPathReport = async (cosmicData: CosmicData) => {
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -100,13 +100,13 @@ export const fetchTarotGnosis = async (cardName: string, archetype: string, cosm
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
       },
     });
-    return JSON.parse(response.text);
+    return JSON.parse(response.text?.trim() || "{}");
   } catch (err: any) {
     console.error("Tarot Gnosis Error:", err);
     return {
@@ -1086,14 +1086,12 @@ export const fetchGroundedTransitAlerts = async (cosmicData: CosmicData | null):
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: [
-        { text: `Search Query: ${query}` },
-        { text: prompt }
+        { role: "user", parts: [{ text: `Search Query: ${query}\n\n${prompt}` }] }
       ],
       config: {
         tools: [{ googleSearch: {} }],
-        responseMimeType: "application/json",
       },
     });
 

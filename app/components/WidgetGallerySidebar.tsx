@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  X, Sparkles, LayoutGrid, Radio, PieChart, Activity, Moon, Compass, Heart, Play, Layers, ShieldCheck, Pin, Check, Trash2 
+  X, Sparkles, LayoutGrid, Radio, PieChart, Activity, Moon, Sun, Compass, Heart, Play, Layers, ShieldCheck, Pin, Check, Trash2, Brain, Network
 } from 'lucide-react';
 import { soundEngine } from '../lib/soundEffects';
 
@@ -121,6 +121,248 @@ export const WidgetGallerySidebar: React.FC<WidgetGallerySidebarProps> = ({
         text: 'Align your neural pathways to the resonance of distant stellar fields. There, wisdom is infinite.',
         energy: 'Intuitive Transmutation'
       }
+    },
+    {
+      id: 'chakra-resonance',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Chakra Resonance',
+      description: 'Monitor etheric energy field spin rates and alignment.',
+      icon: Activity,
+      iconColor: 'text-rose-400',
+      glowColor: 'rgba(244,63,94,0.4)',
+      defaultData: { Root: '98%', Sacral: '84%', Solar: '91%', Heart: '100%', Throat: '77%', ThirdEye: '95%', Crown: '88%' }
+    },
+    {
+      id: 'advanced-problem-solver',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Quantum Problem Solver',
+      description: 'Advanced features thinking and problem solving matrix.',
+      icon: Brain,
+      iconColor: 'text-indigo-400',
+      glowColor: 'rgba(99,102,241,0.4)',
+      defaultData: { Algorithm: 'Deep Genesis', Variables: 144000, State: 'Synthesizing', Output: 'Non-linear' }
+    },
+    {
+      id: 'cognitive-architecture',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Cognitive Architecture',
+      description: 'Neural pathways for advanced autonomous thinking.',
+      icon: Network,
+      iconColor: 'text-purple-400',
+      glowColor: 'rgba(168,85,247,0.4)',
+      defaultData: { Layers: 12, Synapses: 'Active', Inference: 'Predictive', LogicGate: 'Open' }
+    },
+    {
+      id: 'biorhythm-cycle',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Cosmic Biorhythm',
+      description: 'Sync physical, emotional, and intellectual cycles with lunar transits.',
+      icon: Heart,
+      iconColor: 'text-emerald-400',
+      glowColor: 'rgba(16,185,129,0.4)',
+      defaultData: { Physical: 'Peak', Emotional: 'Ascending', Intellectual: 'Critical', Intuition: 'High' }
+    },
+    {
+      id: 'merkaba-status',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Merkaba Spin Rate',
+      description: 'Track the geometrical light body counter-rotational spin.',
+      icon: Sparkles,
+      iconColor: 'text-amber-400',
+      glowColor: 'rgba(245,158,11,0.4)',
+      defaultData: { TopTetrahedron: '99.9% C', BottomTetrahedron: '99.9% C', Alignment: 'Harmonic' }
+    },
+    {
+      id: 'pineal-gland-tuning',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Pineal Calibration',
+      description: 'Measure decalcification levels and dimensional perception capacity.',
+      icon: Activity,
+      iconColor: 'text-indigo-400',
+      glowColor: 'rgba(99,102,241,0.4)',
+      defaultData: { Status: 'Active', Decalcification: '88%', DimPerception: '5D to 7D bounds' }
+    },
+    {
+      id: 'tarot-daily-draw',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Tarot Oracle',
+      description: 'Your energetic blueprint card of the current cycle.',
+      icon: Layers,
+      iconColor: 'text-purple-400',
+      glowColor: 'rgba(168,85,247,0.4)',
+      defaultData: { Card: 'The Star', Element: 'Air', Archetype: 'Hope, healing, inspiration' }
+    },
+    {
+      id: 'numerology-lifepath',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Numerology Core',
+      description: 'Vibrational numbers derived from birth code and soul contract.',
+      icon: LayoutGrid,
+      iconColor: 'text-cyan-400',
+      glowColor: 'rgba(34,211,238,0.4)',
+      defaultData: { LifePath: 7, Destiny: 9, SoulUrge: 11, Personality: 22 }
+    },
+    {
+      id: 'astral-projection-coord',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Astral Coordinates',
+      description: 'Current metaphysical location overlay tracking.',
+      icon: Compass,
+      iconColor: 'text-lime-400',
+      glowColor: 'rgba(163,230,53,0.4)',
+      defaultData: { Realm: 'Akashic Edge', Density: '6th', Coordinates: 'A-77.94.Sigma' }
+    },
+    {
+      id: 'quantum-entanglement',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Quantum Entanglements',
+      description: 'Monitor connections to soul group and karmic ties.',
+      icon: Radio,
+      iconColor: 'text-blue-400',
+      glowColor: 'rgba(56,130,246,0.4)',
+      defaultData: { ActiveLinks: 12, TwinFlame: 'In Proximity', SoulGroupNodes: 'Online' }
+    },
+    {
+      id: 'akashic-records-link',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Akashic Terminal',
+      description: 'Direct reading bandwidth connection to the universal ledger.',
+      icon: ShieldCheck,
+      iconColor: 'text-yellow-400',
+      glowColor: 'rgba(250,204,21,0.4)',
+      defaultData: { Connection: 'Stable', Bandwidth: 'High Resonance', CurrentChapter: 'Earth Experience 3' }
+    },
+    {
+      id: 'sacred-geometry-flux',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Sacred Grid Flux',
+      description: 'Current geometric pattern forming in the global consciousness grid.',
+      icon: PieChart,
+      iconColor: 'text-teal-400',
+      glowColor: 'rgba(45,212,191,0.4)',
+      defaultData: { Pattern: 'Sri Yantra', CoreFrequency: '432 Hz', Coherence: 'Scaling' }
+    },
+    {
+      id: 'starseed-origin',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Starseed Vector',
+      description: 'Galactic soul origin tracking and lineage integration.',
+      icon: Sparkles,
+      iconColor: 'text-violet-400',
+      glowColor: 'rgba(139,92,246,0.4)',
+      defaultData: { Primary: 'Pleiadian', Secondary: 'Sirian', Integration: '92% completed' }
+    },
+    {
+      id: 'angel-number-sync',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Angel Number Sync',
+      description: 'Synchronistic numeric patterns currently clustering in reality field.',
+      icon: Play,
+      iconColor: 'text-sky-400',
+      glowColor: 'rgba(14,165,233,0.4)',
+      defaultData: { Pattern1: '11:11 - Awakening', Pattern2: '444 - Protection', Intensity: 'High Variance' }
+    },
+    {
+      id: 'ley-line-nexus',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Ley Line Nexus',
+      description: 'Earth energetic grid intersections near current coordinate plane.',
+      icon: Compass,
+      iconColor: 'text-green-400',
+      glowColor: 'rgba(74,222,128,0.4)',
+      defaultData: { NearestNode: 'Sedona Vortex', Proximity: 'Energetic Range', Type: 'Magnetic Female' }
+    },
+    {
+      id: 'etheric-body-scan',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Etheric Layer Scan',
+      description: 'Structural integrity of the aura and auric field bleed-through.',
+      icon: Activity,
+      iconColor: 'text-indigo-500',
+      glowColor: 'rgba(99,102,241,0.4)',
+      defaultData: { Layer1: 'Physical - Intact', Layer4: 'Astral - Expanding', Layer7: 'Ketheric - Luminous' }
+    },
+    {
+      id: 'karmic-debt-ledger',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Karmic Ledger',
+      description: 'Status of transmutational debt and dharma accumulation.',
+      icon: Layers,
+      iconColor: 'text-orange-400',
+      glowColor: 'rgba(251,146,60,0.4)',
+      defaultData: { Dharma: '+8,400', DebtTransmuted: '85%', CurrentLesson: 'Unconditional Forgiveness' }
+    },
+    {
+      id: 'flower-of-life-grid',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Flower of Life Map',
+      description: 'Visualization parameters for personal creation reality sphere.',
+      icon: Radio,
+      iconColor: 'text-pink-400',
+      glowColor: 'rgba(244,114,182,0.4)',
+      defaultData: { NodeActivations: '144/144', Phase: 'Genesis', Symmetry: 'Perfect' }
+    },
+    {
+      id: 'pleiadian-light-codes',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Pleiadian Light Codes',
+      description: 'Active DNA uploads and crystalline light structure downloads.',
+      icon: Sparkles,
+      iconColor: 'text-cyan-300',
+      glowColor: 'rgba(103,232,249,0.4)',
+      defaultData: { Source: 'Alcyone', StreamRate: '300 TB/s (Spiritual)', Decryption: 'In progress' }
+    },
+    {
+      id: 'golden-ratio-pulse',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Golden Ratio Pulse',
+      description: 'Phi ratio harmonic oscillation across all energetic centers.',
+      icon: PieChart,
+      iconColor: 'text-yellow-500',
+      glowColor: 'rgba(234,179,8,0.4)',
+      defaultData: { PhiConstant: '1.618033988749', HarmonicResonance: 'True', Oscillation: 'Stable Wave' }
+    },
+    {
+      id: 'kundalini-rise',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Kundalini Vector',
+      description: 'Ascension metrics of the serpent fire resting at the spine base.',
+      icon: Activity,
+      iconColor: 'text-red-500',
+      glowColor: 'rgba(239,68,68,0.4)',
+      defaultData: { Status: 'Awakening', Position: 'Anahata (Heart)', Temperature: 'Pranic Heat' }
+    },
+    {
+      id: 'cosmic-weather',
+      type: 'widget',
+      componentName: 'GenericWidget',
+      displayName: 'Cosmic Weather',
+      description: 'Solar flares, coronal mass ejections, and geomagnetic storm index.',
+      icon: Sun,
+      iconColor: 'text-orange-500',
+      glowColor: 'rgba(249,115,22,0.4)',
+      defaultData: { KPIndex: '4 (Unsettled)', SolarWind: '450 km/s', SchumannResonance: 'Spiking at 36 Hz' }
     }
   ];
 

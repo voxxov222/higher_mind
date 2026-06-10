@@ -35,6 +35,7 @@ export const ProjectableWidget: React.FC<ProjectableWidgetProps> = ({ id, type, 
     const [locked, setLocked] = useState(false);
     const [selectedAnimation, setSelectedAnimation] = useState("None");
     const [orbitTarget, setOrbitTarget] = useState("");
+    const [size, setSize] = useState("Medium");
 
     const isPinned = userData?.profileWidgets?.some(w => w.id === id);
 
@@ -60,7 +61,8 @@ export const ProjectableWidget: React.FC<ProjectableWidgetProps> = ({ id, type, 
             config: {
                 locked,
                 animation: selectedAnimation,
-                orbitTarget: selectedAnimation.includes('Orbit') ? orbitTarget : undefined
+                orbitTarget: selectedAnimation.includes('Orbit') ? orbitTarget : undefined,
+                size
             }
         });
         setIsProjected(true);
@@ -85,11 +87,78 @@ export const ProjectableWidget: React.FC<ProjectableWidgetProps> = ({ id, type, 
         return () => window.removeEventListener('pointerdown', handleDocClick);
     }, [menuPos]);
 
+    const getAnimationProps = () => {
+        let props: any = { scale: size === "Small" ? 0.75 : size === "Large" ? 1.5 : size === "Quantum" ? 2.0 : 1 };
+        switch(selectedAnimation) {
+            case "360 Spin": props.rotate = [0, 360]; props.transition = { repeat: Infinity, duration: 4, ease: "linear" }; break;
+            case "Orbit Around Core": props.x = [0, 50, 0, -50, 0]; props.y = [0, -50, 0, 50, 0]; props.transition = { repeat: Infinity, duration: 6, ease: "linear" }; break;
+            case "Orbit Self": props.rotate = [0, 360]; props.x = [0, 10, 0, -10, 0]; props.transition = { repeat: Infinity, duration: 3, ease: "linear" }; break;
+            case "Zig Zag": props.x = [0, 20, -20, 20, -20, 0]; props.transition = { repeat: Infinity, duration: 2, ease: "linear" }; break;
+            case "Pulse & Glow": props.scale = [1, 1.05, 1]; props.opacity = [1, 0.6, 1]; props.transition = { repeat: Infinity, duration: 1.5, ease: "easeInOut" }; break;
+            case "Zoom In Out": props.scale = [0.8, 1.2, 0.8]; props.transition = { repeat: Infinity, duration: 3, ease: "easeInOut" }; break;
+            case "Hover Float": props.y = [0, -15, 0]; props.transition = { repeat: Infinity, duration: 3, ease: "easeInOut" }; break;
+            case "Quantum Jitter": props.x = [0, 3, -3, 2, -2, 0]; props.y = [0, -2, 3, -3, 2, 0]; props.transition = { repeat: Infinity, duration: 0.5 }; break;
+            case "Hyper-drive Drift": props.scale = [1, 1.1, 1]; props.filter = ["blur(0px)", "blur(4px)", "blur(0px)"]; props.transition = { repeat: Infinity, duration: 2 }; break;
+            case "Sine Wave": props.y = [0, -20, 0, 20, 0]; props.transition = { repeat: Infinity, duration: 2, ease: "linear" }; break;
+            case "Cosine Wave": props.x = [0, 20, 0, -20, 0]; props.transition = { repeat: Infinity, duration: 2, ease: "linear" }; break;
+            case "Torus Spin": props.rotateX = [0, 360]; props.rotateY = [0, 360]; props.transition = { repeat: Infinity, duration: 5, ease: "linesar" }; break;
+            case "Flower of Life Bloom": props.scale = [1, 1.5, 1]; props.rotate = [0, 60, 0]; props.transition = { repeat: Infinity, duration: 4 }; break;
+            case "Metatron's Spin": props.rotateZ = [0, 360]; props.scale = [1, 1.1, 1]; props.transition = { repeat: Infinity, duration: 4, ease: "linear" }; break;
+            case "Merkaba Rotate": props.rotateX = [0, 360]; props.rotateY = [0, -360]; props.transition = { repeat: Infinity, duration: 6, ease: "linear" }; break;
+            case "Fibonacci Spiral In": props.scale = [1, 0.1, 1]; props.rotate = [0, 720, 0]; props.transition = { repeat: Infinity, duration: 5 }; break;
+            case "Fibonacci Spiral Out": props.scale = [0.1, 1, 0.1]; props.rotate = [0, -720, 0]; props.transition = { repeat: Infinity, duration: 5 }; break;
+            case "Celestial Sweep": props.x = [-100, 100, -100]; props.rotate = [-20, 20, -20]; props.transition = { repeat: Infinity, duration: 8 }; break;
+            case "Tachyon Burst": props.scale = [1, 1.02, 1]; props.x = [0, 2, -2, 0]; props.transition = { repeat: Infinity, duration: 0.2 }; break;
+            case "Gravity Well Drop": props.y = [0, 50, 0]; props.scale = [1, 0.5, 1]; props.transition = { repeat: Infinity, duration: 3 }; break;
+            case "Anti-gravity Lift": props.y = [0, -50, 0]; props.scale = [1, 1.2, 1]; props.transition = { repeat: Infinity, duration: 3 }; break;
+            case "Pendulum Swing": props.rotate = [-30, 30, -30]; props.originX = 0.5; props.originY = 0; props.transition = { repeat: Infinity, duration: 2, ease: "easeInOut" }; break;
+            case "Magnetic Tremor": props.x = [0, 1, -1, 1, -1, 0]; props.transition = { repeat: Infinity, duration: 0.1 }; break;
+            case "Dimensional Fold": props.scaleX = [1, 0, 1]; props.transition = { repeat: Infinity, duration: 2 }; break;
+            case "Nebula Swirl": props.rotate = [0, 360]; props.scale = [1, 1.2, 0.8, 1]; props.filter = ["hue-rotate(0deg)", "hue-rotate(360deg)"]; props.transition = { repeat: Infinity, duration: 10 }; break;
+            case "Black Hole Suck": props.scale = [1, 0.1, 1]; props.rotate = [0, 1080, 0]; props.opacity = [1, 0, 1]; props.transition = { repeat: Infinity, duration: 4 }; break;
+            case "White Hole Expand": props.scale = [0.1, 1.5, 1]; props.opacity = [0, 1, 1]; props.filter = ["brightness(2)", "brightness(1)"]; props.transition = { repeat: Infinity, duration: 4 }; break;
+            case "Astral Projection": props.y = [0, -30, 0]; props.opacity = [1, 0.3, 1]; props.transition = { repeat: Infinity, duration: 4 }; break;
+            case "Etheric Phase": props.opacity = [1, 0, 1]; props.filter = ["blur(0px)", "blur(10px)", "blur(0px)"]; props.transition = { repeat: Infinity, duration: 3 }; break;
+            case "Chakra Align Spin": props.rotateY = [0, 360]; props.transition = { repeat: Infinity, duration: 5 }; break;
+            case "DNA Double Helix Twist": props.rotateX = [0, 360]; props.y = [0, 10, -10, 0]; props.transition = { repeat: Infinity, duration: 4 }; break;
+            case "Kundalini Rise": props.y = [20, -20, 20]; props.filter = ["hue-rotate(0deg)", "hue-rotate(90deg)", "hue-rotate(0deg)"]; props.transition = { repeat: Infinity, duration: 5 }; break;
+            case "Pineal Pulse": props.scale = [1, 1.2, 1]; props.filter = ["brightness(1)", "brightness(1.5)", "brightness(1)"]; props.transition = { repeat: Infinity, duration: 1.5 }; break;
+            case "Sacred Geometry Morph": props.borderRadius = ["0%", "50%", "33%", "0%"]; props.rotate = [0, 90, 180, 360]; props.transition = { repeat: Infinity, duration: 5 }; break;
+            case "Golden Ratio Dance": props.scale = [1, 1.618, 1]; props.transition = { repeat: Infinity, duration: 3.236 }; break;
+            case "Vesica Piscis Orbit": props.x = [-20, 20, -20]; props.opacity = [0.8, 1, 0.8]; props.transition = { repeat: Infinity, duration: 3 }; break;
+            case "Kabbalistic Tree Climb": props.y = [50, -50, 50]; props.x = [-10, 10, -10]; props.transition = { repeat: Infinity, duration: 7 }; break;
+            case "Sephirot Flash": props.opacity = [1, 0.2, 1, 0.2, 1]; props.scale = [1, 1.1, 1, 1.1, 1]; props.transition = { repeat: Infinity, duration: 2 }; break;
+            case "Tarot Shuffle Draw": props.x = [0, 30, -30, 0]; props.rotate = [0, 15, -15, 0]; props.transition = { repeat: Infinity, duration: 1.5 }; break;
+            case "Zodiac Wheel Spin": props.rotate = [0, 360]; props.transition = { repeat: Infinity, duration: 12, ease: "linear" }; break;
+            case "Astrological Transit Move": props.x = [-50, 50, -50]; props.transition = { repeat: Infinity, duration: 10, ease: "linear" }; break;
+            case "Planetary Retrograde Slide": props.x = [0, -30, 0]; props.transition = { repeat: Infinity, duration: 4, ease: "easeInOut" }; break;
+            case "Solar Eclipse Cast": props.filter = ["brightness(1)", "brightness(0.2)", "brightness(1)"]; props.transition = { repeat: Infinity, duration: 6 }; break;
+            case "Lunar Eclipse Shadow": props.filter = ["sepia(0)", "sepia(1) hue-rotate(-50deg) saturate(3)", "sepia(0)"]; props.transition = { repeat: Infinity, duration: 6 }; break;
+            case "Starseed Awakening": props.scale = [0.8, 1.2, 1]; props.filter = ["brightness(1)", "brightness(2)", "brightness(1)"]; props.transition = { repeat: Infinity, duration: 3 }; break;
+            case "Akashic Download": props.y = [-20, 0]; props.opacity = [0, 1]; props.transition = { repeat: Infinity, duration: 2 }; break;
+            case "Telepathic Ripples": props.scale = [1, 1.1, 1]; props.opacity = [1, 0.5, 1]; props.boxShadow = ["0 0 0px rgba(168,85,247,0)", "0 0 20px rgba(168,85,247,0.8)", "0 0 0px rgba(168,85,247,0)"]; props.transition = { repeat: Infinity, duration: 2 }; break;
+            case "Aura Expansion": props.boxShadow = ["0 0 10px rgba(236,72,153,0.2)", "0 0 40px rgba(236,72,153,0.8)", "0 0 10px rgba(236,72,153,0.2)"]; props.transition = { repeat: Infinity, duration: 3 }; break;
+            case "Pranic Breathing": props.scale = [1, 1.05, 1]; props.transition = { repeat: Infinity, duration: 4, ease: "easeInOut" }; break;
+            case "Cosmic Egg Hatch": props.scale = [1, 1.1, 1.2, 1]; props.rotate = [0, 5, -5, 0]; props.transition = { repeat: Infinity, duration: 3 }; break;
+        }
+        
+        // Merge scale logic with animation
+        if (!props.scale || Array.isArray(props.scale)) {
+            // keep the complex array scale if there is one
+        } else {
+            props.scale = size === "Small" ? 0.75 : size === "Large" ? 1.5 : size === "Quantum" ? 2.0 : 1;
+        }
+
+        return props;
+    };
+
     return (
         <>
             <motion.div
                 {...longPress}
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: size === "Small" ? 0.77 : size === "Large" ? 1.55 : size === "Quantum" ? 2.05 : 1.02 }}
+                initial={{ scale: size === "Small" ? 0.75 : size === "Large" ? 1.5 : size === "Quantum" ? 2.0 : 1 }}
+                animate={getAnimationProps()}
                 className="cursor-pointer relative group/projectable"
                 onContextMenu={(e) => {
                     e.preventDefault();
@@ -166,6 +235,22 @@ export const ProjectableWidget: React.FC<ProjectableWidgetProps> = ({ id, type, 
                                     >
                                         <Lock size={14} className={locked ? "text-rose-400" : "text-stone-500"} />
                                         <span className={locked ? "text-rose-400" : "text-stone-300"}> {locked ? "Locked Position" : "Lock Position"} </span>
+                                    </button>
+
+                                    <button
+                                        onClick={(e) => { 
+                                            e.stopPropagation(); 
+                                            const sizes = ["Small", "Medium", "Large", "Quantum"];
+                                            const nextIdx = (sizes.indexOf(size) + 1) % sizes.length;
+                                            setSize(sizes[nextIdx]);
+                                        }}
+                                        className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/10 rounded-lg text-sm transition-all text-left group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Settings2 size={14} className="text-stone-500 group-hover:text-stone-300" />
+                                            <span className="text-stone-300 group-hover:text-white">Size Variant</span>
+                                        </div>
+                                        <span className="text-xs text-stone-500">{size}</span>
                                     </button>
 
                                     <button

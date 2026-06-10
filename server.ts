@@ -97,11 +97,11 @@ async function startServer() {
 
   } else {
     // Production mode
-    const distPath = path.join(process.cwd(), "build/client");
+    const distPath = path.join(process.cwd(), "dist/client");
     app.use(express.static(distPath, { immutable: true, maxAge: "1y" }));
     
     // Updated: Load the bundled Remix server build
-    const build = await import(path.join(process.cwd(), "build/server/index.js"));
+    const build = await import(path.join(process.cwd(), "dist/server/index.js"));
     
     app.all("*", (req, res, next) => {
         return createRequestHandler({

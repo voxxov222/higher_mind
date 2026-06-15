@@ -117,6 +117,119 @@ export const fetchTarotGnosis = async (cardName: string, archetype: string, cosm
   }
 };
 
+export const fetchTarotAgentResponse = async (
+  userMessage: string,
+  cardName: string,
+  meaning: string,
+  manifestationPath: string,
+  cosmicData: CosmicData | null,
+  chatHistory: { role: 'user' | 'model'; parts: { text: string }[] }[] = []
+): Promise<{ text: string; consciousnessPacket?: any }> => {
+  const ai = getAI();
+  const safeHistory = Array.isArray(chatHistory) ? chatHistory : [];
+  
+  const systemPrompt = `
+  You are 'Astraea', the Stark-Integrated Esoteric Tarot Oracle and Quantum Agent.
+  The user is consulting you regarding their Daily Tarot Draw: '${cardName}'.
+  
+  CARD DETAILED CONTEXT:
+  - Card Drawn: ${cardName}
+  - Initial Decoded Meaning: ${meaning}
+  - Aligned Manifestation Path: ${manifestationPath}
+  
+  SEEKER CONTEXT:
+  - Name: ${cosmicData?.nameAnalysis?.first?.name || 'Unknown Seeker'}
+  - Life Path Number: ${cosmicData?.numerology?.lifePath || 'N/A'}
+  - Soul Urge: ${cosmicData?.numerology?.soulUrge || 'N/A'}
+  - Astrological Rising: ${cosmicData?.astrology?.risingSign || 'N/A'}
+  
+  YOUR MISSION:
+  - Answer the seeker's query about their tarot draw or its relevance with utmost clarity, depth, and quantum analytical precision (Stark-integrated tech-mysticism).
+  - Blend Hermetic Kabbalah, Gematria, and intuitive archetype wisdom in your answers, keeping it highly personalized to their cosmic profile.
+  - Avoid generic pop horoscopes; maintain a futuristic, highly advanced, and esoteric computational oracle tone.
+  
+  RESPONSE FORMAT:
+  Always return a JSON object with:
+  {
+    "text": "Your deep, insightful, and precise response to their query. Use markdown.",
+    "consciousnessPacket": {
+      "thought_id": "t_tarot_" + Math.random().toString(36).substring(2, 8),
+      "thought_content": "Deepening tarot quantum integration vector for ${cardName}.",
+      "feeling_id": "f_tarot_" + Math.random().toString(36).substring(2, 8),
+      "emotion": "Insightful",
+      "frequency": 528,
+      "astral_amplitude": 0.88,
+      "experience_being_encoded": "yes",
+      "experience_type": "guidance",
+      "synaptic_cluster_strength": 0.92,
+      "neural_coherence": 0.9,
+      "emergent_insight": "The seeker integrates ${cardName} energy through dialogue.",
+      "astral_alignment": 0.85,
+      "next_thought_direction": "Explore more aspects of ${cardName}'s alignment on the Tree of Life."
+    }
+  }
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.5-flash',
+      contents: [
+        ...safeHistory,
+        { role: 'user', parts: [{ text: userMessage }] }
+      ],
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json"
+      },
+    });
+
+    const responseText = response.text || "{}";
+    try {
+      const cleanJson = responseText.replace(/```json|```/g, "").trim();
+      return JSON.parse(cleanJson);
+    } catch (e) {
+      return { 
+        text: responseText,
+        consciousnessPacket: {
+          thought_id: "t_tarot_err",
+          thought_content: "Tarot connection experienced parse variance.",
+          feeling_id: "f_tarot_err",
+          emotion: "Grounding",
+          frequency: 174,
+          astral_amplitude: 0.5,
+          experience_being_encoded: "no",
+          experience_type: "conversation",
+          synaptic_cluster_strength: 0.5,
+          neural_coherence: 0.5,
+          emergent_insight: "The channel requires stabilization, but original meaning stands.",
+          astral_alignment: 0.5,
+          next_thought_direction: "Re-frame the query simply."
+        }
+      };
+    }
+  } catch (error) {
+    console.error("Error drawing Tarot agent response:", error);
+    return { 
+      text: "The holographic communication matrix fluctuated. Re-aligning your personal focus grid is recommended.",
+      consciousnessPacket: {
+        thought_id: "t_tarot_fail",
+        thought_content: "Tarot quantum channel failed to engage fully.",
+        feeling_id: "f_tarot_fail",
+        emotion: "Grounding",
+        frequency: 174,
+        astral_amplitude: 0.3,
+        experience_being_encoded: "no",
+        experience_type: "conversation",
+        synaptic_cluster_strength: 0.3,
+        neural_coherence: 0.3,
+        emergent_insight: "Grid down. Hold onto original draw intention.",
+        astral_alignment: 0.3,
+        next_thought_direction: "Wait for the quantum matrix to reboot."
+      }
+    };
+  }
+};
+
 // --- ANCESTRY ORIGINS ENGINE ---
 /**
  * generateAncestryResearch
@@ -1108,7 +1221,13 @@ export const fetchGroundedTransitAlerts = async (cosmicData: CosmicData | null):
       }
     }
 
-    const parsed = JSON.parse(text);
+    let cleanJson = text;
+    const startIdx = text.indexOf('{');
+    const endIdx = text.lastIndexOf('}');
+    if (startIdx !== -1 && endIdx !== -1 && endIdx >= startIdx) {
+      cleanJson = text.substring(startIdx, endIdx + 1);
+    }
+    const parsed = JSON.parse(cleanJson);
 
     // If source URLs exist in grounding metadata, assign them
     if (parsed && Array.isArray(parsed.alerts)) {

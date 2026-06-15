@@ -48,6 +48,7 @@ const GoldenRatioSection = React.lazy(() => import('./GoldenRatioSection').then(
 const SkyMapSection = React.lazy(() => import('./SkyMapSection').then(m => ({ default: m.SkyMapSection })));
 const SoulPathSection = React.lazy(() => import('./SoulPathSection').then(m => ({ default: m.SoulPathSection })));
 const AncestralResearchSection = React.lazy(() => import('./AncestralResearchSection').then(m => ({ default: m.AncestralResearchSection })));
+const TheBigPicture = React.lazy(() => import('./TheBigPicture').then(m => ({ default: m.TheBigPicture })));
 const CommunityFeed = React.lazy(() => import('./social/CommunityFeed'));
 const LiveMessenger = React.lazy(() => import('./social/LiveMessenger'));
 const KarmaLedger = React.lazy(() => import('./KarmaLedger').then(m => ({ default: m.KarmaLedger })));
@@ -95,8 +96,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine' | '9d_creation';
-  setActiveTab: (tab: 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine' | '9d_creation') => void;
+  activeTab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine' | '9d_creation';
+  setActiveTab: (tab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine' | '9d_creation') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -2380,6 +2381,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               </button>
             </div>
             <div className="flex border-b border-white/10 p-2 gap-2 overflow-x-auto no-scrollbar pr-14 flex-nowrap shrink-0">
+              <Tab active={activeTab === 'the_big_picture'} tabId="the_big_picture" onClick={() => setActiveTab('the_big_picture')} icon={<Sparkles className="w-4 h-4 text-amber-400 animate-pulse"/>}>The Big Picture</Tab>
               <Tab active={activeTab === 'astraea'} tabId="astraea" onClick={() => setActiveTab('astraea')} icon={<Moon className="w-4 h-4 text-pink-400 animate-pulse"/>}>Astraea Oracle</Tab>
               <Tab active={activeTab === 'avatar_matrix'} tabId="avatar_matrix" onClick={() => setActiveTab('avatar_matrix')} icon={<UserIcon className="w-4 h-4 text-emerald-400 animate-pulse"/>}>Avatar Core Summary</Tab>
               <Tab active={activeTab === 'identity'} tabId="identity" onClick={() => setActiveTab('identity')} icon={<UserIcon className="w-4 h-4"/>}>My Identity</Tab>
@@ -2412,7 +2414,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'vibrational_tuning'} tabId="vibrational_tuning" onClick={() => setActiveTab('vibrational_tuning')} icon={<Radio className="w-4 h-4 text-fuchsia-400 animate-pulse"/>}>Vibrational Tuning</Tab>
               <Tab active={activeTab === 'alignment'} tabId="alignment" onClick={() => setActiveTab('alignment')} icon={<Radio className="w-4 h-4 text-teal-400 animate-pulse"/>}>Alignment</Tab>
               <Tab active={activeTab === 'ai_agents'} tabId="ai_agents" onClick={() => setActiveTab('ai_agents')} icon={<Cpu className="w-4 h-4 text-emerald-400"/>}>AI Agents Swarm</Tab>
-              <Tab active={activeTab === 'jarvis_os'} tabId="jarvis_os" onClick={() => { soundEngine.click(); setActiveTab('jarvis_os'); }} icon={<Cpu className="w-4 h-4 text-cyan-400 animate-pulse"/>}>Jarvis OS</Tab>
+              <Tab active={activeTab === 'jarvis_os'} tabId="jarvis_os" onClick={() => { soundEngine.click(); setActiveTab('jarvis_os'); }} icon={<Cpu className="w-4 h-4 text-cyan-400 animate-pulse"/>}>Astral OS</Tab>
               <Tab active={activeTab === 'astrology_engine'} tabId="astrology_engine" onClick={() => { soundEngine.click(); setActiveTab('astrology_engine'); }} icon={<Compass className="w-4 h-4 text-indigo-400 animate-pulse"/>}>Astrology Engine</Tab>
               <Tab active={activeTab === 'astral_canvas'} tabId="astral_canvas" onClick={() => setActiveTab('astral_canvas')} icon={<Workflow className="w-4 h-4 text-purple-400 animate-pulse"/>}>AI Agent Canvas</Tab>
               <Tab active={activeTab === 'gematria_calc'} tabId="gematria_calc" onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
@@ -2433,7 +2435,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'tarot'} tabId="tarot" onClick={() => setActiveTab('tarot')} icon={<Sparkles className="w-4 h-4 text-pink-400 animate-pulse"/>}>Tarot Arcana</Tab>
               <Tab active={activeTab === 'sandbox'} tabId="sandbox" onClick={() => setActiveTab('sandbox')} icon={<Box className="w-4 h-4 text-emerald-400"/>}>Creative Sandbox</Tab>
               <Tab active={activeTab === 'quantum_fluid'} tabId="quantum_fluid" onClick={() => setActiveTab('quantum_fluid')} icon={<Box className="w-4 h-4 text-cyan-400 animate-pulse"/>}>Quantum Fluid WebGPU</Tab>
-              <Tab active={activeTab === 'neural_synaptic'} tabId="neural_synaptic" onClick={() => setActiveTab('neural_synaptic')} icon={<Network className="w-4 h-4 text-indigo-400 animate-pulse"/>}>Neural Synaptic D3</Tab>
+              <Tab active={activeTab === 'neural_synaptic'} tabId="neural_synaptic" onClick={() => setActiveTab('neural_synaptic')} icon={<Network className="w-4 h-4 text-indigo-400 animate-pulse"/>}>Astro Neural 3D</Tab>
               <Tab active={activeTab === 'findings'} tabId="findings" onClick={() => setActiveTab('findings')} icon={<Zap className="w-4 h-4"/>}>Deep Synthesis</Tab>
               <Tab active={activeTab === 'harmonics'} tabId="harmonics" onClick={() => setActiveTab('harmonics')} icon={<BarChart2 className="w-4 h-4"/>}>Harmonics</Tab>
               <Tab active={activeTab === 'soul_frequency_radar'} tabId="soul_frequency_radar" onClick={() => setActiveTab('soul_frequency_radar')} icon={<Radio className="w-4 h-4 text-cyan-500 animate-pulse" />}>Soul Radar</Tab>
@@ -3705,6 +3707,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'jarvis_os' && (
                   <motion.div key="jarvis_os" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full">
                     <JarvisHUD data={data} setActiveTab={setActiveTab} />
+                  </motion.div>
+                )}
+                {activeTab === 'the_big_picture' && (
+                  <motion.div key="the_big_picture" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full">
+                    <TheBigPicture data={data} loadedInputs={loadedInputs} />
                   </motion.div>
                 )}
               </AnimatePresence>

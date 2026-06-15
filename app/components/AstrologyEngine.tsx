@@ -49,7 +49,7 @@ export function AstrologyEngine({ data }: AstrologyEngineProps) {
   const [hoveredNode, setHoveredNode] = useState<any>(null);
   const [vocalBars, setVocalBars] = useState<number[]>(Array(24).fill(6));
 
-  // Jarvis Chat States specialized for this Chart
+  // Astral OS Chat States specialized for this Chart
   const [userQuery, setUserQuery] = useState('');
   const [chatLog, setChatLog] = useState<Array<{ role: 'user' | 'model'; parts: { text: string }[] }>>([]);
   const [chatLoading, setChatLoading] = useState(false);
@@ -72,7 +72,7 @@ export function AstrologyEngine({ data }: AstrologyEngineProps) {
     
     const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognitionClass) {
-      const errorMsg = "Speech recognition is not supported in this browser. Jarvis recommends Google Chrome.";
+      const errorMsg = "Speech recognition is not supported in this browser. Astral OS recommends Google Chrome.";
       setVoiceError(errorMsg);
       speakText(errorMsg);
       return;
@@ -361,7 +361,7 @@ export function AstrologyEngine({ data }: AstrologyEngineProps) {
     }
   };
 
-  // Chat Query with Jarvis
+  // Chat Query with Astral OS
   const handleSendChatQuery = async () => {
     if (!userQuery.trim() || chatLoading) return;
     soundEngine.click();
@@ -377,7 +377,7 @@ export function AstrologyEngine({ data }: AstrologyEngineProps) {
 
     try {
       const response = await fetchCosmicChatResponse(
-        `[ASTROLOGICAL ANALYSIS MODE]: General seeker natal information. Seeker name: ${name}, Chart summary: ${natalData?.summary}, placements: ${JSON.stringify(natalData?.natalPlacements)}, aspects: ${JSON.stringify(natalData?.aspects)}. Answer as Jarvis, high-tech aerospace design assistant, combined with alphanumeric Gematria coordinates and Hermetic Kabbalistics. User query: ${query}`,
+        `[ASTROLOGICAL ANALYSIS MODE]: General seeker natal information. Seeker name: ${name}, Chart summary: ${natalData?.summary}, placements: ${JSON.stringify(natalData?.natalPlacements)}, aspects: ${JSON.stringify(natalData?.aspects)}. Answer as Astral OS, a highly sophisticated, futuristic, celestial operating system assistant, combined with alphanumeric Gematria coordinates, ancient planetary lore, and Hermetic Kabbalistics. User query: ${query}`,
         newHistory,
         data
       );
@@ -775,7 +775,7 @@ export function AstrologyEngine({ data }: AstrologyEngineProps) {
               ASTROLOGY ENGINE
             </h1>
             <p className="text-sm text-slate-400 max-w-xl">
-              Uplink with the stellar dynamics database. Enter coordinates to compile accurate 10-body charts, observe dynamic aspect vectors on our interactive wheel, and engage with Jarvis telemetry prompts.
+              Uplink with the stellar dynamics database. Enter coordinates to compile accurate 10-body charts, observe dynamic aspect vectors on our interactive wheel, and engage with Astral OS telemetry prompts.
             </p>
           </div>
 
@@ -819,7 +819,7 @@ export function AstrologyEngine({ data }: AstrologyEngineProps) {
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono text-purple-300 uppercase tracking-widest flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 animate-spin text-purple-400" />
-                  Jarvis Voice Assist
+                  AOS Voice Assist
                 </span>
                 {isListening ? (
                   <button
@@ -1310,25 +1310,25 @@ export function AstrologyEngine({ data }: AstrologyEngineProps) {
                   </AnimatePresence>
                 </div>
 
-                {/* Interactive 2-Way Chat with Jarvis OS */}
+                {/* Interactive 2-Way Chat with Astral OS */}
                 <div className="bg-black/50 xl:backdrop-blur-xl rounded-3xl border border-white/10 p-6 space-y-4 shadow-xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
                   
                   <div className="flex items-center gap-2 border-b border-white/10 pb-3 justify-between">
                     <div className="flex items-center gap-2 text-cyan-400">
                       <Cpu className="w-5 h-5 animate-pulse" />
-                      <h3 className="text-sm font-mono uppercase tracking-wider font-bold">2-Way Conversation: Seeker to Jarvis</h3>
+                      <h3 className="text-sm font-mono uppercase tracking-wider font-bold">2-Way Conversation: Seeker to Astral OS</h3>
                     </div>
                     <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest flex items-center gap-1">
-                      <Globe className="w-3" /> STARK CORE ONLINE
+                      <Globe className="w-3" /> ASTRAL CORE ONLINE
                     </span>
                   </div>
 
                   {/* Messages Stream Container */}
                   <div className="h-[200px] overflow-y-auto space-y-3.5 pr-2 scrollbar-thin scrollbar-thumb-white/10">
                     <div className="text-slate-400 text-xs italic flex gap-2 items-center bg-slate-900/30 p-2.5 rounded-xl border border-white/5 leading-snug">
-                      <Shield className="w-4 h-4 text-cyan-400 animate-pulse" />
-                      "Sir, our planetary matrix computations are loaded. Go ahead, ask me anything regarding your customized chart, tree positioning, or alpha-numeric coordinates."
+                       <Shield className="w-4 h-4 text-cyan-400 animate-pulse" />
+                      "Aspirant, our planetary matrix computations are loaded. Go ahead, ask me anything regarding your customized chart, tree positioning, or alpha-numeric coordinates."
                     </div>
 
                     {chatLog.map((chat, idx) => {
@@ -1338,7 +1338,7 @@ export function AstrologyEngine({ data }: AstrologyEngineProps) {
                           key={idx}
                           className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-1`}
                         >
-                          <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">{isUser ? 'Seeker Input' : 'Jarvis Telemetry'}</span>
+                          <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">{isUser ? 'Seeker Input' : 'OS Telemetry'}</span>
                           <div
                             className={`px-4 py-2.5 rounded-2xl max-w-[85%] text-xs leading-relaxed ${
                               isUser 
@@ -1368,7 +1368,7 @@ export function AstrologyEngine({ data }: AstrologyEngineProps) {
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') handleSendChatQuery();
                       }}
-                      placeholder="Ask Jarvis about your placements, transits, or aspects..."
+                      placeholder="Ask Astral OS about your placements, transits, or aspects..."
                       className="flex-1 bg-slate-900/80 border border-white/10 rounded-2xl px-4 py-3 text-xs focus:border-cyan-400 focus:outline-none transition-all placeholder-slate-600 shadow-inner"
                     />
                     <button

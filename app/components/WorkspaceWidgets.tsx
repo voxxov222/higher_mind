@@ -1,14 +1,145 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
   X, Pin, RefreshCw, Radio, PieChart, Layers, Moon, Compass, Activity, 
-  Volume2, Play, Sparkles, Check, Flame, Award, HeartPulse, Zap
+  Volume2, Play, Sparkles, Check, Flame, Award, HeartPulse, Zap, Search, ArrowRight, BookOpen, ScrollText
 } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   PieChart as RechartsPieChart, Pie, Cell
 } from 'recharts';
 import { soundEngine } from '../lib/soundEffects';
+import { DEITIES_DATABASE, Deity } from '../utils/deitydb';
+
+const DeityDBWidget: React.FC<{ widget: any; triggerFrequencyAudio: (hz: string, label: string) => void }> = ({ widget, triggerFrequencyAudio }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedPantheon, setSelectedPantheon] = useState('All');
+  const [selectedDeityId, setSelectedDeityId] = useState<string | null>(null);
+
+  const filteredDeities = DEITIES_DATABASE.filter(d => {
+    const matchesSearch = d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          d.domain.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          d.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesPantheon = selectedPantheon === 'All' || d.pantheon === selectedPantheon;
+    return matchesSearch && matchesPantheon;
+  });
+
+  const selectedDeity = DEITIES_DATABASE.find(d => d.id === selectedDeityId);
+
+  return (
+    <div className="space-y-3 font-mono text-zinc-300">
+      <div className="flex gap-1.5">
+        <div className="relative flex-1">
+          <Search size={11} className="absolute left-2 top-2.5 text-stone-500" />
+          <input 
+            type="text" 
+            placeholder="Search deities..."
+            value={searchTerm}
+            className="w-full bg-stone-900 border border-white/5 pl-6 pr-2 py-1.5 rounded-lg text-[9px] focus:outline-none focus:border-cyan-500/40"
+            onChange={(e) => {
+              soundEngine.click();
+              setSearchTerm(e.target.value);
+            }}
+          />
+        </div>
+        <select
+          value={selectedPantheon}
+          className="bg-stone-900 border border-white/5 text-stone-500 text-[9px] rounded-lg px-1 focus:outline-none"
+          onChange={(e) => {
+            soundEngine.click();
+            setSelectedPantheon(e.target.value);
+          }}
+        >
+          <option value="All">All</option>
+          <option value="Egyptian">Egypt</option>
+          <option value="Greek">Greece</option>
+          <option value="Norse">Norse</option>
+          <option value="Celtic">Celtic</option>
+          <option value="Hindu">Hindu</option>
+          <option value="Aztec">Aztec</option>
+        </select>
+      </div>
+
+      {selectedDeity ? (
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="p-2.5 bg-cyan-950/15 border border-cyan-500/20 rounded-xl space-y-2 max-h-48 overflow-y-auto"
+        >
+          <div className="flex justify-between items-start border-b border-white/5 pb-1">
+            <div>
+              <span className="text-[7px] text-cyan-400 font-bold uppercase tracking-wider block">{selectedDeity.pantheon} Pantheon</span>
+              <h4 className="text-xs font-black text-white">{selectedDeity.name}</h4>
+            </div>
+            <button 
+              onClick={() => {
+                soundEngine.click();
+                setSelectedDeityId(null);
+              }}
+              className="text-[6.5px] text-stone-500 hover:text-white uppercase font-bold border border-white/10 px-1 py-0.5 rounded ml-2"
+            >
+              Back
+            </button>
+          </div>
+          
+          <div className="space-y-0.5">
+            <span className="text-[6.5px] uppercase text-zinc-500 block">Domain / Realm</span>
+            <p className="text-[8.5px] text-zinc-300 font-semibold leading-snug">{selectedDeity.domain}</p>
+          </div>
+
+          <p className="text-[8.5px] text-zinc-400 leading-normal font-sans">{selectedDeity.description}</p>
+
+          <div className="grid grid-cols-2 gap-1 text-[7.5px] bg-black/40 p-2 rounded-lg border border-white/5">
+            <div>
+              <span className="text-zinc-600 uppercase block text-[6px]">Planet</span>
+              <span className="text-zinc-300 font-bold">{selectedDeity.rulingPlanet || 'Cosmic'}</span>
+            </div>
+            <div>
+              <span className="text-zinc-600 uppercase block text-[6px]">Sephirah</span>
+              <span className="text-zinc-350 truncate block">{selectedDeity.sephirah}</span>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center pt-1 border-t border-white/5 mt-1">
+            <span className="text-[8px] font-bold text-pink-400 font-mono">Hz: {selectedDeity.solfeggioHz}</span>
+            <button
+              onClick={() => triggerFrequencyAudio(`${selectedDeity.solfeggioHz} Hz`, selectedDeity.name)}
+              className="px-1.5 py-0.5 bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/25 rounded-md text-[7px] text-pink-300 flex items-center gap-0.5 transition-all uppercase font-bold"
+            >
+              <Volume2 size={9} /> Tune
+            </button>
+          </div>
+        </motion.div>
+      ) : (
+        <div className="max-h-40 overflow-y-auto space-y-1 pr-1 text-[8.5px]">
+          {filteredDeities.map(deity => (
+            <div 
+              key={deity.id}
+              onClick={() => {
+                soundEngine.select();
+                setSelectedDeityId(deity.id);
+              }}
+              className="flex justify-between items-center p-1.5 rounded-lg bg-stone-900/60 hover:bg-stone-900/95 border border-white/5 cursor-pointer hover:border-cyan-500/25 transition-all group"
+            >
+              <div>
+                <span className="text-[6px] text-stone-500 tracking-wider block uppercase">{deity.pantheon}</span>
+                <span className="text-[9.5px] font-bold text-stone-200 group-hover:text-cyan-400 transition-colors">{deity.name}</span>
+              </div>
+              <div className="text-right flex items-center gap-1.5">
+                <span className="text-[7.5px] text-zinc-500 max-w-[100px] truncate">{deity.domain}</span>
+                <ArrowRight size={8} className="text-stone-600 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all" />
+              </div>
+            </div>
+          ))}
+
+          {filteredDeities.length === 0 && (
+            <div className="text-stone-600 italic text-center py-4 text-[8px]">No matching deity indexed.</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface WorkspaceWidget {
   id: string;
@@ -99,6 +230,10 @@ export const WorkspaceWidgets: React.FC<WorkspaceWidgetsProps> = ({
           outerBorderGlow = "hover:border-emerald-500/40 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]";
           titleColor = "text-emerald-300";
           HeaderIcon = Layers;
+        } else if (widget.id.includes('deity')) {
+          outerBorderGlow = "hover:border-cyan-500/40 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]";
+          titleColor = "text-cyan-300";
+          HeaderIcon = ScrollText;
         }
 
         return (
@@ -304,6 +439,11 @@ export const WorkspaceWidgets: React.FC<WorkspaceWidgetsProps> = ({
                     <span className="text-[7px] text-fuchsia-400 block mt-2 font-mono uppercase tracking-widest font-black">[ VIBRATIONAL GNOSIS SYSTEM ]</span>
                   </div>
                 </div>
+              )}
+
+              {/* Tool 8: DeityDB Portal */}
+              {widget.id === 'deity-db' && (
+                <DeityDBWidget widget={widget} triggerFrequencyAudio={triggerFrequencyAudio} />
               )}
 
             </div>

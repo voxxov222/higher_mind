@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  X, Sparkles, LayoutGrid, Radio, PieChart, Activity, Moon, Sun, Compass, Heart, Play, Layers, ShieldCheck, Pin, Check, Trash2, Brain, Network
+  X, Sparkles, LayoutGrid, Radio, PieChart, Activity, Moon, Sun, Compass, Heart, Play, Layers, ShieldCheck, Pin, Check, Trash2, Brain, Network, ScrollText
 } from 'lucide-react';
 import { soundEngine } from '../lib/soundEffects';
 
@@ -176,6 +176,17 @@ export const WidgetGallerySidebar: React.FC<WidgetGallerySidebarProps> = ({
       iconColor: 'text-amber-400',
       glowColor: 'rgba(245,158,11,0.4)',
       defaultData: { TopTetrahedron: '99.9% C', BottomTetrahedron: '99.9% C', Alignment: 'Harmonic' }
+    },
+    {
+      id: 'deity-db',
+      type: 'widget',
+      componentName: 'DeityDB Portal',
+      displayName: 'DeityDB Portal (jebboone)',
+      description: 'Divine archetype lookup engine and Oracle matching. Explore Egyptian, Norse, Celtic and Classical deities.',
+      icon: ScrollText,
+      iconColor: 'text-cyan-400',
+      glowColor: 'rgba(34,211,238,0.4)',
+      defaultData: { query: '', selectedPantheon: 'All' }
     },
     {
       id: 'pineal-gland-tuning',

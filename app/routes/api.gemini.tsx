@@ -36,6 +36,15 @@ export async function action({ request }: ActionFunctionArgs) {
         return json(await geminiServer.generateSoulPathReport(payload.cosmicData));
       case "fetchTarotGnosis":
         return json(await geminiServer.fetchTarotGnosis(payload.cardName, payload.archetype, payload.cosmicData));
+      case "fetchTarotAgentResponse":
+        return json(await geminiServer.fetchTarotAgentResponse(
+          payload.userMessage,
+          payload.cardName,
+          payload.meaning,
+          payload.manifestationPath,
+          payload.cosmicData,
+          payload.chatHistory
+        ));
       case "fetchGroundedTransitAlerts":
         return json(await geminiServer.fetchGroundedTransitAlerts(payload.cosmicData));
       case "parseVoiceBirthDetails":

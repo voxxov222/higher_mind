@@ -51,7 +51,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
         recognitionRef.current.onstart = () => {
           setIsListening(true);
           soundEngine.click();
-          addLog("🎙️ Voice receiver online. Jarvis is listening...");
+          addLog("🎙️ Voice receiver online. Astral OS is listening...");
         };
 
         recognitionRef.current.onerror = (e: any) => {
@@ -222,7 +222,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
 
     // Call dynamic Jarvis response
     setLoading(true);
-    addLog("💬 Routing custom neural consciousness vectors through Jarvis core...");
+    addLog("💬 Routing custom neural consciousness vectors through Astral Core...");
     try {
       const response = await fetch(`/api/gemini`, {
         method: 'POST',
@@ -230,7 +230,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
         body: JSON.stringify({
           action: 'fetchCosmicChatResponse',
           payload: {
-            userMessage: `Formulate a short 2-sentence response as JARVIS (Iron Man's assistant). Be witty, futuristic, technologically sophisticated. The user says: "${queryText}"`,
+            userMessage: `Formulate a short 2-sentence response as a sophisticated, futuristic, celestial operating system assistant named Astral OS. Be witty, wise, helpful, and concise. The user says: "${queryText}"`,
             chatHistory: [],
             cosmicData: data
           }
@@ -239,14 +239,14 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
 
       if (response.ok) {
         const payload = await response.json();
-        const textResponse = payload.text || "Sir, the telemetry uplink is yielding some minor celestial static.";
-        addLog(`Jarvis Response: ${textResponse}`);
+        const textResponse = payload.text || "Aspirant, the telemetry uplink is yielding some minor celestial static.";
+        addLog(`Astral OS: ${textResponse}`);
         jarvisSpeak(textResponse);
       } else {
         throw new Error("Bad action call");
       }
     } catch (err: any) {
-      addLog(`❌ Failed to retrieve neural Jarvis response: ${err.message}`);
+      addLog(`❌ Failed to retrieve neural Astral OS response: ${err.message}`);
       soundEngine.error();
     } finally {
       setLoading(false);
@@ -332,7 +332,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
             <div className="space-y-1">
               <span className="text-[10px] uppercase tracking-[0.25em] font-mono text-cyan-400 font-bold flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-                Jarvis AOS Prime-1
+                Astral OS Prime-1
               </span>
               <h2 className="text-xl font-light text-white font-mono tracking-wider flex items-center gap-2 group-hover:text-cyan-300 transition-colors">
                 QUANTUM HUD CORE
@@ -340,7 +340,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
             </div>
             <div className="text-right font-mono text-[9px] text-zinc-500 space-y-1">
               <div>UPLINK: ACTIVE C182-X</div>
-              <div>OS: STARK.AUTONOMOUS.v2</div>
+              <div>OS: ASTRAL.AUTONOMOUS.v2</div>
               <div>STREAK: {Date.now() % 1000} ms</div>
             </div>
           </div>
@@ -434,7 +434,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
             <input 
               type="text"
               className="flex-1 bg-transparent border-none outline-none font-mono text-sm text-white placeholder-zinc-600 py-1"
-              placeholder="Ask Jarvis to inspect planetary telemetry..."
+              placeholder="Ask Astral OS to inspect planetary telemetry..."
               value={userInput}
               onChange={e => setUserInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleJarvisQuery(userInput)}
@@ -523,7 +523,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
                       &ldquo;{transits.overallStatus}&rdquo;
                     </p>
                     <div className="mt-2 text-[8px] font-mono text-zinc-500 text-right uppercase">
-                      Telemetry Anchor: JARVIS Core-1
+                      Telemetry Anchor: Astral Core-1
                     </div>
                   </div>
 
@@ -662,7 +662,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
                            animate={{ opacity: 1, y: 0 }}
                            className={`p-3 rounded-xl border text-[10px] font-mono ${isTestSuccess ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}
                         >
-                           {isTestSuccess ? "PROTOCOL ACKNOWLEDGED: Handshake successful. External systems are now in sync with Jarvis AOS." : "FAILURE: Handshake rejected. Ensure the destination endpoint is public and accepting Stark encrypted packets."}
+                           {isTestSuccess ? "PROTOCOL ACKNOWLEDGED: Handshake successful. External systems are now in sync with Astral OS." : "FAILURE: Handshake rejected. Ensure the destination endpoint is public and accepting encrypted packages."}
                         </motion.div>
                      )}
                   </div>
@@ -674,7 +674,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
                         <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
                         Security Protocol: Level 7
                      </h5>
-                     <p className="text-[10px] text-zinc-500 leading-relaxed font-mono">All outgoing packets are wrapped in 2048-bit Stark RSA encryption. Payload includes full birth-chart telemetry and real-time transit differentials.</p>
+                     <p className="text-[10px] text-zinc-500 leading-relaxed font-mono">All outgoing packets are wrapped in 2048-bit RSA encryption. Payload includes full birth-chart telemetry and real-time transit differentials.</p>
                   </div>
 
                   <div className="group border border-zinc-800 rounded-2xl p-4 hover:border-zinc-700 transition-all bg-zinc-900/20">

@@ -15,6 +15,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { UserProfileConfig } from '../types';
 import { Stars, Navigation, Globe, Loader2 } from 'lucide-react';
 import { useHigherMind } from '../components/HigherMindProvider';
+import { GlobalHUD } from '../components/GlobalHUD';
 
 const LoadingView = ({ color = "purple" }: { color?: string }) => (
   <div className="w-full h-full flex flex-col items-center justify-center bg-black gap-4">
@@ -169,82 +170,84 @@ export default function Index() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden font-sans" style={{ background: activeTheme?.lighting?.backgroundStyle || 'black' }}>
-      <AnimatePresence mode="wait">
-        {viewMode === 'blueprint' ? (
-          <motion.div
-            key="blueprint"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="w-full h-full"
-          >
-            <Suspense fallback={<LoadingView color="purple" />}>
-              <CosmicScene 
-                data={data} 
-                activeTab={activeTab} 
-                setActiveTab={setActiveTab as any} 
-                onPlanetClick={handleSpeak} 
-                isPresentationActive={isPresentationMode}
-                mode={getThinkingMode(activeTab)}
-                vortexMode={vortexMode}
-              />
-              <Dashboard 
-                data={data} 
-                onGenerate={handleGenerate} 
-                isLoading={state === AppState.GENERATING || isAuthLoading} 
-                activeTab={activeTab} 
-                setActiveTab={setActiveTab} 
-                user={user} 
-                onSignIn={handleSignIn} 
-                onSignOut={handleSignOut} 
-                loadedInputs={loadedInputs} 
-                profileConfig={profileConfig || undefined} 
-                onUpdateProfile={handleUpdateProfile} 
-                onPresentationRequest={() => { setIsPresentationMode(true); setTimeout(() => setIsPresentationMode(false), 15000); }} 
-                externalDeepDive={externalDeepDive} 
-                onClearExternalDeepDive={() => setExternalDeepDive(null)} 
-                vortexMode={vortexMode}
-                setVortexMode={setVortexMode}
-              />
-            </Suspense>
-          </motion.div>
-        ) : viewMode === 'universe' ? (
-          <motion.div
-            key="universe"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="w-full h-full"
-          >
-            <Suspense fallback={<LoadingView color="emerald" />}>
-              <CosmicProfile initialConfig={profileConfig || undefined} />
-            </Suspense>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="solar"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="w-full h-full"
-          >
-            <Suspense fallback={<LoadingView color="amber" />}>
-              <SolarSystemScene data={data} onPlanetClick={handleSpeak} />
-            </Suspense>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <GlobalHUD setActiveTab={setActiveTab}>
+        <AnimatePresence mode="wait">
+          {viewMode === 'blueprint' ? (
+            <motion.div
+              key="blueprint"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full h-full"
+            >
+              <Suspense fallback={<LoadingView color="purple" />}>
+                <CosmicScene 
+                  data={data} 
+                  activeTab={activeTab} 
+                  setActiveTab={setActiveTab as any} 
+                  onPlanetClick={handleSpeak} 
+                  isPresentationActive={isPresentationMode}
+                  mode={getThinkingMode(activeTab)}
+                  vortexMode={vortexMode}
+                />
+                <Dashboard 
+                  data={data} 
+                  onGenerate={handleGenerate} 
+                  isLoading={state === AppState.GENERATING || isAuthLoading} 
+                  activeTab={activeTab} 
+                  setActiveTab={setActiveTab} 
+                  user={user} 
+                  onSignIn={handleSignIn} 
+                  onSignOut={handleSignOut} 
+                  loadedInputs={loadedInputs} 
+                  profileConfig={profileConfig || undefined} 
+                  onUpdateProfile={handleUpdateProfile} 
+                  onPresentationRequest={() => { setIsPresentationMode(true); setTimeout(() => setIsPresentationMode(false), 15000); }} 
+                  externalDeepDive={externalDeepDive} 
+                  onClearExternalDeepDive={() => setExternalDeepDive(null)} 
+                  vortexMode={vortexMode}
+                  setVortexMode={setVortexMode}
+                />
+              </Suspense>
+            </motion.div>
+          ) : viewMode === 'universe' ? (
+            <motion.div
+              key="universe"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full h-full"
+            >
+              <Suspense fallback={<LoadingView color="emerald" />}>
+                <CosmicProfile initialConfig={profileConfig || undefined} />
+              </Suspense>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="solar"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full h-full"
+            >
+              <Suspense fallback={<LoadingView color="amber" />}>
+                 <SolarSystemScene data={data} onPlanetClick={handleSpeak} />
+              </Suspense>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex gap-4">
-        <button onClick={() => setViewMode('blueprint')} className={`bg-black/40 backdrop-blur-xl border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 transition-all ${viewMode === 'blueprint' ? 'text-purple-400' : 'text-white/60 font-bold uppercase tracking-widest'}`}><Navigation className="w-4 h-4" /><span>Blueprint</span></button>
-        <button onClick={() => setViewMode('solar')} className={`bg-black/40 backdrop-blur-xl border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 transition-all ${viewMode === 'solar' ? 'text-amber-400' : 'text-white/60 font-bold uppercase tracking-widest'}`}><Stars className="w-4 h-4" /><span>Solar</span></button>
-        <button onClick={() => setViewMode('universe')} className={`bg-black/40 backdrop-blur-xl border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 transition-all ${viewMode === 'universe' ? 'text-emerald-400' : 'text-white/60 font-bold uppercase tracking-widest'}`}><Globe className="w-4 h-4" /><span>Identity</span></button>
-      </div>
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex gap-4">
+          <button onClick={() => setViewMode('blueprint')} className={`bg-black/40 backdrop-blur-xl border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 transition-all ${viewMode === 'blueprint' ? 'text-purple-400' : 'text-white/60 font-bold uppercase tracking-widest'}`}><Navigation className="w-4 h-4" /><span>Blueprint</span></button>
+          <button onClick={() => setViewMode('solar')} className={`bg-black/40 backdrop-blur-xl border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 transition-all ${viewMode === 'solar' ? 'text-amber-400' : 'text-white/60 font-bold uppercase tracking-widest'}`}><Stars className="w-4 h-4" /><span>Solar</span></button>
+          <button onClick={() => setViewMode('universe')} className={`bg-black/40 backdrop-blur-xl border border-white/20 px-6 py-3 rounded-full flex items-center gap-3 transition-all ${viewMode === 'universe' ? 'text-emerald-400' : 'text-white/60 font-bold uppercase tracking-widest'}`}><Globe className="w-4 h-4" /><span>Identity</span></button>
+        </div>
 
-      {error && <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-red-900 text-white px-6 py-3 rounded-2xl">{error}<button onClick={() => setError(null)} className="ml-4">✕</button></div>}
-      
-      <CosmicChat cosmicData={data} />
-      <CosmicAudio />
+        {error && <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-red-900 text-white px-6 py-3 rounded-2xl">{error}<button onClick={() => setError(null)} className="ml-4">✕</button></div>}
+        
+        <CosmicChat cosmicData={data} />
+        <CosmicAudio />
+      </GlobalHUD>
     </div>
   );
 }

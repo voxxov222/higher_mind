@@ -986,7 +986,7 @@ export const DailyCosmicPulse: React.FC = () => {
             <div className="p-6 bg-gradient-to-b from-stone-900/30 to-black/60 border border-white/10 rounded-[2.25rem] space-y-4 shadow-xl">
               <div className="bg-black/40 border border-white/5 p-4 rounded-xl text-xs font-mono font-light leading-relaxed text-indigo-200/90 relative overflow-hidden min-h-[6.5rem]">
                 <div className="text-[8px] text-stone-600 uppercase tracking-widest font-bold mb-1 border-b border-white/5 pb-1 flex items-center justify-between">
-                  <span>JARVIS Output</span>
+                  <span>Astral OS Output</span>
                   {isJarvisThinking && <span className="animate-pulse text-indigo-400">Processing Synaptic matrix...</span>}
                 </div>
                 <span>"{jarvisResponseText}"</span>
@@ -1012,7 +1012,7 @@ export const DailyCosmicPulse: React.FC = () => {
                   type="text" 
                   value={jarvisQuery}
                   onChange={(e) => setJarvisQuery(e.target.value)}
-                  placeholder="Ask JARVIS (e.g., Analyze my natal aspects...)"
+                  placeholder="Ask Astral OS (e.g., Analyze my natal aspects...)"
                   className="flex-grow py-3 px-4 bg-black/60 font-mono text-[11px] rounded-xl border border-white/5 placeholder-stone-600 text-white focus:outline-none focus:border-indigo-500/40"
                   disabled={isJarvisThinking}
                 />

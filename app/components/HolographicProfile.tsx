@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { 
   Sparkles, User as UserIcon, Settings, Hash, Map, Upload, Image as ImageIcon, 
   FileText, X, RefreshCw, Database, CloudLightning, ShieldAlert, Sparkle, Loader2,
-  Cpu, Moon, Hexagon, Zap, Heart, Activity, Pin, Radio, ExternalLink
+  Cpu, Moon, Hexagon, Zap, Heart, Activity, Pin, Radio, ExternalLink, ScrollText
 } from 'lucide-react';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart as RechartsPieChart, Pie, Cell, Tooltip as RechartsTooltip } from 'recharts';
 import { calculateAllCiphers } from '../utils/gematria';
@@ -543,6 +543,19 @@ const ProfileWidgetRenderer = ({ widget, onRemove }: { widget: any, onRemove: (i
             <div className="p-4 flex flex-col items-center gap-2">
                 <Activity size={24} className="text-indigo-300" />
                 <div className="text-xs font-bold text-white uppercase tracking-widest">{data.transit}</div>
+            </div>
+        );
+    } else if (componentName === 'DeityDB Portal') {
+        renderContent = (
+            <div className="p-4 flex flex-col items-center justify-center text-center space-y-3">
+                <ScrollText size={32} className="text-cyan-400 animate-pulse" />
+                <div>
+                    <div className="text-sm font-bold text-white uppercase tracking-widest">DeityDB Portal</div>
+                    <div className="text-[9px] text-zinc-500 font-mono uppercase mt-1">Status: Active Uplink</div>
+                </div>
+                <p className="text-[10px] text-zinc-400 font-sans leading-relaxed">
+                    Connecting your material frequency to deep archetypal models of Egyptian, Classical, and Celtic gods via the jebboone datasets.
+                </p>
             </div>
         );
     } else {

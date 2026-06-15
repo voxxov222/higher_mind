@@ -54,6 +54,17 @@ export const fetchCosmicChatResponse = async (
   return apiProxy("fetchCosmicChatResponse", { userMessage, chatHistory, cosmicData });
 };
 
+export const fetchTarotAgentResponse = async (
+  userMessage: string,
+  cardName: string,
+  meaning: string,
+  manifestationPath: string,
+  cosmicData: CosmicData | null,
+  chatHistory: { role: 'user' | 'model'; parts: { text: string }[] }[] = []
+): Promise<{ text: string; consciousnessPacket?: any }> => {
+  return apiProxy("fetchTarotAgentResponse", { userMessage, cardName, meaning, manifestationPath, cosmicData, chatHistory });
+};
+
 export const fetchTimelineDepth = async (event: any, cosmicData: CosmicData) => {
   return apiProxy("fetchTimelineDepth", { event, cosmicData });
 };

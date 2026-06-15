@@ -9,6 +9,8 @@
   --color-hud-gold: #f59e0b;
   --color-hud-green: #10b981;
   --color-hud-rose: #f43f5e;
+
+  --animate-spin-slow: spin 8s linear infinite;
 }
 @import "@xyflow/react/dist/style.css";
 

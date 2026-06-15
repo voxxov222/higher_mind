@@ -14,7 +14,8 @@ import {
   Eye,
   Tornado,
   Waves,
-  Square
+  Square,
+  History
 } from 'lucide-react';
 import { CosmicData } from '../types';
 
@@ -68,10 +69,10 @@ export const TarotHologram: React.FC<TarotHologramProps> = ({ cosmicData }) => {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    // Find a "Jarvis" like voice (usually a deep male voice if available)
+    // Find a premium voice (usually David, Daniel, or another high-tech voice if available)
     const voices = window.speechSynthesis.getVoices();
-    const jarvisVoice = voices.find(v => v.name.includes('Daniel') || v.name.includes('David') || v.name.includes('Male')) || voices[0];
-    if (jarvisVoice) utterance.voice = jarvisVoice;
+    const premiumVoice = voices.find(v => v.name.includes('Daniel') || v.name.includes('David') || v.name.includes('Male')) || voices[0];
+    if (premiumVoice) utterance.voice = premiumVoice;
     utterance.pitch = 0.85;
     utterance.rate = 0.95;
     utterance.onstart = () => setIsSpeaking(true);
@@ -248,7 +249,7 @@ export const TarotHologram: React.FC<TarotHologramProps> = ({ cosmicData }) => {
                         className="flex items-center justify-center gap-2 text-[10px] text-rose-500 hover:text-rose-400 font-mono uppercase tracking-[0.2em] transition-colors bg-rose-500/10 py-2 rounded-xl border border-rose-500/20"
                       >
                         <Square size={12} fill="currentColor" />
-                        Silence Jarvis
+                        Silence Voice
                       </button>
                     )}
                   </div>

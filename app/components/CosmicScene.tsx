@@ -13,7 +13,7 @@ import { AstralMind, ThinkingMode } from './AstralMind';
 import { VortexScene } from './VortexSequencingSection';
 import { CelestialSolarCore, PlanetaryGravityNetwork } from './CelestialSolarCore';
 import { Gematria3DVisualizer } from './Gematria3DVisualizer';
-import { X, Minus, Lock, Unlock, Play, Square, Palette, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity as InfinityIcon, Magnet, Shuffle, Waves, Terminal, AlertTriangle } from 'lucide-react';
+import { X, Minus, Lock, Unlock, Play, Square, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity as InfinityIcon, Magnet, Shuffle, Waves, Terminal, AlertTriangle } from 'lucide-react';
 import { TerminalOverlay } from './profile/TerminalOverlay';
 import { ProjectedObject3D } from './ProjectedObject3D';
 
@@ -138,9 +138,6 @@ interface CosmicSceneProps {
   mode?: ThinkingMode;
   vortexMode?: 'material' | 'spirit' | 'sync';
 }
-
-// --- GLOBAL OBJECT REGISTRY (VOLATILE) ---
-const objectStates: Record<string, InteractionState> = {};
 
 /**
  * HolographicMenu Component

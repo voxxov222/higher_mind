@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Moon, Star, Heart, Flower2, Zap, Activity } from 'lucide-react';
+import { Sparkles, Moon, Heart, Flower2, Zap, Activity } from 'lucide-react';
 import { ProjectableWidget } from './ProjectableWidget';
 
 interface OracleMessage {

@@ -2,11 +2,11 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  User, Settings, Share2, Plus, Layout as LayoutIcon, 
-  Palette, Grid, Globe, Twitter, Instagram, 
-  Github, Music, Video, Star, Zap, Info, MessageSquare, 
-  Moon, Sun, Compass, Sparkles, Edit3, X, Save,
-  Users, Users2, MessageCircle
+  User, Share2, Plus, Layout as LayoutIcon, 
+  Grid, Globe, Twitter, Instagram, 
+  Zap, Info, 
+  Moon, Sun, Compass, Sparkles, Edit3, X,
+  MessageCircle
 } from 'lucide-react';
 import StarField from './StarField';
 import HolographicPanel from './HolographicPanel';
@@ -20,53 +20,61 @@ import ProfileEditor from './ProfileEditor';
 import clsx from 'clsx';
 
 const CosmicProfile = ({ initialConfig }: { initialConfig?: UserProfileConfig }) => {
-  const { config, isEditing, setConfig, setEditing, updateWidget, addWidget, removeWidget, updateTheme, saveProfile } = useProfileStore();
-  const [activeLayout, setActiveLayout] = useState<'bento' | 'free' | 'column'>('bento');
+  const { config, isEditing, setConfig, setEditing, updateTheme, saveProfile } = useProfileStore();
   const [currentView, setCurrentView] = useState<'profile' | 'community' | 'messages'>('profile');
   const [showEditor, setShowEditor] = useState(false);
   const [activeChat, setActiveChat] = useState<{ id: string; profile: UserProfileConfig } | null>(null);
 
   useEffect(() => {
-    if (initialConfig) {
-      setConfig(initialConfig);
-    } else if (!config) {
-      // Default initial state for demo
-      const defaultConfig: UserProfileConfig = {
-        userId: 'demo-user',
-        username: 'cosmic_traveler',
-        displayName: 'Aria Starlight',
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200&h=200',
-        avatarType: 'image',
-        bannerUrl: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&q=80&w=1200&h=400',
-        theme: {
-          primaryColor: '#a855f7',
-          secondaryColor: '#3b82f6',
-          glowIntensity: 1,
-          transparency: 0.8,
-          borderStyle: 'glass',
-          fontFamily: 'Inter',
-          backgroundEffect: 'stars'
-        },
-        layout: {
-          widgets: [
-            { id: '1', type: 'bio', title: 'Cosmic Bio', layout: { x: 0, y: 0, w: 2, h: 1 } },
-            { id: '2', type: 'astrology', title: 'Soul Blueprint', layout: { x: 2, y: 0, w: 1, h: 2 } },
-            { id: '3', type: 'energy', title: 'Energy State', layout: { x: 0, y: 1, w: 1, h: 1 } },
-            { id: '4', type: 'socials', title: 'Connections', layout: { x: 1, y: 1, w: 1, h: 1 } },
-          ],
-          mainLayoutType: 'bento',
-          snapToGrid: true
-        },
-        socialLinks: [
-          { platform: 'Twitter', url: 'https://twitter.com', icon: 'Twitter' },
-          { platform: 'Instagram', url: 'https://instagram.com', icon: 'Instagram' },
+    const defaultConfig: UserProfileConfig = {
+      userId: 'demo-user',
+      username: 'cosmic_traveler',
+      displayName: 'Aria Starlight',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200&h=200',
+      avatarType: 'image',
+      bannerUrl: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&q=80&w=1200&h=400',
+      theme: {
+        primaryColor: '#a855f7',
+        secondaryColor: '#3b82f6',
+        glowIntensity: 1,
+        transparency: 0.8,
+        borderStyle: 'glass',
+        fontFamily: 'Inter',
+        backgroundEffect: 'stars'
+      },
+      layout: {
+        widgets: [
+          { id: '1', type: 'bio', title: 'Cosmic Bio', layout: { x: 0, y: 0, w: 2, h: 1 } },
+          { id: '2', type: 'astrology', title: 'Soul Blueprint', layout: { x: 2, y: 0, w: 1, h: 2 } },
+          { id: '3', type: 'energy', title: 'Energy State', layout: { x: 0, y: 1, w: 1, h: 1 } },
+          { id: '4', type: 'socials', title: 'Connections', layout: { x: 1, y: 1, w: 1, h: 1 } },
         ],
-        bio: {
-          text: "Celestial architect mapping the intersection of ancient wisdom and futuristic tech. Always dreaming in stardust.",
-          moodStatus: "Exploring the 5th Dimension"
-        },
-        researchVault: []
+        mainLayoutType: 'bento',
+        snapToGrid: true
+      },
+      socialLinks: [
+        { platform: 'Twitter', url: 'https://twitter.com', icon: 'Twitter' },
+        { platform: 'Instagram', url: 'https://instagram.com', icon: 'Instagram' },
+      ],
+      bio: {
+        text: "Celestial architect mapping the intersection of ancient wisdom and futuristic tech. Always dreaming in stardust.",
+        moodStatus: "Exploring the 5th Dimension"
+      },
+      researchVault: []
+    };
+
+    if (initialConfig) {
+      // Deep merge or at least ensure layout exists
+      const merged = {
+        ...defaultConfig,
+        ...initialConfig,
+        theme: { ...defaultConfig.theme, ...initialConfig.theme },
+        layout: initialConfig.layout || defaultConfig.layout,
+        bio: { ...defaultConfig.bio, ...initialConfig.bio },
+        socialLinks: initialConfig.socialLinks || defaultConfig.socialLinks
       };
+      setConfig(merged);
+    } else if (!config) {
       setConfig(defaultConfig);
     }
   }, [initialConfig, setConfig, config]);
@@ -180,9 +188,13 @@ const CosmicProfile = ({ initialConfig }: { initialConfig?: UserProfileConfig })
 
               {/* Dynamic Grid System */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                 {config.layout.widgets.map((widget) => (
+                 {config.layout && config.layout.widgets ? config.layout.widgets.map((widget) => (
                    <WidgetRenderer key={widget.id} widget={widget} config={config} />
-                 ))}
+                 )) : (
+                   <div className="col-span-full p-12 text-center text-white/20 font-mono text-xs uppercase tracking-widest border border-white/5 rounded-[40px] bg-white/[0.02]">
+                     No spectral modules initialized
+                   </div>
+                 )}
                  
                  {isEditing && (
                    <motion.button

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Float, Trail, MeshDistortMaterial, MeshTransmissionMaterial, Sparkles } from '@react-three/drei';
@@ -24,7 +24,7 @@ const FREQUENCIES: FrequencyType[] = [
   { hz: 963, name: 'Crown Synthesis', color: '#c084fc', outcome: 'Connects to Light and Spirit, merges intention with universal consciousness.', blockage: 'Crown Chakra: Spiritual disconnection, isolation.' },
 ];
 
-const ResonanceCoreLine = ({ isActive, frequencyStr, freqObj }: { isActive: boolean, frequencyStr: string, freqObj: FrequencyType }) => {
+const ResonanceCoreLine = ({ isActive, freqObj }: { isActive: boolean, freqObj: FrequencyType }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
@@ -147,7 +147,6 @@ export const VibrationalTuningSection = () => {
           
           <ResonanceCoreLine 
             isActive={isBroadcasting} 
-            frequencyStr={`${selectedFreq.hz}Hz`} 
             freqObj={selectedFreq} 
           />
           

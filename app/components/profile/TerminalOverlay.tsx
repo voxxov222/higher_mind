@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Terminal as TerminalIcon, X, Mic, Send, Code, Brain, Map, PieChart, Play, Loader2, Sparkles, Database } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Terminal as TerminalIcon, X, Mic, Send, Code, Brain, Map, PieChart, Loader2 } from 'lucide-react';
 import { streamGeminiChat } from '../../services/geminiService';
 import Markdown from 'react-markdown';
 import clsx from 'clsx';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 
 export const TerminalOverlay = ({ onClose, initialCommand }: { onClose: () => void, initialCommand?: string }) => {
     const [messages, setMessages] = useState<{role: 'user' | 'assistant', content: string | React.ReactNode, type?: 'text' | 'chart' | 'mindmap' | 'code'}[]>([]);
@@ -113,12 +113,12 @@ export const TerminalOverlay = ({ onClose, initialCommand }: { onClose: () => vo
                     });
                     setMessages(prev => [...prev, { role: 'assistant', content: chatResponse, type: 'text' }]);
                 }
-            } catch (e) {
+            } catch {
                 // Parser failed, treat as normal chat
                 setMessages(prev => [...prev, { role: 'assistant', content: responseText, type: 'text' }]);
             }
 
-        } catch (error) {
+        } catch {
             setMessages(prev => [...prev, { role: 'assistant', content: "ERROR: Neural core connection failed.", type: 'text' }]);
         } finally {
             setIsTyping(false);

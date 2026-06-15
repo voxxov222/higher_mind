@@ -5,17 +5,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import * as THREE from 'three';
 import { 
   Sparkles as SparklesIcon, 
-  RotateCw, 
-  Moon, 
-  Sun, 
   Flame, 
   Droplet, 
-  Wind, 
   Trees, 
   Zap,
-  ChevronRight,
-  Info,
-  Calendar,
   Compass
 } from 'lucide-react';
 
@@ -168,33 +161,6 @@ const CHINESE_ZODIAC_DATA: ChineseZodiacData[] = [
 ];
 
 // --- 3D Visualization Components ---
-
-const ElementalNode = ({ position, color, isActive, onClick, label }: any) => {
-  return (
-    <group position={position} onClick={onClick}>
-      <Float speed={isActive ? 4 : 1.5} rotationIntensity={0.5} floatIntensity={0.5}>
-        <mesh>
-          <sphereGeometry args={[0.4, 32, 32]} />
-          <meshStandardMaterial 
-            color={color} 
-            emissive={color} 
-            emissiveIntensity={isActive ? 2 : 0.2} 
-            roughness={0.1}
-            metalness={0.8}
-          />
-        </mesh>
-        <Text
-          position={[0, -0.7, 0]}
-          fontSize={0.2}
-          color={isActive ? "#ffffff" : "#94a3b8"}
-          anchorX="center"
-        >
-          {label}
-        </Text>
-      </Float>
-    </group>
-  );
-};
 
 const ChineseZodiacWheel = ({ activeAnimalIdx, setActiveAnimalIdx }: any) => {
   const groupRef = useRef<THREE.Group>(null);

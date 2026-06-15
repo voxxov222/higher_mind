@@ -1,5 +1,5 @@
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy } from 'firebase/firestore';
-import { db, auth } from '../firebase';
+import { db } from '../firebase';
 
 export interface SwarmFinding {
   id: string;

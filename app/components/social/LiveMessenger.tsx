@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { 
-  Send, User, Search, MessageSquare, Sparkles, 
-  Moon, Sun, Compass, Zap, X, Info, Globe, 
+  Send, Sparkles, 
+  Compass, X, Globe, 
   ArrowLeft, Heart
 } from 'lucide-react';
 import { Message, UserProfileConfig } from '../../types';
-import { sendMessage, subscribeToMessages, markAsRead } from '../../services/socialService';
+import { sendMessage, subscribeToMessages } from '../../services/socialService';
 import { useProfileStore } from '../../services/profileService';
-import HolographicPanel from '../profile/HolographicPanel';
 import clsx from 'clsx';
 
 interface LiveMessengerProps {
@@ -121,7 +120,7 @@ const LiveMessenger = ({ recipientId, recipientProfile, onClose }: LiveMessenger
                <p className="text-[10px] mt-2 italic">Be the bridge between your worlds.</p>
             </div>
           ) : (
-            messages.map((msg, i) => {
+            messages.map((msg) => {
               const isOwn = msg.senderId === config?.userId;
               return (
                 <motion.div

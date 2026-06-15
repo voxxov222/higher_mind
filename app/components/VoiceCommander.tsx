@@ -13,7 +13,6 @@ export default function VoiceCommander({ setActiveTab, openHoloDrawer }: VoiceCo
   const [statusText, setStatusText] = useState('Standby');
   const [isOpen, setIsOpen] = useState(false);
   const recognitionRef = useRef<any>(null);
-  const visualizerContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -57,7 +56,7 @@ export default function VoiceCommander({ setActiveTab, openHoloDrawer }: VoiceCo
     if (!isListening && transcript) {
       processCommand(transcript);
     }
-  }, [isListening]);
+  }, [isListening, transcript]);
 
   const speakResponse = (text: string) => {
     if ('speechSynthesis' in window) {

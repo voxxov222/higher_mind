@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Video, VideoOff, Mic, MicOff, UserPlus, Users, Share2, X, Check,
-  Radio, Tv, Sparkles, Moon, Activity, Flame, ShieldAlert, ExternalLink,
-  Lock, Unlock, Wifi, WifiOff, Volume2, Heart, Award, Send, Loader2
+  Radio, Tv, Moon, Activity, ExternalLink,
+  Lock, Wifi, Heart, Send, Loader2
 } from 'lucide-react';
 import { soundEngine } from '../lib/soundEffects';
 
@@ -37,7 +37,6 @@ interface JoinRequest {
 export const TikTokLivePortal: React.FC<TikTokLivePortalProps> = ({
   isOpen,
   onClose,
-  user,
   holographicConfig = {},
   onSaveConfig
 }) => {
@@ -51,7 +50,6 @@ export const TikTokLivePortal: React.FC<TikTokLivePortalProps> = ({
 
   // Streaming status state
   const [isLive, setIsLive] = useState<boolean>(false);
-  const [isConnected, setIsConnected] = useState<boolean>(true);
   const [muted, setMuted] = useState<boolean>(false);
   const [cameraOff, setCameraOff] = useState<boolean>(false);
   
@@ -61,7 +59,6 @@ export const TikTokLivePortal: React.FC<TikTokLivePortalProps> = ({
 
   // Audience & interactive simulation state
   const [viewerCount, setViewerCount] = useState<number>(0);
-  const [likeCount, setLikeCount] = useState<number>(1040);
   const [floatingHearts, setFloatingHearts] = useState<Array<{ id: number; x: number; color: string }>>([]);
   const [liveComments, setLiveComments] = useState<Array<{ id: string; user: string; text: string; time: string }>>([
     { id: '1', user: 'Stark_Core', text: 'J.A.R.V.I.S. Live Bridge online.', time: '02:39' },
@@ -237,7 +234,6 @@ export const TikTokLivePortal: React.FC<TikTokLivePortalProps> = ({
   // Trigger floating interactive hearts
   const triggerLike = () => {
     soundEngine.mechClick();
-    setLikeCount(prev => prev + 1);
     
     const newHeart = {
       id: Date.now(),

@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
-  X, Pin, RefreshCw, Radio, PieChart, Layers, Moon, Compass, Activity, 
-  Volume2, Play, Sparkles, Check, Flame, Award, HeartPulse, Zap, Search, ArrowRight, BookOpen, ScrollText
+  X, Pin, Radio, PieChart, Layers, Moon, Compass, Activity, 
+  Volume2, Zap, Search, ArrowRight, ScrollText
 } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   PieChart as RechartsPieChart, Pie, Cell
 } from 'recharts';
 import { soundEngine } from '../lib/soundEffects';
-import { DEITIES_DATABASE, Deity } from '../utils/deitydb';
+import { DEITIES_DATABASE } from '../utils/deitydb';
 
-const DeityDBWidget: React.FC<{ widget: any; triggerFrequencyAudio: (hz: string, label: string) => void }> = ({ widget, triggerFrequencyAudio }) => {
+const DeityDBWidget: React.FC<{ triggerFrequencyAudio: (hz: string, label: string) => void }> = ({ triggerFrequencyAudio }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPantheon, setSelectedPantheon] = useState('All');
   const [selectedDeityId, setSelectedDeityId] = useState<string | null>(null);
@@ -339,7 +339,7 @@ export const WorkspaceWidgets: React.FC<WorkspaceWidgetsProps> = ({
                   </div>
 
                   <div className="grid grid-cols-4 gap-1 text-[8px] uppercase tracking-wider text-stone-400 font-semibold border-t border-white/5 pt-2">
-                    {widget.data.map((entry: any, index: number) => (
+                    {widget.data.map((entry: any) => (
                       <div key={entry.name} className="text-center">
                         <span className="block font-bold" style={{ color: ELEMENT_COLORS[entry.name as keyof typeof ELEMENT_COLORS] }}>
                           {entry.value}%
@@ -443,7 +443,7 @@ export const WorkspaceWidgets: React.FC<WorkspaceWidgetsProps> = ({
 
               {/* Tool 8: DeityDB Portal */}
               {widget.id === 'deity-db' && (
-                <DeityDBWidget widget={widget} triggerFrequencyAudio={triggerFrequencyAudio} />
+                <DeityDBWidget triggerFrequencyAudio={triggerFrequencyAudio} />
               )}
 
             </div>

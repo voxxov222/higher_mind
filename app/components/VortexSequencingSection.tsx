@@ -210,7 +210,7 @@ export const MaterialCircuit = ({ active }: { active: boolean }) => {
   const sequence = [1, 2, 4, 8, 7, 5];
   
   const points = useMemo(() => {
-    return sequence.map((num, i) => {
+    return sequence.map((num) => {
       const angle = (num / 9) * Math.PI * 2;
       // Hyperbolic funnel positioning: further nodes are higher and wider
       const radius = 4 + (num / 9) * 4;

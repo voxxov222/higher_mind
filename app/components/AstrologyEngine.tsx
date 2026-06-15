@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Compass, ArrowRight, ArrowLeft, Volume2, VolumeX, Sparkles, AlertCircle, 
   MapPin, Clock, Calendar, User, RefreshCw, Cpu, Activity, Star, Info, MessageSquare, Send, Shield,
-  Orbit, Layers, Zap, X, Radio, Terminal, Sliders, Globe, Table, Gauge, Activity as Waves,
-  Mic, MicOff
+  Orbit, Layers, X, Radio, Terminal, Sliders, Globe, Table,
+  Mic
 } from 'lucide-react';
 import { fetchAstrologyNatalDetails, fetchCosmicChatResponse, parseVoiceBirthDetails } from '../services/geminiService';
 import { soundEngine } from '../lib/soundEffects';

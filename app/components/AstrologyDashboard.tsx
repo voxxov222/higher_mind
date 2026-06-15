@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Moon, Sun, Star, Compass, Activity, Globe, Sparkles, Navigation, Layers, Flame, Droplets, Wind, Hexagon, Info } from 'lucide-react';
 import { CosmicData } from '../types';
 import { ProjectableWidget } from './ProjectableWidget';
-import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+
 import { AstrologyReferenceModal } from './AstrologyReferenceModal';
 
 interface AstrologyDashboardProps {

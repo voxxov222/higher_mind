@@ -85,7 +85,7 @@ export const CosmicAudio: React.FC = () => {
     const freqIndex = Math.floor(coherence * (SOLFEGGIO.length - 1));
     const baseFreq = SOLFEGGIO[freqIndex];
     
-    filtersRef.current.forEach((filter, i) => {
+    filtersRef.current.forEach((filter) => {
       // Neural coherence affects the filter frequency and resonance
       // Higher coherence = clearer, more resonant sound
       const sweep = Math.sin(now * 0.2) * 500;

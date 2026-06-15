@@ -56,6 +56,11 @@ import { getAstralProfile } from '../services/socialService';
 const BirthChartGuide = React.lazy(() => import('./BirthChartGuide'));
 const SandboxSection = React.lazy(() => import('./sandbox/SandboxSection').then(m => ({ default: m.SandboxSection })));
 const QuantumFluid = React.lazy(() => import('./QuantumFluid').then(m => ({ default: m.QuantumFluid })));
+const FifthDimensionLayer = React.lazy(() => import('./FifthDimensionLayer').then(m => ({ default: m.FifthDimensionLayer })));
+const SubconsciousProgramming = React.lazy(() => import('./SubconsciousProgramming').then(m => ({ default: m.SubconsciousProgramming })));
+const ConsciousnessAtlasWidget = React.lazy(() => import('./ConsciousnessAtlasWidget').then(m => ({ default: m.ConsciousnessAtlasWidget })));
+const ShvayambhuWidget = React.lazy(() => import('./ShvayambhuWidget').then(m => ({ default: m.ShvayambhuWidget })));
+
 import VoiceCommander from './VoiceCommander';
 import { HigherMindSettings } from './HigherMindSettings';
 const TetragrammatonHUD = React.lazy(() => import('./TetragrammatonHUD').then(m => ({ default: m.TetragrammatonHUD })));
@@ -76,7 +81,7 @@ const FlowerOfLifeSection = React.lazy(() => import('./FlowerOfLifeSection').the
 const VibrationalTuningSection = React.lazy(() => import('./VibrationalTuningSection').then(m => ({ default: m.VibrationalTuningSection })));
 const DestinyMatrix = React.lazy(() => import('./DestinyMatrix').then(m => ({ default: m.DestinyMatrix })));
 const CelestialBlueprintSection = React.lazy(() => import('./CelestialBlueprintSection').then(m => ({ default: m.CelestialBlueprintSection })));
-const JarvisHUD = React.lazy(() => import('./JarvisHUD').then(m => ({ default: m.JarvisHUD })));
+const AstralHUD = React.lazy(() => import('./AstralHUD').then(m => ({ default: m.AstralHUD })));
 const AstrologyEngine = React.lazy(() => import('./AstrologyEngine').then(m => ({ default: m.AstrologyEngine })));
 const NineDimensionsSection = React.lazy(() => import('./NineDimensionsSection').then(m => ({ default: m.NineDimensionsSection })));
 const SoulFrequencyRadar = React.lazy(() => import('./SoulFrequencyRadar').then(m => ({ default: m.SoulFrequencyRadar })));
@@ -96,8 +101,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine' | '9d_creation';
-  setActiveTab: (tab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine' | '9d_creation') => void;
+  activeTab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming';
+  setActiveTab: (tab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -2414,7 +2419,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'vibrational_tuning'} tabId="vibrational_tuning" onClick={() => setActiveTab('vibrational_tuning')} icon={<Radio className="w-4 h-4 text-fuchsia-400 animate-pulse"/>}>Vibrational Tuning</Tab>
               <Tab active={activeTab === 'alignment'} tabId="alignment" onClick={() => setActiveTab('alignment')} icon={<Radio className="w-4 h-4 text-teal-400 animate-pulse"/>}>Alignment</Tab>
               <Tab active={activeTab === 'ai_agents'} tabId="ai_agents" onClick={() => setActiveTab('ai_agents')} icon={<Cpu className="w-4 h-4 text-emerald-400"/>}>AI Agents Swarm</Tab>
-              <Tab active={activeTab === 'jarvis_os'} tabId="jarvis_os" onClick={() => { soundEngine.click(); setActiveTab('jarvis_os'); }} icon={<Cpu className="w-4 h-4 text-cyan-400 animate-pulse"/>}>Astral OS</Tab>
+              <Tab active={activeTab === 'astral_os'} tabId="astral_os" onClick={() => { soundEngine.click(); setActiveTab('astral_os'); }} icon={<Cpu className="w-4 h-4 text-cyan-400 animate-pulse"/>}>Astral OS</Tab>
               <Tab active={activeTab === 'astrology_engine'} tabId="astrology_engine" onClick={() => { soundEngine.click(); setActiveTab('astrology_engine'); }} icon={<Compass className="w-4 h-4 text-indigo-400 animate-pulse"/>}>Astrology Engine</Tab>
               <Tab active={activeTab === 'astral_canvas'} tabId="astral_canvas" onClick={() => setActiveTab('astral_canvas')} icon={<Workflow className="w-4 h-4 text-purple-400 animate-pulse"/>}>AI Agent Canvas</Tab>
               <Tab active={activeTab === 'gematria_calc'} tabId="gematria_calc" onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
@@ -2442,6 +2447,10 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'astral_dream_log'} tabId="astral_dream_log" onClick={() => setActiveTab('astral_dream_log')} icon={<Moon className="w-4 h-4 text-violet-400" />}>Dream Log</Tab>
               <Tab active={activeTab === 'karma_engine'} tabId="karma_engine" onClick={() => setActiveTab('karma_engine')} icon={<Zap className="w-4 h-4 text-amber-500" />}>Karma Engine</Tab>
               <Tab active={activeTab === 'karma_ledger'} tabId="karma_ledger" onClick={() => setActiveTab('karma_ledger')} icon={<History className="w-4 h-4 text-emerald-400" />}>Karma Ledger</Tab>
+              <Tab active={activeTab === 'fifth_dimension'} tabId="fifth_dimension" onClick={() => setActiveTab('fifth_dimension')} icon={<Brain className="w-4 h-4 text-fuchsia-400 animate-pulse" />}>5D Subconscious Overwrite</Tab>
+              <Tab active={activeTab === 'subconscious_programming'} tabId="subconscious_programming" onClick={() => setActiveTab('subconscious_programming')} icon={<Brain className="w-4 h-4 text-sky-400 animate-pulse" />}>Subconscious Rewrite</Tab>
+              <Tab active={activeTab === 'consciousness_atlas'} tabId="consciousness_atlas" onClick={() => setActiveTab('consciousness_atlas')} icon={<Network className="w-4 h-4 text-cyan-400 animate-pulse" />}>Consciousness Atlas</Tab>
+              <Tab active={activeTab === 'shvayambhu'} tabId="shvayambhu" onClick={() => setActiveTab('shvayambhu')} icon={<Brain className="w-4 h-4 text-emerald-400 animate-pulse" />}>Shvayambhu AI OS</Tab>
               <Tab active={activeTab === '9d_creation'} tabId="9d_creation" onClick={() => setActiveTab('9d_creation')} icon={<Layers className="w-4 h-4 text-amber-500 animate-pulse" />}>9D Conscious Creation</Tab>
             </div>
             
@@ -3699,14 +3708,48 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <AstrologyEngine data={data} />
                   </motion.div>
                 )}
+                {activeTab === 'fifth_dimension' && (
+                  <motion.div key="fifth_dimension" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
+                    <FifthDimensionLayer cosmicData={data} />
+                  </motion.div>
+                )}
+                {activeTab === 'consciousness_atlas' && (
+                  <motion.div
+                    key="consciousness_atlas"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.4 }}
+                    className="h-full"
+                  >
+                    <ConsciousnessAtlasWidget />
+                  </motion.div>
+                )}
+                {activeTab === 'shvayambhu' && (
+                  <motion.div
+                    key="shvayambhu"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.4 }}
+                    className="h-full"
+                  >
+                    <ShvayambhuWidget />
+                  </motion.div>
+                )}
+                {activeTab === 'subconscious_programming' && (
+                  <motion.div key="subconscious_programming" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
+                    <SubconsciousProgramming cosmicData={data} />
+                  </motion.div>
+                )}
                 {activeTab === '9d_creation' && (
                   <motion.div key="9d_creation" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
                     <NineDimensionsSection />
                   </motion.div>
                 )}
-                {activeTab === 'jarvis_os' && (
-                  <motion.div key="jarvis_os" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full">
-                    <JarvisHUD data={data} setActiveTab={setActiveTab} />
+                {activeTab === 'astral_os' && (
+                  <motion.div key="astral_os" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full">
+                    <AstralHUD data={data} setActiveTab={setActiveTab} />
                   </motion.div>
                 )}
                 {activeTab === 'the_big_picture' && (

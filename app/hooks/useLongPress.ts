@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 export const useLongPress = (
   callback: (e: React.MouseEvent | React.TouchEvent) => void,

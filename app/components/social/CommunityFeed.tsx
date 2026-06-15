@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Heart, MessageCircle, Share2, Sparkles, Send, 
-  Search, Filter, Plus, BookOpen, Zap, Moon, Sun, 
-  Layout, Compass, Star, X, Info, Globe, Video
+  Heart, MessageCircle, Share2, Sparkles, Plus, 
+  Globe, Video, X
 } from 'lucide-react';
-import { CommunityPost, UserProfileConfig } from '../../types';
+import { CommunityPost } from '../../types';
 import { createPost, subscribeToPosts, likePost } from '../../services/socialService';
 import { useProfileStore } from '../../services/profileService';
 import HolographicPanel from '../profile/HolographicPanel';

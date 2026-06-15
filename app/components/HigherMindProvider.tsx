@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { Thought, Feeling, Experience, SynapticCluster, ConsciousnessPacket, UserProfileConfig, AstralTheme } from '../types';
+import { Thought, Feeling, Experience, SynapticCluster, ConsciousnessPacket, UserProfileConfig, AstralTheme, CosmicData } from '../types';
 import { ASTRAL_THEMES } from '../utils/themes';
 
 export interface CosmicContextConfig {

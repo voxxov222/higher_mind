@@ -88,7 +88,7 @@ export const ProjectableWidget: React.FC<ProjectableWidgetProps> = ({ id, type, 
     }, [menuPos]);
 
     const getAnimationProps = () => {
-        let props: any = { scale: size === "Small" ? 0.75 : size === "Large" ? 1.5 : size === "Quantum" ? 2.0 : 1 };
+        const props: any = { scale: size === "Small" ? 0.75 : size === "Large" ? 1.5 : size === "Quantum" ? 2.0 : 1 };
         switch(selectedAnimation) {
             case "360 Spin": props.rotate = [0, 360]; props.transition = { repeat: Infinity, duration: 4, ease: "linear" }; break;
             case "Orbit Around Core": props.x = [0, 50, 0, -50, 0]; props.y = [0, -50, 0, 50, 0]; props.transition = { repeat: Infinity, duration: 6, ease: "linear" }; break;

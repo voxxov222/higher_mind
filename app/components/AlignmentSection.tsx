@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Float, Line, Sphere, MeshDistortMaterial, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
-import { Play, Square, Activity, Shield, ShieldAlert, Waves, Radio, Music, Zap, Settings2 } from 'lucide-react';
+import { Play, Square, Activity, Shield, ShieldAlert, Radio, Settings2 } from 'lucide-react';
 import { CosmicData } from '../types';
 
 interface AlignmentSectionProps {

@@ -13,7 +13,7 @@ import {
   limit,
   increment
 } from 'firebase/firestore';
-import { db, auth, handleFirestoreError, OperationType } from '../firebase';
+import { db, handleFirestoreError, OperationType } from '../firebase';
 import { CommunityPost, Message, UserProfileConfig, WallPost } from '../types';
 
 // --- PROFILE SERVICES ---

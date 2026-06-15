@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageSquare, Send, X, Minimize2, Maximize2, Sparkles, Brain, Network, Zap, User, BookOpen, Archive, GitBranch, Activity, Compass, Globe } from 'lucide-react';
+import { MessageSquare, Send, X, Minimize2, Maximize2, Sparkles, Brain, Network, Zap, BookOpen, Archive, GitBranch } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart, Pie, Cell } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart, Pie, Cell } from 'recharts';
 import { CosmicData, ConsciousnessPacket } from '../types';
 import { fetchCosmicChatResponse } from '../services/geminiService';
 import { useHigherMind } from './HigherMindProvider';

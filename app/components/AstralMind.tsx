@@ -3,7 +3,7 @@ import { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Sphere, Text } from '@react-three/drei';
-import { Thought, Feeling, Experience } from '../types';
+import { Feeling } from '../types';
 
 export type ThinkingMode = 'idle' | 'planetary' | 'emotional' | 'numerology' | 'transit' | 'insight' | 'transcendent' | 'synergetic' | 'kabbalistic' | 'analyzing';
 

@@ -4,7 +4,6 @@ import { SplashScreen } from '../components/SplashScreen';
 const SolarSystemScene = lazy(() => import('../components/SolarSystemScene').then(m => ({ default: m.SolarSystemScene })));
 const Dashboard = lazy(() => import('../components/Dashboard').then(m => ({ default: m.Dashboard })));
 const CosmicProfile = lazy(() => import('../components/profile/CosmicProfile'));
-import { Canvas } from '@react-three/fiber';
 import { CosmicChat } from '../components/CosmicChat';
 import { fetchCosmicReading } from '../services/geminiService';
 import { CosmicAudio } from '../components/CosmicAudio';
@@ -39,7 +38,7 @@ export default function Index() {
   }, []);
   const [state, setState] = useState<AppState>(AppState.IDLE);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine'>('torus');
+  const [activeTab, setActiveTab] = useState<'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'karma_ledger' | 'jarvis_os' | 'astrology_engine' | 'fifth_dimension' | 'subconscious_programming'>('torus');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -73,8 +72,8 @@ export default function Index() {
             setProfileConfig(profile.profileConfig);
             setState(AppState.READY);
           }
-        } catch (e) {
-          console.error("Error loading profile", e);
+        } catch {
+          console.error("Error loading profile");
         }
       } else {
         setData(null);
@@ -86,8 +85,8 @@ export default function Index() {
     return () => unsubscribe();
   }, []);
 
-  const handleSignIn = async () => { try { await signIn(); } catch (e) { setError("Failed to sign in."); } };
-  const handleSignOut = async () => { try { await signOut(); } catch (e) { setError("Failed to sign out."); } };
+  const handleSignIn = async () => { try { await signIn(); } catch { setError("Failed to sign in."); } };
+  const handleSignOut = async () => { try { await signOut(); } catch { setError("Failed to sign out."); } };
 
   const handleGenerate = async (name: string, date: string, time: string, location: string) => {
     setState(AppState.GENERATING);
@@ -97,7 +96,7 @@ export default function Index() {
       setData(result);
       setState(AppState.READY);
       if (user) await saveCosmicProfile(user.uid, result, { name, date, time, location });
-    } catch (err) {
+    } catch {
       setError("Failed to align cosmic energies.");
       setState(AppState.ERROR);
     }

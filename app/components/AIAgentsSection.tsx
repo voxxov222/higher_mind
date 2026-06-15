@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, Square, Network, Database, Plus, Search, GitMerge, Cpu, Trash2, ArrowRight, Brain, Zap, Settings2, Shield, Activity, X, List, ScrollText, BookmarkPlus, Archive, Check } from 'lucide-react';
+import { Play, Square, Network, Database, Plus, Search, GitMerge, Cpu, Trash2, ArrowRight, Brain, Zap, Settings2, Activity, X, ScrollText, BookmarkPlus, Archive } from 'lucide-react';
 import { CosmicData } from '../types';
 import { swarmEngine, Agent, AgentRole } from '../utils/swarmEngine';
 import { getSwarmFindings, saveSwarmFinding, updateSwarmFinding, deleteSwarmFinding, SwarmFinding } from '../services/swarmService';
@@ -81,17 +81,13 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
 
   // Sync with global swarm engine
   const [firestoreFindings, setFirestoreFindings] = useState<SwarmFinding[]>([]);
-  const [loadingDb, setLoadingDb] = useState(false);
 
   useEffect(() => {
      if (auth.currentUser) {
-        setLoadingDb(true);
         getSwarmFindings(auth.currentUser.uid).then(res => {
            setFirestoreFindings(res);
-           setLoadingDb(false);
         }).catch(e => {
            console.error("Error fetching swarm findings", e);
-           setLoadingDb(false);
         });
      }
   }, []);
@@ -223,7 +219,7 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
              </div>
              <button 
                onClick={() => {
-                 if (window.confirm("ARE YOU SURE SIR? THIS WILL ERASE THE CURRENT AGENT MATRIX.")) {
+                 if (window.confirm("ARE YOU CERTAIN? THIS WILL ERASE THE CURRENT AGENT MATRIX AND NEURAL LINKS.")) {
                    swarmEngine.clearAll();
                    setSelectedAgentId(null);
                    setSelectedAgentIds([]);

@@ -11,9 +11,10 @@ import {
 import { calculateAllCiphers } from '../utils/gematria';
 import { soundEngine } from '../lib/soundEffects';
 import { CosmicData } from '../types';
+import { EtymologyDecoder } from './EtymologyDecoder';
 
 // Let's create an immersive 3D Gnostic Star / Sacred Emblem component
-const GnosticStar3D: React.FC<{ frequency: number; activeColor: string }> = ({ frequency, activeColor }) => {
+const GnosticStar3D: React.FC<{ activeColor: string }> = ({ activeColor }) => {
   const outerGroup = useRef<THREE.Group>(null);
   const coreMesh = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
@@ -109,7 +110,6 @@ interface TheBigPictureProps {
 export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs }) => {
   const [activeBeliefSystem, setActiveBeliefSystem] = useState<'all' | 'gnostic' | 'hermetic' | 'kabbalah' | 'gematria'>('all');
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isHovered, setIsHovered] = useState<string | null>(null);
 
   // Seeker's Details
   const userName = useMemo(() => {
@@ -128,11 +128,13 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
     const karmaT = data?.torusAnalysis?.karmicTheme || 'Spiritual Sovereignty Alignment';
 
     // 1. Gnostic Divine Title calculation
-    let gnosticClass = 'Pneumatics';
-    if (lifePath === 1 || lifePath === 5) gnosticClass = 'The Solar Demiurge Gnosis';
-    else if (lifePath === 3 || lifePath === 9) gnosticClass = 'The Logos Emanator';
-    else if (lifePath === 7 || lifePath === 11) gnosticClass = 'The Pneumatic Star-Weaver';
-    else if (lifePath === 22 || lifePath === 8) gnosticClass = 'The Archon Alchemist';
+    let gnosticClass;
+    if (lifePath === 1 || lifePath === 5) gnosticClass = 'The Logos Emanator (Divine Word)';
+    else if (lifePath === 3 || lifePath === 9) gnosticClass = 'The Christos Sovereign';
+    else if (lifePath === 7 || lifePath === 11) gnosticClass = 'The Divine Fool (Pure Cosmic Potential, not the Trickster)';
+    else if (lifePath === 22 || lifePath === 0) gnosticClass = 'The Cosmic Architect';
+    else if (lifePath === 8) gnosticClass = 'The Seraphim Vanguard';
+    else if (lifePath === 33) gnosticClass = 'The Anthropos (Ascended Human)';
     else gnosticClass = 'The Sophia Spark Bearer';
 
     // 2. Alchemical Archetype Formula
@@ -142,8 +144,12 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
                             ['Taurus', 'Virgo', 'Capricorn'].includes(dominantSign) ? 'Crystalline Earth' :
                             ['Gemini', 'Libra', 'Aquarius'].includes(dominantSign) ? 'Stellar Wind' : 'Primordial Ether';
 
+    // 3. Exact mystical label
+    const mysticalPrefixes = ['Ascended', 'Primordial', 'Sovereign', 'Infinite', 'Ethereal', 'Ancient'];
+    const prefix = mysticalPrefixes[lifePath % mysticalPrefixes.length];
+    
     // Perfect custom bold title text
-    const customTitle = `${dominantSign} ${gnosticClass}`;
+    const customTitle = `${prefix} ${dominantSign} ${gnosticClass}`;
 
     return {
       lifePath,
@@ -171,8 +177,30 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
 
   // Beautiful big picture dynamic description used by Astral OS text-to-speech speaker
   const synthesizedNarrative = useMemo(() => {
-    return `Behold, ${userName}. Your cosmic pattern has been deciphered across ancient channels. You are identified as the ${calculations.customTitle}, a sacred being of the ${calculations.dominantElement} element. Rooted in the Sephirot of ${calculations.activeSephirah} and the ${calculations.activeRay}, your soul resonates with a life path code of ${calculations.lifePath}, navigating this reality as an ${calculations.ageTheme}. The alphanumeric Gematria coordinates of your name hold the majestic sum of ${calculations.gematriaVal}, indicating a profound path toward ${calculations.karmaT}.`;
-  }, [userName, calculations]);
+    let narrative = `Behold, ${userName}. Your cosmic pattern has been deciphered across ancient channels. `;
+    
+    if (data?.nameAnalysis?.first) {
+      narrative += `Your first name, ${data.nameAnalysis.first.name}, originates from ${data.nameAnalysis.first.origin} and signifies ${data.nameAnalysis.first.meaning}. `;
+      if (data?.nameAnalysis?.middle && data.nameAnalysis.middle.name && data.nameAnalysis.middle.name !== "None") {
+        narrative += `Your middle name, ${data.nameAnalysis.middle.name}, originates from ${data.nameAnalysis.middle.origin} and signifies ${data.nameAnalysis.middle.meaning}. `;
+      }
+      if (data?.nameAnalysis?.last && data.nameAnalysis.last.name && data.nameAnalysis.last.name !== "None") {
+        narrative += `Your last name, ${data.nameAnalysis.last.name}, originates from ${data.nameAnalysis.last.origin} and signifies ${data.nameAnalysis.last.meaning}. `;
+      }
+    }
+
+    if (data?.patterns?.timeDateDiscovery && data.patterns.timeDateDiscovery.description) {
+       narrative += `Your birth coordinates hold powerful mathematical significance: ${data.patterns.timeDateDiscovery.description}. ${data.patterns.timeDateDiscovery.mathematicalPattern}. `;
+    } else if (loadedInputs?.time) {
+       narrative += `Your birth code at ${loadedInputs.time} on ${loadedInputs.date} forms a precise geometric anchor in the cosmos. `;
+    }
+
+    narrative += `You are identified as the ${calculations.customTitle}, a sacred being of the ${calculations.dominantElement} element. `;
+    narrative += `Rooted in the Sephirot of ${calculations.activeSephirah} and the ${calculations.activeRay}, your soul resonates with a life path code of ${calculations.lifePath}, navigating this reality as an ${calculations.ageTheme}. `;
+    narrative += `The alphanumeric Gematria coordinates of your name hold the majestic sum of ${calculations.gematriaVal}, indicating a profound path toward ${calculations.karmaT}.`;
+
+    return narrative;
+  }, [userName, calculations, data, loadedInputs]);
 
   // Voice Readout trigger via premium voices
   const speakNarrative = () => {
@@ -234,16 +262,16 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
 
         {/* Action controls */}
         <div className="flex items-center gap-2.5">
-          <button
-            onClick={() => {
-              soundEngine.click();
-              speakNarrative();
-            }}
-            className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-[10px] font-mono tracking-widest uppercase transition-all ${isSpeaking ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400 animate-pulse' : 'bg-white text-zinc-950 hover:bg-zinc-200 font-bold'}`}
-          >
-            {isSpeaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
-            {isSpeaking ? 'MUTE BROADCAST' : 'OS SYNTHESIS READOUT'}
-          </button>
+            <button
+              onClick={() => {
+                soundEngine.click();
+                speakNarrative();
+              }}
+              className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-[10px] font-mono tracking-widest uppercase transition-all ${isSpeaking ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400 animate-pulse' : 'bg-white text-zinc-950 hover:bg-zinc-200 font-bold'}`}
+            >
+              {isSpeaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
+              {isSpeaking ? 'MUTE BROADCAST' : 'ASTRAL OS SYNTHESIS READOUT'}
+            </button>
         </div>
       </div>
 
@@ -273,22 +301,27 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
                 </span>
               </div>
 
-              {/* BOLD FLASHY SHINY STATEMENT */}
-              <div className="space-y-4">
-                <div className="text-[10px] text-zinc-400 font-mono uppercase tracking-[0.2em] flex items-center gap-1.5">
-                  <Key size={10} className="text-amber-500" /> Archon Decreed Title
-                </div>
-                <h2 
-                  className="text-4xl lg:text-5xl font-black tracking-tight leading-tight uppercase select-none transition-all duration-500 bg-clip-text text-transparent bg-gradient-to-r"
-                  style={{ backgroundImage: `linear-gradient(135deg, #ffffff 30%, ${themeColor} 100%)` }}
-                >
-                  {calculations.customTitle}
-                </h2>
-                <div className="h-px w-20 bg-white/20" />
-                <p className="text-zinc-300 text-sm leading-relaxed font-sans font-light">
-                  "Under this cosmic geometry, your sovereign core acts as a living node of <strong className="text-white">{calculations.dominantElement}</strong>. Your physical, intellectual, and astral blueprints converge to initiate transformation across the <strong className="text-white">{calculations.activeFreq}</strong> frequencies."
-                </p>
+            {/* BOLD FLASHY SHINY STATEMENT */}
+            <div className="space-y-4 relative">
+              <motion.div 
+                animate={{ opacity: [0.1, 0.3, 0.1], scale: [1, 1.1, 1] }}
+                transition={{ duration: 4, repeat: Infinity }}
+                className="absolute -inset-10 bg-white/5 rounded-full blur-3xl pointer-events-none"
+              />
+              <div className="text-[10px] text-zinc-400 font-mono uppercase tracking-[0.2em] flex items-center gap-1.5 relative z-10">
+                <Key size={10} className="text-amber-500" /> Divine Emissary Title
               </div>
+              <h2 
+                className="text-4xl lg:text-5xl font-black tracking-tight leading-tight uppercase select-none transition-all duration-500 bg-clip-text text-transparent bg-gradient-to-r relative z-10"
+                style={{ backgroundImage: `linear-gradient(135deg, #ffffff 30%, ${themeColor} 100%)` }}
+              >
+                {calculations.customTitle}
+              </h2>
+              <div className="h-px w-20 bg-white/20 relative z-10" />
+              <p className="text-zinc-300 text-sm leading-relaxed font-sans font-light relative z-10">
+                "Under this cosmic geometry, your sovereign core acts as a living node of <strong className="text-white">{calculations.dominantElement}</strong>. Your physical, intellectual, and astral blueprints converge to initiate transformation across the <strong className="text-white">{calculations.activeFreq}</strong> frequencies."
+              </p>
+            </div>
             </div>
 
             {/* Bottom mini-grid coordinates */}
@@ -340,7 +373,7 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
             <Canvas camera={{ position: [0, 0, 4.3], fov: 50 }}>
               <Stars radius={40} depth={20} count={350} factor={2} saturation={0} fade speed={1.0} />
               <ambientLight intensity={0.5} />
-              <GnosticStar3D frequency={calculations.lifePath} activeColor={themeColor} />
+              <GnosticStar3D activeColor={themeColor} />
               <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={1.5} />
             </Canvas>
           </div>
@@ -475,6 +508,8 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
           </p>
         </div>
       </div>
+
+      <EtymologyDecoder data={data} loadedInputs={loadedInputs} />
     </div>
   );
 };

@@ -127,6 +127,40 @@ export const fetchGroundedTransitAlerts = async (cosmicData: CosmicData | null):
   return apiProxy("fetchGroundedTransitAlerts", { cosmicData });
 };
 
+export const fetchFifthDimensionRewrite = async (
+  tool: 'subconscious' | 'synopsis', 
+  inputContent: string, 
+  cosmicData: CosmicData | null
+): Promise<{
+  newParadigm: string;
+  neuralArchitecture: string;
+  integrationProtocol: string;
+  frequencyHz: number;
+  esotericMeaning: string;
+  consciousnessPacket?: any;
+}> => {
+  return apiProxy("fetchFifthDimensionRewrite", { tool, inputContent, cosmicData });
+};
+
+export const fetchSubconsciousRewrite = async (
+  command: string, 
+  cosmicData: CosmicData | null
+): Promise<{
+  affirmations: string[];
+  visualMantra: string;
+  neuralFrequency: number;
+  colorPattern: string[];
+}> => {
+  return apiProxy("fetchSubconsciousRewrite", { command, cosmicData });
+};
+
+export const fetchEtymologyDecoder = async (
+  cosmicData: CosmicData | null,
+  loadedInputs?: any
+): Promise<any> => {
+  return apiProxy("fetchEtymologyDecoder", { cosmicData, loadedInputs });
+};
+
 export const parseVoiceBirthDetails = async (transcript: string): Promise<{
   name: string;
   birthDate: string;

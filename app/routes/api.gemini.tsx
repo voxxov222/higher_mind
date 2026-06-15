@@ -47,6 +47,12 @@ export async function action({ request }: ActionFunctionArgs) {
         ));
       case "fetchGroundedTransitAlerts":
         return json(await geminiServer.fetchGroundedTransitAlerts(payload.cosmicData));
+      case "fetchFifthDimensionRewrite":
+        return json(await geminiServer.fetchFifthDimensionRewrite(payload.tool, payload.inputContent, payload.cosmicData));
+      case "fetchEtymologyDecoder":
+        return json(await geminiServer.fetchEtymologyDecoder(payload.cosmicData, payload.loadedInputs));
+      case "fetchSubconsciousRewrite":
+        return json(await geminiServer.fetchSubconsciousRewrite(payload.command, payload.cosmicData));
       case "parseVoiceBirthDetails":
         return json(await geminiServer.parseVoiceBirthDetails(payload.transcript));
       default:

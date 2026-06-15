@@ -247,20 +247,28 @@ const InteractiveGlyph: React.FC<{ symbol: string; color: string; position: [num
   );
 };
 
-const EnergyCore: React.FC<{ color: string, geometry: string, aura: string }> = ({ color, geometry, aura }) => {
+const EnergyCore: React.FC<{ color: string, geometry: string, aura: string, filter: string }> = ({ color, geometry, aura, filter }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.getElapsedTime() * 0.3;
-      meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.4;
+      const speedMult = filter === 'neural' ? 3 : 1;
+      meshRef.current.rotation.x = state.clock.getElapsedTime() * 0.3 * speedMult;
+      meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.4 * speedMult;
     }
     if (ringRef.current) {
       ringRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.5) * Math.PI * 0.2;
       ringRef.current.rotation.y += 0.01;
     }
   });
+
+  const distortValue = useMemo(() => {
+    if (filter === 'neural') return 0.8;
+    return geometry === 'sphere' ? 0.4 : 0.1;
+  }, [filter, geometry]);
+
+  const finalColor = filter === 'monochrome' ? '#888888' : color;
 
   return (
     <group>
@@ -272,14 +280,14 @@ const EnergyCore: React.FC<{ color: string, geometry: string, aura: string }> = 
         {geometry === 'box' && <boxGeometry args={[2, 2, 2]} />}
         
         <MeshDistortMaterial
-          color={color}
+          color={finalColor}
           envMapIntensity={1}
           clearcoat={1}
           clearcoatRoughness={0.1}
           metalness={0.8}
           roughness={0.2}
-          distort={geometry === 'sphere' ? 0.4 : 0.1}
-          speed={2}
+          distort={distortValue}
+          speed={filter === 'neural' ? 5 : 2}
           transparent
           opacity={0.8}
           wireframe={geometry !== 'sphere' && aura === 'glitch'}
@@ -614,6 +622,10 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
   const [tiktokLiveActive, setTiktokLiveActive] = useState(true);
   const [isTikTokOpen, setIsTikTokOpen] = useState(false);
   
+  // Customization State
+  const [activeFilter, setActiveFilter] = useState<'none' | 'neural' | 'monochrome' | 'scanline'>('none');
+  const [activeTheme, setActiveTheme] = useState<'default' | 'cosmic' | 'ethereal' | 'monarchy'>('default');
+
   // New State variables for requested features
   const [showConstellations, setShowConstellations] = useState(false);
   const [orbitalSpeed, setOrbitalSpeed] = useState(1);
@@ -731,6 +743,8 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
             if (hc.showMoons !== undefined) setShowMoons(hc.showMoons);
             if (hc.tiktokHandle !== undefined) setTiktokHandle(hc.tiktokHandle);
             if (hc.tiktokLiveActive !== undefined) setTiktokLiveActive(hc.tiktokLiveActive);
+            if (hc.activeFilter !== undefined) setActiveFilter(hc.activeFilter);
+            if (hc.activeTheme !== undefined) setActiveTheme(hc.activeTheme);
             if (hc.uploadedFiles !== undefined) {
               // Convert saved relative info back to visual files state (with local placeholder object URLs)
               setUploadedFiles(hc.uploadedFiles.map((uf: any) => ({
@@ -796,6 +810,8 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
         showMoons,
         tiktokHandle,
         tiktokLiveActive,
+        activeFilter,
+        activeTheme,
         uploadedFiles: uploadedFiles.map(f => ({
           name: f.name,
           type: f.type,
@@ -825,7 +841,7 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
       
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance("Stark profile integrated. Cloud decryption deck is secured.");
+        const utterance = new SpeechSynthesisUtterance("Astral profile integrated. Cloud decryption deck is secured.");
         utterance.rate = 1.1;
         window.speechSynthesis.speak(utterance);
       }
@@ -838,28 +854,45 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
   
   
 
+  // Compute dynamic colors based on theme
+  const themeColors = useMemo(() => {
+    if (activeTheme === 'cosmic') return { primary: '#6366f1', secondary: '#1e1b4b', bg: 'from-indigo-950' };
+    if (activeTheme === 'ethereal') return { primary: '#22d3ee', secondary: '#0f172a', bg: 'from-cyan-950' };
+    if (activeTheme === 'monarchy') return { primary: '#fbbf24', secondary: '#451a03', bg: 'from-amber-950' };
+    return { primary: selectedZodiac.color, secondary: '#18181b', bg: 'from-indigo-900/10' };
+  }, [activeTheme, selectedZodiac.color]);
+
+  const primaryColor = activeFilter === 'monochrome' ? '#ffffff' : themeColors.primary;
+
   return (
     <div className="flex flex-col h-full bg-zinc-950 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden font-sans">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/10 via-zinc-950 to-zinc-950 pointer-events-none" />
+      <div className={`absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] ${themeColors.bg} via-zinc-950 to-zinc-950 pointer-events-none`} />
       
+      {/* Scanline Filter Overlay */}
+      {activeFilter === 'scanline' && (
+        <div className="absolute inset-0 z-[5] pointer-events-none overflow-hidden opacity-20">
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] animate-pulse" />
+        </div>
+      )}
+
       {/* 3D Canvas */}
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 5]} intensity={1} />
-          <pointLight position={[-10, -10, -10]} intensity={0.5} color="#4f46e5" />
+          <pointLight position={[-10, -10, -10]} intensity={0.5} color={primaryColor} />
           
-          <Stars radius={20} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
+          <Stars radius={20} depth={50} count={activeFilter === 'neural' ? 5000 : 2000} factor={activeFilter === 'neural' ? 8 : 4} saturation={0} fade speed={activeFilter === 'neural' ? 5 : 1} />
           
-          <ZodiacConstellations visible={showConstellations} color={selectedZodiac.color} />
+          <ZodiacConstellations visible={showConstellations} color={primaryColor} />
 
           {/* Core Energy */}
-          <EnergyCore color={selectedZodiac.color} geometry={selectedGeometry.id} aura={selectedAura.id} />
+          <EnergyCore color={primaryColor} geometry={selectedGeometry.id} aura={selectedAura.id} filter={activeFilter} />
           
           {/* Zodiac Glyph */}
           <InteractiveGlyph 
             symbol={selectedZodiac.symbol} 
-            color={selectedZodiac.color} 
+            color={primaryColor} 
             position={[-2.5, 0, 0]} 
             scale={1.5} 
           />
@@ -867,17 +900,17 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
           {/* Planet Glyph with mechanics */}
           <OrbitalPlanet 
             symbol={selectedPlanet.symbol} 
-            color={selectedPlanet.color} 
+            color={activeFilter === 'monochrome' ? '#cccccc' : selectedPlanet.color} 
             distance={3.5}
             speed={orbitalSpeed}
             showPath={showOrbitalPath}
             showMoons={showMoons}
           />
 
-          <GematriaOrbiters text={gematriaText} color={selectedZodiac.color} />
-          <FrequencyWaveGraph history={gematriaHistory} color={selectedZodiac.color} />
+          <GematriaOrbiters text={gematriaText} color={primaryColor} />
+          <FrequencyWaveGraph history={gematriaHistory} color={primaryColor} />
 
-          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
+          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={activeFilter === 'neural' ? 2 : 0.5} />
         </Canvas>
       </div>
 
@@ -973,7 +1006,7 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
             </div>
         </div>
 
-        {/* Stark J.A.R.V.I.S. Cloud Sync & Astrological Handshake Panel */}
+        {/* Astral Mind Cloud Sync & Astrological Handshake Panel */}
         <div className="absolute top-[490px] left-8 w-72 pointer-events-auto">
             <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden group">
                 {/* Glowing decorative tech lines */}
@@ -995,7 +1028,7 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
                             <div className="flex items-center gap-2 font-semibold mb-1">
                                 <ShieldAlert size={14} className="text-amber-400" /> SECURITY LOCK ACTIVE
                             </div>
-                            Authenticate with your J.A.R.V.I.S. Core to serialize and save your coordinates permanently.
+                            Authenticate with your Higher Mind Core to serialize and save your coordinates permanently.
                         </div>
                         <button
                             onClick={onSignIn}
@@ -1090,7 +1123,7 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
             </div>
         </div>
 
-        {/* Stark TikTok Broadcast HUD Panel */}
+        {/* Astral TikTok Broadcast HUD Panel */}
         <div className="absolute top-36 left-[340px] w-72 pointer-events-auto hidden xl:block">
             <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-pink-500/50 to-transparent" />
@@ -1312,6 +1345,48 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
                       </button>
                     ))}
                   </div>
+                </div>
+
+                <div>
+                   <label className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-3 block flex items-center gap-1.5">
+                      <Sparkles size={12} className="text-emerald-400" /> Resonance Themes
+                   </label>
+                   <div className="grid grid-cols-2 gap-2">
+                      {(['default', 'cosmic', 'ethereal', 'monarchy'] as const).map(theme => (
+                        <button
+                          key={theme}
+                          onClick={() => { soundEngine.select(); setActiveTheme(theme); }}
+                          className={`px-3 py-2 rounded-lg text-[10px] tracking-widest uppercase font-mono transition-all ${
+                            activeTheme === theme 
+                              ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200' 
+                              : 'bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10'
+                          } border`}
+                        >
+                          {theme}
+                        </button>
+                      ))}
+                   </div>
+                </div>
+
+                <div>
+                   <label className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-3 block flex items-center gap-1.5">
+                      <Activity size={12} className="text-cyan-400" /> Neural Filters
+                   </label>
+                   <div className="grid grid-cols-2 gap-2">
+                      {(['none', 'neural', 'monochrome', 'scanline'] as const).map(filter => (
+                        <button
+                          key={filter}
+                          onClick={() => { soundEngine.charge(); setActiveFilter(filter); }}
+                          className={`px-3 py-2 rounded-lg text-[10px] tracking-widest uppercase font-mono transition-all ${
+                            activeFilter === filter 
+                              ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-200' 
+                              : 'bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10'
+                          } border`}
+                        >
+                          {filter}
+                        </button>
+                      ))}
+                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-white/5 space-y-4">

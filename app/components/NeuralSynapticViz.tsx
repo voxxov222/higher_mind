@@ -90,6 +90,19 @@ const getElementColor = (element: string) => {
   }
 };
 
+const SEPHIROT = [
+  { name: 'Kether', pos: [0, 8, 2], color: '#ffffff', desc: 'The Crown: Infinite Source, Divine Will, and pure singularity.' },
+  { name: 'Chokmah', pos: [2, 7, 2], color: '#d1d5db', desc: 'Wisdom: The primordial flash of creation, dynamic force, and enlightenment.' },
+  { name: 'Binah', pos: [-2, 7, 2], color: '#111827', desc: 'Understanding: The great mother, structure, restrictive form, and cosmic womb.' },
+  { name: 'Chesed', pos: [2, 5, 2], color: '#2563eb', desc: 'Mercy: Expansive love, benevolence, majesty, and divine grace.' },
+  { name: 'Gevurah', pos: [-2, 5, 2], color: '#dc2626', desc: 'Strength: Severity, judgment, discipline, and courageous restraint.' },
+  { name: 'Tiphareth', pos: [0, 4, 2], color: '#fbbf24', desc: 'Beauty: The heart of the tree, harmony, balance, and solar mediation.' },
+  { name: 'Netzach', pos: [2, 2, 2], color: '#16a34a', desc: 'Victory: Endurance, creative desire, emotion, and rhythmic beauty.' },
+  { name: 'Hod', pos: [-2, 2, 2], color: '#ea580c', desc: 'Splendor: Communication, mental intelligence, magic, and scientific form.' },
+  { name: 'Yesod', pos: [0, 1, 2], color: '#9333ea', desc: 'Foundation: The subconscious filter, lunar patterns, and imaginative flow.' },
+  { name: 'Malkuth', pos: [0, -1, 2], color: '#713f12', desc: 'Kingdom: Physical manifestation, grounding, and the material world.' }
+];
+
 interface BrainNode {
   id: string;
   label: string;
@@ -522,6 +535,43 @@ export const NeuralSynapticViz: React.FC<{ data: CosmicData | null }> = ({ data 
       }
     });
 
+    // 5. KABBALAH SEPHIROT INTEGRATION
+    SEPHIROT.forEach(sph => {
+        const id = `sephirah_${sph.name.toLowerCase()}`;
+        computedNodes.push({
+            id,
+            label: sph.name,
+            type: 'zodiac', // Reuse zodiac shape or refine if needed
+            pos: new THREE.Vector3(...sph.pos),
+            color: sph.color,
+            description: sph.desc
+        });
+
+        // Link to matching Planets by energy signature
+        const mapping: {[key: string]: string} = {
+            'Kether': 'Neptune',
+            'Chokmah': 'Uranus',
+            'Binah': 'Saturn',
+            'Chesed': 'Jupiter',
+            'Gevurah': 'Mars',
+            'Tiphareth': 'Sun',
+            'Netzach': 'Venus',
+            'Hod': 'Mercury',
+            'Yesod': 'Moon',
+            'Malkuth': 'Pluto' // or Earth/Ascendant
+        };
+
+        const targetPlanet = mapping[sph.name];
+        if (targetPlanet) {
+            computedLinks.push({
+                source: id,
+                target: `planet_${targetPlanet.toLowerCase()}`,
+                type: 'core_gravity',
+                strength: 0.5
+            });
+        }
+    });
+
     return { nodes: computedNodes, links: computedLinks };
   }, [data]);
 
@@ -549,7 +599,11 @@ export const NeuralSynapticViz: React.FC<{ data: CosmicData | null }> = ({ data 
     if (activeNodeData.type === 'planet' && activeNodeData.meta) {
       phrase = `${activeNodeData.label} in ${activeNodeData.meta.sign} House ${activeNodeData.meta.house}`;
     } else if (activeNodeData.type === 'zodiac') {
-      phrase = `Zodiac ${activeNodeData.label} Element ${activeNodeData.meta?.element}`;
+      if (activeNodeData.id.startsWith('sephirah_')) {
+        phrase = `Sephirah ${activeNodeData.label}`;
+      } else {
+        phrase = `Zodiac ${activeNodeData.label} Element ${activeNodeData.meta?.element}`;
+      }
     } else if (activeNodeData.type === 'house') {
       phrase = `Astral ${activeNodeData.label}`;
     }
@@ -669,7 +723,7 @@ export const NeuralSynapticViz: React.FC<{ data: CosmicData | null }> = ({ data 
               <span>SOLFEGGIO BEAT:</span> <span className="text-amber-400">528Hz ACTIVE</span>
             </div>
             <div className="pt-1.5 border-t border-white/5 text-[8px] text-zinc-600 uppercase flex items-center gap-1">
-              <Shield size={8} /> STARK AOS PROTOCOL DEPLOYED
+              <Shield size={8} /> ASTRAL OS PROTOCOL DEPLOYED
             </div>
           </motion.div>
         )}

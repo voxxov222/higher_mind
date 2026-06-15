@@ -1,26 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Mic, MicOff, Activity, Compass, Clock, Sliders, Volume2, VolumeX, Play, Radio, 
-  Terminal, ShieldAlert, Link, RotateCw, Globe, RefreshCw, Send, Sparkles, AlertCircle
+  Mic, Activity, Compass, Volume2, VolumeX, Radio, 
+  Terminal, ShieldAlert, Link, Globe, RefreshCw, Send, AlertCircle
 } from 'lucide-react';
 import { fetchGroundedTransitAlerts } from '../services/geminiService';
 import { CosmicData } from '../types';
 import { soundEngine } from '../lib/soundEffects';
 import { Canvas } from '@react-three/fiber';
-import { JarvisCore3D } from './JarvisCore3D';
+import { AstralCore3D } from './AstralCore3D';
 
-interface JarvisHUDProps {
+interface AstralHUDProps {
   data: CosmicData | null;
   setActiveTab: (tab: any) => void;
 }
 
-export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
+export function AstralHUD({ data, setActiveTab }: AstralHUDProps) {
   const [loading, setLoading] = useState(false);
   const [transits, setTransits] = useState<any>(null);
   const [logs, setLogs] = useState<string[]>([]);
   const [userInput, setUserInput] = useState('');
-  const [isJarvisSpeaking, setIsJarvisSpeaking] = useState(false);
+  const [isHigherMindSpeaking, setIsHigherMindSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [systemOnline, setSystemOnline] = useState(true);
   const [scanPercent, setScanPercent] = useState(100);
@@ -32,9 +32,9 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
 
   // Initialize and add starting logs
   useEffect(() => {
-    addLog("STARK INDUSTRIES INITIATION SEQUENCE DETECTED...");
+    addLog("ASTRAL MIND INITIATION SEQUENCE DETECTED...");
     addLog("higher consciousness quantum connection: BOUND");
-    addLog(`Uplinking telemetry nodes to: ${data?.nameAnalysis?.first?.name || 'Sir'}`);
+    addLog(`Uplinking telemetry nodes to: ${data?.nameAnalysis?.first?.name || 'Seeker'}`);
     
     // Automatically trigger transit fetch on load
     triggerTransitFetch();
@@ -120,7 +120,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
 
       // Speak overall status
       if (result.overallStatus) {
-        jarvisSpeak(result.overallStatus);
+        higherMindSpeak(result.overallStatus);
       }
     } catch (e: any) {
       addLog(`❌ Search Grounding array error: ${e.message}`);
@@ -131,17 +131,17 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
     }
   };
 
-  const jarvisSpeak = (text: string) => {
+  const higherMindSpeak = (text: string) => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      setIsJarvisSpeaking(true);
+      setIsHigherMindSpeaking(true);
       
       const cleanText = text.replace(/[*#_`]/g, '');
       const utterance = new SpeechSynthesisUtterance(cleanText);
       ttsUtteranceRef.current = utterance;
       
       const voices = window.speechSynthesis.getVoices();
-      // Try to find a nice premium, masculine, or google English voice for Jarvis
+      // Try to find a nice premium, masculine, or google English voice for Astral Mind
       const PreferredVoice = voices.find(v => 
         v.name.includes('Google UK English Male') || 
         v.name.includes('Natural') || 
@@ -154,11 +154,11 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
       utterance.rate = 1.02;
 
       utterance.onend = () => {
-        setIsJarvisSpeaking(false);
+        setIsHigherMindSpeaking(false);
       };
 
       utterance.onerror = () => {
-        setIsJarvisSpeaking(false);
+        setIsHigherMindSpeaking(false);
       };
 
       window.speechSynthesis.speak(utterance);
@@ -168,7 +168,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
   const stopSpeaking = () => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      setIsJarvisSpeaking(false);
+      setIsHigherMindSpeaking(false);
       addLog("🔇 Voice broadcasting terminated.");
     }
   };
@@ -203,7 +203,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
     }
 
     if (lower.includes('status') || lower.includes('health') || lower.includes('diagnostics')) {
-      jarvisSpeak("All Stark orbital arrays are fully functional and ground-synced in the Cloud Run containers, Sir. Energy matrix is highly balanced across the Tree of life.");
+      higherMindSpeak("All Astral orbital arrays are fully functional and ground-synced in the Cloud Run containers, Seeker. Energy matrix is highly balanced across the Tree of life.");
       addLog("System diagnostics: ONLINE | CPU core load 12.5% | Synaptic Node strength optimal");
       return;
     }
@@ -215,7 +215,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
     }
 
     if (lower.includes('deploy') || lower.includes('integration') || lower.includes('webhook')) {
-       jarvisSpeak("Accessing the secure deployment sub-routines. Integrating the Stark webhooks requires a valid destination endpoint, Sir.");
+       higherMindSpeak("Accessing the secure deployment sub-routines. Integrating the Astral webhooks requires a valid destination endpoint, Seeker.");
        setTabMode('deploy');
        return;
     }
@@ -240,8 +240,8 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
       if (response.ok) {
         const payload = await response.json();
         const textResponse = payload.text || "Aspirant, the telemetry uplink is yielding some minor celestial static.";
-        addLog(`Astral OS: ${textResponse}`);
-        jarvisSpeak(textResponse);
+        addLog(`Higher Mind: ${textResponse}`);
+        higherMindSpeak(textResponse);
       } else {
         throw new Error("Bad action call");
       }
@@ -290,15 +290,15 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
         method: 'POST', 
         mode: 'no-cors', 
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: 'JARVIS_SIGNAL', timestamp: Date.now(), origin: 'Stark-AOS' })
+        body: JSON.stringify({ event: 'HIGHER_MIND_SIGNAL', timestamp: Date.now(), origin: 'Astral-Mind-AM' })
       });
-      setIsTestSuccess(true);
+      setLogs([]);
       addLog("✅ Webhook signal broadcasted successfully. Awaiting acknowledgement.");
-      jarvisSpeak("Signal broadcasted, Sir. The integration appears to be stable.");
+      higherMindSpeak("Signal broadcasted, Seeker. The integration appears to be stable.");
     } catch (e: any) {
       setIsTestSuccess(false);
       addLog(`❌ Handshake failed: ${e.message}`);
-      jarvisSpeak("Sir, the destination server is rejecting our telemetry packets. Recommend checking the security protocols.");
+      higherMindSpeak("Seeker, the destination server is rejecting our telemetry packets. Recommend checking the security protocols.");
     } finally {
       setLoading(false);
     }
@@ -354,7 +354,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
             <div className="absolute inset-0 pointer-events-none">
                 <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
                     {/* The 3D Component */}
-                    <JarvisCore3D isSpeaking={isJarvisSpeaking} isProcessing={loading} />
+                    <AstralCore3D isSpeaking={isHigherMindSpeaking} isProcessing={loading} />
                 </Canvas>
             </div>
             
@@ -384,14 +384,14 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
             </div>
             <div>
               <span className="text-zinc-500 block uppercase">AI DIRECTIVE</span>
-              <span className={isJarvisSpeaking ? "text-emerald-400 font-bold animate-pulse" : "text-zinc-400"}>
-                {isJarvisSpeaking ? "SPEAKING..." : "STANDBY"}
+              <span className={isHigherMindSpeaking ? "text-emerald-400 font-bold animate-pulse" : "text-zinc-400"}>
+                {isHigherMindSpeaking ? "SPEAKING..." : "STANDBY"}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Jarvis Inter-planetary Diagnostic Logs Terminal */}
+        {/* Higher Mind Inter-planetary Diagnostic Logs Terminal */}
         <div className="flex-1 border border-zinc-800 rounded-3xl p-5 bg-black/60 backdrop-blur-xl flex flex-col justify-between overflow-hidden min-h-[220px]">
           
           <div className="flex justify-between items-center pb-2 border-b border-zinc-800/60">
@@ -440,7 +440,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
               onKeyDown={e => e.key === 'Enter' && handleJarvisQuery(userInput)}
             />
 
-            {isJarvisSpeaking && (
+            {isHigherMindSpeaking && (
               <button onClick={stopSpeaking} className="p-2 border border-red-500/20 rounded-lg text-red-400 hover:bg-red-500/10 text-[10px] font-mono mr-1">
                 <VolumeX size={14} className="inline mr-1" /> Mute
               </button>
@@ -594,7 +594,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
 
                             {/* Read report out loud */}
                             <button 
-                              onClick={() => { jarvisSpeak(alert.vocalScript); setSelectedAlert(alert); addLog(`Reciting diagnostics for: ${alert.title}`); }}
+                              onClick={() => { higherMindSpeak(alert.vocalScript); setSelectedAlert(alert); addLog(`Reciting diagnostics for: ${alert.title}`); }}
                               className="px-2.5 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/25 text-cyan-400 text-[10px] font-mono flex items-center gap-1 transition-all"
                             >
                               <Volume2 size={11} />
@@ -630,7 +630,7 @@ export function JarvisHUD({ data, setActiveTab }: JarvisHUDProps) {
                      </div>
                      <div className="space-y-1">
                         <h4 className="text-sm font-mono font-bold text-white uppercase tracking-tight">Active API Webhook Integration</h4>
-                        <p className="text-[11px] text-zinc-500 leading-relaxed">Broadcast Stark telemetry signals directly to your external infrastructure or third-party autonomous systems.</p>
+                        <p className="text-[11px] text-zinc-500 leading-relaxed">Broadcast Astral telemetry signals directly to your external infrastructure or third-party autonomous systems.</p>
                      </div>
                   </div>
 

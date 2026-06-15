@@ -5,9 +5,8 @@ import { Sphere, Trail, Float, Stars, Text, OrbitControls, PerspectiveCamera, Ht
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Activity, X, Info, Sparkle, BookOpen, Send, Bot, Cpu, Zap, Radio, Terminal, 
-  MousePointer2, ChevronRight, Binary, Layers, Wind, Ghost, Atom, Eye, Loader2, 
-  Globe, Globe2, Compass, Minimize2, Maximize2 
+  X, Sparkle, Send, Bot, Zap, Radio, Layers, Loader2, 
+  Minimize2, Maximize2 
 } from 'lucide-react';
 import { CosmicData } from '../types';
 import { fetchAuraInsight } from '../services/geminiService';

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Text, Trail, Sphere } from '@react-three/drei';
 import * as THREE from 'three';
-import { Navigation, Focus, ZoomIn, ZoomOut, Maximize, Orbit } from 'lucide-react';
+import { Orbit } from 'lucide-react';
 import { CosmicData } from '../types';
 
 const PLANET_COLORS: Record<string, string> = {

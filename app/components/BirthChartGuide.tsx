@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { motion } from 'motion/react';
-import { BookOpen, Info, Sparkles, Compass, Hexagon, Network, Workflow, Sun, Moon, Star } from 'lucide-react';
+import { BookOpen, Sparkles, Compass, Hexagon, Workflow, Sun, Star } from 'lucide-react';
 
 const PLANETS = [
   { symbol: '☉', name: 'Sun', description: 'Your core identity, ego, and life purpose.' },

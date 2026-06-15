@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, X, Maximize2, Trash2, Box, Cpu, HardDrive, Brain, Network, Radio, Camera, Video, MonitorPlay, Zap, Activity, RefreshCw } from 'lucide-react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, Radar, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars, Float, Sphere, MeshDistortMaterial } from '@react-three/drei';
 import { ReactFlow, Controls, Background, applyNodeChanges, applyEdgeChanges, addEdge, Node, Edge, Connection, NodeChange, EdgeChange, Handle, Position, NodeProps } from '@xyflow/react';

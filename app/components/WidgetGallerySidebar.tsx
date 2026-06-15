@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  X, Sparkles, LayoutGrid, Radio, PieChart, Activity, Moon, Sun, Compass, Heart, Play, Layers, ShieldCheck, Pin, Check, Trash2, Brain, Network, ScrollText
+  X, Sparkles, LayoutGrid, Radio, PieChart, Activity, Moon, Sun, Compass, Heart, Play, Layers, ShieldCheck, Pin, Check, Brain, Network, ScrollText
 } from 'lucide-react';
 import { soundEngine } from '../lib/soundEffects';
 

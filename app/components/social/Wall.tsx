@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Image as ImageIcon, Video, X, Sparkles } from 'lucide-react';
-import { WallPost, UserProfileConfig } from '../../types';
+import { Video, X, Sparkles } from 'lucide-react';
+import { WallPost } from '../../types';
 import { createWallPost, subscribeToWallPosts } from '../../services/socialService';
 import { useProfileStore } from '../../services/profileService';
 import clsx from 'clsx';

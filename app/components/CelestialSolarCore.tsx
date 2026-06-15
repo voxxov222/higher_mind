@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { MeshDistortMaterial, Sphere, Sparkles, Ring, Trail, Line } from '@react-three/drei';
+import { MeshDistortMaterial, Sphere, Sparkles, Ring, Line, Html } from '@react-three/drei';
 
 export const CelestialSolarCore = ({ selected, hovered, onClick, onPointerOver, onPointerOut }: any) => {
   const coreRef = useRef<THREE.Mesh>(null!);
@@ -120,9 +120,6 @@ export const PlanetaryGravityNetwork = ({ planets }: { planets: any[] }) => {
         </group>
     );
 };
-
-import { Html } from '@react-three/drei';
-import { useState } from 'react';
 
 // At the top level or inside the file (we'll just replace the CelestialDNAHelix function)
 export const CelestialDNAHelix = () => {

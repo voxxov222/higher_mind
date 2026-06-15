@@ -43,7 +43,7 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
   },
   updateWidget: (widgetId, updates) => {
     const config = get().config;
-    if (!config) return;
+    if (!config || !config.layout || !config.layout.widgets) return;
     const widgets = config.layout.widgets.map((w) =>
       w.id === widgetId ? { ...w, ...updates } : w
     );
@@ -51,12 +51,12 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
   },
   addWidget: (widget) => {
     const config = get().config;
-    if (!config) return;
+    if (!config || !config.layout || !config.layout.widgets) return;
     set({ config: { ...config, layout: { ...config.layout, widgets: [...config.layout.widgets, widget] } } });
   },
   removeWidget: (widgetId) => {
     const config = get().config;
-    if (!config) return;
+    if (!config || !config.layout || !config.layout.widgets) return;
     set({
       config: {
         ...config,

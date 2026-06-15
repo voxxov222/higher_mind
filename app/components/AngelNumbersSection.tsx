@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Hash, Search, Volume2, Sparkles, BookOpen, Fingerprint, Activity, Layers, Plus, Info, Zap, RefreshCw } from 'lucide-react';
+import { Hash, Volume2, Sparkles, BookOpen, Fingerprint, Activity, Layers, Plus, Info, Zap, RefreshCw } from 'lucide-react';
 import { CosmicData } from '../types';
 import { fetchAngelNumberInsight } from '../services/geminiService';
 import { soundEngine } from '../lib/soundEffects';

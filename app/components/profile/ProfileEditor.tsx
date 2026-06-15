@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  User, Check, X, Sparkles, BookOpen, 
-  MapPin, Clock, Star, Zap, Save, 
-  RefreshCw, Info, Edit3, Heart, 
-  Shield, Globe, Send, Compass, Moon, Sun
+  User, Sparkles, 
+  Zap, Save, 
+  RefreshCw, Edit3,
+  Compass, Moon, Sun
 } from 'lucide-react';
 import { useProfileStore } from '../../services/profileService';
 import { fetchCosmicChatResponse } from '../../services/geminiService';
@@ -21,13 +21,7 @@ const SPIRITUAL_PRACTICES = [
   "Energy Work", "Ritual", "Breathwork", "Chanting", "Moon Phases"
 ];
 
-const MASTER_NUMBERS = {
-  11: { name: "The Intuitive Visionary", color: "#FFD700" },
-  22: { name: "The Master Builder", color: "#FF6347" },
-  33: { name: "The Master Teacher", color: "#87CEEB" }
-};
-
-const RESONANCE_LEVELS = {
+const RESONANCE_LEVELS: Record<number, { name: string, color: string, description: string }> = {
   1: { name: "Awakening", color: "#FFB6C1", description: "Just beginning spiritual journey. Curious and seeking." },
   2: { name: "Exploring", color: "#FFD700", description: "Actively studying. Learning and questioning." },
   3: { name: "Deepening", color: "#87CEEB", description: "Regular practice. Noticeable shifts. Committed." },

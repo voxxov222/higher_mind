@@ -1,13 +1,12 @@
 import * as React from 'react';
-import { useRef, useMemo } from 'react';
+import { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Float, Sphere, MeshDistortMaterial, MeshWobbleMaterial, Stars, Sparkles } from '@react-three/drei';
+import { OrbitControls, Float, MeshDistortMaterial, MeshWobbleMaterial, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
 import { Bloom, EffectComposer } from '@react-three/postprocessing';
 
 const SoulEntity = ({ color = '#a855f7' }: { color?: string }) => {
   const meshRef = useRef<THREE.Group>(null);
-  const coreRef = useRef<THREE.Mesh>(null);
 
   // Rotate and oscillate
   useFrame((state) => {

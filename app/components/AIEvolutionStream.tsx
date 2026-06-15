@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Zap, Box, Layers, Cpu, Code, Database, RefreshCw, Send, Brain, Globe, Infinity as InfinityIcon, Atom } from 'lucide-react';
+import { Box, Layers, Cpu, Code, Database, RefreshCw, Brain, Infinity as InfinityIcon, Atom } from 'lucide-react';
 import { fetchCosmicChatResponse } from '../services/geminiService';
 import { useHigherMind } from './HigherMindProvider';
 

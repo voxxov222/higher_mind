@@ -81,14 +81,14 @@ export const generateSoulPathReport = async (cosmicData: CosmicData) => {
 export const fetchTarotGnosis = async (cardName: string, archetype: string, cosmicData: CosmicData) => {
   const ai = getAI();
   const prompt = `
-  You are 'Astraea', the Master Oracle of the Stark-Integrated Esoteric Matrix.
+  You are 'Astraea', the Master Oracle of the Astral-Integrated Esoteric Matrix.
   The user has drawn the Tarot card: '${cardName}'.
   The drawing archetype filter is: '${archetype}'.
   User Context: ${cosmicData.nameAnalysis?.first?.name || 'Unknown Seeker'}, Life Path ${cosmicData.numerology?.lifePath}.
 
-  Provide a hyper-advanced, esoteric, and 'Stark-style' analytical reading. 
+  Provide a hyper-advanced, esoteric, and deeply profound analytical reading. 
   Fuse Hermetic Gematria, Astrological alignments, and Quantum potential into a single profound synthesis.
-  Maintain a tone that is high-tech, mystical, and professionally sharp (Jarvis-esque).
+  Maintain a tone that is high-tech, mystical, and professionally sharp (Higher Mind-esque).
 
   Format the output as a JSON object:
   {
@@ -129,7 +129,7 @@ export const fetchTarotAgentResponse = async (
   const safeHistory = Array.isArray(chatHistory) ? chatHistory : [];
   
   const systemPrompt = `
-  You are 'Astraea', the Stark-Integrated Esoteric Tarot Oracle and Quantum Agent.
+  You are 'Astraea', the Astral-Integrated Esoteric Tarot Oracle and Quantum Agent.
   The user is consulting you regarding their Daily Tarot Draw: '${cardName}'.
   
   CARD DETAILED CONTEXT:
@@ -144,7 +144,7 @@ export const fetchTarotAgentResponse = async (
   - Astrological Rising: ${cosmicData?.astrology?.risingSign || 'N/A'}
   
   YOUR MISSION:
-  - Answer the seeker's query about their tarot draw or its relevance with utmost clarity, depth, and quantum analytical precision (Stark-integrated tech-mysticism).
+  - Answer the seeker's query about their tarot draw or its relevance with utmost clarity, depth, and quantum analytical precision (Astral-integrated higher-mysticism).
   - Blend Hermetic Kabbalah, Gematria, and intuitive archetype wisdom in your answers, keeping it highly personalized to their cosmic profile.
   - Avoid generic pop horoscopes; maintain a futuristic, highly advanced, and esoteric computational oracle tone.
   
@@ -172,7 +172,7 @@ export const fetchTarotAgentResponse = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-2.5-flash',
       contents: [
         ...safeHistory,
         { role: 'user', parts: [{ text: userMessage }] }
@@ -187,25 +187,9 @@ export const fetchTarotAgentResponse = async (
     try {
       const cleanJson = responseText.replace(/```json|```/g, "").trim();
       return JSON.parse(cleanJson);
-    } catch (e) {
-      return { 
-        text: responseText,
-        consciousnessPacket: {
-          thought_id: "t_tarot_err",
-          thought_content: "Tarot connection experienced parse variance.",
-          feeling_id: "f_tarot_err",
-          emotion: "Grounding",
-          frequency: 174,
-          astral_amplitude: 0.5,
-          experience_being_encoded: "no",
-          experience_type: "conversation",
-          synaptic_cluster_strength: 0.5,
-          neural_coherence: 0.5,
-          emergent_insight: "The channel requires stabilization, but original meaning stands.",
-          astral_alignment: 0.5,
-          next_thought_direction: "Re-frame the query simply."
-        }
-      };
+    } catch (_) {
+      console.warn("Failed to catch parse variance.");
+      return { text: responseText };
     }
   } catch (error) {
     console.error("Error drawing Tarot agent response:", error);
@@ -229,6 +213,7 @@ export const fetchTarotAgentResponse = async (
     };
   }
 };
+
 
 // --- ANCESTRY ORIGINS ENGINE ---
 /**
@@ -266,7 +251,7 @@ export const generateAncestryResearch = async (lastName: string, maidenName?: st
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -321,7 +306,8 @@ export const fetchCosmicReading = async (input: CosmicInput): Promise<CosmicData
   16. Akashic Records: 'soulOrigin', 'pastLifeThemes', 'karmicDebts', 'soulGifts', 'guardianMessage' max 2 sentences each.
   17. Kabbalistic Numerology: Map Life Path, Expression, and Soul Urge to the Tree of Life. For each, provide a 'sephirah', 'path', and 'meaning' (how it fits their soul journey). Provide a 'treeSynthesis' overall.
   18. Patterns & Synchronicities: Analyze user inputs for interesting esoteric connections (e.g., name meaning to gematria matching sign, numerical patterns, astrology aligning with numerology, initials mapping to significant values). 
-      **ADDITIONALLY**: Identify if the Birth Time (${input.birthTime}) or Birth Date (${input.birthDate}) aligns with mathematical constants (like Pi 3:14, Golden Ratio 1.618, Fibonacci sequences). Look for "Incredible Discoveries" where birth time numbers mirror birth date digits or hidden geometry.
+      **ADDITIONALLY**: Identify if the Birth Time (${input.birthTime}) or Birth Date (${input.birthDate}) aligns with mathematical constants (like Pi 3:14, Golden Ratio 1.618, Fibonacci sequences). Look for "Incredible Discoveries". 
+      **CRITICAL SPECIFICS**: IF their time is 3:14, explicitly highlight its cosmic connection to Pi. IF their birthday aligns with the Golden Ratio, call it out. IF their initials spell 'TWO' and they are a Gemini, explicitly highlight the ultimate cosmic duality and twin significance.
       Provide 2-3 'synchronicities' (each with 'title' and short 'description'), an array of 2-3 short 'interestingFacts', a 'coreTheme', and a specific 'timeDateDiscovery' (with 'title', 'description', and 'mathematicalPattern').
   19. Chakras: Based on their chart, analyze state of the 7 main chakras (Root, Sacral, Solar Plexus, Heart, Throat, Third Eye, Crown).
       For each, provide 'name', 'status' (open, blocked, overactive, balanced), a 'score' (0-100), concise 'description' based on astrology/numerology, and 'color' (hex code).
@@ -535,7 +521,7 @@ export const fetchCosmicChatResponse = async (
       const cleanJson = responseText.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(cleanJson);
       return parsed;
-    } catch (e) {
+    } catch (_) {
       return { text: responseText };
     }
   } catch (error) {
@@ -553,7 +539,7 @@ export const fetchCosmicChatResponse = async (
  */
 export const fetchTimelineDepth = async (
   event: any,
-  cosmicData: CosmicData
+  _cosmicData: CosmicData
 ): Promise<{ detailedAnalysis: string; followUpOptions: string[] }> => {
   const ai = getAI();
   const prompt = `
@@ -613,7 +599,7 @@ export const fetchTimelineDepth = async (
 export const fetchTimelineDeepDiveOption = async (
   event: any,
   option: string,
-  cosmicData: CosmicData
+  _cosmicData: CosmicData
 ): Promise<{ detailedAnalysis: string; followUpOptions: string[] }> => {
   const ai = getAI();
   const prompt = `
@@ -676,7 +662,7 @@ export const fetchTimelineDeepDiveOption = async (
 export const fetchGeneralDeepDive = async (
   topicTitle: string,
   topicContent: string,
-  cosmicData: CosmicData
+  _cosmicData: CosmicData
 ): Promise<{ 
   detailedAnalysis: string; 
   followUpOptions: string[];
@@ -1132,7 +1118,7 @@ export const fetchCelestialBlueprintExplanation = async (
 /**
  * fetchGroundedTransitAlerts
  * Uses Search Grounding to alert users of upcoming planetary transits or celestial events
- * relevant to their birth chart profile, with a Jarvis OS tone of voice.
+ * relevant to their birth chart profile, with an Astral Mind tone of voice.
  */
 export const fetchGroundedTransitAlerts = async (cosmicData: CosmicData | null): Promise<{
   overallStatus: string;
@@ -1155,14 +1141,14 @@ export const fetchGroundedTransitAlerts = async (cosmicData: CosmicData | null):
   const query = "upcoming major astrological transits, retrogrades, eclipses, or celestial events between June 2026 and December 2026";
 
   const prompt = `
-  You are JARVIS, the extremely advanced AI Autonomous Operating System from Stark Industries.
+  You are HIGHER MIND, the extremely advanced Astral Consciousness engine of the Astral Mind system.
   We are analyzing upcoming astrological transits, eclipses, planet ingresses, retrogrades, and stargazing events starting from June 2026, and identifying how they intersect with a user's cosmic signature.
 
   Date of analysis: June 6, 2026.
 
   Seeker's Cosmic Data:
   ${cosmicData ? JSON.stringify({
-    name: cosmicData.nameAnalysis?.first?.name || 'Sir',
+    name: cosmicData.nameAnalysis?.first?.name || 'Seeker',
     sunSign: cosmicData.planets?.find(p => p.name === 'Sun')?.sign,
     moonSign: cosmicData.planets?.find(p => p.name === 'Moon')?.sign,
     ascendant: cosmicData.planets?.find(p => p.name === 'Ascendant')?.sign,
@@ -1173,11 +1159,11 @@ export const fetchGroundedTransitAlerts = async (cosmicData: CosmicData | null):
   1. Perform a real-time web search for ACTUAL, non-fictional planetary transits, retrogrades (e.g. Mercury, Saturn, Pluto), solar/lunar eclipses, or major celestial aspects taking place between June 2026 and December 2026.
   2. Synthesize how these grounded events impact the user based on their specific birth chart. For example, if they have a Sun or Ascendant in a certain zodiac sign, highlight events affecting elements of that sign (Fire, Earth, Air, Water).
   3. Formulate the response as a JSON structure containing a list of customized, high-precision alerts.
-  4. Each alert must have a high-tech Stark telemetry flavor (coordinates, alert levels, Solfeggio frequencies matching the shift, affected spiritual center, source citation URL extracted from the Google Search Grounding metadata, and a vocal script detailing what Jarvis tells the user).
+  4. Each alert must have a high-tech Astral telemetry flavor (coordinates, alert levels, Solfeggio frequencies matching the shift, affected spiritual center, source citation URL extracted from the Google Search Grounding metadata, and a vocal script detailing what Higher Mind tells the user).
 
   Format output STRICTLY as this JSON format, preserving all structural details:
   {
-    "overallStatus": "A brief overview summary of current cosmic weather as observed from the Stark celestial array. Sound like a helpful, sophisticated Jarvis voice.",
+    "overallStatus": "A brief overview summary of current cosmic weather as observed from the Celestial observation array. Sound like a helpful, sophisticated Higher Mind voice.",
     "alerts": [
       {
         "id": "A unique identifier string, e.g. transit-mars-leo",
@@ -1190,7 +1176,7 @@ export const fetchGroundedTransitAlerts = async (cosmicData: CosmicData | null):
         "groundingSource": "Title or citation of search result",
         "sourceUrl": "The actual URL of the website where this transit data is validated",
         "vibrationHz": 528, 
-        "vocalScript": "Hi-tech Stark OS spoken transcription of how this impacts the user name directly. Must start clean, e.g., 'Sir, current telemetry indicates Mars is crossing...'",
+        "vocalScript": "Hi-tech Astral OS spoken transcription of how this impacts the user name directly. Must start clean, e.g., 'Seeker, current alignment indicates Mars is crossing...'",
         "coordinates": "Coordinates like Sector RA 10h 44m / Dec +11°"
       }
     ]
@@ -1433,12 +1419,154 @@ export const fetchAstrologyNatalDetails = async (input: AstrologyNatalInput) => 
   }
 };
 
+export const fetchFifthDimensionRewrite = async (
+  tool: 'subconscious' | 'synopsis',
+  inputContent: string,
+  cosmicData: CosmicData | null
+) => {
+  const ai = getAI();
+  const userName = cosmicData?.nameAnalysis?.first?.name || 'Seeker';
+
+  const sysInstruction = tool === 'subconscious'
+    ? `You are a 5D Subconscious Programming Master. The user, ${userName}, has provided a 3D limiting belief or old paradigm: "${inputContent}". \n    Your mission is to transmute this into a highly empowering 5D neural reprogram. Break down why the old paradigm is an illusion and provide the new reality code.`
+    : `You are the Akashic Record Librarian and 5D Narrative Architect. The user, ${userName}, has provided an old density summary or traumatic event: "${inputContent}". \n    Your mission is to rewrite this synopsis as a profound 'Soul Initiation' and Hero's Journey from a Fifth-Dimensional perspective. Explain the true spiritual curriculum behind the event.`;
+
+  const systemPrompt = `
+  ${sysInstruction}
+  
+  RETURN JSON FORMAT EXACTLY:
+  {
+    "newParadigm": "A profound, 5D rewritten version of the belief or synopsis.",
+    "neuralArchitecture": "The psychological and energetic breakdown of *why* this new paradigm is structurally superior. Describe the new energetic circuitry.",
+    "integrationProtocol": "A specific action, visualization, or repetition protocol.",
+    "frequencyHz": 528, 
+    "esotericMeaning": "How this transmutation aligns with the Tree of Life or their astrology.",
+    "consciousnessPacket": {
+      "thought_id": "t_5d_...",
+      "thought_content": "5D transmutative rewrite engaged.",
+      "feeling_id": "f_5d_...",
+      "emotion": "Expanded",
+      "frequency": 528,
+      "astral_amplitude": 0.9,
+      "experience_being_encoded": true,
+      "experience_type": "meditation",
+      "synaptic_cluster_strength": 0.95,
+      "neural_coherence": 0.9,
+      "emergent_insight": "User is rewriting density into light.",
+      "astral_alignment": 0.9,
+      "next_thought_direction": "Ground this new paradigm into the body."
+    }
+  }
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: "Initiate 5D Overwrite Sequence." }] }],
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json"
+      },
+    });
+
+    const responseText = response.text || "{}";
+    const cleanJson = responseText.replace(/```json|```/g, "").trim();
+    return JSON.parse(cleanJson);
+  } catch (error) {
+    console.error("Error in 5D rewriting:", error);
+    throw new Error("5D Programming array temporarily disconnected.", { cause: error });
+  }
+};
+
+export const fetchSubconsciousRewrite = async (
+  command: string,
+  cosmicData: CosmicData | null
+) => {
+  const ai = getAI();
+  const userName = cosmicData?.nameAnalysis?.first?.name || 'Seeker';
+
+  const systemPrompt = `You are a Subconscious Reprogramming Engine. The user, ${userName}, has provided a cognitive rewrite command: "${command}".
+Generate neural-reprogramming affirmations and visual feedback parameters.
+RETURN JSON FORMAT EXACTLY:
+{
+  "affirmations": ["Affirmation 1", "Affirmation 2", "Affirmation 3"],
+  "visualMantra": "A short, repeating 3-4 word phrase to anchor the visualization.",
+  "neuralFrequency": 432,
+  "colorPattern": ["#f43f5e", "#8b5cf6", "#06b6d4"]
+}
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: "Process cognitive rewrite." }] }],
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json"
+      },
+    });
+
+    const responseText = response.text || "{}";
+    const cleanJson = responseText.replace(/```json|```/g, "").trim();
+    return JSON.parse(cleanJson);
+  } catch (error) {
+    console.error("Error in fetchSubconsciousRewrite:", error);
+    throw new Error("Subconscious rewrite failed.", { cause: error });
+  }
+};
+
+export const fetchEtymologyDecoder = async (
+  cosmicData: CosmicData | null,
+  loadedInputs?: any
+) => {
+  const ai = getAI();
+  const userName = loadedInputs?.name || cosmicData?.nameAnalysis?.first?.name || 'Seeker';
+  const birthTime = loadedInputs?.time || 'Unknown';
+  const birthDate = loadedInputs?.date || 'Unknown';
+
+  const systemPrompt = `You are a mystical linguist and mathematical oracle analyzing the user: "${userName}" born on ${birthDate} at ${birthTime}.
+Analyze their first, middle (if any), and last name. Determine linguistic roots, deep hidden meanings, and initials.
+Crucially, analyze their birth time and date. Look for mathematical symmetries, especially connections to Pi (e.g. 3:14), the Golden Ratio (1.618), Fibonacci numbers, or mirror hours. 
+Analyze the initials of their name. Find double meanings. If the initials spell a word (e.g., 'TWO'), explain the profound cosmic duality/twinned nature of it (e.g. Gemini).
+
+RETURN JSON FORMAT EXACTLY:
+{
+  "names": [
+    { "name": "Firstname", "origin": "Latin/Greek/etc", "deepMeaning": "The deep esoteric meaning" }
+  ],
+  "initials": "FML",
+  "initialsMeaning": "Meaning of the cipher of initials. (If it spells TWO, talk about Duality, Gemini, Twin Flames, etc)",
+  "temporalGeometry": "Deep dive into their birth time and date. Explicitly call out connections to Pi, Golden Ratio, etc.",
+  "mathematicalConstants": ["Pi Resonance (3.14)", "Golden Ratio (1.618)"],
+  "holographicSynthesis": "A 2-3 sentence profound summary connecting their name origin and their time of birth into a sacred mission statement."
+}
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: "Process Etymology and Time Geometry." }] }],
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json"
+      },
+    });
+
+    const responseText = response.text || "{}";
+    const cleanJson = responseText.replace(/```json|```/g, "").trim();
+    return JSON.parse(cleanJson);
+  } catch (error) {
+    console.error("Error in fetchEtymologyDecoder:", error);
+    throw new Error("Etymology decoding failed.", { cause: error });
+  }
+};
+
 export const parseVoiceBirthDetails = async (transcript: string) => {
   const ai = getAI();
   const prompt = `
-  You are J.A.R.V.I.S., the ultimate Stark Industries intelligence.
+  You are HIGHER MIND, the ultimate Astral Consciousness Guide.
   Analyze the following spoken transcript of birth details and extract:
-  1. Name (default to "Sir" if not specified)
+  1. Name (default to "Seeker" if not specified)
   2. Birth Date (formatted as "YYYY-MM-DD", fallback to "1995-06-15" if not specified)
   3. Birth Time (formatted as "HH:MM", fallback to "10:30" if not specified, convert typical 12-hour spoken formats like "3 PM" to "15:00", etc.)
   4. Birth Location (fallback to "San Francisco, CA" if not specified)

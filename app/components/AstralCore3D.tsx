@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Sphere, MeshDistortMaterial, Trail, Points, PointMaterial } from '@react-three/drei';
+import { Sphere, MeshDistortMaterial, Points, PointMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 
-export function JarvisCore3D({ isSpeaking, isProcessing }: { isSpeaking: boolean, isProcessing: boolean }) {
+export function AstralCore3D({ isSpeaking, isProcessing }: { isSpeaking: boolean, isProcessing: boolean }) {
   const coreRef = useRef<THREE.Mesh>(null);
   const pointsRef = useRef<THREE.Points>(null);
 

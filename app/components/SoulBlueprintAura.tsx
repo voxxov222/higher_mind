@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { Float, Stars, Center, Html, Line, Points, PointMaterial, OrbitControls } from '@react-three/drei';
+import { Float, Stars, Center, Html, Line, OrbitControls } from '@react-three/drei';
 
 import { CelestialBody } from '../types';
 

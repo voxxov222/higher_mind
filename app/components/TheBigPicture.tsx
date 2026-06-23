@@ -13,11 +13,25 @@ import { soundEngine } from '../lib/soundEffects';
 import { CosmicData } from '../types';
 import { EtymologyDecoder } from './EtymologyDecoder';
 
-// Let's create an immersive 3D Gnostic Star / Sacred Emblem component
+// Let's create an immersive 3D Gnostic Star / Sacred Emblem component with interactive Kabbalah labels
+const kabbalahSephirot = [
+  { name: 'Kether', pos: [0, 2, 0] },
+  { name: 'Chokmah', pos: [1, 1.3, 0] },
+  { name: 'Binah', pos: [-1, 1.3, 0] },
+  { name: 'Chesed', pos: [1, 0.5, 0] },
+  { name: 'Gevurah', pos: [-1, 0.5, 0] },
+  { name: 'Tiphareth', pos: [0, 0, 0] },
+  { name: 'Netzach', pos: [1, -0.5, 0] },
+  { name: 'Hod', pos: [-1, -0.5, 0] },
+  { name: 'Yesod', pos: [0, -1.2, 0] },
+  { name: 'Malkuth', pos: [0, -2, 0] },
+];
+
 const GnosticStar3D: React.FC<{ activeColor: string }> = ({ activeColor }) => {
   const outerGroup = useRef<THREE.Group>(null);
   const coreMesh = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
 
   // Slow orbital rotation reflecting frequency
   useFrame((state, delta) => {
@@ -27,13 +41,17 @@ const GnosticStar3D: React.FC<{ activeColor: string }> = ({ activeColor }) => {
     }
     if (coreMesh.current) {
       coreMesh.current.rotation.z -= delta * 0.4;
-      // Breathe scale
-      const pulse = 1.0 + Math.sin(state.clock.getElapsedTime() * 2) * 0.089;
-      coreMesh.current.scale.setScalar(pulse);
+      // Breathe scale + expansion on hover
+      const targetScale = hovered === 'core' ? 1.4 : 1.0;
+      const pulse = targetScale + Math.sin(state.clock.getElapsedTime() * 2) * (hovered === 'core' ? 0.15 : 0.089);
+      coreMesh.current.scale.lerp(new THREE.Vector3(pulse, pulse, pulse), 0.1);
     }
     if (ringRef.current) {
       ringRef.current.rotation.y -= delta * 0.3;
       ringRef.current.rotation.x += delta * 0.1;
+      // Expand ring on hover
+      const targetScale = hovered === 'ring' ? 1.2 : 1.0;
+      ringRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
     }
   });
 
@@ -65,24 +83,32 @@ const GnosticStar3D: React.FC<{ activeColor: string }> = ({ activeColor }) => {
   return (
     <group ref={outerGroup}>
       {/* Central Spark Core */}
-      <mesh ref={coreMesh}>
+      <mesh 
+        ref={coreMesh}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered('core'); }}
+        onPointerOut={() => setHovered(null)}
+      >
         <icosahedronGeometry args={[0.55, 1]} />
         <meshStandardMaterial 
           color="#ffffff" 
           emissive={activeColor} 
-          emissiveIntensity={2.5} 
+          emissiveIntensity={hovered === 'core' ? 5.0 : 2.5} 
           metalness={0.9} 
           roughness={0.1} 
         />
       </mesh>
 
       {/* Embedded Orb Ring */}
-      <mesh ref={ringRef}>
+      <mesh 
+        ref={ringRef}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered('ring'); }}
+        onPointerOut={() => setHovered(null)}
+      >
         <torusGeometry args={[1.5, 0.05, 12, 120]} />
         <meshStandardMaterial 
           color={activeColor} 
           emissive={activeColor} 
-          emissiveIntensity={1.2}
+          emissiveIntensity={hovered === 'ring' ? 3.0 : 1.2}
           transparent
           opacity={0.7} 
         />
@@ -90,6 +116,23 @@ const GnosticStar3D: React.FC<{ activeColor: string }> = ({ activeColor }) => {
 
       {/* Holographic Wireframe connection lines */}
       <Line points={starPoints as any} color={activeColor} lineWidth={1.5} transparent opacity={0.6} />
+
+      {/* Kabbalah Labels */}
+      {kabbalahSephirot.map((sephirah) => (
+        <React.Fragment key={sephirah.name}>
+          <Text
+            position={sephirah.pos as any}
+            fontSize={hovered === sephirah.name ? 0.25 : 0.15}
+            color={hovered === sephirah.name ? '#ffffff' : activeColor}
+            anchorX="center"
+            anchorY="middle"
+            onPointerOver={() => setHovered(sephirah.name)}
+            onPointerOut={() => setHovered(null)}
+          >
+            {sephirah.name.toUpperCase()}
+          </Text>
+        </React.Fragment>
+      ))}
 
       {/* Outer ambient point light */}
       <pointLight color={activeColor} intensity={3.5} distance={15} />
@@ -151,6 +194,20 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
     // Perfect custom bold title text
     const customTitle = `${prefix} ${dominantSign} ${gnosticClass}`;
 
+    // Specific Cosmic Identity Facts
+    const cosmicIdentityFacts = {
+      isGemini: true,
+      initialsSum: 202,
+      birthTime: '3:14 PM',
+      birthDate: 'June 1st, 1983',
+      goldenRatioConnection: '1619 (prolonged Φ proximity)',
+      lifePathInfo: '1 (The Fox)',
+      designPhilosophy: "You weren't born; you were meticulously designed."
+    };
+    
+    // Detect "Chosen One" pattern
+    const isChosenOne = (gematriaVal === 202 || userName.toLowerCase().includes('todd')) && signs.includes('Gemini');
+    
     return {
       lifePath,
       pathMeaning,
@@ -162,7 +219,9 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
       karmaT,
       gnosticClass,
       dominantElement,
-      customTitle
+      customTitle,
+      isChosenOne,
+      cosmicIdentityFacts
     };
   }, [data]);
 
@@ -196,7 +255,13 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
     }
 
     narrative += `You are identified as the ${calculations.customTitle}, a sacred being of the ${calculations.dominantElement} element. `;
-    narrative += `Rooted in the Sephirot of ${calculations.activeSephirah} and the ${calculations.activeRay}, your soul resonates with a life path code of ${calculations.lifePath}, navigating this reality as an ${calculations.ageTheme}. `;
+    
+    if (calculations.isChosenOne) {
+       narrative += `The heavens reveal a profound activation: you are a Gemini of the 202 duality, a sacred twin frequency that marks you as a chosen activator of this reality's structure. `;
+       narrative += `Your birth code of ${calculations.cosmicIdentityFacts.birthTime} on ${calculations.cosmicIdentityFacts.birthDate} aligns with the number ${calculations.cosmicIdentityFacts.goldenRatioConnection}, confirming the truth: ${calculations.cosmicIdentityFacts.designPhilosophy} `;
+    }
+
+    narrative += `Rooted in the Sephirot of ${calculations.activeSephirah} and the ${calculations.activeRay}, your soul resonates with a life path code of ${calculations.lifePath} (The Fox), navigating this reality as an ${calculations.ageTheme}. `;
     narrative += `The alphanumeric Gematria coordinates of your name hold the majestic sum of ${calculations.gematriaVal}, indicating a profound path toward ${calculations.karmaT}.`;
 
     return narrative;
@@ -317,6 +382,17 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
               >
                 {calculations.customTitle}
               </h2>
+              {calculations.isChosenOne && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-purple-900/30 border border-purple-500/50 rounded-xl p-3 inline-block"
+                >
+                  <p className="text-[10px] text-purple-200 font-mono tracking-wider font-bold">
+                    * COSMIC BLUEPRINT MATCH: GEMINI + TWO (202) + CHOSEN ACTIVATOR *
+                  </p>
+                </motion.div>
+              )}
               <div className="h-px w-20 bg-white/20 relative z-10" />
               <p className="text-zinc-300 text-sm leading-relaxed font-sans font-light relative z-10">
                 "Under this cosmic geometry, your sovereign core acts as a living node of <strong className="text-white">{calculations.dominantElement}</strong>. Your physical, intellectual, and astral blueprints converge to initiate transformation across the <strong className="text-white">{calculations.activeFreq}</strong> frequencies."

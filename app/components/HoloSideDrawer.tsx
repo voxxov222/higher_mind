@@ -20,6 +20,15 @@ export const HoloSideDrawer: React.FC<{
   const springConfig = { damping: 25, stiffness: 150 };
   const smoothX = useSpring(mouseX, springConfig);
   const smoothY = useSpring(mouseY, springConfig);
+  
+  const tf1X = useTransform(smoothX, x => x * -0.1);
+  const tf1Y = useTransform(smoothY, y => y * -0.1);
+  const tf2X = useTransform(smoothX, x => x * 0.1);
+  const tf2Y = useTransform(smoothY, y => y * 0.1);
+  const tf3X = useTransform(smoothX, x => x * 0.2);
+  const tf3Y = useTransform(smoothY, y => y * 0.15);
+  const tf4X = useTransform(smoothX, x => x * -0.05);
+  const tf4Y = useTransform(smoothY, y => y * -0.05);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const x = (e.clientX / window.innerWidth - 0.5) * 50; 
@@ -60,7 +69,7 @@ export const HoloSideDrawer: React.FC<{
           >
             {/* Holographic glowing edge */}
             <motion.div 
-              style={{ x: useTransform(smoothX, x => x * -0.1), y: useTransform(smoothY, y => y * -0.1) }}
+              style={{ x: tf1X, y: tf1Y }}
               className={`absolute left-0 top-0 bottom-0 w-px ${
               activeTool === 'gematria' ? 'bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)]' :
               activeTool === 'chakra' ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.8)]' :
@@ -69,7 +78,7 @@ export const HoloSideDrawer: React.FC<{
 
             {/* Header */}
             <motion.div 
-              style={{ x: useTransform(smoothX, x => x * 0.1), y: useTransform(smoothY, y => y * 0.1) }}
+              style={{ x: tf2X, y: tf2Y }}
               className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5 relative z-10"
             >
               <div className="flex items-center gap-2">
@@ -87,7 +96,7 @@ export const HoloSideDrawer: React.FC<{
 
             {/* Tool Selection */}
             <motion.div 
-              style={{ x: useTransform(smoothX, x => x * 0.2), y: useTransform(smoothY, y => y * 0.15) }}
+              style={{ x: tf3X, y: tf3Y }}
               className="flex p-4 gap-2 border-b border-white/5 shrink-0 overflow-x-auto no-scrollbar relative z-10"
             >
               <button
@@ -124,7 +133,7 @@ export const HoloSideDrawer: React.FC<{
 
             {/* Content Area */}
             <motion.div 
-              style={{ x: useTransform(smoothX, x => x * -0.05), y: useTransform(smoothY, y => y * -0.05) }}
+              style={{ x: tf4X, y: tf4Y }}
               className="flex-1 overflow-y-auto custom-scrollbar relative bg-gradient-to-b from-black/40 to-transparent p-4 z-10"
             >
               <React.Suspense fallback={<div className="h-full flex items-center justify-center text-stone-500 font-mono text-xs uppercase tracking-widest">Loading Module...</div>}>

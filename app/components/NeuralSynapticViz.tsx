@@ -276,6 +276,7 @@ const NodeMesh = ({
     <group position={node.pos}>
       <mesh
         ref={meshRef}
+        geometry={geometry}
         onClick={(e) => {
           e.stopPropagation();
           soundEngine.click();
@@ -292,7 +293,6 @@ const NodeMesh = ({
           document.body.style.cursor = 'default';
         }}
       >
-        {geometry}
         <meshStandardMaterial
           color={isHovered ? '#ffffff' : finalColor}
           emissive={finalColor}

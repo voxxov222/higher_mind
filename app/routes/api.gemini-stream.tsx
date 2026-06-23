@@ -49,7 +49,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
     return new Response(stream, {
       headers: {
-        "Content-Type": "text/event-stream",
+        "Content-Type": "text/plain",
         "Cache-Control": "no-cache",
         "Connection": "keep-alive"
       }

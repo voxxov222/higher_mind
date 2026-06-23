@@ -1213,7 +1213,7 @@ export const HolographicProfile: React.FC<HolographicProfileProps> = ({ user, on
               className="absolute top-24 right-8 w-80 bg-black/80 backdrop-blur-xl border border-white/15 p-6 rounded-2xl pointer-events-auto max-h-[calc(100vh-150px)] overflow-y-auto custom-scrollbar"
             >
               <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                <User size={16} className="text-purple-400" />
+                <UserIcon size={16} className="text-purple-400" />
                 Identity Configuration
               </h3>
               

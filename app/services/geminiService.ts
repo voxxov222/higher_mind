@@ -7,12 +7,30 @@ export interface CosmicInput {
   location: string;
 }
 
+const pruneCosmicData = (data: CosmicData | null): any => {
+  if (!data) return null;
+  // Make a shallow copy and remove potentially massive arrays that blow up payload size.
+  const { 
+    timeline, transits, aspects_matrix, interactions, 
+    chakras, aspects, transit_aspects, 
+    ...essentialData 
+  } = data as any;
+  return essentialData;
+};
+
 const apiProxy = async (action: string, payload: any) => {
+  if (payload && payload.cosmicData) {
+    payload.cosmicData = pruneCosmicData(payload.cosmicData);
+  }
+  
   try {
+    const jsonBody = JSON.stringify({ action, payload });
+    // Check if the payload is still too large? It should be well under 1MB now.
+    
     const response = await fetch("/api/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, payload })
+      body: jsonBody
     });
     
     const contentType = response.headers.get("content-type") || "";

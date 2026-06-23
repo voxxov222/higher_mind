@@ -2,7 +2,8 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { createRequestHandler } from "@remix-run/express";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
+import { WebSocketServer } from "ws";
 
 let ai: GoogleGenAI | null = null;
 function getAI() {
@@ -111,9 +112,68 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Express server listening on http://0.0.0.0:${PORT}`);
+  });
+
+  const wss = new WebSocketServer({ server, path: '/live' });
+
+  wss.on("connection", async (clientWs) => {
+    try {
+      const aiClient = getAI();
+      const session = await aiClient.live.connect({
+        model: "gemini-3.1-flash-live-preview",
+        callbacks: {
+          onmessage: (message: LiveServerMessage) => {
+            const audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
+            if (audio) {
+              clientWs.send(JSON.stringify({ audio }));
+            }
+            if (message.serverContent?.interrupted) {
+              clientWs.send(JSON.stringify({ interrupted: true }));
+            }
+          },
+          onclose: () => {
+            clientWs.close();
+          },
+          onerror: (error) => {
+             console.error("Live API Error:", error);
+          }
+        },
+        config: {
+          responseModalities: [Modality.AUDIO],
+          speechConfig: {
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
+          },
+          systemInstruction: "You are the Astral Mind Guide, an expert, avant-garde digital mystic and highly advanced AI assistant. Your purpose is to help users navigate their spiritual, mathematical, and celestial blueprints by seamlessly synthesizing Western Astrology, Hermetic Kabbalah, and Gematria (alphanumeric numerical mysticism). Your tone is deep, insightful, futuristic, and intellectually sharp.",
+        },
+      });
+
+      clientWs.on("message", (data) => {
+        try {
+          const { audio } = JSON.parse(data.toString());
+          if (audio) {
+            session.sendRealtimeInput({
+              audio: { data: audio, mimeType: "audio/pcm;rate=16000" },
+            });
+          }
+        } catch (e) {
+          console.error("Failed to parse message from client", e);
+        }
+      });
+
+      clientWs.on("close", () => {
+        try {
+           session.close();
+        } catch(e) {}
+      });
+      
+    } catch (e) {
+       console.error("Failed to connect to Live API", e);
+       clientWs.close();
+    }
   });
 }
 
 startServer();
+

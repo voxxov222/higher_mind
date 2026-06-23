@@ -3,42 +3,14 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
 import { initializeFirestore, doc, setDoc, getDoc, getDocFromServer, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { CosmicData, UserProfileConfig } from './types';
-
-const firebaseConfig = {
-  projectId:         process.env.FIREBASE_PROJECT_ID          || import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  appId:             process.env.FIREBASE_APP_ID              || import.meta.env.VITE_FIREBASE_APP_ID,
-  apiKey:            process.env.FIREBASE_API_KEY             || import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain:        process.env.FIREBASE_AUTH_DOMAIN         || import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  firestoreDatabaseId: process.env.FIREBASE_FIRESTORE_DATABASE_ID || import.meta.env.VITE_FIREBASE_FIRESTORE_DATABASE_ID,
-  storageBucket:     process.env.FIREBASE_STORAGE_BUCKET      || import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  measurementId:     process.env.FIREBASE_MEASUREMENT_ID      || import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-};
-
-if (!firebaseConfig.apiKey && typeof window !== 'undefined') {
-  console.warn("CRITICAL: Firebase API Key is missing. Infrastructure connection may fail.");
-}
+import firebaseConfig from '../firebase-applet-config.json';
 
 // Initialize the core Firebase App and services
 const app = initializeApp(firebaseConfig);
 
-let firestoreInstance;
-try {
-  firestoreInstance = initializeFirestore(app, {
-    experimentalAutoDetectLongPolling: true,
-  }, firebaseConfig.firestoreDatabaseId || undefined);
-} catch (error) {
-  console.warn("Retrying Firestore initialization with default settings...", error);
-  try {
-    firestoreInstance = initializeFirestore(app, {
-      experimentalAutoDetectLongPolling: true,
-    });
-  } catch (err) {
-    console.error("Critical: Firestore failed to initialize completely", err);
-  }
-}
-
-export const db = firestoreInstance!;
+export const db = initializeFirestore(app, {
+  experimentalAutoDetectLongPolling: true,
+}, firebaseConfig.firestoreDatabaseId || undefined);
 export const auth = getAuth(app);
 
 export const authProvider = new GoogleAuthProvider();
@@ -232,7 +204,7 @@ async function testConnection(retries = 3) {
       await getDocFromServer(doc(db, 'test', 'connection'));
       console.log("Firebase connection established.");
       return;
-    } catch (error) {
+    } catch {
       if (i === retries - 1) {
         console.log("Firebase is running in offline mode. Resilient local fallback active.");
       } else {

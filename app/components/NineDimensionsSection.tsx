@@ -1,6 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
 import { Layers, Infinity as InfinityIcon, Eye, Heart, Orbit, Network, Zap, Waves, Sparkles, CircleDot, ArrowDown } from 'lucide-react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Float, Stars, Sphere, Box, Torus, Octahedron, Icosahedron, Dodecahedron, Cylinder, Ring, MeshDistortMaterial, MeshWobbleMaterial, OrbitControls } from '@react-three/drei';
+import * as THREE from 'three';
 
 const DIMENSIONS = [
   {
@@ -114,8 +117,93 @@ function BoxIcon(props: React.SVGProps<SVGSVGElement>) {
     )
 }
 
-const DimensionCard = ({ dim, index }: { dim: any, index: number }) => {
-    const ref = useRef(null);
+function DimensionalGeometry({ activeIndex }: { activeIndex: number }) {
+    const groupRef = useRef<THREE.Group>(null);
+    const materialRef = useRef<THREE.MeshPhysicalMaterial>(null);
+
+    useFrame((state) => {
+        if (!groupRef.current) return;
+        const time = state.clock.getElapsedTime();
+        
+        // Dynamic rotation based on dimension
+        groupRef.current.rotation.x = Math.sin(time / 3) * (0.1 * activeIndex);
+        groupRef.current.rotation.y += 0.005 + (activeIndex * 0.002);
+
+        // Interpolate material properties
+        if (materialRef.current) {
+            const targetRoughness = Math.max(0.1, 1 - (activeIndex * 0.1));
+            const targetMetalness = Math.min(1, activeIndex * 0.1);
+            
+            materialRef.current.roughness = THREE.MathUtils.lerp(materialRef.current.roughness, targetRoughness, 0.05);
+            materialRef.current.metalness = THREE.MathUtils.lerp(materialRef.current.metalness, targetMetalness, 0.05);
+        }
+    });
+
+    return (
+        <group ref={groupRef}>
+            <Float speed={2} rotationIntensity={1} floatIntensity={1}>
+                {activeIndex === 0 && (
+                    <Sphere args={[1.5, 64, 64]}>
+                        <meshPhysicalMaterial ref={materialRef} color="#57534e" roughness={0.9} metalness={0.1} />
+                    </Sphere>
+                )}
+                {activeIndex === 1 && (
+                    <Torus args={[1.2, 0.4, 32, 64]}>
+                        <MeshDistortMaterial ref={materialRef} color="#059669" distort={0.4} speed={2} roughness={0.6} metalness={0.2} />
+                    </Torus>
+                )}
+                {activeIndex === 2 && (
+                    <Box args={[1.8, 1.8, 1.8]}>
+                        <meshPhysicalMaterial ref={materialRef} color="#3b82f6" roughness={0.2} metalness={0.5} wireframe={false} transmission={0.5} thickness={1} />
+                    </Box>
+                )}
+                {activeIndex === 3 && (
+                    <Icosahedron args={[1.8, 1]}>
+                        <meshPhysicalMaterial ref={materialRef} color="#6366f1" wireframe={true} roughness={0.1} metalness={0.8} emissive="#3730a3" emissiveIntensity={0.5} />
+                    </Icosahedron>
+                )}
+                {activeIndex === 4 && (
+                    <Torus args={[1.5, 0.6, 64, 128]}>
+                        <meshPhysicalMaterial ref={materialRef} color="#f43f5e" transmission={0.9} thickness={2} roughness={0} metalness={0.1} ior={1.5} />
+                    </Torus>
+                )}
+                {activeIndex === 5 && (
+                    <group>
+                        <Dodecahedron args={[1.4]}>
+                            <meshPhysicalMaterial ref={materialRef} color="#f59e0b" wireframe thickness={2} roughness={0.2} metalness={0.8} />
+                        </Dodecahedron>
+                        <Octahedron args={[1]}>
+                            <meshPhysicalMaterial color="#fcd34d" transmission={0.8} thickness={1} roughness={0} />
+                        </Octahedron>
+                    </group>
+                )}
+                {activeIndex === 6 && (
+                    <group>
+                        {[0, 1, 2].map((i) => (
+                            <Ring key={i} args={[1 + i * 0.3, 1.05 + i * 0.3, 64]} rotation-x={Math.PI / 2} rotation-y={i * Math.PI / 4}>
+                                <meshBasicMaterial color="#22d3ee" side={THREE.DoubleSide} transparent opacity={0.6 - (i * 0.1)} />
+                            </Ring>
+                        ))}
+                    </group>
+                )}
+                {activeIndex === 7 && (
+                    <Sphere args={[2, 64, 64]}>
+                        <meshPhysicalMaterial ref={materialRef} color="#a855f7" transmission={1} thickness={5} roughness={0.1} metalness={0.1} ior={1.1} emissive="#7e22ce" emissiveIntensity={0.2} />
+                    </Sphere>
+                )}
+                {activeIndex === 8 && (
+                    <Sphere args={[1.5, 64, 64]}>
+                        <meshBasicMaterial color="#ffffff" />
+                        <pointLight color="#ffffff" intensity={5} distance={10} />
+                    </Sphere>
+                )}
+            </Float>
+        </group>
+    );
+}
+
+const DimensionCard = ({ dim, index, onInView }: { dim: any, index: number, onInView: (idx: number) => void }) => {
+    const ref = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({
         target: ref,
         offset: ["0 1", "1 1"]
@@ -125,19 +213,32 @@ const DimensionCard = ({ dim, index }: { dim: any, index: number }) => {
     const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1, 1]);
     const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 1]);
 
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    onInView(index);
+                }
+            },
+            { threshold: 0.5 }
+        );
+
+        if (ref.current) observer.observe(ref.current);
+        return () => observer.disconnect();
+    }, [index, onInView]);
+
     return (
         <motion.div 
             ref={ref}
             style={{ scale, opacity }}
-            className={`min-h-[80vh] snap-center flex flex-col justify-center relative my-12`}
+            className={`min-h-[80vh] snap-center flex flex-col justify-center relative my-12 md:pl-[40vw]`}
         >
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-stone-900/40 to-transparent -z-10 pointer-events-none" />
             <div className={`absolute -right-20 -top-20 w-[500px] h-[500px] bg-gradient-to-br ${dim.color} opacity-10 rounded-full blur-[120px] pointer-events-none`} />
             
-            <div className="bg-stone-900/60 border border-white/5 p-8 md:p-12 rounded-3xl backdrop-blur-md shadow-2xl relative overflow-hidden">
-                <div className="flex flex-col md:flex-row gap-8 items-start relative z-10">
-                    {/* Left: Icon & Title */}
-                    <div className="flex-1">
+            <div className="bg-stone-900/60 border border-white/5 p-8 md:p-12 rounded-3xl backdrop-blur-md shadow-2xl relative overflow-hidden transition-all duration-700 hover:bg-stone-900/80">
+                <div className="flex flex-col gap-8 items-start relative z-10">
+                    <div className="flex-1 w-full">
                         <div className="flex items-center gap-4 mb-4">
                             <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center bg-black/50 ${dim.ringColor}`}>
                                 {React.cloneElement(dim.icon, { className: "w-8 h-8 text-white" })}
@@ -151,15 +252,14 @@ const DimensionCard = ({ dim, index }: { dim: any, index: number }) => {
                         <h2 className="text-3xl font-light text-white mb-2">{dim.title}</h2>
                         <h3 className="text-xl text-stone-400 font-serif italic mb-6">{dim.subtitle}</h3>
                         
-                        <div className="inline-block p-3 bg-black/40 border border-white/10 rounded-xl mb-6">
+                        <div className="inline-block p-3 bg-black/40 border border-white/10 rounded-xl mb-6 shadow-inner">
                             <span className="text-[10px] text-stone-500 uppercase tracking-widest block mb-1">State of Awareness</span>
                             <span className="text-lg text-amber-400 font-mono tracking-tight">{dim.stage}</span>
                         </div>
                     </div>
                     
-                    {/* Right: Content */}
-                    <div className="flex-1 space-y-6">
-                        <div className="bg-black/30 border border-white/5 p-6 rounded-2xl">
+                    <div className="flex-1 space-y-6 w-full">
+                        <div className="bg-black/30 border border-white/5 p-6 rounded-2xl hover:border-white/20 transition-colors">
                             <h4 className="text-sm font-mono text-stone-400 mb-3 flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-emerald-400" /> Defining the Reality
                             </h4>
@@ -168,7 +268,7 @@ const DimensionCard = ({ dim, index }: { dim: any, index: number }) => {
                             </p>
                         </div>
 
-                        <div className="bg-black/30 border border-white/5 p-6 rounded-2xl">
+                        <div className="bg-black/30 border border-white/5 p-6 rounded-2xl hover:border-white/20 transition-colors">
                             <h4 className="text-sm font-mono text-stone-400 mb-3 flex items-center gap-2">
                                 <Orbit className="w-4 h-4 text-purple-400" /> Dimensional Integration Practice
                             </h4>
@@ -180,8 +280,8 @@ const DimensionCard = ({ dim, index }: { dim: any, index: number }) => {
                 </div>
 
                 {/* Perspective Timeline */}
-                <div className="mt-12 pt-8 border-t border-white/10 relative z-10">
-                    <div className="grid grid-cols-4 gap-2 md:gap-4 text-center">
+                <div className="mt-12 pt-8 border-t border-white/10 relative z-10 w-full overflow-x-auto custom-scrollbar">
+                    <div className="grid grid-cols-4 gap-2 md:gap-4 text-center min-w-[400px]">
                         {['TO ME', 'BY ME', 'THROUGH ME', 'AS ME'].map((perspective, pIdx) => {
                             let isActive = false;
                             if (pIdx === 0 && index < 3) isActive = true; // 1D, 2D, 3D
@@ -203,56 +303,95 @@ const DimensionCard = ({ dim, index }: { dim: any, index: number }) => {
 };
 
 export const NineDimensionsSection = () => {
+    const [activeIndex, setActiveIndex] = useState(0);
+
     return (
         <div className="h-[85vh] overflow-y-auto overflow-x-hidden snap-y snap-mandatory scrollbar-none scroll-smooth bg-stone-950 rounded-3xl relative">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/5 via-stone-900 to-stone-950 pointer-events-none" />
             
-            {/* Header Hero Section */}
-            <div className="min-h-[80vh] flex flex-col items-center justify-center snap-center text-center px-4 relative z-10">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 1 }}
-                >
-                    <Layers className="w-16 h-16 text-amber-500 mx-auto mb-6 opacity-80" />
-                    <h1 className="text-5xl md:text-7xl font-serif text-white tracking-tight mb-6 drop-shadow-lg">The 9 Dimensions</h1>
-                    <p className="text-xl text-stone-400 max-w-2xl mx-auto font-light mb-12">
-                        A cosmic curriculum of ascending consciousness. From the dense gravity of survival to the absolute singularity of Source.
-                    </p>
-                </motion.div>
-
-                <motion.div 
-                    animate={{ y: [0, 10, 0] }} 
-                    transition={{ repeat: Infinity, duration: 2 }}
-                    className="text-stone-500 mt-12"
-                >
-                    <ArrowDown className="w-8 h-8 mx-auto" />
-                    <span className="text-xs uppercase tracking-widest mt-2 block">Scroll to Ascend</span>
-                </motion.div>
+            {/* Sticky 3D Background */}
+            <div className="md:w-[40vw] w-full h-[30vh] md:h-[85vh] absolute md:fixed top-0 left-0 pointer-events-none z-0">
+                <AnimatePresence mode="wait">
+                    <motion.div 
+                        key={activeIndex}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.2 }}
+                        transition={{ duration: 1 }}
+                        className="absolute inset-0"
+                    >
+                        <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+                            <ambientLight intensity={0.5} />
+                            <pointLight position={[10, 10, 10]} intensity={1} />
+                            <pointLight position={[-10, -10, -10]} intensity={0.5} />
+                            <Stars radius={50} depth={50} count={activeIndex * 1000 + 500} factor={4} saturation={0} fade speed={1} />
+                            <DimensionalGeometry activeIndex={activeIndex} />
+                            <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
+                        </Canvas>
+                    </motion.div>
+                </AnimatePresence>
+                {/* Visual fading gradient to blend with content on mobile */}
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-stone-950 to-transparent block md:hidden" />
+                <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-stone-950 to-transparent hidden md:block" />
             </div>
-            
-            {/* Scrollable Dimensions List */}
-            <div className="max-w-6xl mx-auto px-4 pb-32 relative z-10">
-                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent -z-20 hidden md:block" />
-                {DIMENSIONS.map((dim, idx) => (
-                    <DimensionCard key={dim.level} dim={dim} index={idx} />
-                ))}
+
+            <div className="relative pt-[30vh] md:pt-0">
+                {/* Header Hero Section */}
+                <div className="min-h-[80vh] flex flex-col items-center justify-center snap-center text-center px-4 relative z-10 md:pl-[40vw]">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 1 }}
+                    >
+                        <Layers className="w-16 h-16 text-amber-500 mx-auto mb-6 opacity-80" />
+                        <h1 className="text-5xl md:text-7xl font-serif text-white tracking-tight mb-6 drop-shadow-lg">The 9 Dimensions</h1>
+                        <p className="text-xl text-stone-400 max-w-2xl mx-auto font-light mb-12">
+                            A cosmic curriculum of ascending consciousness. From the dense gravity of survival to the absolute singularity of Source.
+                        </p>
+                    </motion.div>
+
+                    <motion.div 
+                        animate={{ y: [0, 10, 0] }} 
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        className="text-stone-500 mt-12 cursor-pointer z-20 pointer-events-auto"
+                        onClick={() => {
+                            const firstCard = document.getElementById('dim-0');
+                            firstCard?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                    >
+                        <ArrowDown className="w-8 h-8 mx-auto hover:text-amber-500 transition-colors" />
+                        <span className="text-xs uppercase tracking-widest mt-2 block">Scroll to Ascend</span>
+                    </motion.div>
+                </div>
                 
-                {/* Integration Final Section */}
-                <motion.div 
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    className="min-h-[60vh] snap-center flex flex-col items-center justify-center relative mt-32 text-center"
-                >
-                    <InfinityIcon className="w-16 h-16 text-white mb-6" />
-                    <h2 className="text-4xl text-white font-light mb-4">You Are the Multidimensional Self</h2>
-                    <p className="text-lg text-stone-400 max-w-xl mx-auto font-light mb-8">
-                        The mastery of conscious creation is not abandoning the lower dimensions to live only in the higher ones. Real mastery is holding all 9 dimensions simultaneously—embodying spirit within matter.
-                    </p>
-                    <div className="px-6 py-3 bg-white/10 border border-white/20 rounded-full font-mono text-sm text-white">
-                        From 3D Reality to 5D Awareness and Beyond.
-                    </div>
-                </motion.div>
+                {/* Scrollable Dimensions List */}
+                <div className="max-w-7xl mx-auto px-4 pb-32 relative z-10">
+                    <div className="absolute left-[40vw] top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent -z-20 hidden md:block" />
+                    {DIMENSIONS.map((dim, idx) => (
+                        <div key={dim.level} id={`dim-${idx}`}>
+                            <DimensionCard 
+                                dim={dim} 
+                                index={idx} 
+                                onInView={setActiveIndex} 
+                            />
+                        </div>
+                    ))}
+                    
+                    {/* Integration Final Section */}
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        className="min-h-[60vh] snap-center flex flex-col items-center justify-center relative mt-32 text-center md:pl-[40vw]"
+                    >
+                        <InfinityIcon className="w-16 h-16 text-white mb-6" />
+                        <h2 className="text-4xl text-white font-light mb-4">You Are the Multidimensional Self</h2>
+                        <p className="text-lg text-stone-400 max-w-xl mx-auto font-light mb-8">
+                            The mastery of conscious creation is not abandoning the lower dimensions to live only in the higher ones. Real mastery is holding all 9 dimensions simultaneously—embodying spirit within matter.
+                        </p>
+                        <div className="px-6 py-3 bg-white/10 border border-white/20 rounded-full font-mono text-sm text-white shadow-lg backdrop-blur-md">
+                            From 3D Reality to 5D Awareness and Beyond.
+                        </div>
+                    </motion.div>
+                </div>
             </div>
         </div>
     );

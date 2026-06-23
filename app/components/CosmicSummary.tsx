@@ -29,6 +29,9 @@ export const CosmicSummary = ({ data }: { data: CosmicData }) => {
   const bgY2 = useTransform(smoothScroll, [0, 1], ["0%", "100%"]);
   const bgRotate = useTransform(smoothScroll, [0, 1], [0, 45]);
 
+  const hudOpacity = useTransform(smoothScroll, [0, 0.1], [0, 1]);
+  const hudStrokeDashoffset = useTransform(smoothScroll, [0, 1], [88, 0]);
+
   if (!data) return null;
 
   return (
@@ -284,7 +287,7 @@ export const CosmicSummary = ({ data }: { data: CosmicData }) => {
       {/* --- PERMANENT NAVIGATION HUD --- */}
       <div className="fixed bottom-12 right-12 z-50 pointer-events-none hidden md:block">
          <motion.div 
-           style={{ opacity: useTransform(smoothScroll, [0, 0.1], [0, 1]) }}
+           style={{ opacity: hudOpacity }}
            className="p-6 bg-black/60 backdrop-blur-xl border border-white/10 rounded-[2.5rem] flex flex-col gap-6 items-center shadow-2xl pointer-events-auto"
          >
             <div className="relative w-8 h-8">
@@ -294,7 +297,7 @@ export const CosmicSummary = ({ data }: { data: CosmicData }) => {
                     cx="16" cy="16" r="14" 
                     fill="none" stroke="#a855f7" strokeWidth="2"
                     strokeDasharray="88"
-                    style={{ strokeDashoffset: useTransform(smoothScroll, [0, 1], [88, 0]) }}
+                    style={{ strokeDashoffset: hudStrokeDashoffset }}
                   />
                </svg>
                <div className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white">

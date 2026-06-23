@@ -62,70 +62,269 @@ interface InteractionState {
   glowIntensity: number;
 }
 
-// --- COSMIC BACKGROUND PHENOMENA ---
+// --- COSMIC BACKGROUND PHENOMENA (HYPERSPACE) ---
 const CosmicPhenomena = () => {
   const pointsRef = useRef<THREE.Points>(null);
-  const particleCount = 2000;
+  const particleCount = 10000;
   
-  const [positions, rotations] = useMemo(() => {
+  const [positions, rotations, velocities] = useMemo(() => {
     const pos = new Float32Array(particleCount * 3);
     const rot = new Float32Array(particleCount);
+    const vel = new Float32Array(particleCount);
+    
     for (let i = 0; i < particleCount; i++) {
+      // Create a cylindrical tunnel
       const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(Math.random() * 2 - 1);
-      const radius = 200 + Math.random() * 300;
+      // Leave a gap in the center so objects are visible
+      const radius = 60 + Math.random() * 400;
+      const z = (Math.random() - 0.5) * 2000;
       
-      pos[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      pos[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      pos[i * 3 + 2] = radius * Math.cos(phi);
+      pos[i * 3] = radius * Math.cos(theta);
+      pos[i * 3 + 1] = radius * Math.sin(theta);
+      pos[i * 3 + 2] = z;
+      
       rot[i] = Math.random() * Math.PI;
+      // High velocity to simulate hyperspace movement
+      vel[i] = 1 + Math.random() * 5; 
     }
-    return [pos, rot];
+    return [pos, rot, vel];
   }, []);
 
   useFrame((state) => {
     if (pointsRef.current) {
-      pointsRef.current.rotation.y += 0.0001;
-      pointsRef.current.rotation.z += 0.00005;
+      // Tunnel rotation
+      pointsRef.current.rotation.z -= 0.0005;
       
-      // Subtle pulsing of all background particles
-      const scale = 1 + Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
-      pointsRef.current.scale.setScalar(scale);
+      // Fast forward movement
+      const posArray = pointsRef.current.geometry.attributes.position.array as Float32Array;
+      for (let i = 0; i < particleCount; i++) {
+        posArray[i * 3 + 2] += velocities[i];
+        // Reset when moving past the camera
+        if (posArray[i * 3 + 2] > 1000) {
+          posArray[i * 3 + 2] = -1000;
+        }
+      }
+      pointsRef.current.geometry.attributes.position.needsUpdate = true;
+      
+      // Engine/Hyperspace pulsing
+      const scale = 1 + Math.sin(state.clock.elapsedTime * 2.0) * 0.02;
+      pointsRef.current.scale.set(scale, scale, scale);
     }
   });
 
   return (
     <group>
-      <Points ref={pointsRef} positions={positions}>
+      <Points ref={pointsRef}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={particleCount}
+            array={positions}
+            itemSize={3}
+          />
+        </bufferGeometry>
         <PointMaterial
           transparent
-          color="#8b5cf6"
-          size={0.8}
+          color="#a855f7"
+          size={1.5}
           sizeAttenuation={true}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
-          opacity={0.4}
+          opacity={0.6}
         />
       </Points>
-      {/* Distant Nebula clouds */}
-      {[...Array(5)].map((_, i) => (
-        <Float key={i} speed={1} rotationIntensity={2} floatIntensity={1}>
+      
+      {/* Distant swirling hyperspace clouds */}
+      {[...Array(6)].map((_, i) => (
+        <Float key={i} speed={3} rotationIntensity={5} floatIntensity={3}>
           <Sparkles
-            count={50}
-            scale={100}
-            size={6}
-            speed={0.3}
-            opacity={0.2}
-            color={i % 2 === 0 ? "#4f46e5" : "#7c3aed"}
+            count={120}
+            scale={400}
+            size={12}
+            speed={1.5}
+            opacity={0.4}
+            color={i % 3 === 0 ? "#4f46e5" : i % 3 === 1 ? "#ec4899" : "#06b6d4"}
             position={[
-              Math.sin(i) * 200,
-              Math.cos(i) * 150,
-              (Math.random() - 0.5) * 300
+              Math.sin(i * Math.PI / 3) * 250,
+              Math.cos(i * Math.PI / 3) * 200,
+              (Math.random() - 0.5) * 800
             ]}
           />
         </Float>
       ))}
+      
+      {/* Intense center warp rays */}
+      <group rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[2, 60, 2000, 32, 1, true]} />
+        <meshBasicMaterial color="#7c3aed" wireframe transparent opacity={0.03} />
+      </group>
+      <group rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[10, 80, 2000, 16, 1, true]} />
+        <meshBasicMaterial color="#38bdf8" wireframe transparent opacity={0.02} />
+      </group>
     </group>
+  );
+};
+
+// --- HIGH-PERFORMANCE DYNAMIC COLOR-SHIFTING TWINKLING STARFIELD ---
+const DynamicAmbientStars = ({ count = 2000, radius = 100, depth = 50 }) => {
+  const pointsRef = useRef<THREE.Points>(null);
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
+
+  // Generate random star attributes
+  const [positions, colors, phases, speeds] = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    const col = new Float32Array(count * 3);
+    const ph = new Float32Array(count);
+    const sp = new Float32Array(count);
+
+    for (let i = 0; i < count; i++) {
+      // Sphere coordinate generation (same as Drei Stars)
+      const u = Math.random();
+      const v = Math.random();
+      const theta = u * 2.0 * Math.PI;
+      const phi = Math.acos(2.0 * v - 1.0);
+      
+      const r = radius + (Math.random() - 0.5) * depth;
+
+      pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      pos[i * 3 + 2] = r * Math.cos(phi);
+
+      // Base colors: slight variation of celestial blues, purples, cyans, and white
+      const colorType = Math.random();
+      if (colorType < 0.25) {
+        // Celestial cyan
+        col[i * 3] = 0.4 + Math.random() * 0.2;     // R
+        col[i * 3 + 1] = 0.8 + Math.random() * 0.2; // G
+        col[i * 3 + 2] = 0.9 + Math.random() * 0.1; // B
+      } else if (colorType < 0.5) {
+        // Deep indigo/purple
+        col[i * 3] = 0.6 + Math.random() * 0.2;     // R
+        col[i * 3 + 1] = 0.4 + Math.random() * 0.2; // G
+        col[i * 3 + 2] = 0.9 + Math.random() * 0.1; // B
+      } else if (colorType < 0.75) {
+        // Golden star
+        col[i * 3] = 0.9 + Math.random() * 0.1;     // R
+        col[i * 3 + 1] = 0.8 + Math.random() * 0.2; // G
+        col[i * 3 + 2] = 0.4 + Math.random() * 0.2; // B
+      } else {
+        // Pure high-energy white/blue
+        col[i * 3] = 0.9 + Math.random() * 0.1;     // R
+        col[i * 3 + 1] = 0.9 + Math.random() * 0.1; // G
+        col[i * 3 + 2] = 1.0;                       // B
+      }
+
+      // Random starting phases and twinkling speeds for perfect independent twinkling
+      ph[i] = Math.random() * Math.PI * 2.0;
+      sp[i] = 1.5 + Math.random() * 3.5; // speeds between 1.5 and 5.0 rad/s
+    }
+
+    return [pos, col, ph, sp];
+  }, [count, radius, depth]);
+
+  const uniforms = useMemo(() => ({
+    uTime: { value: 0.0 },
+    uSize: { value: 6.0 }
+  }), []);
+
+  useFrame((state) => {
+    const elapsed = state.clock.getElapsedTime();
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTime.value = elapsed;
+    }
+    if (pointsRef.current) {
+      // Subtle rotation to simulate ambient space rotation
+      pointsRef.current.rotation.y = elapsed * 0.01;
+      pointsRef.current.rotation.x = elapsed * 0.005;
+    }
+  });
+
+  return (
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={count}
+          array={positions}
+          itemSize={3}
+        />
+        <bufferAttribute
+          attach="attributes-aColor"
+          count={count}
+          array={colors}
+          itemSize={3}
+        />
+        <bufferAttribute
+          attach="attributes-aPhase"
+          count={count}
+          array={phases}
+          itemSize={1}
+        />
+        <bufferAttribute
+          attach="attributes-aSpeed"
+          count={count}
+          array={speeds}
+          itemSize={1}
+        />
+      </bufferGeometry>
+      <shaderMaterial
+        ref={materialRef}
+        transparent
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+        uniforms={uniforms}
+        vertexShader={`
+          uniform float uTime;
+          uniform float uSize;
+          attribute vec3 aColor;
+          attribute float aPhase;
+          attribute float aSpeed;
+          varying vec3 vColor;
+          varying float vTwinkle;
+
+          void main() {
+            vColor = aColor;
+            
+            // Randomized twinkling using sine wave shifted by unique phase & speed
+            float twinkle = 0.3 + 0.7 * sin(uTime * aSpeed + aPhase);
+            vTwinkle = twinkle;
+
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            gl_Position = projectionMatrix * mvPosition;
+            
+            // Dynamic point size relative to distance and individual twinkling intensity
+            gl_PointSize = uSize * twinkle * (300.0 / -mvPosition.z);
+          }
+        `}
+        fragmentShader={`
+          uniform float uTime;
+          varying vec3 vColor;
+          varying float vTwinkle;
+
+          void main() {
+            // Draw a rounded, soft-glow star particle instead of square
+            vec2 center = gl_PointCoord - vec2(0.5);
+            float dist = length(center);
+            if (dist > 0.5) discard;
+
+            // Cosmic color cycle: dynamic color shifting over time
+            vec3 shiftingColor = vColor;
+            shiftingColor.r += sin(uTime * 0.5 + vColor.g * 10.0) * 0.12;
+            shiftingColor.g += cos(uTime * 0.3 + vColor.b * 10.0) * 0.12;
+            shiftingColor.b += sin(uTime * 0.4 + vColor.r * 10.0) * 0.12;
+            
+            // Keep clamping safe
+            shiftingColor = clamp(shiftingColor, 0.2, 1.0);
+
+            // Compute soft falloff radial alpha
+            float softAlpha = smoothstep(0.5, 0.0, dist) * vTwinkle;
+
+            gl_FragColor = vec4(shiftingColor, softAlpha);
+          }
+        `}
+      />
+    </points>
   );
 };
 
@@ -1646,7 +1845,7 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
       <pointLight position={[10, 10, -5]} intensity={(activeTheme.lighting?.pointIntensity || 2) / 2} color={activeTheme.lighting?.point2Color || '#ffffff'} />
       
       {/* Lightened particle fields for mobile performance */}
-      <Stars radius={100} depth={50} count={150} factor={4} saturation={0} fade />
+      <DynamicAmbientStars count={300} radius={100} depth={50} />
       <CosmicPhenomena />
       <Sparkles count={100} scale={150} size={2} speed={0.2} opacity={0.3} />
 
@@ -1755,7 +1954,7 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
             onNodeClick={(content) => onPlanetClick?.("Name Analysis", content)} 
           />
           <pointLight color="#0ea5e9" intensity={2} distance={30} />
-          <Stars radius={50} depth={20} count={100} factor={2} saturation={0} fade />
+          <DynamicAmbientStars count={150} radius={50} depth={20} />
         </group>
       )}
 
@@ -1768,7 +1967,7 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
       {data && activeTab === 'numbers' && (
         <group position={[15, 5, 0]}>
           <NumerologyGeometria data={data} onSelect={(title, content) => onPlanetClick?.(title, content)} />
-          <Stars radius={40} depth={10} count={50} factor={1} saturation={0} fade />
+          <DynamicAmbientStars count={80} radius={40} depth={10} />
         </group>
       )}
 

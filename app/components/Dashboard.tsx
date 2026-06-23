@@ -9,7 +9,7 @@ import {
   Camera, Video, ExternalLink, User as UserIcon, LogOut, Edit3, Globe, Compass, 
   Type, BookOpen, Minimize2, Maximize2, Search, BarChart2, Zap, Upload, Palette, 
   Bookmark, Volume2, Grid, Heart, Brain, CirclePlay, MessageCircle, Box, Key, Cpu,
-  Workflow, Radio, Loader2, Flame, Orbit, Hash, Map, Triangle, LibraryBig, History, Layers, LayoutGrid, Pin
+  Workflow, Radio, Loader2, Flame, Orbit, Hash, Map, Triangle, LibraryBig, History, Layers, LayoutGrid, Pin, Award, Eye
 } from 'lucide-react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
@@ -20,11 +20,11 @@ import { fetchTimelineDepth, fetchTimelineDeepDiveOption, fetchGeneralDeepDive, 
 import { User } from 'firebase/auth';
 
 // --- DYNAMICALLY IMPORTED COMPONENTS ---
-const DeepSynthesis = React.lazy(() => import('./DeepSynthesis'));
+const DeepSynthesis = React.lazy(() => import('./DeepSynthesis').then(m => ({ default: m.default })));
 const HarmonicVisualizer = React.lazy(() => import('./HarmonicVisualizer'));
 const ChakraScene = React.lazy(() => import('./ChakraScene'));
 const CompatibilityMatrix = React.lazy(() => import('./CompatibilityMatrix'));
-const SoulBlueprintAura = React.lazy(() => import('./SoulBlueprintAura'));
+import SoulBlueprintAura from './SoulBlueprintAura';
 const CelestialDNASection = React.lazy(() => import('./CelestialDNASection'));
 const DailyCosmicPulse = React.lazy(() => import('./DailyCosmicPulse').then(m => ({ default: m.DailyCosmicPulse })));
 const HolographicProfile = React.lazy(() => import('./HolographicProfile').then(m => ({ default: m.HolographicProfile })));
@@ -32,7 +32,7 @@ const StarChart3D = React.lazy(() => import('./StarChart3D').then(m => ({ defaul
 const EgyptianPyramidAlignment = React.lazy(() => import('./EgyptianPyramid').then(m => ({ default: m.EgyptianPyramidAlignment })));
 const SynapticWebVisualizer = React.lazy(() => import('./SynapticWebVisualizer').then(m => ({ default: m.SynapticWebVisualizer })));
 const NeuralSynapticViz = React.lazy(() => import('./NeuralSynapticViz').then(m => ({ default: m.NeuralSynapticViz })));
-const AstraeaOracle = React.lazy(() => import('./AstraeaOracle').then(m => ({ default: m.AstraeaOracle })));
+
 const CosmicCanvas = React.lazy(() => import('./CosmicCanvas').then(m => ({ default: m.CosmicCanvas })));
 const HolographicNotebook = React.lazy(() => import('./HolographicNotebook').then(m => ({ default: m.HolographicNotebook })));
 const AIAgentsSection = React.lazy(() => import('./AIAgentsSection').then(m => ({ default: m.AIAgentsSection })));
@@ -48,7 +48,7 @@ const GoldenRatioSection = React.lazy(() => import('./GoldenRatioSection').then(
 const SkyMapSection = React.lazy(() => import('./SkyMapSection').then(m => ({ default: m.SkyMapSection })));
 const SoulPathSection = React.lazy(() => import('./SoulPathSection').then(m => ({ default: m.SoulPathSection })));
 const AncestralResearchSection = React.lazy(() => import('./AncestralResearchSection').then(m => ({ default: m.AncestralResearchSection })));
-const TheBigPicture = React.lazy(() => import('./TheBigPicture').then(m => ({ default: m.TheBigPicture })));
+import { TheBigPicture } from './TheBigPicture';
 const CommunityFeed = React.lazy(() => import('./social/CommunityFeed'));
 const LiveMessenger = React.lazy(() => import('./social/LiveMessenger'));
 const KarmaLedger = React.lazy(() => import('./KarmaLedger').then(m => ({ default: m.KarmaLedger })));
@@ -60,8 +60,9 @@ const FifthDimensionLayer = React.lazy(() => import('./FifthDimensionLayer').the
 const SubconsciousProgramming = React.lazy(() => import('./SubconsciousProgramming').then(m => ({ default: m.SubconsciousProgramming })));
 const ConsciousnessAtlasWidget = React.lazy(() => import('./ConsciousnessAtlasWidget').then(m => ({ default: m.ConsciousnessAtlasWidget })));
 const ShvayambhuWidget = React.lazy(() => import('./ShvayambhuWidget').then(m => ({ default: m.ShvayambhuWidget })));
+const WillowQuantumCollapse = React.lazy(() => import('./WillowQuantumCollapse').then(m => ({ default: m.WillowQuantumCollapse })));
 
-import VoiceCommander from './VoiceCommander';
+import LiveVoiceAgent from './LiveVoiceAgent';
 import { HigherMindSettings } from './HigherMindSettings';
 const TetragrammatonHUD = React.lazy(() => import('./TetragrammatonHUD').then(m => ({ default: m.TetragrammatonHUD })));
 const Freemason33Section = React.lazy(() => import('./Freemasonry33Section').then(m => ({ default: m.Freemason33Section })));
@@ -69,7 +70,8 @@ const TarotGnosis = React.lazy(() => import('./TarotGnosis').then(m => ({ defaul
 const TarotHologram = React.lazy(() => import('./TarotHologram').then(m => ({ default: m.TarotHologram })));
 const ChineseZodiacGnosis = React.lazy(() => import('./ChineseZodiacGnosis').then(m => ({ default: m.ChineseZodiacGnosis })));
 import { soundEngine } from '../lib/soundEffects';
-const AstralCanvas = React.lazy(() => import('./AstralCanvas').then(m => ({ default: m.AstralCanvas })));
+
+const AstralOSSynthesisEngine = React.lazy(() => import('./AstralOSSynthesisEngine').then(m => ({ default: m.AstralOSSynthesisEngine })));
 const AvatarMatrix = React.lazy(() => import('./AvatarMatrix').then(m => ({ default: m.AvatarMatrix })));
 
 const QuantumEvolutionSection = React.lazy(() => import('./QuantumEvolutionSection').then(m => ({ default: m.QuantumEvolutionSection })));
@@ -93,6 +95,38 @@ import { HoloSideDrawer } from './HoloSideDrawer';
 import { WidgetGallerySidebar } from './WidgetGallerySidebar';
 import { WorkspaceWidgets } from './WorkspaceWidgets';
 
+class ThreeDErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("3D Context crashed:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center p-8 bg-black/50 border border-red-500/30 rounded-3xl h-[400px]">
+          <span className="text-red-400 text-sm font-bold mb-4">A 3D visualization failed to load or crashed.</span>
+          <button 
+            onClick={() => this.setState({ hasError: false })}
+            className="px-6 py-2 bg-red-500/20 border border-red-500/30 rounded-xl text-red-300 text-xs uppercase tracking-widest hover:bg-red-500/40 transition-colors"
+          >
+            Retry Render
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 /**
  * Interface for DashboardProps
  * Defines the contract for top-level data flow into the dashboard.
@@ -101,8 +135,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming';
-  setActiveTab: (tab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming') => void;
+  activeTab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming';
+  setActiveTab: (tab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming') => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -115,6 +149,47 @@ interface DashboardProps {
   vortexMode?: 'material' | 'spirit' | 'sync';
   setVortexMode?: (mode: 'material' | 'spirit' | 'sync') => void;
 }
+
+const AvatarParticleEffect = ({ color }: { color: string }) => {
+  const [particles, setParticles] = useState<{ id: number, x: number, y: number }[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const newParticle = { id: Date.now() + Math.random(), x, y };
+    setParticles(prev => [...prev.slice(-15), newParticle]); // keep last 15
+  };
+
+  return (
+    <div 
+      ref={containerRef} 
+      className="absolute inset-0 z-20 overflow-hidden rounded-3xl"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setParticles([])}
+    >
+      <AnimatePresence>
+        {particles.map(p => (
+          <motion.div
+            key={p.id}
+            initial={{ opacity: 0.8, scale: 0.5, x: p.x, y: p.y, filter: 'hue-rotate(0deg)' }}
+            animate={{ opacity: 0, scale: 2, x: p.x + (Math.random() - 0.5) * 40, y: p.y - Math.random() * 40 - 20, filter: `hue-rotate(${Math.random() * 60 - 30}deg)` }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="absolute w-1.5 h-1.5 rounded-full pointer-events-none mix-blend-screen"
+            style={{ 
+              backgroundColor: color, 
+              boxShadow: `0 0 10px ${color}, 0 0 20px ${color}` 
+            }}
+          />
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 /**
  * ProfileModal Component
@@ -229,12 +304,13 @@ const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedI
             <div className="relative group cursor-pointer">
               <div className="w-32 h-32 rounded-3xl bg-stone-900 border-4 border-stone-950 shadow-2xl overflow-hidden flex items-center justify-center ring-1 ring-white/10">
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover relative z-10 pointer-events-none" />
                 ) : (
-                  <UserIcon className="w-16 h-16 text-stone-700" />
+                  <UserIcon className="w-16 h-16 text-stone-700 relative z-10 pointer-events-none" />
                 )}
+                <AvatarParticleEffect color={primaryColor} />
               </div>
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-3xl">
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-3xl pointer-events-none z-30">
                 <Camera className="text-white w-6 h-6" />
               </div>
             </div>
@@ -335,6 +411,33 @@ const ProfileModal = ({ isOpen, onClose, profileConfig, onUpdateProfile, loadedI
                   <div className="flex justify-between text-[10px] text-stone-600">
                     <span>Markdown supported</span>
                     <span>{bioText.length}/512</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-6 border-t border-white/5">
+                  <div className="flex justify-between items-center">
+                    <label className="block text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold flex items-center gap-2">
+                       <Award size={14} className="text-purple-400" />
+                       Cosmic Achievements
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                     {[
+                       { id: 'architect', title: 'Astral Architect', desc: 'Configured Identity Matrix', icon: Fingerprint, unlocked: true },
+                       { id: 'numerology', title: 'Code Breaker', desc: 'Calculated core metrics', icon: Compass, unlocked: true },
+                       { id: 'community', title: 'Node Connected', desc: 'Sent Cosmic Affinity', icon: Zap, unlocked: true },
+                       { id: 'oracle', title: 'High Oracle', desc: 'Consulted the AI matrix', icon: Eye, unlocked: false },
+                       { id: 'alchemist', title: 'Soul Alchemist', desc: 'Merged multiple readings', icon: Sparkles, unlocked: false },
+                       { id: 'voyager', title: 'Star Voyager', desc: 'Generated Sky Map', icon: Orbit, unlocked: false }
+                     ].map(ach => (
+                       <div key={ach.id} className={`p-4 rounded-3xl border transition-colors ${ach.unlocked ? 'bg-purple-500/10 border-purple-500/30' : 'bg-black/40 border-white/5 opacity-50'}`}>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-3 ${ach.unlocked ? 'bg-purple-500/20 text-purple-300' : 'bg-white/5 text-stone-500'}`}>
+                             <ach.icon size={14} />
+                          </div>
+                          <h4 className={`text-[11px] font-bold uppercase tracking-widest ${ach.unlocked ? 'text-white' : 'text-stone-400'}`}>{ach.title}</h4>
+                          <p className="text-[9px] text-stone-500 mt-1">{ach.desc}</p>
+                       </div>
+                     ))}
                   </div>
                 </div>
               </motion.div>
@@ -676,7 +779,11 @@ const SoulBlueprintTab = ({ data, ResearchBox, isReading, handleReadOutLoud, han
   
   return (
     <div className="absolute inset-0 -mx-6 -my-6 overflow-hidden rounded-3xl group bg-black/40">
-      <SoulBlueprintAura data={data} />
+      <ThreeDErrorBoundary>
+        <React.Suspense fallback={<div className="flex w-full h-full items-center justify-center text-white">Loading Soul Blueprint Aura...</div>}>
+          <SoulBlueprintAura data={data} />
+        </React.Suspense>
+      </ThreeDErrorBoundary>
       {/* HUD overlays */}
       <div className="absolute top-8 left-4 right-4 md:left-8 md:right-8 flex flex-col gap-4 z-20 pointer-events-none">
         
@@ -1705,6 +1812,64 @@ const MockOpastroTerminal = ({ sign = "Aries", period = "daily" }: { sign?: stri
   );
 };
 
+const WillowWrapper = () => {
+  const [question, setQuestion] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showCollapse, setShowCollapse] = useState(false);
+
+  const startCollapse = () => {
+    if (question.trim()) {
+      setIsProcessing(true);
+      setShowCollapse(true);
+    }
+  };
+
+  if (showCollapse) {
+    return (
+      <React.Suspense fallback={<div className="p-12 animate-pulse text-cyan-500 font-mono text-sm tracking-widest text-center">INITIALIZING QUANTUM CORE...</div>}>
+         <WillowQuantumCollapse 
+            question={question} 
+            onClose={() => {
+              setShowCollapse(false);
+              setIsProcessing(false);
+              setQuestion("");
+            }}
+         />
+      </React.Suspense>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-2xl bg-stone-900 border border-white/10 rounded-2xl p-8 shadow-2xl">
+        <div className="flex items-center gap-4 mb-6">
+            <div className="p-3 bg-cyan-500/20 text-cyan-400 rounded-xl">
+                <Cpu size={24} />
+            </div>
+            <div>
+                <h2 className="text-2xl text-white font-light">Willow Node Collapse</h2>
+                <p className="text-stone-400 text-sm mt-1">Ask the hardest, most outrageous questions. The quantum fields will collapse to the most probable absolute truth.</p>
+            </div>
+        </div>
+        <textarea 
+            className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white resize-none font-light mb-6 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 outline-none transition-all"
+            rows={4}
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="Ask the universe anything..."
+        ></textarea>
+        <div className="flex justify-end">
+            <button 
+                disabled={!question.trim() || isProcessing}
+                className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-medium tracking-wide transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={startCollapse}
+            >
+                <Zap size={18} /> Initiate Quantum Collapse
+            </button>
+        </div>
+    </div>
+  );
+};
+
 export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab, user, onSignIn, onSignOut, loadedInputs, profileConfig, onUpdateProfile, onPresentationRequest, externalDeepDive, onClearExternalDeepDive, vortexMode, setVortexMode }: DashboardProps) => {
   // --- LOCAL COMPONENT STATE ---
   const [name, setName] = useState('');
@@ -1722,7 +1887,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
   
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedTimelineEvent, setSelectedTimelineEvent] = useState<any>(null);
-  const [layoutMode, setLayoutMode] = useState<'minimized' | 'half' | 'full'>('half');
+  const [layoutMode, setLayoutMode] = useState<'minimized' | 'half' | 'full' | 'immersive'>('half');
   const dragControls = useDragControls();
   const [isHoloDrawerOpen, setIsHoloDrawerOpen] = useState(false);
   const [holoDrawerTool, setHoloDrawerTool] = useState<'gematria' | 'chakra' | 'karma'>('gematria');
@@ -2094,17 +2259,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
       />
       <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} profileConfig={profileConfig || {} as UserProfileConfig} onUpdateProfile={onUpdateProfile} loadedInputs={loadedInputs} isReading={isReading} handleReadOutLoud={handleReadOutLoud} />
       <React.Suspense fallback={null}>
-        <VoiceCommander 
-          setActiveTab={setActiveTab} 
-          openHoloDrawer={(tool) => {
-            if (tool === null) {
-              setIsHoloDrawerOpen(false);
-            } else {
-              setHoloDrawerTool(tool);
-              setIsHoloDrawerOpen(true);
-            }
-          }}
-        />
+        <LiveVoiceAgent />
       </React.Suspense>
 
       <HoloSideDrawer 
@@ -2277,7 +2432,13 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             dragListener={false}
             dragControls={dragControls}
             dragMomentum={false}
-            className={`pointer-events-auto resize min-w-[320px] min-h-[400px] flex flex-col overflow-hidden relative transition-[background,border] duration-500 ${layoutMode === 'full' ? 'w-full max-w-[calc(100vw-2rem)] md:max-w-7xl h-[95vh] mx-auto' : 'w-full max-w-xl h-[80vh] mx-auto sm:mx-0 sm:ml-0'} ${
+            className={`pointer-events-auto resize min-w-[320px] min-h-[400px] flex flex-col overflow-hidden relative transition-all duration-500 ${
+              layoutMode === 'full' 
+                ? 'w-full max-w-[calc(100vw-2rem)] md:max-w-7xl h-[95vh] mx-auto' 
+                : layoutMode === 'immersive' 
+                  ? 'opacity-10 hover:opacity-[0.95] hover:scale-100 scale-[0.8] origin-bottom absolute bottom-2 left-1/2 -translate-x-1/2 w-[800px] h-[30vh] ring-2 ring-purple-500/50 backdrop-blur-3xl' 
+                  : 'w-full max-w-xl h-[80vh] mx-auto sm:mx-0 sm:ml-0'
+            } ${
               activeTheme.cardBg
             } ${
               activeTheme.fontFamily
@@ -2370,6 +2531,13 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
             </div>
 
             <div className="absolute top-4 right-4 z-20 flex gap-2">
+              <button
+                onClick={() => setLayoutMode(layoutMode === 'immersive' ? 'half' : 'immersive')}
+                className="bg-black/50 hover:bg-white/10 p-2 rounded-full border border-purple-500/50 text-purple-400 hover:text-purple-300 transition-colors shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+                title={layoutMode === 'immersive' ? 'Exit Immersive 3D Space' : 'Enter Hyperspace 3D Mode'}
+              >
+                <Orbit className="w-4 h-4 animate-pulse" />
+              </button>
               <button 
                 onClick={() => setLayoutMode(layoutMode === 'full' ? 'half' : 'full')}
                 className="bg-black/50 hover:bg-white/10 p-2 rounded-full border border-white/10 text-stone-400 hover:text-white transition-colors"
@@ -2420,6 +2588,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'alignment'} tabId="alignment" onClick={() => setActiveTab('alignment')} icon={<Radio className="w-4 h-4 text-teal-400 animate-pulse"/>}>Alignment</Tab>
               <Tab active={activeTab === 'ai_agents'} tabId="ai_agents" onClick={() => setActiveTab('ai_agents')} icon={<Cpu className="w-4 h-4 text-emerald-400"/>}>AI Agents Swarm</Tab>
               <Tab active={activeTab === 'astral_os'} tabId="astral_os" onClick={() => { soundEngine.click(); setActiveTab('astral_os'); }} icon={<Cpu className="w-4 h-4 text-cyan-400 animate-pulse"/>}>Astral OS</Tab>
+              <Tab active={activeTab === 'astral_oracle'} tabId="astral_oracle" onClick={() => { soundEngine.click(); setActiveTab('astral_oracle'); }} icon={<Sparkles className="w-4 h-4 text-indigo-400 animate-pulse"/>}>Astral Oracle</Tab>
+              <Tab active={activeTab === 'astral_os_synthesis'} tabId="astral_os_synthesis" onClick={() => { soundEngine.click(); setActiveTab('astral_os_synthesis'); }} icon={<Zap className="w-4 h-4 text-emerald-400 animate-pulse"/>}>Synthesis Engine</Tab>
               <Tab active={activeTab === 'astrology_engine'} tabId="astrology_engine" onClick={() => { soundEngine.click(); setActiveTab('astrology_engine'); }} icon={<Compass className="w-4 h-4 text-indigo-400 animate-pulse"/>}>Astrology Engine</Tab>
               <Tab active={activeTab === 'astral_canvas'} tabId="astral_canvas" onClick={() => setActiveTab('astral_canvas')} icon={<Workflow className="w-4 h-4 text-purple-400 animate-pulse"/>}>AI Agent Canvas</Tab>
               <Tab active={activeTab === 'gematria_calc'} tabId="gematria_calc" onClick={() => setActiveTab('gematria_calc')} icon={<Type className="w-4 h-4 text-fuchsia-400"/>}>Gematria Calculator</Tab>
@@ -2452,18 +2622,20 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'consciousness_atlas'} tabId="consciousness_atlas" onClick={() => setActiveTab('consciousness_atlas')} icon={<Network className="w-4 h-4 text-cyan-400 animate-pulse" />}>Consciousness Atlas</Tab>
               <Tab active={activeTab === 'shvayambhu'} tabId="shvayambhu" onClick={() => setActiveTab('shvayambhu')} icon={<Brain className="w-4 h-4 text-emerald-400 animate-pulse" />}>Shvayambhu AI OS</Tab>
               <Tab active={activeTab === '9d_creation'} tabId="9d_creation" onClick={() => setActiveTab('9d_creation')} icon={<Layers className="w-4 h-4 text-amber-500 animate-pulse" />}>9D Conscious Creation</Tab>
+              <Tab active={activeTab === 'willow_quantum'} tabId="willow_quantum" onClick={() => setActiveTab('willow_quantum')} icon={<Cpu className="w-4 h-4 text-cyan-400 animate-pulse" />}>Willow Quantum Collapse</Tab>
             </div>
             
             <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/20">
-              <React.Suspense fallback={
-                <div className="h-full flex flex-col items-center justify-center gap-4 opacity-50">
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }}>
-                    <Loader2 className="w-8 h-8 text-purple-500" />
-                  </motion.div>
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-purple-400/60">Assembling Synaptic Buffer...</p>
-                </div>
-              }>
-                <AnimatePresence mode="wait">
+              <ThreeDErrorBoundary>
+                <React.Suspense fallback={
+                  <div className="h-full flex flex-col items-center justify-center gap-4 opacity-50">
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }}>
+                      <Loader2 className="w-8 h-8 text-purple-500" />
+                    </motion.div>
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-purple-400/60">Assembling Synaptic Buffer...</p>
+                  </div>
+                }>
+                  <AnimatePresence mode="wait">
                   {activeTab === 'identity' && (
                   <motion.div key="identity" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8 pb-32">
                     <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 shadow-2xl">
@@ -3616,11 +3788,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <CelestialBlueprintSection data={data} setActiveTab={setActiveTab} />
                   </motion.div>
                 )}
-                {activeTab === 'astral_canvas' && (
-                  <motion.div key="astral_canvas" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
-                    <AstralCanvas cosmicData={data} />
-                  </motion.div>
-                )}
+
                 {activeTab === 'christ_sophia' && (
                   <motion.div key="christ_sophia" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <ChristSophiaSection data={data} />
@@ -3674,13 +3842,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <HolographicRainbowSection />
                   </motion.div>
                 )}
-                {activeTab === 'astraea' && (
-                  <motion.div key="astraea" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="h-full">
-                    <React.Suspense fallback={<div className="flex h-[600px] w-full items-center justify-center bg-zinc-950 rounded-3xl border border-pink-500/10"><div className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-500 rounded-full animate-spin" /></div>}>
-                      <AstraeaOracle />
-                    </React.Suspense>
-                  </motion.div>
-                )}
+
                 {activeTab === 'flower_of_life' && (
                   <motion.div key="flower_of_life" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <FlowerOfLifeSection />
@@ -3742,14 +3904,37 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     <SubconsciousProgramming cosmicData={data} />
                   </motion.div>
                 )}
+                {activeTab === 'community' && (
+                  <motion.div key="community" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
+                    <React.Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="w-8 h-8 text-teal-400 animate-spin" /></div>}>
+                      <CommunityFeed onConnect={(userId) => {
+                         // Send affinity request
+                         import('../services/socialService').then(m => {
+                           m.sendAffinityRequest(user?.uid || 'guest', user?.displayName || 'Anonymous', userId);
+                         });
+                      }} />
+                    </React.Suspense>
+                  </motion.div>
+                )}
                 {activeTab === '9d_creation' && (
                   <motion.div key="9d_creation" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
                     <NineDimensionsSection />
                   </motion.div>
                 )}
+                {activeTab === 'willow_quantum' && (
+                  <motion.div key="willow_quantum" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full flex-1 flex flex-col items-center justify-center min-h-[60vh]">
+                     <WillowWrapper />
+                  </motion.div>
+                )}
                 {activeTab === 'astral_os' && (
                   <motion.div key="astral_os" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full">
                     <AstralHUD data={data} setActiveTab={setActiveTab} />
+                  </motion.div>
+                )}
+
+                {activeTab === 'astral_os_synthesis' && (
+                  <motion.div key="astral_os_synthesis" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full">
+                    <AstralOSSynthesisEngine />
                   </motion.div>
                 )}
                 {activeTab === 'the_big_picture' && (
@@ -3759,6 +3944,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 )}
               </AnimatePresence>
               </React.Suspense>
+              </ThreeDErrorBoundary>
           </div>
             <div className="p-4 border-t border-white/10 bg-black/20 text-center">
               <button onClick={() => window.location.reload()} className="text-xs uppercase tracking-widest text-stone-500 hover:text-white transition-colors">Reset Environment</button>

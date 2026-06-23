@@ -228,3 +228,59 @@ export const subscribeToWallPosts = (userId: string, callback: (posts: WallPost[
     handleFirestoreError(error, OperationType.LIST, path);
   });
 };
+
+export interface AffinityRequest {
+  id?: string;
+  senderId: string;
+  senderName: string;
+  recipientId: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  timestamp?: any;
+}
+
+export const sendAffinityRequest = async (senderId: string, senderName: string, recipientId: string): Promise<string> => {
+  const path = 'affinity_requests';
+  try {
+    const docRef = await addDoc(collection(db, path), {
+      senderId,
+      senderName,
+      recipientId,
+      status: 'pending',
+      timestamp: serverTimestamp()
+    });
+    return docRef.id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+    return '';
+  }
+};
+
+export const subscribeToAffinityRequests = (userId: string, callback: (requests: AffinityRequest[]) => void) => {
+  const path = 'affinity_requests';
+  const q = query(
+    collection(db, path),
+    where('recipientId', '==', userId),
+    where('status', '==', 'pending'),
+    orderBy('timestamp', 'desc')
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const requests = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as AffinityRequest));
+    callback(requests);
+  }, (error) => {
+    handleFirestoreError(error, OperationType.LIST, path);
+  });
+};
+
+export const updateAffinityRequestStatus = async (requestId: string, status: 'accepted' | 'rejected'): Promise<void> => {
+  const path = `affinity_requests/${requestId}`;
+  try {
+    const docRef = doc(db, 'affinity_requests', requestId);
+    await updateDoc(docRef, { status });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+};

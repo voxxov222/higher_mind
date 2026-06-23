@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
       host: "0.0.0.0",
     },
     resolve: {
-      dedupe: ["react", "react-dom", "three", "@react-three/fiber"],
+      dedupe: ["react", "react-dom", "three", "@react-three/fiber", "@react-three/drei", "@react-three/postprocessing"],
     },
     plugins: [
       remix({
@@ -33,22 +33,6 @@ export default defineConfig(({ mode }) => {
       sourcemap: false,
       cssMinify: true,
       chunkSizeWarningLimit: 4000,
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes("node_modules")) {
-              if (id.includes("three")) return "vendor-three";
-              if (id.includes("@react-three")) return "vendor-react-three";
-              if (id.includes("lucide-react")) return "vendor-lucide";
-              if (id.includes("recharts")) return "vendor-recharts";
-              if (id.includes("firebase")) return "vendor-firebase";
-              if (id.includes("motion")) return "vendor-motion";
-              if (id.includes("react") || id.includes("react-dom")) return "vendor-react";
-              return "vendor";
-            }
-          }
-        }
-      }
     },
   };
 });

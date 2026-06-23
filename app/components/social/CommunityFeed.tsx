@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, MessageCircle, Share2, Sparkles, Plus, 
-  Globe, Video, X
+  Globe, Video, X, Check
 } from 'lucide-react';
 import { CommunityPost } from '../../types';
-import { createPost, subscribeToPosts, likePost } from '../../services/socialService';
+import { createPost, subscribeToPosts, likePost, subscribeToAffinityRequests, updateAffinityRequestStatus, AffinityRequest } from '../../services/socialService';
 import { useProfileStore } from '../../services/profileService';
 import HolographicPanel from '../profile/HolographicPanel';
 import clsx from 'clsx';
@@ -16,6 +16,7 @@ interface CommunityFeedProps {
 
 const CommunityFeed = ({ onConnect }: CommunityFeedProps) => {
   const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [affinityRequests, setAffinityRequests] = useState<AffinityRequest[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [filter, setFilter] = useState('all');
   const { config } = useProfileStore();
@@ -26,6 +27,14 @@ const CommunityFeed = ({ onConnect }: CommunityFeedProps) => {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!config?.userId) return;
+    const unsubscribe = subscribeToAffinityRequests(config.userId, (requests) => {
+      setAffinityRequests(requests);
+    });
+    return () => unsubscribe();
+  }, [config?.userId]);
 
   const handleCreatePost = async (title: string, content: string, type: string, mediaUrl?: string, mediaType?: 'image' | 'video') => {
     if (!config) return;
@@ -56,7 +65,7 @@ const CommunityFeed = ({ onConnect }: CommunityFeedProps) => {
   return (
     <div className="space-y-8 max-w-4xl mx-auto px-4 pb-24">
       {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-white mb-2 flex items-center gap-3">
             <Globe className="w-8 h-8 text-purple-400" />
@@ -89,6 +98,45 @@ const CommunityFeed = ({ onConnect }: CommunityFeedProps) => {
           </button>
         </div>
       </div>
+
+      {affinityRequests.length > 0 && (
+        <div className="bg-purple-900/20 border border-purple-500/30 rounded-3xl p-6 mb-8">
+          <h3 className="text-purple-300 font-bold mb-4 flex items-center gap-2">
+             <Sparkles className="w-5 h-5" /> Cosmic Affinity Requests ({affinityRequests.length})
+          </h3>
+          <div className="space-y-3">
+            {affinityRequests.map(req => (
+              <div key={req.id} className="flex items-center justify-between bg-black/40 p-4 rounded-2xl border border-white/5">
+                 <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center font-bold text-lg text-purple-300 border border-purple-500/30">
+                     {req.senderName?.[0]?.toUpperCase() || '?'}
+                   </div>
+                   <div>
+                     <p className="text-white font-bold">{req.senderName}</p>
+                     <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-0.5">Wants to compare destiny matrices</p>
+                   </div>
+                 </div>
+                 <div className="flex items-center gap-2">
+                   <button 
+                     onClick={() => req.id && updateAffinityRequestStatus(req.id, 'accepted')}
+                     className="w-8 h-8 rounded-full bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-400 border border-emerald-500/30 flex items-center justify-center transition-colors"
+                     title="Accept & Merge Matrices"
+                   >
+                     <Check className="w-4 h-4" />
+                   </button>
+                   <button 
+                     onClick={() => req.id && updateAffinityRequestStatus(req.id, 'rejected')}
+                     className="w-8 h-8 rounded-full bg-rose-500/20 hover:bg-rose-500/40 text-rose-400 border border-rose-500/30 flex items-center justify-center transition-colors"
+                     title="Decline"
+                   >
+                     <X className="w-4 h-4" />
+                   </button>
+                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <AnimatePresence>
         {isCreating && (
@@ -256,13 +304,13 @@ const PostCard = ({ post, onConnect }: { post: CommunityPost, onConnect?: (userI
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-bold text-white/90">@{post.username}</p>
-                  {onConnect && (
+                  {onConnect && post.userId !== config?.userId && (
                     <button 
                       onClick={() => onConnect(post.userId)}
                       className="p-1 rounded-lg hover:bg-white/10 text-purple-400 transition-colors"
-                      title="Connect with this soul"
+                      title="Send Cosmic Affinity Request to compare destiny matrices"
                     >
-                      <MessageCircle className="w-3.5 h-3.5" />
+                      <Sparkles className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>

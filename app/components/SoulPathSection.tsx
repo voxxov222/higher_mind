@@ -1,10 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Text, Trail, Sphere } from '@react-three/drei';
 import * as THREE from 'three';
-import { motion } from 'motion/react';
-import { Compass, ArrowRight, Sparkles, MessageCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Compass, ArrowRight, Sparkles, MessageCircle, Activity, BarChart2 } from 'lucide-react';
 import { useHigherMind } from './HigherMindProvider';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from 'recharts';
 
 const AnimatedTrail = ({ startPos, endPos }: { startPos: THREE.Vector3, endPos: THREE.Vector3 }) => {
   const ref = useRef<THREE.Mesh>(null);
@@ -106,6 +107,33 @@ export const SoulPathSection = ({ data }: { data: any }) => {
 
   const [report, setReport] = useState<any>(null);
   const [loadingReport, setLoadingReport] = useState(false);
+  const [showChart, setShowChart] = useState(false);
+
+  // Generate dynamic chart data based on nodal placements
+  const journeyData = useMemo(() => {
+     const cycleCount = 7;
+     let currentKarmicWeight = 80;
+     let spiritualAttunement = 20;
+     const data = [];
+     
+     const signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+     const southIdx = signs.indexOf(southNode?.sign || 'Aries');
+     const northIdx = signs.indexOf(northNode?.sign || 'Libra');
+     
+     for(let i = 0; i < cycleCount; i++) {
+        // Decrease karmic weight, increase attunement over cycles
+        currentKarmicWeight -= (Math.random() * 15 + 5);
+        spiritualAttunement += (Math.random() * 20 + 5);
+        
+        data.push({
+           cycle: `Life ${i + 1}`,
+           karmicWeight: Math.max(0, currentKarmicWeight),
+           attunement: Math.min(100, spiritualAttunement),
+           lesson: i === cycleCount - 1 ? (northNode?.sign || 'Destiny') : (southNode?.sign || 'Past')
+        });
+     }
+     return data;
+  }, [southNode, northNode]);
 
   const handleSaveToChat = () => {
     saveToChat(
@@ -161,6 +189,14 @@ export const SoulPathSection = ({ data }: { data: any }) => {
 
       <div className="absolute top-8 right-8 z-20 flex gap-4">
         <button
+          onClick={() => setShowChart(!showChart)}
+          className={`bg-black/60 backdrop-blur-md border px-4 py-2 rounded-full transition-all flex items-center gap-2 shadow-lg ${showChart ? 'border-sky-500/60 text-sky-300' : 'border-sky-500/30 hover:border-sky-500/60 text-sky-400 hover:text-sky-300'}`}
+        >
+          <BarChart2 className="w-4 h-4" />
+          <span className="text-xs uppercase tracking-widest font-bold whitespace-nowrap">Growth Chart</span>
+        </button>
+
+        <button
           onClick={handleGenerateReport}
           disabled={loadingReport}
           className="bg-black/60 backdrop-blur-md border border-fuchsia-500/30 hover:border-fuchsia-500/60 px-4 py-2 rounded-full text-fuchsia-400 hover:text-fuchsia-300 transition-all flex items-center gap-2 shadow-lg"
@@ -183,7 +219,7 @@ export const SoulPathSection = ({ data }: { data: any }) => {
            <motion.div 
              initial={{ opacity: 0, scale: 0.95 }}
              animate={{ opacity: 1, scale: 1 }}
-             className="w-full max-w-4xl max-h-full overflow-y-auto bg-stone-900 border border-purple-500/30 p-8 rounded-3xl shadow-2xl"
+             className="w-full max-w-4xl max-h-full overflow-y-auto bg-stone-900 border border-purple-500/30 p-8 rounded-3xl shadow-2xl custom-scrollbar"
            >
               <div className="flex justify-between items-start mb-6 border-b border-purple-500/20 pb-4">
                  <h2 className="text-2xl font-serif text-purple-300">{report.title}</h2>
@@ -211,20 +247,56 @@ export const SoulPathSection = ({ data }: { data: any }) => {
         </div>
       )}
 
-      {/* 3D Visualizer */}
-      <div className="h-[55%] w-full relative z-0 cursor-move border-b border-white/5">
-        <Canvas camera={{ position: [0, 5, 25], fov: 60 }}>
-          <SoulPathScene northNode={northNode} southNode={southNode} />
-        </Canvas>
+      {/* 3D Visualizer or Chart Toggle */}
+      <div className="h-[55%] w-full relative z-0 cursor-move border-b border-white/5 bg-black/30 flex items-center justify-center">
+        {showChart ? (
+          <motion.div 
+             initial={{ opacity: 0 }} 
+             animate={{ opacity: 1 }}
+             className="w-full h-full p-8 pt-20 max-w-5xl mx-auto"
+          >
+             <h3 className="text-stone-400 uppercase tracking-widest font-bold mb-4 text-xs flex items-center gap-2">
+                <Activity className="text-emerald-400 w-4 h-4" /> Trans-Incarnational Growth Vector
+             </h3>
+             <ResponsiveContainer width="100%" height="90%">
+                <AreaChart data={journeyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                   <defs>
+                     <linearGradient id="colorAttune" x1="0" y1="0" x2="0" y2="1">
+                       <stop offset="5%" stopColor="#a855f7" stopOpacity={0.8}/>
+                       <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
+                     </linearGradient>
+                     <linearGradient id="colorKarma" x1="0" y1="0" x2="0" y2="1">
+                       <stop offset="5%" stopColor="#64748b" stopOpacity={0.8}/>
+                       <stop offset="95%" stopColor="#64748b" stopOpacity={0}/>
+                     </linearGradient>
+                   </defs>
+                   <XAxis dataKey="cycle" stroke="#3f3f46" tick={{ fill: '#71717a', fontSize: 10 }} />
+                   <YAxis stroke="#3f3f46" tick={{ fill: '#71717a', fontSize: 10 }} />
+                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                   <Tooltip 
+                     contentStyle={{ backgroundColor: 'rgba(9,9,11,0.9)', borderColor: '#3f3f46', borderRadius: '12px' }}
+                     itemStyle={{ fontSize: '12px' }}
+                     labelStyle={{ color: '#a1a1aa', marginBottom: '4px' }}
+                   />
+                   <Area type="monotone" dataKey="karmicWeight" name="Karmic Density" stroke="#64748b" fillOpacity={1} fill="url(#colorKarma)" />
+                   <Area type="monotone" dataKey="attunement" name="Spiritual Attunement" stroke="#a855f7" fillOpacity={1} fill="url(#colorAttune)" />
+                </AreaChart>
+             </ResponsiveContainer>
+          </motion.div>
+        ) : (
+          <Canvas camera={{ position: [0, 5, 25], fov: 60 }}>
+            <SoulPathScene northNode={northNode} southNode={southNode} />
+          </Canvas>
+        )}
       </div>
 
       {/* Info Panels */}
-      <div className="flex-1 p-8 bg-black/60 backdrop-blur-md relative z-10 overflow-y-auto scrollbar-thin">
-        <div className="max-w-5xl mx-auto grid md:grid-cols-[1fr_auto_1fr] gap-8 md:gap-4 items-center">
+      <div className="flex-1 p-8 bg-black/60 backdrop-blur-md relative z-10 overflow-y-auto custom-scrollbar">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-[1fr_auto_1fr] gap-8 md:gap-4 items-center h-full">
            
            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="space-y-4 p-6 bg-stone-900/40 rounded-3xl border border-stone-800 h-full">
              <div className="flex items-center gap-4 border-b border-stone-800 pb-4 mb-4">
-               <div className="w-12 h-12 rounded-full border border-stone-600 flex items-center justify-center bg-stone-800 text-stone-300 text-sm tracking-widest shadow-inner">
+               <div className="w-12 h-12 rounded-full border border-stone-600 flex items-center justify-center bg-stone-800 text-stone-300 text-sm tracking-widest shadow-inner shrink-0">
                  SN
                </div>
                <div>
@@ -256,7 +328,7 @@ export const SoulPathSection = ({ data }: { data: any }) => {
              <div className="absolute top-0 right-0 p-3 opacity-20"><Sparkles className="w-24 h-24 text-purple-400" /></div>
              
              <div className="flex items-center gap-4 border-b border-purple-900/50 pb-4 mb-4 relative z-10">
-               <div className="w-12 h-12 rounded-full border border-purple-500/50 flex items-center justify-center bg-purple-900/40 text-purple-300 text-sm tracking-widest shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+               <div className="w-12 h-12 rounded-full border border-purple-500/50 flex items-center justify-center bg-purple-900/40 text-purple-300 text-sm tracking-widest shadow-[0_0_15px_rgba(168,85,247,0.3)] shrink-0">
                  NN
                </div>
                <div>
@@ -280,3 +352,4 @@ export const SoulPathSection = ({ data }: { data: any }) => {
     </div>
   );
 };
+

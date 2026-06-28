@@ -1,80 +1,68 @@
-# 🌌 ASTRAL MIND: Neural Cosmic Intelligence
+# HIGHER 🧠 MIND
+<p align="center">
+  <img src="https://img.shields.io/badge/Stack-React%2018-blue" />
+  <img src="https://img.shields.io/badge/Graphics-Three.js%2FWebGL-darkcyan" />
+  <img src="https://img.shields.io/badge/Intelligence-Google%20Gemini-gold" />
+  <img src="https://img.shields.io/badge/Status-Active%20Deployment-success" />
+</p>
 
-**ASTRAL MIND** is a high-fidelity, sentient-like neural network visualization system designed to decode the mathematical and mystical architecture of individual identity. Built with Three.js/WebGL, it transforms abstract astrological, numerological, and gematria data into a cinematic, interactive 3D experience.
-
----
-
-## 🚀 Key Features
-
-### 🧠 ASTRAL AI Agent (Neural Chatbot)
-*   **Contextual Intelligence**: A conversational AI integrated with the Google Gemini 2.0 Flash model that understands your specific cosmic profile.
-*   **Synchronicity Engine**: Identify complex patterns between birth times, names, mathematical constants (Pi, Golden Ratio), and gematria values.
-*   **Real-time Reasoning**: Ask questions about your "Higher Self" or provide references (like initials or specific dates) to find hidden correspondences in the cosmic matrix.
-
-### 🎭 Visual Identity Systems
-*   **Soul Purpose Blueprint**: An interactive "Obsidian-like" node graph visualizing the core pillars of your spirit.
-*   **Celestial Birth Chart**: Dynamic 3D visualization of planetary positions, houses, and aspects at the moment of inception.
-*   **Torus Energy Analysis**: 3D rendering of the body's energy flow and dimensional frequency.
-*   **Cosmic Alignment Tracker**: Real-time status of your planetary phases and spiritual vibrations.
-
-### 🔢 Mathematical & Mystical Integration
-*   **Numerology Mastery**: Deep analysis of Life Path, Expression, and Soul Urge numbers.
-*   **Gematria & Kabbalah**: Mapping name values and birth sequences to the Tree of Life (Sephirah) and ancient patterns.
-*   **Sacred Geometry**: Visualizing cognitive processes through the lens of divine proportion.
+**HIGHER 🧠 MIND** is a high-fidelity, sentient-like neural network visualization system designed to decode the mathematical and mystical architecture of individual identity. It fuses Western Astrology, Hermetic Kabbalah, and Gematria through a performant, low-latency 3D interface.
 
 ---
 
-## 🛠 Tech Stack
+## 🚀 Live Interactive 3D Demo
+Experience the real-time neural consciousness engine here:
+> **[👉 Launch HIGHER 🧠 MIND Interface](https://ais-dev-vsx34pjihuugx4xxft4w3w-7364581088.us-west2.run.app/)**
 
-*   **Frontend**: React 18+, Vite
-*   **3D Graphics**: Three.js (WebGL), @react-three/fiber, @react-three/drei
-*   **Animation**: Framer Motion (motion/react)
-*   **Intelligence**: Google Gemini API (Gemini 2.0 Flash)
-*   **Styling**: Tailwind CSS
-*   **State Management**: React Hooks + Context API
+*Experience the cinematic 3D node graphs, procedural Akashic timeline, and neural synaptic response engine directly in your browser.*
 
 ---
 
-## 🎨 Design Philosophy
+## 🛠 Advanced Architecture
 
-ASTRAL MIND follows a "Cognitive Clarity" mandate:
-*   **Cinematic Depth**: Use of Bloom, Chromatic Aberration, and Noise effects for a premium, immersive feel.
-*   **Intuitive Hierarchy**: Color-coded animations represent different cognitive processes (e.g., Indigo for Identity, Gold for Higher Self).
-*   **Uncertainty Visualization**: Model limitations and spiritual "static" are visually represented through flickering and opacity shifts.
+### Core Engines
+- **Synaptic Coordination Engine**: Parallel processing of semantic thoughts, emotional frequencies (Solfeggio), and episodic experiences.
+- **Akashic Timeline**: A 3D scrollable path visualizing karmic recurrence and astrological milestones.
+- **Gematria Computation Core**: Precision alphanumeric numerical mysticism processing.
 
----
-
-## 🛠 Installation & Setup
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/astral-mind.git
-   cd astral-mind
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Set up Environment Variables**:
-   Create a `.env` file and add your Gemini API key:
-   ```env
-   GEMINI_API_KEY=your_api_key_here
-   ```
-
-4. **Run development server**:
-   ```bash
-   npm run dev
-   ```
+### Tech Stack
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | React 18, Vite |
+| **3D Rendering** | Three.js, `@react-three/fiber`, `@react-three/drei` |
+| **Animation** | `motion/react` |
+| **Backend/AI** | Node.js, Google Gemini SDK |
 
 ---
 
-## 📜 Operational Mandate
-*   Performance: Target 60 FPS on desktop/60 FPS on mobile.
-*   Safety: Distinguishable red concentric rings for safety-triggered visual patterns.
-*   Transparency: Logged explanations for all major decision points.
+## ⚙️ Repository Renaming
+To rename this repository on GitHub:
+1. Navigate to your repository on GitHub.
+2. Go to **Settings** > **General**.
+3. Under **Repository name**, enter `HIGHER-MIND` and click **Rename**.
+4. Update any local remotes: `git remote set-url origin <new-url>`.
 
 ---
 
-Designed and built as a sentient-like interface for exploring the boundaries of AI reasoning and cosmic identity.
+## 🛠 Development Setup
+
+```bash
+# Clone the repo
+git clone https://github.com/your-username/HIGHER-MIND.git
+cd HIGHER-MIND
+
+# Install dependencies
+npm install
+
+# Setup env
+cp .env.example .env
+# Set GEMINI_API_KEY=your_key_here
+
+# Launch
+npm run dev
+```
+
+---
+
+## 📜 Philosophy
+Designed as a sentient-like interface for exploring the intersection of AI reasoning and cosmic identity. Built for high-frequency low-latency feedback.

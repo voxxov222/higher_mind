@@ -15,6 +15,7 @@ import { CelestialSolarCore, PlanetaryGravityNetwork } from './CelestialSolarCor
 import { Gematria3DVisualizer } from './Gematria3DVisualizer';
 import { X, Minus, Lock, Unlock, Play, Square, Zap, Move, RefreshCw, Activity, Flame, History, ArrowLeftRight, Wind, Cpu, Infinity as InfinityIcon, Magnet, Shuffle, Waves, Terminal, AlertTriangle } from 'lucide-react';
 import { TerminalOverlay } from './profile/TerminalOverlay';
+import { ProceduralNebula } from './ProceduralNebula';
 import { ProjectedObject3D } from './ProjectedObject3D';
 
 class WebGLErrorBoundary extends Component<{children: ReactNode, fallback?: ReactNode}, {hasError: boolean}> {
@@ -1845,6 +1846,7 @@ export const CosmicScene = ({ data, activeTab, setActiveTab, onPlanetClick, isPr
       <pointLight position={[10, 10, -5]} intensity={(activeTheme.lighting?.pointIntensity || 2) / 2} color={activeTheme.lighting?.point2Color || '#ffffff'} />
       
       {/* Lightened particle fields for mobile performance */}
+      <ProceduralNebula />
       <DynamicAmbientStars count={300} radius={100} depth={50} />
       <CosmicPhenomena />
       <Sparkles count={100} scale={150} size={2} speed={0.2} opacity={0.3} />

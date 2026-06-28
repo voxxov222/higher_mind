@@ -13,6 +13,61 @@ export default function LiveVoiceAgent() {
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const nextStartTimeRef = useRef<number>(0);
   const streamRef = useRef<MediaStream | null>(null);
+  const wakeWordRecognitionRef = useRef<any>(null);
+  const [isWakeWordActive, setIsWakeWordActive] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onresult = (event: any) => {
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript.toLowerCase();
+            if (transcript.includes('oracle') || transcript.includes('higher mind')) {
+              console.log('Wake word detected:', transcript);
+              if (!isActive) {
+                // start the agent
+                startSession();
+              }
+            }
+          }
+        };
+
+        recognition.onend = () => {
+          // Restart if it's supposed to be active and LiveVoiceAgent is NOT active
+          if (isWakeWordActive && !isActive) {
+             try { recognition.start(); } catch(e) { /* ignore */ }
+          }
+        };
+
+        recognition.onerror = (e: any) => {
+           console.warn("Wake word recognition error:", e.error);
+        };
+
+        wakeWordRecognitionRef.current = recognition;
+      }
+    }
+    
+    return () => {
+       if (wakeWordRecognitionRef.current) wakeWordRecognitionRef.current.stop();
+    };
+  }, []);
+
+  useEffect(() => {
+    // Manage wake word listener state based on Agent state
+    if (wakeWordRecognitionRef.current) {
+        if (isWakeWordActive && !isActive) {
+            try { wakeWordRecognitionRef.current.start(); } catch(e){ /* ignore */ }
+        } else {
+            try { wakeWordRecognitionRef.current.stop(); } catch(e){ /* ignore */ }
+        }
+    }
+  }, [isWakeWordActive, isActive]);
 
   // Helper to convert base64 back to Float32Array
   const base64ToFloat32Array = (base64: string): Float32Array => {
@@ -227,27 +282,47 @@ export default function LiveVoiceAgent() {
         )}
       </AnimatePresence>
 
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={toggleListen}
-        className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all border
-          ${isActive 
-            ? 'bg-teal-600 text-white border-teal-400 shadow-[0_0_20px_rgba(20,184,166,0.5)]' 
-            : 'bg-stone-900 border-white/10 text-stone-400 hover:text-white hover:border-teal-500/50 hover:bg-stone-800'
-          }`}
-      >
-        <div className="relative">
-          <Activity size={24} />
-          {isActive && (
-            <motion.div 
-              className="absolute inset-0 rounded-full border-2 border-teal-400"
-              animate={{ scale: [1, 1.5, 1], opacity: [1, 0, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
-          )}
-        </div>
-      </motion.button>
+      <div className="flex items-center gap-2">
+         {!isActive && (
+            <motion.button
+               whileHover={{ scale: 1.05 }}
+               whileTap={{ scale: 0.95 }}
+               onClick={() => setIsWakeWordActive(!isWakeWordActive)}
+               className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border flex items-center gap-1 shadow-lg ${
+                  isWakeWordActive 
+                     ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-[0_0_15px_rgba(251,191,36,0.2)]'
+                     : 'bg-stone-900 border-white/10 text-stone-500 hover:text-stone-300'
+               }`}
+            >
+               {isWakeWordActive ? (
+                  <><Mic size={10} className="animate-pulse" /> Wake Word ON</>
+               ) : (
+                  <><Mic size={10} /> Wake Word OFF</>
+               )}
+            </motion.button>
+         )}
+         <motion.button
+           whileHover={{ scale: 1.05 }}
+           whileTap={{ scale: 0.95 }}
+           onClick={toggleListen}
+           className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all border
+             ${isActive 
+               ? 'bg-teal-600 text-white border-teal-400 shadow-[0_0_20px_rgba(20,184,166,0.5)]' 
+               : 'bg-stone-900 border-white/10 text-stone-400 hover:text-white hover:border-teal-500/50 hover:bg-stone-800'
+             }`}
+         >
+           <div className="relative">
+             <Activity size={24} />
+             {isActive && (
+               <motion.div 
+                 className="absolute inset-0 rounded-full border-2 border-teal-400"
+                 animate={{ scale: [1, 1.5, 1], opacity: [1, 0, 1] }}
+                 transition={{ duration: 1.5, repeat: Infinity }}
+               />
+             )}
+           </div>
+         </motion.button>
+      </div>
     </div>
   );
 }

@@ -59,8 +59,11 @@ const QuantumFluid = React.lazy(() => import('./QuantumFluid').then(m => ({ defa
 const FifthDimensionLayer = React.lazy(() => import('./FifthDimensionLayer').then(m => ({ default: m.FifthDimensionLayer })));
 const SubconsciousProgramming = React.lazy(() => import('./SubconsciousProgramming').then(m => ({ default: m.SubconsciousProgramming })));
 const ConsciousnessAtlasWidget = React.lazy(() => import('./ConsciousnessAtlasWidget').then(m => ({ default: m.ConsciousnessAtlasWidget })));
+const HigherMindOracleStory = React.lazy(() => import('./HigherMindOracleStory').then(m => ({ default: m.HigherMindOracleStory })));
+const PersonalSymbolGenerator = React.lazy(() => import('./PersonalSymbolGenerator').then(m => ({ default: m.PersonalSymbolGenerator })));
 const ShvayambhuWidget = React.lazy(() => import('./ShvayambhuWidget').then(m => ({ default: m.ShvayambhuWidget })));
 const WillowQuantumCollapse = React.lazy(() => import('./WillowQuantumCollapse').then(m => ({ default: m.WillowQuantumCollapse })));
+const VirtualWorkspace = React.lazy(() => import('./VirtualWorkspace').then(m => ({ default: m.VirtualWorkspace })));
 
 import LiveVoiceAgent from './LiveVoiceAgent';
 import { HigherMindSettings } from './HigherMindSettings';
@@ -135,8 +138,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming';
-  setActiveTab: (tab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming') => void;
+  activeTab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming' | 'virtual_workspace';
+  setActiveTab: (tab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming' | 'virtual_workspace' | any) => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -1049,9 +1052,71 @@ const ResearchBox = ({ title, content, children, className = "", category = "Mis
   handleGeneralDeepDive: (title: string, content: string) => void
 }) => {
   const { saveToChat } = useHigherMind();
+  const [showMenu, setShowMenu] = useState(false);
+  const [menuPos, setMenuPos] = useState({x: 0, y: 0});
+  const timeoutRef = useRef<any>(null);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    const x = e.clientX;
+    const y = e.clientY;
+    timeoutRef.current = setTimeout(() => {
+      setMenuPos({ x, y });
+      setShowMenu(true);
+      if (window.navigator.vibrate) window.navigator.vibrate(50);
+    }, 600);
+  };
+
+  const clearTimer = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  };
+
+  const handleSendToWorkspace = () => {
+    const stringContent = typeof content === 'string' ? content : JSON.stringify(content);
+    window.dispatchEvent(new CustomEvent('sendToWorkspace', { detail: { title, content: stringContent } }));
+    setShowMenu(false);
+  };
   
   return (
-    <div className={`group relative bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-white/20 transition-all ${className}`}>
+    <div 
+      className={`group relative bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-white/20 transition-all cursor-default ${className}`}
+      onPointerDown={handlePointerDown}
+      onPointerUp={clearTimer}
+      onPointerLeave={clearTimer}
+      onPointerCancel={clearTimer}
+    >
+      {showMenu && (
+        <>
+          <div className="fixed inset-0 z-[100]" onClick={(e) => { e.stopPropagation(); setShowMenu(false); }} />
+          <div 
+            className="fixed z-[101] bg-stone-900 border border-white/20 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] p-2 flex flex-col gap-1 min-w-[200px]"
+            style={{ left: Math.min(menuPos.x, window.innerWidth - 220), top: Math.min(menuPos.y, window.innerHeight - 150) }}
+          >
+            <div className="text-[10px] text-stone-500 px-2 py-1 uppercase tracking-widest font-bold border-b border-white/5 mb-1 flex items-center justify-between">
+              Actions
+              <Sparkles className="w-3 h-3 text-amber-500/50" />
+            </div>
+            <button 
+              onClick={(e) => { e.stopPropagation(); handleSendToWorkspace(); }}
+              className="flex items-center gap-3 px-3 py-2 text-sm text-stone-300 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors text-left"
+            >
+              <LayoutGrid className="w-4 h-4" /> Send to Workspace
+            </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); setShowMenu(false); saveToChat(title, typeof content === 'string' ? content : JSON.stringify(content), category); }}
+              className="flex items-center gap-3 px-3 py-2 text-sm text-stone-300 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors text-left"
+            >
+              <MessageCircle className="w-4 h-4" /> Share with Oracle
+            </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); setShowMenu(false); handleGeneralDeepDive(title, typeof content === 'string' ? content : JSON.stringify(content)); }}
+              className="flex items-center gap-3 px-3 py-2 text-sm text-stone-300 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors text-left"
+            >
+              <Search className="w-4 h-4" /> Deep Dive Research
+            </button>
+          </div>
+        </>
+      )}
       <div className="flex justify-end gap-2 mb-2 z-30 relative opacity-40 group-hover:opacity-100 transition-opacity pointer-events-auto">
         <button 
           onClick={() => { soundEngine.click(); handleReadOutLoud(typeof content === 'string' ? content : JSON.stringify(content)); }}
@@ -2621,8 +2686,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'subconscious_programming'} tabId="subconscious_programming" onClick={() => setActiveTab('subconscious_programming')} icon={<Brain className="w-4 h-4 text-sky-400 animate-pulse" />}>Subconscious Rewrite</Tab>
               <Tab active={activeTab === 'consciousness_atlas'} tabId="consciousness_atlas" onClick={() => setActiveTab('consciousness_atlas')} icon={<Network className="w-4 h-4 text-cyan-400 animate-pulse" />}>Consciousness Atlas</Tab>
               <Tab active={activeTab === 'shvayambhu'} tabId="shvayambhu" onClick={() => setActiveTab('shvayambhu')} icon={<Brain className="w-4 h-4 text-emerald-400 animate-pulse" />}>Shvayambhu AI OS</Tab>
+              <Tab active={activeTab === 'oracle_story'} tabId="oracle_story" onClick={() => setActiveTab('oracle_story')} icon={<BookOpen className="w-4 h-4 text-indigo-400 animate-pulse" />}>Oracle Story</Tab>
+              <Tab active={activeTab === 'personal_symbol'} tabId="personal_symbol" onClick={() => setActiveTab('personal_symbol')} icon={<Hexagon className="w-4 h-4 text-amber-500 animate-pulse" />}>Personal Sigil</Tab>
               <Tab active={activeTab === '9d_creation'} tabId="9d_creation" onClick={() => setActiveTab('9d_creation')} icon={<Layers className="w-4 h-4 text-amber-500 animate-pulse" />}>9D Conscious Creation</Tab>
               <Tab active={activeTab === 'willow_quantum'} tabId="willow_quantum" onClick={() => setActiveTab('willow_quantum')} icon={<Cpu className="w-4 h-4 text-cyan-400 animate-pulse" />}>Willow Quantum Collapse</Tab>
+              <Tab active={activeTab === 'virtual_workspace'} tabId="virtual_workspace" onClick={() => setActiveTab('virtual_workspace')} icon={<LayoutGrid className="w-4 h-4 text-emerald-400 animate-pulse" />}>Virtual Workspace</Tab>
             </div>
             
             <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/20">
@@ -3916,6 +3984,16 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     </React.Suspense>
                   </motion.div>
                 )}
+                {activeTab === 'oracle_story' && (
+                  <motion.div key="oracle_story" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full pb-20">
+                     <HigherMindOracleStory cosmicData={data} />
+                  </motion.div>
+                )}
+                {activeTab === 'personal_symbol' && (
+                  <motion.div key="personal_symbol" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full">
+                     <PersonalSymbolGenerator cosmicData={data} />
+                  </motion.div>
+                )}
                 {activeTab === '9d_creation' && (
                   <motion.div key="9d_creation" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}}>
                     <NineDimensionsSection />
@@ -3924,6 +4002,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'willow_quantum' && (
                   <motion.div key="willow_quantum" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full flex-1 flex flex-col items-center justify-center min-h-[60vh]">
                      <WillowWrapper />
+                  </motion.div>
+                )}
+                {activeTab === 'virtual_workspace' && (
+                  <motion.div key="virtual_workspace" initial={{opacity: 0, scale: 0.95}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.95}} className="w-full h-[80vh] min-h-[600px] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                     <VirtualWorkspace />
                   </motion.div>
                 )}
                 {activeTab === 'astral_os' && (

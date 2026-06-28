@@ -1,0 +1,290 @@
+117:        <div className="flex flex-col items-center justify-center p-8 bg-black/50 border border-red-500/30 rounded-3xl h-[400px]">
+121:            className="px-6 py-2 bg-red-500/20 border border-red-500/30 rounded-xl text-red-300 text-xs uppercase tracking-widest hover:bg-red-500/40 transition-colors"
+288:    <div className="fixed inset-0 z-[200] flex items-center justify-center p-0 md:p-8 bg-black/80 backdrop-blur-md pointer-events-auto">
+292:        className="bg-stone-950 border border-white/10 rounded-none md:rounded-[2.5rem] w-full max-w-5xl h-full max-h-screen md:max-h-[85vh] shadow-[0_0_100px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden relative"
+295:        <div className="h-48 md:h-64 bg-stone-900 relative overflow-hidden shrink-0">
+299:            <div className="w-full h-full bg-gradient-to-br from-stone-800 to-black flex items-center justify-center opacity-30">
+303:          <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent"></div>
+307:              <div className="w-32 h-32 rounded-3xl bg-stone-900 border-4 border-stone-950 shadow-2xl overflow-hidden flex items-center justify-center ring-1 ring-white/10">
+315:              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-3xl pointer-events-none z-30">
+322:                 <span className="px-2 py-1 bg-white/5 border border-white/10 rounded text-[9px] uppercase tracking-widest text-stone-400">Level 4 Consciousness</span>
+323:                 <span className="px-2 py-1 bg-white/5 border border-white/10 rounded text-[9px] uppercase tracking-widest text-stone-400">Node Connected</span>
+328:          <button onClick={onClose} className="absolute top-6 right-6 p-3 bg-black/40 hover:bg-white/10 rounded-full border border-white/10 text-stone-400 hover:text-white transition-all backdrop-blur-md">
+364:                       className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-purple-500/50 transition-all font-light text-lg"
+385:                          className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-stone-300 focus:outline-none focus:border-purple-500/50 transition-all font-light text-sm"
+388:                        <button className="bg-white/5 border border-white/10 p-3 rounded-2xl text-stone-400 hover:text-white transition-colors">
+410:                    className="w-full h-40 bg-white/5 border border-white/10 rounded-3xl px-6 py-5 text-stone-200 focus:outline-none focus:border-purple-500/50 transition-all font-light leading-relaxed resize-none text-lg"
+435:                       <div key={ach.id} className={`p-4 rounded-3xl border transition-colors ${ach.unlocked ? 'bg-purple-500/10 border-purple-500/30' : 'bg-black/40 border-white/5 opacity-50'}`}>
+436:                          <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-3 ${ach.unlocked ? 'bg-purple-500/20 text-purple-300' : 'bg-white/5 text-stone-500'}`}>
+466:                      className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-stone-300 focus:outline-none focus:border-purple-500/50 transition-all font-light"
+494:                           className={`px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest border transition-all ${backgroundEffect === effect ? 'bg-white/10 border-white/30 text-white' : 'bg-black/40 border-white/5 text-stone-500 hover:text-stone-300'}`}
+515:                      className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-all font-light"
+523:                        className={`px-4 py-2 rounded-xl border text-[9px] uppercase tracking-widest transition-all whitespace-nowrap ${vaultCategory === cat ? 'bg-purple-600 border-purple-500 text-white' : 'bg-white/5 border-white/5 text-stone-500 hover:text-white'}`}
+532:                  <div className="py-20 text-center space-y-4 bg-white/5 rounded-[2.5rem] border border-dashed border-white/10 mx-auto max-w-md">
+545:                      <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 relative group overflow-hidden">
+546:                        <div className={`absolute top-0 left-0 w-1 h-full ${item.category === 'Astrology' ? 'bg-purple-500' : item.category === 'Numerology' ? 'bg-blue-500' : 'bg-emerald-500'}`}></div>
+551:                              <span key={tag} className="text-[8px] uppercase tracking-[0.2em] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded border border-purple-500/20">{tag}</span>
+557:                              className={`p-1.5 rounded-lg border border-white/10 transition-all ${isReading ? 'bg-purple-600 text-white animate-pulse' : 'text-stone-500 hover:text-white hover:bg-white/5'}`}
+584:        <div className="p-8 border-t border-white/5 bg-black/40 flex justify-between items-center shrink-0">
+590:              className="px-10 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs uppercase tracking-[0.2em] font-bold shadow-lg shadow-purple-900/40 transition-all"
+664:           <motion.div initial={{ opacity: 0, scale: 0.9, transformOrigin: 'top right' }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-black/80 backdrop-blur-xl border border-white/10 p-2 rounded-2xl mb-4 flex flex-col gap-2 origin-top-right shadow-2xl">
+672:                         <div className="w-8 h-8 rounded-full bg-purple-900/50 flex items-center justify-center text-purple-300"><UserIcon size={16}/></div>
+684:                   <button onClick={onSignOut} className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-stone-200 transition-colors w-full text-left text-sm font-medium">
+687:                   <div className="h-px bg-white/10 my-1 mx-2"></div>
+691:                   <button onClick={onSignIn} className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-stone-200 transition-colors w-full text-left text-sm font-medium mb-1">
+694:                   <div className="h-px bg-white/10 my-1 mx-2"></div>
+700:                  <button onClick={() => { setOpen(false); onSetLayoutMode('minimized'); }} className={`flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl transition-colors w-full text-left text-sm font-medium ${layoutMode === 'minimized' ? 'bg-white/10 text-white' : 'text-stone-300'}`}>
+703:                  <button onClick={() => { setOpen(false); onSetLayoutMode('half'); }} className={`flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl transition-colors w-full text-left text-sm font-medium ${layoutMode === 'half' ? 'bg-white/10 text-white' : 'text-stone-300'}`}>
+706:                  <button onClick={() => { setOpen(false); onSetLayoutMode('full'); }} className={`flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl transition-colors w-full text-left text-sm font-medium ${layoutMode === 'full' ? 'bg-white/10 text-white' : 'text-stone-300'}`}>
+711:              <button onClick={handleCaptureImage} className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-stone-200 transition-colors w-full text-left text-sm font-medium">
+714:              <button onClick={handleRecordVideo} className={`flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-stone-200 transition-colors w-full text-left text-sm font-medium ${isRecording ? 'animate-pulse text-red-400' : ''}`}>
+729:                className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-stone-200 transition-colors w-full text-left text-sm font-medium">
+732:              <div className="h-px bg-white/10 my-1 mx-2"></div>
+733:              <a href="https://astrology3d.app/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-stone-200 transition-colors w-full text-left text-sm font-medium">
+736:              <a href="https://gematrinator.com/calculator" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-stone-200 transition-colors w-full text-left text-sm font-medium">
+739:              <a href="https://gematrinator.com/number-properties" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-xl text-stone-200 transition-colors w-full text-left text-sm font-medium">
+745:      <button onClick={() => setOpen(!open)} className={`p-4 rounded-full shadow-2xl transition-all flex items-center justify-center ${open ? 'bg-white/20 text-white shadow-purple-500/20' : 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-900/50'}`}>
+783:    <div className="absolute inset-0 -mx-6 -my-6 overflow-hidden rounded-3xl group bg-black/40">
+793:        <motion.div initial={{opacity: 0, y: -20}} animate={{opacity: 1, y: 0}} className="bg-purple-950/40 backdrop-blur-md border border-purple-500/30 p-3 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.2)] self-center text-center">
+806:               <motion.div initial={{opacity: 0, x: -20}} animate={{opacity: 1, x: 0}} transition={{delay: 0.5}} className="bg-sky-950/50 backdrop-blur-md border border-sky-500/30 p-4 rounded-2xl shadow-[0_0_15px_rgba(14,165,233,0.15)] md:min-w-[200px]">
+813:             <motion.div initial={{opacity: 0, x: 20}} animate={{opacity: 1, x: 0}} transition={{delay: 0.6}} className="bg-sky-950/50 backdrop-blur-md border border-sky-500/30 p-4 rounded-2xl shadow-[0_0_15px_rgba(14,165,233,0.15)] md:text-right md:min-w-[200px]">
+821:             <motion.div initial={{opacity: 0, x: -20}} animate={{opacity: 1, x: 0}} transition={{delay: 0.7}} className="bg-sky-950/50 backdrop-blur-md border border-sky-500/30 p-4 rounded-2xl shadow-[0_0_15px_rgba(14,165,233,0.15)] md:min-w-[200px]">
+827:             <motion.div initial={{opacity: 0, x: 20}} animate={{opacity: 1, x: 0}} transition={{delay: 0.8}} className="bg-sky-950/50 backdrop-blur-md border border-sky-500/30 p-4 rounded-2xl shadow-[0_0_15px_rgba(14,165,233,0.15)] md:text-right md:max-w-[300px]">
+837:            <motion.div initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}} transition={{delay: 0.9}} className="flex-1 bg-gradient-to-br from-fuchsia-950/60 to-transparent backdrop-blur-xl border border-fuchsia-500/30 p-4 rounded-3xl shadow-[0_0_35px_rgba(217,70,239,0.15)] relative overflow-hidden group">
+838:                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-fuchsia-400 to-transparent group-hover:scale-110 transition-transform animate-pulse" />
+844:                   <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }} className="text-[10px] font-mono text-fuchsia-100 bg-fuchsia-600/30 px-2 py-0.5 rounded shadow-[0_0_10px_rgba(217,70,239,0.5)]">
+856:                        <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden shadow-inner relative">
+857:                           <motion.div className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-fuchsia-600 via-fuchsia-400 to-white/80" initial={{width: "40%"}} animate={{width: ["90%", "98.4%", "96%"]}} transition={{duration: 4, ease: "easeInOut", repeat: Infinity, repeatType: "reverse"}}/>
+865:                               <motion.div key={i} className="flex-1 bg-fuchsia-500/50 rounded-sm" animate={{ opacity: [0.3, 1, 0.3], height: ["40%", "100%", "40%"] }} transition={{ duration: 1 + Math.random(), repeat: Infinity, delay: i * 0.1 }} />
+874:            <motion.div initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}} transition={{delay: 1.0}} className="flex-1 bg-gradient-to-br from-emerald-950/60 to-transparent backdrop-blur-xl border border-emerald-500/30 p-4 rounded-3xl shadow-[0_0_35px_rgba(16,185,129,0.15)] relative overflow-hidden group">
+875:                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent group-hover:scale-110 transition-transform animate-pulse" />
+876:                <div className="absolute -inset-10 bg-emerald-500/10 blur-[30px] rounded-full animate-pulse opacity-50" />
+882:                   <div className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-100 font-mono tracking-widest shadow-[0_0_10px_rgba(16,185,129,0.5)] flex items-center gap-1">
+883:                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-ping"></span>
+889:                     <motion.div key={i} className="flex-1 bg-gradient-to-t from-emerald-600 via-emerald-400 to-white/70 rounded-t-[2px] shadow-[0_0_5px_rgba(16,185,129,0.5)]" initial={{height: '10%'}} animate={{height: `${Math.max(20, Math.sin(i*0.4) * 50 + 50 + Math.random() * 40)}%`}} transition={{duration: 0.3 + Math.random() * 0.2, repeat: Infinity, repeatType: 'reverse', ease: "linear"}}/>
+896:            <motion.div initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}} transition={{delay: 1.1}} className="flex-1 bg-gradient-to-br from-indigo-950/60 to-transparent backdrop-blur-xl border border-indigo-500/30 p-4 rounded-3xl shadow-[0_0_35px_rgba(99,102,241,0.15)] relative overflow-hidden group">
+897:                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-indigo-400 to-transparent group-hover:scale-110 transition-transform animate-pulse" />
+914:                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-300 shadow-[0_0_8px_rgba(165,180,252,1)]" />
+917:                    <span className="text-[8px] uppercase tracking-widest text-indigo-300/80 flex gap-1 items-center mt-2 font-mono"><span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span> SYNC: 1.0</span>
+940:                <div className="absolute -inset-4 bg-sky-500/20 blur-2xl rounded-[3rem]" />
+944:                  className="bg-sky-950/40 backdrop-blur-3xl border-sky-500/30 shadow-[0_0_30px_rgba(14,165,233,0.2)]"
+965:                <div className="absolute -inset-4 bg-blue-500/20 blur-2xl rounded-[3rem]" />
+969:                  className="bg-blue-950/40 backdrop-blur-3xl border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.2)]"
+990:                 <div className="absolute -inset-4 bg-cyan-500/20 blur-2xl rounded-[3rem]" />
+994:                  className="bg-cyan-950/40 backdrop-blur-3xl border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.2)]"
+1015:                 <div className="absolute -inset-4 bg-sky-400/20 blur-2xl rounded-[3rem]" />
+1019:                  className="bg-sky-900/40 backdrop-blur-3xl border-sky-400/30 shadow-[0_0_50px_rgba(56,189,248,0.3)]"
+1036:         <div className="w-px h-12 bg-gradient-to-b from-sky-400 to-transparent" />
+1056:    <div className={`group relative bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-white/20 transition-all ${className}`}>
+1061:          className={`px-3 py-2 rounded-lg transition-all border border-white/10 shadow-lg flex items-center gap-2 text-[9px] uppercase tracking-widest font-bold ${isReading ? 'bg-purple-600 text-white animate-pulse' : 'bg-stone-800/80 text-stone-300 hover:bg-stone-700 hover:text-white'}`}
+1070:          className="bg-stone-800/80 hover:bg-emerald-700 p-2 rounded-lg text-stone-300 hover:text-white transition-all border border-white/10 shadow-lg"
+1078:          className="bg-stone-800/80 hover:bg-purple-600 p-2 rounded-lg text-stone-300 hover:text-white transition-all border border-white/10 shadow-lg"
+1086:          className="bg-stone-800/80 hover:bg-stone-700 p-2 rounded-lg text-stone-300 hover:text-white flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold border border-white/10 shadow-lg"
+1274:    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md pointer-events-auto overflow-y-auto">
+1278:        className="bg-stone-900 border border-white/10 rounded-[2rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative scrollbar-thin scrollbar-thumb-white/20 p-6 md:p-8"
+1284:          className="absolute top-6 right-6 text-stone-400 hover:text-white bg-white/5 p-2.5 rounded-full border border-white/10 transition-colors z-30"
+1292:            <div className="bg-purple-500/10 p-3 rounded-2xl border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.15)] animate-pulse">
+1306:              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[9px] uppercase tracking-widest font-black border border-white/10 bg-white/5 text-stone-400 hover:text-white hover:bg-white/10 transition-all"
+1314:              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[9px] uppercase tracking-widest font-black border border-white/10 transition-all ${isReading ? 'bg-purple-600 text-white animate-pulse shadow-[0_0_15px_rgba(168,85,247,0.5)]' : 'bg-white/5 text-stone-400 hover:text-white hover:bg-white/10'}`}
+1334:            <div className="flex flex-wrap gap-1 bg-stone-950/80 border border-white/5 p-1 rounded-2xl">
+1337:                className={`flex-1 py-3 px-4 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all flex items-center justify-center gap-2 ${activeModalTab === 'text' ? 'bg-stone-900 border border-white/10 text-white shadow-xl' : 'text-stone-500 hover:text-stone-300'}`}
+1345:                className={`flex-1 py-3 px-4 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all flex items-center justify-center gap-2 ${activeModalTab === 'images' ? 'bg-stone-900 border border-white/10 text-white shadow-xl' : 'text-stone-500 hover:text-stone-300'}`}
+1353:                className={`flex-1 py-3 px-4 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all flex items-center justify-center gap-2 ${activeModalTab === 'video' ? 'bg-stone-900 border border-white/10 text-white shadow-xl' : 'text-stone-500 hover:text-stone-300'}`}
+1361:                className={`flex-1 py-3 px-4 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all flex items-center justify-center gap-2 ${activeModalTab === 'interactive' ? 'bg-stone-900 border border-white/10 text-white shadow-xl' : 'text-stone-500 hover:text-stone-300'}`}
+1382:                      <div className="bg-black/35 p-6 rounded-2xl border border-white/5 shadow-2xl relative overflow-hidden leading-relaxed text-sm text-stone-200 font-light whitespace-pre-wrap">
+1383:                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
+1395:                                 className="px-4 py-2 border border-purple-500/20 bg-purple-500/5 hover:bg-purple-900/40 hover:border-purple-500/50 rounded-xl text-xs text-stone-300 hover:text-white transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+1415:                  <div className="md:col-span-2 bg-stone-950/80 border border-white/10 rounded-2xl overflow-hidden p-6 relative flex flex-col justify-center items-center select-none aspect-video">
+1417:                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.06)_0%,transparent_70%)]" />
+1467:                  <div className="bg-stone-900/60 border border-white/5 rounded-2xl p-5 flex flex-col justify-between">
+1479:                      <div className="bg-amber-400/5 border border-amber-500/10 p-3 rounded-lg flex items-center gap-2">
+1498:                  <div className="bg-black/75 border border-emerald-500/20 rounded-2xl overflow-hidden p-6 relative">
+1499:                    <div className="absolute inset-0 bg-radial-gradient(ellipse_at_top,rgba(16,185,129,0.06)_0%,transparent_80%) pointer-events-none" />
+1504:                        <div className={`w-2.5 h-2.5 rounded-full ${isVideoPlaying ? 'bg-red-500 animate-ping' : 'bg-stone-500'}`} />
+1511:                    <div className="relative aspect-video max-h-[220px] mx-auto rounded-xl bg-stone-950 border border-white/10 flex items-center justify-center overflow-hidden mb-4">
+1543:                        <div className="bg-purple-500/20 animate-pulse rounded-full absolute flex items-center justify-center border shadow-lg"
+1562:                            className="bg-emerald-400 w-1 rounded-sm transition-all duration-150" 
+1572:                      <div className="absolute top-3 left-3 bg-stone-900/95 border border-white/10 px-2.5 py-1 rounded-md text-[8px] tracking-wider font-mono text-stone-300">
+1578:                    <div className="bg-stone-900/90 border border-white/5 rounded-xl p-4 min-h-[75px] flex items-center">
+1586:                  <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-stone-900 p-4 rounded-xl border border-white/5">
+1597:                          className={`px-3 py-1.5 rounded-lg text-[9px] font-mono tracking-wider transition-all border ${videoChapter === ch.id ? 'bg-emerald-500/25 border-emerald-500 text-emerald-300 font-bold' : 'bg-transparent border-white/10 text-stone-400 hover:text-white'}`}
+1611:                        className={`p-3 rounded-full border transition-all ${isVideoPlaying ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-emerald-500/20 border-emerald-500/45 text-emerald-300'}`}
+1625:                          className="ml-1 bg-stone-950 border border-white/10 rounded-md px-1.5 py-0.5 text-[10px] text-white"
+1646:                    <div className="bg-stone-900 border border-white/5 rounded-2xl p-6 relative overflow-hidden">
+1686:                        <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/5 text-xs text-stone-300 font-light leading-relaxed animate-fade-in">
+1706:                    <div className="bg-stone-950 border border-white/10 rounded-2xl p-8 text-center space-y-6 relative overflow-hidden">
+1708:                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-cyan-500 to-amber-500" />
+1710:                      <div className="w-16 h-16 rounded-full bg-cyan-400/10 border border-cyan-500/30 flex items-center justify-center mx-auto mb-4 animate-bounce">
+1721:                      <div className="inline-block px-5 py-3 rounded-2xl bg-white/5 border border-white/5 font-mono text-sm">
+1730:                          className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl max-w-sm mx-auto text-[11px] font-mono text-emerald-300"
+1738:                            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white rounded-xl text-xs uppercase tracking-widest font-black transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+1744:                            className="px-4 py-3 bg-transparent border border-white/20 hover:border-white text-stone-400 hover:text-white rounded-xl text-xs uppercase tracking-widest font-bold transition-all"
+1797:    <div className="bg-black border border-emerald-500/30 rounded-2xl p-6 font-mono text-[10px] text-emerald-400/80 shadow-[0_0_40px_rgba(16,185,129,0.1)] mb-8 overflow-hidden relative">
+1799:        <div className="w-2 h-2 rounded-full bg-red-500/40" />
+1800:        <div className="w-2 h-2 rounded-full bg-yellow-500/40" />
+1801:        <div className="w-2 h-2 rounded-full bg-emerald-500/40" />
+1810:        {lines.length < 10 && <div className="w-2 h-3 bg-emerald-400 animate-pulse ml-6" />}
+1812:      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-emerald-500/5 to-transparent opacity-20" />
+1845:    <div className="w-full max-w-2xl bg-stone-900 border border-white/10 rounded-2xl p-8 shadow-2xl">
+1847:            <div className="p-3 bg-cyan-500/20 text-cyan-400 rounded-xl">
+1856:            className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white resize-none font-light mb-6 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 outline-none transition-all"
+1865:                className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-medium tracking-wide transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+2341:            className="flex items-center gap-2 px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded-xl transition-all group"
+2358:            className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 p-5 md:p-8 rounded-3xl w-full max-w-md shadow-2xl shrink-0 mx-auto mt-4 sm:mt-10"
+2373:                <input required type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-light" placeholder="e.g. John Doe" />
+2378:                  <input required type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-light" />
+2382:                  <input required type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-light" />
+2387:                <input required type="text" value={location} onChange={e => setLocation(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-light" placeholder="e.g. New York, NY" />
+2390:              <button disabled={isLoading} type="submit" className="w-full mt-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-xl px-4 py-4 font-medium tracking-wide shadow-lg shadow-purple-900/50 transition-all flex items-center justify-center gap-2 group disabled:opacity-50">
+2401:            className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full p-3 shadow-2xl cursor-pointer hover:bg-white/10 transition-colors mx-auto sm:mx-0 sm:ml-0 w-max"
+2418:            <div className="absolute top-4 left-1/2 -translate-x-1/2 flex border border-white/10 p-1.5 gap-2 overflow-x-auto no-scrollbar max-w-[90vw] flex-nowrap bg-black/40 backdrop-blur-xl rounded-2xl z-[100] shadow-2xl">
+2463:              <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-[99] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,3px_100%]" />
+2468:              <div className="bg-sky-500/5 border-b border-sky-500/15 p-3 flex items-center justify-between gap-4 select-none shrink-0 text-sky-400 z-10">
+2470:                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+2480:                    className="w-20 md:w-28 accent-sky-500 bg-sky-950/40 h-1 outline-none rounded-full cursor-col-resize hover:accent-sky-400" 
+2489:              <div className="bg-indigo-500/5 border-b border-indigo-500/10 p-3 flex items-center justify-between shrink-0 text-indigo-400 z-10">
+2491:                  <span className="w-2 h-2 rounded bg-indigo-500 animate-pulse" />
+2494:                <span className="text-[9px] uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-0.5 rounded-full text-indigo-300">
+2502:              <div className="bg-amber-500/5 border-b border-amber-500/10 p-3 flex items-center justify-between shrink-0 text-amber-500 z-10">
+2504:                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+2508:                  <span className="w-0.5 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
+2509:                  <span className="w-0.5 h-3 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+2510:                  <span className="w-0.5 h-1 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
+2511:                  <span className="w-0.5 h-2.5 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.6s' }} />
+2518:              <div className="bg-stone-900/40 border-b border-amber-900/30 p-2 text-center text-[10px] font-serif uppercase tracking-[0.2em] italic text-amber-500/60 font-bold shrink-0 z-10">
+2526:                <div className="absolute top-0 left-12 w-1.5 h-1.5 rounded-full bg-cyan-400/60 blur-[1px]" />
+2527:                <div className="absolute bottom-12 left-0 w-1 h-1 rounded-full bg-pink-400/60 blur-[1px]" />
+2538:                className="bg-black/50 hover:bg-white/10 p-2 rounded-full border border-purple-500/50 text-purple-400 hover:text-purple-300 transition-colors shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+2545:                className="bg-black/50 hover:bg-white/10 p-2 rounded-full border border-white/10 text-stone-400 hover:text-white transition-colors"
+2552:                className="bg-black/50 hover:bg-white/10 p-2 rounded-full border border-white/10 text-stone-400 hover:text-white transition-colors"
+2645:                    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 shadow-2xl">
+2647:                      <div className="h-40 bg-stone-900 relative">
+2651:                          <div className="w-full h-full bg-gradient-to-r from-purple-900/50 via-blue-900/50 to-emerald-900/50 opacity-40" />
+2653:                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+2658:                        <div className="w-24 h-24 rounded-[2rem] bg-stone-950 border-4 border-stone-950 shadow-2xl overflow-hidden flex items-center justify-center ring-1 ring-white/10 shrink-0">
+2670:                             <span className="px-2 py-1 bg-purple-500/20 border border-purple-500/30 rounded-lg text-[10px] uppercase tracking-widest text-purple-300 font-bold shadow-lg shadow-purple-500/10">Resonance Level 4</span>
+2671:                             <span className="px-2 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-[10px] uppercase tracking-widest text-blue-300 font-bold shadow-lg shadow-blue-500/10">Node Active</span>
+2676:                          className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl border border-white/10 text-xs uppercase tracking-widest text-white transition-all backdrop-blur-md flex items-center gap-2 mb-2"
+2687:                              <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 to-blue-500 rounded-full opacity-50" />
+2695:                            <div className="bg-white/5 border border-white/5 p-6 rounded-2xl">
+2706:                            <div className="bg-white/5 border border-white/5 p-6 rounded-2xl">
+2709:                                <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+2730:                        <span className="text-[10px] text-stone-500 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/10">
+2740:                                <span className="text-[9px] uppercase tracking-widest text-stone-500 px-2 py-0.5 bg-white/5 rounded border border-white/5">{item.category}</span>
+2747:                            <button className="w-full py-4 text-xs uppercase tracking-[0.3em] text-stone-500 hover:text-white transition-colors bg-white/2 bg-white/2 hover:bg-white/5 rounded-2xl border border-dashed border-white/10">
+2753:                        <div className="py-12 border border-dashed border-white/10 bg-white/2 rounded-[2.5rem] flex flex-col items-center justify-center space-y-3 opacity-50">
+2764:                      <div className="bg-white/5 p-10 rounded-3xl border border-white/10 text-center space-y-4">
+2774:                        <div className="p-6 bg-gradient-to-br from-sky-900/40 to-indigo-900/40 rounded-[2.5rem] border border-sky-500/30 shadow-2xl relative overflow-hidden group">
+2784:                               <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+2788:                               <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+2792:                               <div className="bg-black/40 p-4 rounded-2xl border border-white/5 col-span-2">
+2802:                             <div className="h-px flex-1 bg-white/5"></div>
+2804:                             <div className="h-px flex-1 bg-white/5"></div>
+2817:                               className={`bg-white/5 rounded-3xl border border-white/10 hover:border-${part.color}-500/30 transition-all p-6 relative group`}
+2821:                                   <div className={`w-12 h-12 rounded-2xl bg-${part.color}-500/20 border border-${part.color}-500/30 flex items-center justify-center text-${part.color}-400 mb-4`}>
+2829:                                   <div className="bg-black/30 p-4 rounded-xl border border-white/5">
+2833:                                   <div className="bg-black/30 p-4 rounded-xl border border-white/5">
+2841:                                 className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800/80 p-2 rounded-lg text-stone-300 border border-white/10"
+2849:                             <div className="bg-gradient-to-r from-sky-900/20 to-teal-900/20 p-8 rounded-[3rem] border border-sky-500/20 shadow-xl relative overflow-hidden">
+2850:                                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(56,189,248,0.1),transparent)]"></div>
+2871:                      <div className="bg-white/5 p-10 rounded-3xl border border-white/10 text-center space-y-4">
+2880:                          className="mt-6 bg-teal-600 hover:bg-teal-500 text-white px-8 py-3 rounded-full text-xs font-bold tracking-widest uppercase transition-all shadow-lg shadow-teal-900/50"
+2897:                              className="bg-amber-900/20 border-amber-500/40 shadow-[0_0_30px_rgba(245,158,11,0.15)] relative overflow-hidden"
+2908:                                <div className="bg-black/40 px-4 py-2 rounded-xl inline-block border border-amber-500/20 text-amber-200 font-mono text-xs mb-4">
+2916:                          <BoundResearchBox title="Core Esoteric Theme" content={data.patterns.coreTheme} className="bg-teal-900/10 border-teal-500/20 shadow-[0_0_15px_rgba(45,212,191,0.1)]">
+2923:                              <BoundResearchBox key={i} title={`Synchronicity: ${sync.title}`} content={sync.description} className="bg-white/5">
+2974:                      <div className="bg-white/5 p-10 rounded-3xl border border-white/10 text-center space-y-4">
+2983:                          className="mt-6 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-full text-xs font-bold tracking-widest uppercase transition-all shadow-lg shadow-indigo-900/50"
+3008:                          <BoundResearchBox title="Guide Message Research" content={data.akashic.guardianMessage} className="bg-indigo-900/20 border-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
+3022:                      <div className="bg-white/5 p-10 rounded-3xl border border-white/10 text-center space-y-4">
+3031:                          className="mt-6 bg-rose-600 hover:bg-rose-500 text-white px-8 py-3 rounded-full text-xs font-bold tracking-widest uppercase transition-all shadow-lg shadow-rose-900/50"
+3056:                                className={`absolute -left-[31px] z-10 w-3 h-3 rounded-full border-2 border-stone-900 transition-colors ${event.period === 'past' ? 'bg-stone-500' : event.period === 'present' ? 'bg-rose-500 animate-pulse' : 'bg-purple-500'}`}
+3067:                                className={`bg-white/5 p-6 rounded-[2rem] border cursor-pointer transition-all duration-500 ${isSelected ? 'border-rose-500 shadow-[0_0_40px_rgba(244,63,94,0.25)] bg-rose-950/20' : 'border-white/10 hover:border-rose-500/40 hover:bg-white/10'}`}
+3072:                                    <motion.span layout className="ml-3 text-xs uppercase tracking-[0.2em] text-stone-500 bg-black/40 px-2 py-1 rounded">Age {event.age}</motion.span>
+3077:                                      className="p-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg text-rose-400 hover:text-rose-300 transition-all flex items-center gap-1.5 text-[9px] uppercase tracking-widest font-bold"
+3083:                                     <span className={`text-[10px] uppercase tracking-widest px-3 py-1 rounded-full font-bold ${event.period === 'past' ? 'bg-stone-800 text-stone-400' : event.period === 'present' ? 'bg-rose-900/40 text-rose-300 border border-rose-500/20' : 'bg-purple-900/40 text-purple-300 border border-purple-500/20'}`}>
+3089:                                <motion.div layout className="bg-black/40 p-4 rounded-2xl border border-dashed border-white/5 backdrop-blur-sm">
+3104:                                        className="w-full p-4 bg-gradient-to-r from-purple-900/20 to-rose-900/20 border border-purple-500/30 rounded-2xl flex items-center justify-center gap-3 hover:from-purple-900/40 hover:to-rose-900/40 border-dashed text-purple-300 transition-all shadow-inner font-bold text-[10px] uppercase tracking-widest relative overflow-hidden group"
+3106:                                        <div className="absolute inset-0 bg-purple-400/10 w-0 group-hover:w-full transition-all duration-700 ease-out"></div>
+3119:                                    <div className="flex items-center justify-center p-5 bg-rose-500/10 rounded-2xl border border-rose-500/30 shadow-inner">
+3136:                      <div className="bg-white/5 p-10 rounded-3xl border border-white/10 text-center space-y-4">
+3145:                          className="mt-6 bg-teal-600 hover:bg-teal-500 text-white px-8 py-3 rounded-full text-xs font-bold tracking-widest uppercase transition-all shadow-lg shadow-teal-900/50"
+3168:                          <BoundResearchBox title="Personal Goal Plan" content={data.lifeStrategy.goalPlan} className="bg-teal-900/10 border-teal-500/20">
+3173:                          <BoundResearchBox title="Strategy: Moving Forward" content={data.lifeStrategy.movingForward} className="bg-black/30 border-white/5">
+3190:                      <div className="bg-white/5 p-10 rounded-3xl border border-white/10 text-center space-y-4">
+3199:                          className="mt-6 bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-8 py-3 rounded-full text-xs font-bold tracking-widest uppercase transition-all shadow-lg shadow-fuchsia-900/50"
+3214:                              <div className="bg-black/30 p-4 rounded-xl border border-dashed border-white/10">
+3218:                              <div className="bg-black/30 p-4 rounded-xl border border-dashed border-white/10">
+3229:                              <div className="bg-cyan-900/10 p-4 rounded-xl border border-cyan-500/20">
+3233:                              <div className="bg-rose-900/10 p-4 rounded-xl border border-rose-500/20">
+3249:                                      <span className="text-[10px] uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded text-stone-400">{phase.phase}</span>
+3259:                            <BoundResearchBox title="Soli-Arcs Cosmic Fusion" content={data.advancedCycles.soliArcs.map(a => a.description).join('; ')} className="bg-orange-900/10 border-orange-500/20">
+3280:                      <div className="bg-white/5 p-10 rounded-3xl border border-white/10 text-center space-y-4">
+3289:                          className="mt-6 bg-yellow-600 hover:bg-yellow-500 text-white px-8 py-3 rounded-full text-xs font-bold tracking-widest uppercase transition-all shadow-lg shadow-yellow-900/50"
+3299:                          <span className="text-xs tracking-widest text-stone-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">{data.dailyInsight.date}</span>
+3310:                          <BoundResearchBox title="Daily Affirmation Deep Dive" content={data.dailyInsight.affirmation} className="bg-purple-900/20 border-purple-500/20">
+3316:                            <BoundResearchBox title="Daily Cautionary Influence" content={data.dailyInsight.caution} className="bg-red-900/10 border-red-500/10">
+3320:                            <BoundResearchBox title="Daily Key Universal Interest" content={data.dailyInsight.keyInterest} className="bg-emerald-900/10 border-emerald-500/20">
+3327:                            <BoundResearchBox title="Age Significance Meaning" content={data.dailyInsight.ageSignificance} className="bg-black/30 border-white/5">
+3332:                            <BoundResearchBox title="Time & Date Space Correlation" content={data.dailyInsight.timeDateCorrelation} className="bg-black/30 border-white/5">
+3344:                              <span className="text-[10px] uppercase tracking-widest text-indigo-400 bg-indigo-900/30 px-2 py-0.5 rounded border border-indigo-500/20">{data.weeklyInsight.theme}</span>
+3346:                            <BoundResearchBox title={`Weekly Outlook: ${data.weeklyInsight.theme}`} content={data.weeklyInsight.horoscope} className="bg-indigo-900/10 border-indigo-500/10">
+3357:                              <span className="text-[10px] uppercase tracking-widest text-fuchsia-400 bg-fuchsia-900/30 px-2 py-0.5 rounded border border-fuchsia-500/20">{data.monthlyInsight.theme}</span>
+3359:                            <BoundResearchBox title={`Monthly Outlook: ${data.monthlyInsight.theme}`} content={data.monthlyInsight.horoscope} className="bg-fuchsia-900/10 border-fuchsia-500/10">
+3370:                              <span className="text-[10px] uppercase tracking-widest text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded border border-amber-500/20">{data.yearlyInsight.theme}</span>
+3372:                            <BoundResearchBox title={`Yearly Outlook: ${data.yearlyInsight.theme}`} content={data.yearlyInsight.horoscope} className="bg-amber-900/10 border-amber-500/10">
+3389:                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-white/5"><div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" /></div>}>
+3402:                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-white/5"><div className="w-12 h-12 border-4 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" /></div>}>
+3410:                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-yellow-900/30"><div className="w-12 h-12 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full animate-spin" /></div>}>
+3418:                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-indigo-900/30"><div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" /></div>}>
+3426:                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-fuchsia-900/30"><div className="w-12 h-12 border-4 border-fuchsia-500/30 border-t-fuchsia-500 rounded-full animate-spin" /></div>}>
+3434:                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-zinc-950 rounded-3xl border border-indigo-900/30"><div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" /></div>}>
+3442:                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-zinc-950 rounded-3xl border border-indigo-900/30"><div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" /></div>}>
+3450:                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-zinc-950 rounded-3xl border border-pink-905/30"><div className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-500 rounded-full animate-spin" /></div>}>
+3483:                      <p className="text-sm text-stone-300 bg-black/20 p-3 rounded-lg leading-relaxed">{data.advancedCycles.morningEveningStars.meaning}</p>
+3486:                    <BoundResearchBox title="Arabic Lots Interpretation" content={data.advancedCycles.arabicLots.meaning} className="bg-white/5 border-white/10">
+3498:                      <p className="text-sm text-stone-300 bg-black/20 p-3 rounded-lg leading-relaxed">{data.advancedCycles.arabicLots.meaning}</p>
+3505:                          <BoundResearchBox key={ast.name} title={`Asteroid Research: ${ast.name}`} content={ast.meaning} className="bg-black/30 border-white/5">
+3527:                      <div className="bg-stone-900/40 rounded-[2.5rem] border border-white/5 p-8 mt-6">
+3563:                      <div className="p-6 bg-gradient-to-br from-purple-900/20 to-transparent border border-purple-500/20 rounded-[2rem]">
+3570:                             <div key={i} className="flex flex-col items-center bg-white/5 border border-white/5 rounded-lg p-2 min-w-[32px]">
+3581:                        <div className="text-center font-mono text-xs text-stone-500 my-2 bg-white/5 py-4 rounded-2xl border border-white/5">
+3585:                               <span key={i} className="w-6 h-8 flex items-center justify-center bg-black/40 rounded border border-white/5 text-white">{d}</span>
+3591:                      <div className="p-5 bg-gradient-to-br from-blue-900/20 to-transparent border border-blue-500/20 rounded-2xl">
+3592:                        <BoundResearchBox title="Gematria Analysis & Patterns" content={data.gematria.pattern + " reduction: " + data.gematria.reduction} className="bg-transparent p-0 border-0">
+3620:                          <p className="text-sm text-stone-300 mt-4 leading-relaxed bg-black/20 p-3 rounded-lg border border-white/5">{data.gematria.pattern}</p>
+3625:                         <BoundResearchBox title="Number Properties Research" content={data.gematria.numberProperties} className="bg-teal-900/20 border-teal-500/20">
+3635:                    <BoundResearchBox title="Mystical Sephirah & Path" content={data.kabbalah.sephirah + " " + data.kabbalah.path} className="max-w-md mx-auto bg-transparent border-0">
+3637:                        <div className="absolute inset-0 bg-purple-500/20 blur-[100px] rounded-full group-hover:bg-purple-500/30 transition-all"></div>
+3649:                      <div className="p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md relative z-10">
+3659:                       <div className="bg-white/5 p-10 rounded-3xl border border-white/10 text-center space-y-4">
+3667:                           className="mt-6 bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-full text-xs font-bold tracking-widest uppercase transition-all shadow-lg shadow-emerald-900/50"
+3680:                           <BoundResearchBox title="Tree of Life Synthesis" content={data.kabbalisticNumerology.treeSynthesis} className="bg-emerald-900/10 border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+3813:                    <React.Suspense fallback={<div className="flex h-[800px] w-full items-center justify-center bg-black rounded-3xl border border-white/5"><div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" /></div>}>
+3867:                    <React.Suspense fallback={<div className="flex h-[600px] w-full items-center justify-center bg-zinc-950 rounded-3xl border border-cyan-500/10"><div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" /></div>}>
+3963:            <div className="p-4 border-t border-white/10 bg-black/20 text-center">
+4068:    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium uppercase tracking-wider transition-all whitespace-nowrap ${active ? 'bg-white/10 text-white shadow-sm border border-white/10' : 'text-stone-400 hover:bg-white/5 hover:text-stone-200'}`}
+4113:          <div className="h-64 w-full bg-black/20 rounded-2xl border border-white/5 p-2 pt-6">
+4132:                        <div className="bg-black/90 backdrop-blur-xl border border-white/10 p-3 rounded-xl shadow-2xl">
+4150:          <div className="h-64 w-full bg-black/20 rounded-2xl border border-white/5 p-2 pt-6">
+4173:                        <div className="bg-black/90 backdrop-blur-xl border border-white/10 p-3 rounded-xl shadow-2xl">
+4226:    <div className="bg-white/5 rounded-xl border border-white/5 overflow-hidden group/celestial relative">
+4230:          className="absolute top-2 right-12 z-20 opacity-0 group-hover/celestial:opacity-100 transition-opacity bg-stone-800/80 hover:bg-stone-700 p-1.5 rounded-lg text-stone-300 hover:text-white border border-white/10 shadow-xl"
+4236:      <button onClick={() => setExpanded(!expanded)} className="w-full text-left p-3 flex justify-between items-center hover:bg-white/5 transition-colors relative">
+4238:          <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center border border-white/10 group-hover/celestial:border-purple-500/50 transition-colors">
+4254:            <div className="p-4 pt-0 text-xs font-light leading-relaxed border-t border-white/5 mt-1 bg-black/40">
+4256:                 <div className="flex-1 bg-white/5 p-2 rounded-lg border border-white/5 text-center">
+4260:                 <div className="flex-1 bg-white/5 p-2 rounded-lg border border-white/5 text-center">
+4280:  <div className="bg-purple-900/10 rounded-xl p-3 border border-purple-500/20 text-center">
+4481:    <div className="w-full flex flex-col items-center bg-black/40 backdrop-blur-xl rounded-[3rem] border border-white/10 p-8 my-8 relative overflow-hidden group">
+4496:            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+4500:            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+4504:            <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
+4510:      <div className="relative w-full aspect-[6/5] bg-black/20 rounded-[2.5rem] border border-white/5 cursor-crosshair">
+4524:                    className="z-[9999] px-4 py-2 bg-stone-900/90 backdrop-blur-md border border-white/20 rounded-xl text-[10px] text-white font-mono shadow-[0_10px_30px_rgba(0,0,0,0.5)] pointer-events-none whitespace-nowrap overflow-hidden"
+4526:                      <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
+4556:  <div className="group relative bg-white/5 rounded-2xl p-4 border border-white/10 text-center flex flex-col justify-center items-center hover:bg-white/10 transition-all">
+4560:        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800/80 hover:bg-stone-700 p-1.5 rounded-lg text-stone-300 hover:text-white border border-white/10 z-10 shadow-xl"
+4588:    <div className={`p-6 rounded-2xl border transition-all hover:bg-black/40 relative group ${activeStyles}`}>
+4591:        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800/80 hover:bg-stone-700 p-2 rounded-lg text-stone-300 hover:text-white flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold border border-white/10 z-10 shadow-xl"
+4618:       <div className="bg-black/30 p-4 rounded-xl border border-white/5 backdrop-blur-sm">

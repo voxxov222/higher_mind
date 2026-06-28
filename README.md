@@ -10,11 +10,16 @@
 
 ---
 
-## 🚀 Live Interactive 3D Demo
-Experience the real-time neural consciousness engine here:
-> **[👉 Launch HIGHER 🧠 MIND Interface](https://ais-dev-vsx34pjihuugx4xxft4w3w-7364581088.us-west2.run.app/)**
+## 📽️ Demo Preview
+*(Replace this image with a high-quality GIF or MP4 recording of your live app interaction)*
 
----
+![HIGHER MIND Interface](https://raw.githubusercontent.com/voxxov222/HIGHER-MIND/main/src/assets/images/higher_mind_hero_1782671396836.jpg)
+
+### How to record your live demo:
+1. Open the [Live Interface](https://ais-dev-vsx34pjihuugx4xxft4w3w-7364581088.us-west2.run.app/).
+2. Use screen recording software (like OBS Studio, QuickTime, or Loom) to capture 10-15 seconds of interaction.
+3. Save as a GIF or optimize as an MP4 and commit it to your repository under `src/assets/images/`.
+4. Update the path in this `README.md` to point to your new file.
 
 ## 🛠 Advanced Architecture
 

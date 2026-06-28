@@ -14,8 +14,6 @@
 Experience the real-time neural consciousness engine here:
 > **[👉 Launch HIGHER 🧠 MIND Interface](https://ais-dev-vsx34pjihuugx4xxft4w3w-7364581088.us-west2.run.app/)**
 
-*Experience the cinematic 3D node graphs, procedural Akashic timeline, and neural synaptic response engine directly in your browser.*
-
 ---
 
 ## 🛠 Advanced Architecture
@@ -24,6 +22,16 @@ Experience the real-time neural consciousness engine here:
 - **Synaptic Coordination Engine**: Parallel processing of semantic thoughts, emotional frequencies (Solfeggio), and episodic experiences.
 - **Akashic Timeline**: A 3D scrollable path visualizing karmic recurrence and astrological milestones.
 - **Gematria Computation Core**: Precision alphanumeric numerical mysticism processing.
+
+### Project Structure (Advanced Framework)
+```text
+/src
+  /types       # Centralized global interfaces & enums
+  /hooks       # Reusable React hooks (e.g., useLocalStorage)
+  /services    # API interaction modules (e.g., api.ts)
+/app           # Application components
+/server.ts     # Express backend for secure API proxying
+```
 
 ### Tech Stack
 | Layer | Technology |

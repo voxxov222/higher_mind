@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CosmicData } from '../types';
 import { VedAstroCosmic3D } from './VedAstroCosmic3D';
+import { VedicGnosisScriptEditor } from './VedicGnosisScriptEditor';
 import { 
   calculateNakshatra, 
   calculateVimshottariDasa, 
@@ -24,7 +25,8 @@ import {
   TrendingUp,
   User,
   Sliders,
-  AlertTriangle
+  AlertTriangle,
+  Terminal
 } from 'lucide-react';
 
 interface VedAstroPerspectiveProps {
@@ -88,7 +90,7 @@ const getCoordinatesForLocation = (locName: string) => {
 };
 
 export const VedAstroPerspective: React.FC<VedAstroPerspectiveProps> = ({ data, loadedInputs }) => {
-  const [activeTab, setActiveTab] = useState<'kundali' | 'dasa' | 'nakshatras' | 'ashtakavarga' | 'matching' | 'live_predictions' | 'live_numerology'>('kundali');
+  const [activeTab, setActiveTab] = useState<'kundali' | 'dasa' | 'nakshatras' | 'ashtakavarga' | 'matching' | 'live_predictions' | 'live_numerology' | 'vedic_script'>('kundali');
   const [kundaliSubView, setKundaliSubView] = useState<'2d' | '3d'>('2d');
   const [activeHouse, setActiveHouse] = useState<number | null>(null);
   const [selectedDasa, setSelectedDasa] = useState<string | null>(null);
@@ -281,7 +283,8 @@ export const VedAstroPerspective: React.FC<VedAstroPerspectiveProps> = ({ data, 
             { id: 'ashtakavarga', label: 'Ashtakavarga', icon: GridIcon },
             { id: 'matching', label: 'Matchmaking', icon: Heart },
             { id: 'live_predictions', label: 'Live Predictions', icon: Activity },
-            { id: 'live_numerology', label: 'Live Numerology', icon: Info }
+            { id: 'live_numerology', label: 'Live Numerology', icon: Info },
+            { id: 'vedic_script', label: 'Vedic Script', icon: Terminal }
           ].map(tab => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
@@ -1124,6 +1127,19 @@ export const VedAstroPerspective: React.FC<VedAstroPerspectiveProps> = ({ data, 
                   )
                 )}
               </div>
+            </motion.div>
+          )}
+
+          {/* TAB 8: VEDIC GNOSIS SCRIPT EDITOR */}
+          {activeTab === 'vedic_script' && (
+            <motion.div
+              key="vedic_script"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              className="w-full h-full flex flex-col justify-start items-start gap-4 p-1"
+            >
+              <VedicGnosisScriptEditor />
             </motion.div>
           )}
 

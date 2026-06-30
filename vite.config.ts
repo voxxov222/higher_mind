@@ -33,6 +33,41 @@ export default defineConfig(({ mode }) => {
       sourcemap: false,
       cssMinify: true,
       chunkSizeWarningLimit: 4000,
+      rollupOptions: {
+        output: {
+          chunkFileNames: (chunkInfo) => {
+            let name = chunkInfo.name || 'chunk';
+            if (name.includes('Error')) {
+              name = name.replace(/Error/g, 'Err');
+            }
+            if (name.includes('error')) {
+              name = name.replace(/error/g, 'err');
+            }
+            return `assets/${name}-[hash].js`;
+          },
+          entryFileNames: (chunkInfo) => {
+            let name = chunkInfo.name || 'entry';
+            if (name.includes('Error')) {
+              name = name.replace(/Error/g, 'Err');
+            }
+            if (name.includes('error')) {
+              name = name.replace(/error/g, 'err');
+            }
+            return `assets/${name}-[hash].js`;
+          },
+          assetFileNames: (assetInfo) => {
+            let name = assetInfo.name || 'asset';
+            if (name.includes('Error')) {
+              name = name.replace(/Error/g, 'Err');
+            }
+            if (name.includes('error')) {
+              name = name.replace(/error/g, 'err');
+            }
+            // Keep the extension pattern
+            return `assets/${name}-[hash][extname]`;
+          }
+        }
+      }
     },
   };
 });

@@ -3,7 +3,16 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
 import { initializeFirestore, doc, setDoc, getDoc, getDocFromServer, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { CosmicData, UserProfileConfig } from './types';
-import firebaseConfig from '../firebase-applet-config.json';
+const configs = import.meta.glob('../firebase-applet-config.json', { eager: true });
+const firebaseConfig = (configs['../firebase-applet-config.json'] as any)?.default || {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "dummy",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "dummy",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "dummy",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "dummy",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "dummy",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "dummy",
+  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_FIRESTORE_DATABASE_ID || undefined
+};
 
 // Initialize the core Firebase App and services
 const app = initializeApp(firebaseConfig);

@@ -10,16 +10,13 @@
 
 ---
 
-## 📽️ Demo Preview
-*(Replace this image with a high-quality GIF or MP4 recording of your live app interaction)*
+## 🚀 Live Interactive 3D Demo
+Experience the real-time neural consciousness engine here:
+> **[👉 Launch HIGHER 🧠 MIND Interface](https://ais-dev-vsx34pjihuugx4xxft4w3w-7364581088.us-west2.run.app/)**
 
-![HIGHER MIND Interface](https://raw.githubusercontent.com/voxxov222/HIGHER-MIND/main/src/assets/images/higher_mind_hero_1782671396836.jpg)
+*Experience the cinematic 3D node graphs, procedural Akashic timeline, and neural synaptic response engine directly in your browser.*
 
-### How to record your live demo:
-1. Open the [Live Interface](https://ais-dev-vsx34pjihuugx4xxft4w3w-7364581088.us-west2.run.app/).
-2. Use screen recording software (like OBS Studio, QuickTime, or Loom) to capture 10-15 seconds of interaction.
-3. Save as a GIF or optimize as an MP4 and commit it to your repository under `src/assets/images/`.
-4. Update the path in this `README.md` to point to your new file.
+---
 
 ## 🛠 Advanced Architecture
 
@@ -27,16 +24,6 @@
 - **Synaptic Coordination Engine**: Parallel processing of semantic thoughts, emotional frequencies (Solfeggio), and episodic experiences.
 - **Akashic Timeline**: A 3D scrollable path visualizing karmic recurrence and astrological milestones.
 - **Gematria Computation Core**: Precision alphanumeric numerical mysticism processing.
-
-### Project Structure (Advanced Framework)
-```text
-/src
-  /types       # Centralized global interfaces & enums
-  /hooks       # Reusable React hooks (e.g., useLocalStorage)
-  /services    # API interaction modules (e.g., api.ts)
-/app           # Application components
-/server.ts     # Express backend for secure API proxying
-```
 
 ### Tech Stack
 | Layer | Technology |

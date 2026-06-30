@@ -58,6 +58,7 @@ const SandboxSection = React.lazy(() => import('./sandbox/SandboxSection').then(
 const QuantumFluid = React.lazy(() => import('./QuantumFluid').then(m => ({ default: m.QuantumFluid })));
 const FifthDimensionLayer = React.lazy(() => import('./FifthDimensionLayer').then(m => ({ default: m.FifthDimensionLayer })));
 const SubconsciousProgramming = React.lazy(() => import('./SubconsciousProgramming').then(m => ({ default: m.SubconsciousProgramming })));
+const GlassDashboard = React.lazy(() => import('./GlassDashboard').then(m => ({ default: m.GlassDashboard })));
 const ConsciousnessAtlasWidget = React.lazy(() => import('./ConsciousnessAtlasWidget').then(m => ({ default: m.ConsciousnessAtlasWidget })));
 const HigherMindOracleStory = React.lazy(() => import('./HigherMindOracleStory').then(m => ({ default: m.HigherMindOracleStory })));
 const PersonalSymbolGenerator = React.lazy(() => import('./PersonalSymbolGenerator').then(m => ({ default: m.PersonalSymbolGenerator })));
@@ -138,8 +139,8 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming' | 'virtual_workspace';
-  setActiveTab: (tab: 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming' | 'virtual_workspace' | any) => void;
+  activeTab: 'glass_dashboard' | 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming' | 'virtual_workspace';
+  setActiveTab: (tab: 'glass_dashboard' | 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming' | 'virtual_workspace' | any) => void;
   user: User | null;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -1955,7 +1956,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
   const [layoutMode, setLayoutMode] = useState<'minimized' | 'half' | 'full' | 'immersive'>('half');
   const dragControls = useDragControls();
   const [isHoloDrawerOpen, setIsHoloDrawerOpen] = useState(false);
-  const [holoDrawerTool, setHoloDrawerTool] = useState<'gematria' | 'chakra' | 'karma'>('gematria');
+  const [holoDrawerTool, setHoloDrawerTool] = useState<'gematria' | 'chakra' | 'karma' | 'vedastro'>('gematria');
   const [isWidgetGalleryOpen, setIsWidgetGalleryOpen] = useState(false);
   const [activeWorkspaceWidgets, setActiveWorkspaceWidgets] = useState<Array<{
     id: string;
@@ -2333,6 +2334,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
         data={data} 
         activeTool={holoDrawerTool}
         setActiveTool={setHoloDrawerTool}
+        loadedInputs={loadedInputs}
       />
 
       <WidgetGallerySidebar
@@ -2619,6 +2621,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               </button>
             </div>
             <div className="flex border-b border-white/10 p-2 gap-2 overflow-x-auto no-scrollbar pr-14 flex-nowrap shrink-0">
+              <Tab active={activeTab === 'glass_dashboard'} tabId="glass_dashboard" onClick={() => setActiveTab('glass_dashboard')} icon={<LayoutGrid className="w-4 h-4 text-cyan-400 animate-pulse"/>}>HUD Matrix</Tab>
               <Tab active={activeTab === 'the_big_picture'} tabId="the_big_picture" onClick={() => setActiveTab('the_big_picture')} icon={<Sparkles className="w-4 h-4 text-amber-400 animate-pulse"/>}>The Big Picture</Tab>
               <Tab active={activeTab === 'astraea'} tabId="astraea" onClick={() => setActiveTab('astraea')} icon={<Moon className="w-4 h-4 text-pink-400 animate-pulse"/>}>Astraea Oracle</Tab>
               <Tab active={activeTab === 'avatar_matrix'} tabId="avatar_matrix" onClick={() => setActiveTab('avatar_matrix')} icon={<UserIcon className="w-4 h-4 text-emerald-400 animate-pulse"/>}>Avatar Core Summary</Tab>
@@ -4018,6 +4021,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'astral_os_synthesis' && (
                   <motion.div key="astral_os_synthesis" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full">
                     <AstralOSSynthesisEngine />
+                  </motion.div>
+                )}
+                {activeTab === 'glass_dashboard' && (
+                  <motion.div key="glass_dashboard" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="w-full h-full">
+                     <GlassDashboard data={data} loadedInputs={loadedInputs} />
                   </motion.div>
                 )}
                 {activeTab === 'the_big_picture' && (

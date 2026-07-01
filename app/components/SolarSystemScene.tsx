@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, Sparkle, Send, Bot, Zap, Radio, Layers, Loader2, 
-  Minimize2, Maximize2 
+  Minimize2, Maximize2, Globe, Globe2
 } from 'lucide-react';
 import { CosmicData } from '../types';
 import { fetchAuraInsight } from '../services/geminiService';

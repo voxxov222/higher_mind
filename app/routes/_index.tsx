@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { CosmicScene } from '../components/CosmicScene';
 import { SplashScreen } from '../components/SplashScreen';
+import { CosmosBackground } from '../components/CosmosBackground';
 const SolarSystemScene = lazy(() => import('../components/SolarSystemScene').then(m => ({ default: m.SolarSystemScene })));
 const Dashboard = lazy(() => import('../components/Dashboard').then(m => ({ default: m.Dashboard })));
 const CosmicProfile = lazy(() => import('../components/profile/CosmicProfile'));
@@ -169,6 +170,7 @@ export default function Index() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden font-sans" style={{ background: activeTheme?.lighting?.backgroundStyle || 'black' }}>
+      <CosmosBackground />
       <GlobalHUD setActiveTab={setActiveTab}>
         <AnimatePresence mode="wait">
           {viewMode === 'blueprint' ? (

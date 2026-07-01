@@ -64,6 +64,7 @@ const HigherMindOracleStory = React.lazy(() => import('./HigherMindOracleStory')
 const PersonalSymbolGenerator = React.lazy(() => import('./PersonalSymbolGenerator').then(m => ({ default: m.PersonalSymbolGenerator })));
 const ShvayambhuWidget = React.lazy(() => import('./ShvayambhuWidget').then(m => ({ default: m.ShvayambhuWidget })));
 const WillowQuantumCollapse = React.lazy(() => import('./WillowQuantumCollapse').then(m => ({ default: m.WillowQuantumCollapse })));
+const DashyWorkspace = React.lazy(() => import('./DashyWorkspace').then(m => ({ default: m.DashyWorkspace })));
 const VirtualWorkspace = React.lazy(() => import('./VirtualWorkspace').then(m => ({ default: m.VirtualWorkspace })));
 
 import LiveVoiceAgent from './LiveVoiceAgent';
@@ -139,7 +140,7 @@ interface DashboardProps {
   data: CosmicData | null;
   onGenerate: (name: string, date: string, time: string, location: string) => void;
   isLoading: boolean;
-  activeTab: 'glass_dashboard' | 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming' | 'virtual_workspace';
+  activeTab: 'glass_dashboard' | 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming' | 'virtual_workspace' | 'dashy_workspace' | any;
   setActiveTab: (tab: 'glass_dashboard' | 'the_big_picture' | 'astraea' | 'neural_synaptic' | 'quantum_fluid' | 'torus' | 'numbers' | 'kabbalah' | 'kabbalistic_numerology' | 'chakras' | 'compatibility' | 'cycles' | 'daily' | 'houses' | 'synthesis' | 'strategy' | 'timeline' | 'name' | 'akashic' | 'patterns' | 'findings' | 'identity' | 'harmonics' | 'celestial_dna' | 'brain' | 'angel_numbers' | 'vortex' | 'gematria_calc' | 'golden_ratio' | 'community' | 'messages' | 'sandbox' | 'sky_map' | 'soul_path' | 'tetragrammaton' | 'christ_sophia' | 'astral_canvas' | 'avatar_matrix' | 'vibrational_tuning' | 'celestial_blueprint' | 'obsidian' | 'codex' | 'evolution' | 'freemason33' | 'tarot' | 'chinese_zodiac' | 'destiny_matrix' | 'holographic_rainbow' | 'flower_of_life' | 'alignment' | 'ai_agents' | 'holographic_profile' | 'celestial_sphere' | 'star_chart' | 'egyptian' | 'notebook' | 'past_life_echoes' | 'synaptic_web' | 'cosmic_canvas' | 'karma_ledger' | 'astral_os' | 'astral_os_synthesis' | 'astral_oracle' | 'astrology_engine' | '9d_creation' | 'fifth_dimension' | 'subconscious_programming' | 'virtual_workspace' | any) => void;
   user: User | null;
   onSignIn: () => void;
@@ -2694,6 +2695,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === '9d_creation'} tabId="9d_creation" onClick={() => setActiveTab('9d_creation')} icon={<Layers className="w-4 h-4 text-amber-500 animate-pulse" />}>9D Conscious Creation</Tab>
               <Tab active={activeTab === 'willow_quantum'} tabId="willow_quantum" onClick={() => setActiveTab('willow_quantum')} icon={<Cpu className="w-4 h-4 text-cyan-400 animate-pulse" />}>Willow Quantum Collapse</Tab>
               <Tab active={activeTab === 'virtual_workspace'} tabId="virtual_workspace" onClick={() => setActiveTab('virtual_workspace')} icon={<LayoutGrid className="w-4 h-4 text-emerald-400 animate-pulse" />}>Virtual Workspace</Tab>
+              <Tab active={activeTab === 'dashy_workspace'} tabId="dashy_workspace" onClick={() => setActiveTab('dashy_workspace')} icon={<LayoutGrid className="w-4 h-4 text-cyan-500 animate-pulse" />}>Dashy Custom Board</Tab>
             </div>
             
             <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/20">
@@ -4010,6 +4012,11 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'virtual_workspace' && (
                   <motion.div key="virtual_workspace" initial={{opacity: 0, scale: 0.95}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.95}} className="w-full h-[80vh] min-h-[600px] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
                      <VirtualWorkspace />
+                  </motion.div>
+                )}
+                {activeTab === 'dashy_workspace' && (
+                  <motion.div key="dashy_workspace" initial={{opacity: 0, scale: 0.95}} animate={{opacity: 1, scale: 1}} exit={{opacity: 0, scale: 0.95}} className="w-full h-[80vh] min-h-[600px] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                     <DashyWorkspace setActiveTab={setActiveTab} />
                   </motion.div>
                 )}
                 {activeTab === 'astral_os' && (

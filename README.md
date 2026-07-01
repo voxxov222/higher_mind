@@ -12,9 +12,7 @@
 
 ## 🚀 Live Interactive 3D Demo
 Experience the real-time neural consciousness engine here:
-> **[👉 Launch HIGHER 🧠 MIND Interface (Live Vercel Deployment)](https://bet49-etvmigp2u-enterupteds-projects-e79e57e0.vercel.app/)**
-
-*(Note: GitHub markdown does not support interactive iframe embeds, so please click the link above for the live animated preview!)*
+> **[👉 Launch HIGHER 🧠 MIND Interface](https://ais-dev-vsx34pjihuugx4xxft4w3w-7364581088.us-west2.run.app/)**
 
 *Experience the cinematic 3D node graphs, procedural Akashic timeline, and neural synaptic response engine directly in your browser.*
 

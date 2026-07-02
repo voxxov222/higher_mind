@@ -1,70 +1,58 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Points, PointMaterial } from '@react-three/drei';
+import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
-import { soundEngine } from '../lib/soundEffects';
 
-function ParticleField({ count = 5000 }) {
-  const pointsRef = useRef<THREE.Points>(null);
+function Starfield() {
+  const groupRef = useRef<THREE.Group>(null);
   
-  // Generate random positions for the particles
-  const [positions, colors] = useMemo(() => {
-    const pos = new Float32Array(count * 3);
-    const col = new Float32Array(count * 3);
-    const color = new THREE.Color();
-    for (let i = 0; i < count; i++) {
-      // Spherical distribution for a more cosmic feel
-      const r = 20 + Math.random() * 80;
-      const theta = 2 * Math.PI * Math.random();
-      const phi = Math.acos(2 * Math.random() - 1);
-      
-      const x = r * Math.sin(phi) * Math.cos(theta);
-      const y = r * Math.sin(phi) * Math.sin(theta);
-      const z = r * Math.cos(phi);
-
-      pos[i * 3] = x;
-      pos[i * 3 + 1] = y;
-      pos[i * 3 + 2] = z;
-
-      // Cosmos colors: purples, blues, cyan, and some starlight white
-      const hue = 0.5 + Math.random() * 0.4; // between cyan and magenta
-      const lightness = 0.5 + Math.random() * 0.5;
-      color.setHSL(hue, 0.8, lightness);
-      col[i * 3] = color.r;
-      col[i * 3 + 1] = color.g;
-      col[i * 3 + 2] = color.b;
-    }
-    return [pos, col];
-  }, [count]);
+  const [starTexture, skyTexture] = useTexture([
+    '/textures/8k_stars.jpg',
+    '/textures/stars.jpg'
+  ]);
 
   useFrame((state, delta) => {
-    if (pointsRef.current) {
-      pointsRef.current.rotation.y += delta * 0.05;
-      pointsRef.current.rotation.x += delta * 0.02;
+    if (groupRef.current) {
+      groupRef.current.rotation.y += delta * 0.005;
+      groupRef.current.rotation.x += delta * 0.002;
     }
   });
 
   return (
-    <Points ref={pointsRef} positions={positions} colors={colors} stride={3} frustumCulled={false}>
-      <PointMaterial
-        transparent
-        vertexColors
-        size={0.15}
-        sizeAttenuation={true}
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </Points>
+    <group ref={groupRef}>
+      <mesh>
+        <sphereGeometry args={[200, 64, 64]} />
+        <meshBasicMaterial 
+          map={starTexture} 
+          side={THREE.BackSide} 
+          toneMapped={false}
+          color={new THREE.Color(1.2, 1.2, 1.2)}
+        />
+      </mesh>
+      <mesh>
+        <sphereGeometry args={[190, 64, 64]} />
+        <meshBasicMaterial 
+          map={skyTexture} 
+          side={THREE.BackSide} 
+          toneMapped={false}
+          transparent={true}
+          opacity={0.3}
+          color={new THREE.Color(0.8, 0.9, 1.0)}
+        />
+      </mesh>
+    </group>
   );
 }
 
 export const CosmosBackground: React.FC = () => {
   return (
-    <div className="fixed inset-0 z-[-1] bg-black overflow-hidden pointer-events-none">
+    <div className="fixed inset-0 z-[-1] bg-[#000814] overflow-hidden pointer-events-none">
       <Canvas camera={{ position: [0, 0, 50], fov: 60 }}>
-        <fog attach="fog" args={['#000000', 30, 100]} />
+        <fog attach="fog" args={['#000814', 180, 250]} />
         <ambientLight intensity={0.5} />
-        <ParticleField count={8000} />
+        <Suspense fallback={null}>
+          <Starfield />
+        </Suspense>
       </Canvas>
     </div>
   );

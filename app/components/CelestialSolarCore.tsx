@@ -1,12 +1,13 @@
 import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { MeshDistortMaterial, Sphere, Sparkles, Ring, Line, Html } from '@react-three/drei';
+import { MeshDistortMaterial, Sphere, Sparkles, Ring, Line, Html, useTexture } from '@react-three/drei';
 
 export const CelestialSolarCore = ({ selected, hovered, onClick, onPointerOver, onPointerOut }: any) => {
   const coreRef = useRef<THREE.Mesh>(null!);
   const auraRef = useRef<THREE.Mesh>(null!);
   const ringsRef = useRef<THREE.Group>(null!);
+  const sunTexture = useTexture('/textures/sun.jpg');
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
@@ -32,13 +33,12 @@ export const CelestialSolarCore = ({ selected, hovered, onClick, onPointerOver, 
         onPointerOut={onPointerOut}
     >
        {/* Core Plasma */}
-       <Sphere ref={coreRef} args={[6, 128, 128]}>
-         <MeshDistortMaterial 
-            color="#FF4D00" 
-            emissive={selected || hovered ? "#FF8800" : "#FF2200"}
-            emissiveIntensity={selected || hovered ? 4 : 2.5}
-            distort={0.4}
-            speed={2}
+       <Sphere ref={coreRef} args={[6, 64, 64]}>
+         <meshStandardMaterial 
+            map={sunTexture}
+            emissive="#FF8800"
+            emissiveIntensity={selected || hovered ? 1.5 : 1.0}
+            emissiveMap={sunTexture}
             roughness={0.2}
             metalness={0.8}
          />

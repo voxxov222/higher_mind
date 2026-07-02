@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame, Canvas } from '@react-three/fiber';
-import { Sphere, Trail, Float, Stars, Text, OrbitControls, PerspectiveCamera, Html, Ring, Sparkles, Line, Grid, Float as FloatDrei } from '@react-three/drei';
+import { Sphere, Trail, Float, Stars, Text, OrbitControls, PerspectiveCamera, Html, Ring, Sparkles, Line, Grid, Float as FloatDrei, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, Sparkle, Send, Bot, Zap, Radio, Layers, Loader2, 
-  Minimize2, Maximize2, Globe, Globe2
+  Minimize2, Maximize2, Globe, Globe2, Compass, Activity, Eye, Atom, Wind, Ghost
 } from 'lucide-react';
 import { CosmicData } from '../types';
 import { fetchAuraInsight } from '../services/geminiService';
@@ -360,6 +360,35 @@ const OrbitalResonanceRipples = ({ size, color }: { size: number, color: string 
   );
 };
 
+const TexturedMaterial = ({ path, color, active, hovered }: { path: string, color: string, active: boolean, hovered: boolean }) => {
+  const texture = useTexture(path);
+  return (
+    <meshStandardMaterial 
+      map={texture}
+      emissive={active ? "#ffffff" : color} 
+      emissiveIntensity={active ? 1.5 : (hovered ? 0.4 : 0)} 
+      roughness={0.8} 
+      metalness={0.1} 
+    />
+  );
+};
+
+const SaturnRing = ({ size, color }: { size: number, color: string }) => {
+  const ringTexture = useTexture('/textures/saturn_ring.png');
+  return (
+    <mesh rotation={[Math.PI / 2.5, 0, 0]}>
+      <ringGeometry args={[size * 1.2, size * 2.8, 64]} />
+      <meshStandardMaterial 
+        map={ringTexture} 
+        color={color} 
+        transparent 
+        opacity={0.8} 
+        side={THREE.DoubleSide} 
+      />
+    </mesh>
+  );
+};
+
 interface PlanetProps extends PlanetData {
   onSelect: (p: PlanetData) => void;
   onPlanetClick?: (title: string, content: string) => void;
@@ -381,6 +410,20 @@ const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, a
   const cloudsRef = useRef<THREE.Mesh>(null);
   const particlesGroupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
+
+  const tName = name.toLowerCase();
+  const texturePaths: Record<string, string> = {
+    mercury: '/textures/mercury.jpg',
+    venus: '/textures/venus.jpg',
+    earth: '/textures/earth.jpg',
+    mars: '/textures/mars.jpg',
+    jupiter: '/textures/jupiter.jpg',
+    saturn: '/textures/saturn.jpg',
+    uranus: '/textures/uranus.jpg',
+    neptune: '/textures/neptune.jpg',
+    sun: '/textures/sun.jpg',
+  };
+  const path = texturePaths[tName];
 
   const elementInfo = astro?.sign ? SIGN_ELEMENTS[astro.sign] : null;
 
@@ -445,13 +488,17 @@ const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, a
             }}
             scale={active ? 1.3 : (hovered ? 1.2 : 1)}
           >
-            <meshStandardMaterial 
-              color={active ? "#ffffff" : color} 
-              emissive={active ? "#ffffff" : color} 
-              emissiveIntensity={active ? 1.5 : (hovered ? 1 : 0.2)} 
-              roughness={0.4} 
-              metalness={0.6} 
-            />
+            {path ? (
+              <TexturedMaterial path={path} color={color} active={active || false} hovered={hovered} />
+            ) : (
+              <meshStandardMaterial 
+                color={active ? "#ffffff" : color} 
+                emissive={active ? "#ffffff" : color} 
+                emissiveIntensity={active ? 1.5 : (hovered ? 1 : 0.2)} 
+                roughness={0.4} 
+                metalness={0.6} 
+              />
+            )}
           </Sphere>
         </Trail>
         
@@ -460,10 +507,7 @@ const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, a
         )}
         
         {name === 'Saturn' && (
-          <mesh rotation={[Math.PI / 2.5, 0, 0]}>
-            <ringGeometry args={[size * 1.5, size * 2.5, 64]} />
-            <meshStandardMaterial color={color} transparent opacity={0.5} side={THREE.DoubleSide} />
-          </mesh>
+          <SaturnRing size={size} color={color} />
         )}
 
         {name === 'Earth' && (
@@ -814,11 +858,9 @@ const SolarSystem3DScene = ({
       <Stars radius={400} depth={80} count={30000} factor={7} saturation={0} fade speed={1.5} />
       <Stars radius={200} depth={40} count={5000} factor={4} saturation={0.5} fade speed={0.5} />
       
-      <color attach="background" args={['#020205']} />
-      <fog attach="fog" args={['#020205', 100, 600]} />
-      
-      <ambientLight intensity={0.2} />
-      <pointLight position={[100, 100, 100]} intensity={1} color="#ffffff" />
+      <ambientLight intensity={0.15} />
+      <pointLight position={[0, 0, 0]} intensity={3} color="#ffffff" decay={0.5} distance={1000} />
+      <hemisphereLight skyColor="#ffffff" groundColor="#000000" intensity={0.1} />
       
       {showHouseGuide && (
         <>
@@ -1243,29 +1285,31 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
           >
             <div className="w-full h-full absolute inset-0 z-10" id="solar-system-canvas-container">
             <Canvas id="solar-canvas" shadows dpr={[1, 1.5]} gl={{ powerPreference: "high-performance" }} className="w-full h-full block">
-              <SolarSystem3DScene 
-                data={data}
-                selectedPlanet={selectedPlanet}
-                setSelectedPlanet={setSelectedPlanet}
-                rotationPerspective={rotationPerspective}
-                isStatic={isStatic}
-                showHouseGuide={showHouseGuide}
-                isLatticeActive={isLatticeActive}
-                sceneMode={sceneMode}
-                sunHovered={sunHovered}
-                setSunHovered={setSunHovered}
-                hoveredHouse={hoveredHouse}
-                setHoveredHouse={setHoveredHouse}
-                setSelectedAspect={setSelectedAspect}
-                auraNodes={auraNodes}
-                auraEdges={auraEdges}
-                isNeuralSyncActive={isNeuralSyncActive}
-                onPlanetClick={onPlanetClick}
-                controlsRef={controlsRef}
-                getAstrologicalData={getAstrologicalData}
-                getPlanetPos={getPlanetPos}
-                setSelectedAuraNode={setSelectedAuraNode}
-              />
+              <React.Suspense fallback={null}>
+                <SolarSystem3DScene 
+                  data={data}
+                  selectedPlanet={selectedPlanet}
+                  setSelectedPlanet={setSelectedPlanet}
+                  rotationPerspective={rotationPerspective}
+                  isStatic={isStatic}
+                  showHouseGuide={showHouseGuide}
+                  isLatticeActive={isLatticeActive}
+                  sceneMode={sceneMode}
+                  sunHovered={sunHovered}
+                  setSunHovered={setSunHovered}
+                  hoveredHouse={hoveredHouse}
+                  setHoveredHouse={setHoveredHouse}
+                  setSelectedAspect={setSelectedAspect}
+                  auraNodes={auraNodes}
+                  auraEdges={auraEdges}
+                  isNeuralSyncActive={isNeuralSyncActive}
+                  onPlanetClick={onPlanetClick}
+                  controlsRef={controlsRef}
+                  getAstrologicalData={getAstrologicalData}
+                  getPlanetPos={getPlanetPos}
+                  setSelectedAuraNode={setSelectedAuraNode}
+                />
+              </React.Suspense>
             </Canvas>
             </div>
           </motion.div>

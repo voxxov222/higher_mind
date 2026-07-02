@@ -231,9 +231,13 @@ User's Question: "${question}"
 
 Provide the final collapsed truth:`;
 
+  const ai = getAI();
   return retryWithBackoff(async () => {
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+    const result = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+    return result.text || "";
   });
 };
 

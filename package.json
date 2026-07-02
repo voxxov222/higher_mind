@@ -64,7 +64,7 @@
     "tsx": "^4.22.0",
     "typescript": "~5.8.2",
     "typescript-eslint": "^8.59.3",
-    "vite": "^8.0.16"
+    "vite": "^6.2.0"
   },
   "overrides": {
     "node-domexception": "file:./dummy-domexception",

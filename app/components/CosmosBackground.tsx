@@ -1,12 +1,12 @@
 import React, { useRef, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useTexture } from '@react-three/drei';
+import { useSafeTexture } from '../hooks/useSafeTexture';
 import * as THREE from 'three';
 
 function Starfield() {
   const groupRef = useRef<THREE.Group>(null);
   
-  const [starTexture, skyTexture] = useTexture([
+  const [starTexture, skyTexture] = useSafeTexture([
     '/textures/8k_stars.jpg',
     '/textures/stars.jpg'
   ]);

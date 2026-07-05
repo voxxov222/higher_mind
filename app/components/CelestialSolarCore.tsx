@@ -1,13 +1,14 @@
 import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { MeshDistortMaterial, Sphere, Sparkles, Ring, Line, Html, useTexture } from '@react-three/drei';
+import { MeshDistortMaterial, Sphere, Sparkles, Ring, Line, Html } from '@react-three/drei';
+import { useSafeTexture } from '../hooks/useSafeTexture';
 
 export const CelestialSolarCore = ({ selected, hovered, onClick, onPointerOver, onPointerOut }: any) => {
   const coreRef = useRef<THREE.Mesh>(null!);
   const auraRef = useRef<THREE.Mesh>(null!);
   const ringsRef = useRef<THREE.Group>(null!);
-  const sunTexture = useTexture('/textures/sun.jpg');
+  const sunTexture = useSafeTexture('/textures/sun.jpg');
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();

@@ -10,7 +10,10 @@ export default defineConfig(({ mode }) => {
       host: "0.0.0.0",
     },
     resolve: {
-      dedupe: ["react", "react-dom", "three", "@react-three/fiber", "@react-three/drei", "@react-three/postprocessing"],
+      dedupe: ["react", "react-dom", "three", "@react-three/fiber", "@react-three/drei", "@react-three/postprocessing", "motion/react", "framer-motion"],
+    },
+    optimizeDeps: {
+      include: ["react", "react-dom", "motion/react", "framer-motion", "lucide-react"],
     },
     plugins: [
       remix({

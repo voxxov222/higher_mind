@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import * as animejs from 'animejs';
-const anime = animejs.default || animejs;
+import anime from 'animejs';
+
 
 export const AnimeVisualizer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);

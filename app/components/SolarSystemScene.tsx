@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame, Canvas } from '@react-three/fiber';
-import { Sphere, Trail, Float, Stars, Text, OrbitControls, PerspectiveCamera, Html, Ring, Sparkles, Line, Grid, Float as FloatDrei, useTexture } from '@react-three/drei';
+import { Sphere, Trail, Float, Stars, Text, OrbitControls, PerspectiveCamera, Html, Ring, Sparkles, Line, Grid, Float as FloatDrei } from '@react-three/drei';
 import * as THREE from 'three';
+import { useSafeTexture } from '../hooks/useSafeTexture';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, Sparkle, Send, Bot, Zap, Radio, Layers, Loader2, 
@@ -361,7 +362,7 @@ const OrbitalResonanceRipples = ({ size, color }: { size: number, color: string 
 };
 
 const TexturedMaterial = ({ path, color, active, hovered }: { path: string, color: string, active: boolean, hovered: boolean }) => {
-  const texture = useTexture(path);
+  const texture = useSafeTexture(path);
   return (
     <meshStandardMaterial 
       map={texture}
@@ -374,7 +375,7 @@ const TexturedMaterial = ({ path, color, active, hovered }: { path: string, colo
 };
 
 const SaturnRing = ({ size, color }: { size: number, color: string }) => {
-  const ringTexture = useTexture('/textures/saturn_ring.png');
+  const ringTexture = useSafeTexture('/textures/saturn_ring.png');
   return (
     <mesh rotation={[Math.PI / 2.5, 0, 0]}>
       <ringGeometry args={[size * 1.2, size * 2.8, 64]} />

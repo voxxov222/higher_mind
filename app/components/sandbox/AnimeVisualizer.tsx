@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import anime from 'animejs';
+import { animate, stagger } from 'animejs';
 
 
 export const AnimeVisualizer: React.FC = () => {
@@ -43,7 +43,7 @@ export const AnimeVisualizer: React.FC = () => {
     containerRef.current.appendChild(fragment);
 
     // Stagger animation based on anime.js incredible grid stagger feature
-    const animation = anime({
+    const animation = animate({
       targets: '.anime-stagger-el',
       scale: [
         {value: .1, easing: 'easeOutSine', duration: 500},
@@ -53,16 +53,16 @@ export const AnimeVisualizer: React.FC = () => {
         {value: 0, duration: 200},
         {value: 1, duration: 500}
       ],
-      translateX: anime.stagger(10, {grid: [colCount, rowCount], from: 'center', axis: 'x'}),
-      translateY: anime.stagger(10, {grid: [colCount, rowCount], from: 'center', axis: 'y'}),
-      rotateZ: anime.stagger([0, 90], {grid: [colCount, rowCount], from: 'center', axis: 'x'}),
+      translateX: stagger(10, {grid: [colCount, rowCount], from: 'center', axis: 'x'}),
+      translateY: stagger(10, {grid: [colCount, rowCount], from: 'center', axis: 'y'}),
+      rotateZ: stagger([0, 90], {grid: [colCount, rowCount], from: 'center', axis: 'x'}),
       backgroundColor: [
         { value: '#14b8a6', duration: 1000 },
         { value: '#8b5cf6', duration: 1000 },
         { value: '#f43f5e', duration: 1000 },
         { value: '#14b8a6', duration: 1000 },
       ],
-      delay: anime.stagger(200, {grid: [colCount, rowCount], from: 'center'}),
+      delay: stagger(200, {grid: [colCount, rowCount], from: 'center'}),
       loop: true,
       direction: 'alternate',
       easing: 'easeInOutQuad'

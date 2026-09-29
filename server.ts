@@ -76,7 +76,9 @@ async function startServer() {
       }
   });
 
+
   if (process.env.NODE_ENV !== "production") {
+
     // Development mode
     const vite = await import("vite");
     const viteDevServer = await vite.createServer({
@@ -122,7 +124,7 @@ async function startServer() {
     try {
       const aiClient = getAI();
       const session = await aiClient.live.connect({
-        model: "gemini-3.1-flash-live-preview",
+        model: "gemini-2.5-flash",
         callbacks: {
           onmessage: (message: LiveServerMessage) => {
             const audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;

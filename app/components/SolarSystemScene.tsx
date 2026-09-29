@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame, Canvas } from '@react-three/fiber';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { Sphere, Trail, Float, Stars, Text, OrbitControls, PerspectiveCamera, Html, Ring, Sparkles, Line, Grid, Float as FloatDrei } from '@react-three/drei';
 import * as THREE from 'three';
 import { useSafeTexture } from '../hooks/useSafeTexture';
@@ -15,7 +16,8 @@ import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration } from '@re
 import { BlendFunction } from 'postprocessing';
 import { soundEngine } from '../lib/soundEffects';
 
-import { ClassicBirthChart } from './ClassicBirthChart';
+import { SketchfabBirthChart } from './SketchfabBirthChart';
+import { NatalChart3D } from './NatalChart3D';
 import { CelestialSolarCore, PlanetaryGravityNetwork, CelestialDNAHelix } from './CelestialSolarCore';
 
 interface AuraVisualNode {
@@ -405,12 +407,221 @@ const SIGN_ANGLES: Record<string, number> = {
   'Libra': 180, 'Scorpio': 210, 'Sagittarius': 240, 'Capricorn': 270, 'Aquarius': 300, 'Pisces': 330
 };
 
-const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, active, astro, isStatic, isBirthChartMode, showTracking }: PlanetProps) => {
+const CELESTIAL_CHARTS_DATA: Record<string, {
+  atmosphere: { name: string; value: number; color: string }[];
+  temperature: { name: string; temp: number; color: string }[];
+  tempUnit: string;
+}> = {
+  'Mercury': {
+    atmosphere: [
+      { name: 'Oxygen', value: 42, color: '#10b981' },
+      { name: 'Sodium', value: 29, color: '#f59e0b' },
+      { name: 'Hydrogen', value: 22, color: '#3b82f6' },
+      { name: 'Helium', value: 6, color: '#8b5cf6' },
+      { name: 'Others', value: 1, color: '#6b7280' }
+    ],
+    temperature: [
+      { name: 'Night', temp: -173, color: '#3b82f6' },
+      { name: 'Dawn', temp: -100, color: '#60a5fa' },
+      { name: 'Morning', temp: 100, color: '#fbbf24' },
+      { name: 'Noon', temp: 427, color: '#ef4444' },
+      { name: 'Dusk', temp: 150, color: '#f59e0b' }
+    ],
+    tempUnit: '°C'
+  },
+  'Venus': {
+    atmosphere: [
+      { name: 'Carbon Dioxide', value: 96.5, color: '#ef4444' },
+      { name: 'Nitrogen', value: 3.5, color: '#3b82f6' },
+      { name: 'Trace Gases', value: 0.1, color: '#6b7280' }
+    ],
+    temperature: [
+      { name: '1960s', temp: 460, color: '#f59e0b' },
+      { name: '1970s', temp: 475, color: '#f59e0b' },
+      { name: '1980s', temp: 462, color: '#f59e0b' },
+      { name: '1990s', temp: 464, color: '#f59e0b' },
+      { name: '2000s', temp: 465, color: '#f59e0b' },
+      { name: 'Modern', temp: 467, color: '#ef4444' }
+    ],
+    tempUnit: '°C'
+  },
+  'Earth': {
+    atmosphere: [
+      { name: 'Nitrogen', value: 78, color: '#3b82f6' },
+      { name: 'Oxygen', value: 21, color: '#10b981' },
+      { name: 'Argon', value: 0.93, color: '#8b5cf6' },
+      { name: 'CO2', value: 0.04, color: '#ef4444' },
+      { name: 'Others', value: 0.03, color: '#6b7280' }
+    ],
+    temperature: [
+      { name: '1920', temp: 13.8, color: '#3b82f6' },
+      { name: '1940', temp: 14.0, color: '#3b82f6' },
+      { name: '1960', temp: 13.9, color: '#3b82f6' },
+      { name: '1980', temp: 14.2, color: '#3b82f6' },
+      { name: '2000', temp: 14.5, color: '#f59e0b' },
+      { name: '2020', temp: 14.9, color: '#ef4444' }
+    ],
+    tempUnit: '°C'
+  },
+  'Mars': {
+    atmosphere: [
+      { name: 'Carbon Dioxide', value: 95.3, color: '#ef4444' },
+      { name: 'Nitrogen', value: 2.7, color: '#3b82f6' },
+      { name: 'Argon', value: 1.6, color: '#8b5cf6' },
+      { name: 'Oxygen', value: 0.13, color: '#10b981' },
+      { name: 'Others', value: 0.27, color: '#6b7280' }
+    ],
+    temperature: [
+      { name: 'Winter', temp: -120, color: '#3b82f6' },
+      { name: 'Spring', temp: -60, color: '#60a5fa' },
+      { name: 'Summer', temp: -20, color: '#fbbf24' },
+      { name: 'Autumn', temp: -50, color: '#a8a29e' }
+    ],
+    tempUnit: '°C'
+  },
+  'Jupiter': {
+    atmosphere: [
+      { name: 'Hydrogen', value: 89.8, color: '#60a5fa' },
+      { name: 'Helium', value: 10.2, color: '#a78bfa' },
+      { name: 'Methane', value: 0.3, color: '#34d399' },
+      { name: 'Ammonia', value: 0.02, color: '#f59e0b' }
+    ],
+    temperature: [
+      { name: 'Cloud Top', temp: -108, color: '#3b82f6' },
+      { name: 'Deep Strat', temp: -50, color: '#60a5fa' },
+      { name: '10 Bar Depth', temp: 67, color: '#fbbf24' },
+      { name: 'Metallic H2', temp: 5000, color: '#ef4444' },
+      { name: 'Core Boundary', temp: 20000, color: '#f43f5e' }
+    ],
+    tempUnit: '°C'
+  },
+  'Saturn': {
+    atmosphere: [
+      { name: 'Hydrogen', value: 96.3, color: '#60a5fa' },
+      { name: 'Helium', value: 3.25, color: '#a78bfa' },
+      { name: 'Methane', value: 0.45, color: '#34d399' },
+      { name: 'Ammonia', value: 0.01, color: '#f59e0b' }
+    ],
+    temperature: [
+      { name: 'Cloud Top', temp: -139, color: '#3b82f6' },
+      { name: 'Deep Strat', temp: -80, color: '#60a5fa' },
+      { name: '10 Bar Depth', temp: 40, color: '#fbbf24' },
+      { name: 'Metallic H2', temp: 3000, color: '#ef4444' },
+      { name: 'Core Boundary', temp: 11000, color: '#f43f5e' }
+    ],
+    tempUnit: '°C'
+  },
+  'Uranus': {
+    atmosphere: [
+      { name: 'Hydrogen', value: 82.5, color: '#60a5fa' },
+      { name: 'Helium', value: 15.2, color: '#a78bfa' },
+      { name: 'Methane', value: 2.3, color: '#34d399' }
+    ],
+    temperature: [
+      { name: 'Stratosphere', temp: -197, color: '#3b82f6' },
+      { name: 'Tropopause', temp: -224, color: '#1d4ed8' },
+      { name: 'Troposphere', temp: -150, color: '#60a5fa' },
+      { name: 'Icy Mantle', temp: 2000, color: '#fbbf24' },
+      { name: 'Rocky Core', temp: 4700, color: '#ef4444' }
+    ],
+    tempUnit: '°C'
+  },
+  'Neptune': {
+    atmosphere: [
+      { name: 'Hydrogen', value: 80, color: '#60a5fa' },
+      { name: 'Helium', value: 19, color: '#a78bfa' },
+      { name: 'Methane', value: 1.5, color: '#34d399' }
+    ],
+    temperature: [
+      { name: 'Stratosphere', temp: -201, color: '#3b82f6' },
+      { name: 'Tropopause', temp: -218, color: '#1d4ed8' },
+      { name: 'Troposphere', temp: -150, color: '#60a5fa' },
+      { name: 'Icy Mantle', temp: 2500, color: '#fbbf24' },
+      { name: 'Rocky Core', temp: 5000, color: '#ef4444' }
+    ],
+    tempUnit: '°C'
+  },
+  'Sun': {
+    atmosphere: [
+      { name: 'Hydrogen', value: 73.46, color: '#fbbf24' },
+      { name: 'Helium', value: 24.85, color: '#f59e0b' },
+      { name: 'Oxygen', value: 0.77, color: '#ef4444' },
+      { name: 'Carbon', value: 0.29, color: '#ec4899' },
+      { name: 'Others', value: 0.63, color: '#6b7280' }
+    ],
+    temperature: [
+      { name: 'Surface', temp: 5500, color: '#fbbf24' },
+      { name: 'Convective', temp: 2000000, color: '#f59e0b' },
+      { name: 'Radiative', temp: 7000000, color: '#ef4444' },
+      { name: 'Solar Core', temp: 15000000, color: '#f43f5e' }
+    ],
+    tempUnit: '°C'
+  },
+  'North Node': {
+    atmosphere: [
+      { name: 'Karmic Future', value: 50, color: '#10b981' },
+      { name: 'Soul Growth', value: 30, color: '#3b82f6' },
+      { name: 'Dharma Align', value: 20, color: '#fbbf24' }
+    ],
+    temperature: [
+      { name: 'Past Cycle', temp: 10, color: '#6b7280' },
+      { name: 'Initiation', temp: 40, color: '#60a5fa' },
+      { name: 'Integration', temp: 80, color: '#fbbf24' },
+      { name: 'Realization', temp: 150, color: '#ef4444' }
+    ],
+    tempUnit: 'Hz'
+  },
+  'South Node': {
+    atmosphere: [
+      { name: 'Karmic Habits', value: 60, color: '#ef4444' },
+      { name: 'Inherited Talent', value: 30, color: '#a78bfa' },
+      { name: 'Comfort Zone', value: 10, color: '#6b7280' }
+    ],
+    temperature: [
+      { name: 'Origin', temp: 396, color: '#ef4444' },
+      { name: 'Comfort', temp: 417, color: '#fbbf24' },
+      { name: 'Release', temp: 528, color: '#10b981' },
+      { name: 'Resolution', temp: 639, color: '#3b82f6' }
+    ],
+    tempUnit: 'Hz'
+  },
+  'Chiron': {
+    atmosphere: [
+      { name: 'Vulnerability', value: 40, color: '#f59e0b' },
+      { name: 'Wounding', value: 30, color: '#ef4444' },
+      { name: 'Healed Gift', value: 30, color: '#10b981' }
+    ],
+    temperature: [
+      { name: 'Wound State', temp: 174, color: '#ef4444' },
+      { name: 'Acceptance', temp: 285, color: '#f59e0b' },
+      { name: 'Transmutation', temp: 528, color: '#10b981' },
+      { name: 'Empowerment', temp: 852, color: '#3b82f6' }
+    ],
+    tempUnit: 'Hz'
+  },
+  'Lilith': {
+    atmosphere: [
+      { name: 'Primal Nature', value: 45, color: '#ec4899' },
+      { name: 'Shadow Wisdom', value: 35, color: '#8b5cf6' },
+      { name: 'Untamed Power', value: 20, color: '#111111' }
+    ],
+    temperature: [
+      { name: 'Suppression', temp: -50, color: '#3b82f6' },
+      { name: 'Subversion', temp: 150, color: '#8b5cf6' },
+      { name: 'Liberation', temp: 450, color: '#ec4899' },
+      { name: 'Sovereignty', temp: 963, color: '#d946ef' }
+    ],
+    tempUnit: 'Hz'
+  }
+};
+
+const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, active, astro, isStatic, isBirthChartMode, showTracking, timeMultiplier = 1 }: PlanetProps & { timeMultiplier?: number }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
   const particlesGroupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
+  const [activeCardTab, setActiveCardTab] = useState<'resonance' | 'atmosphere' | 'temperature'>('resonance');
 
   const tName = name.toLowerCase();
   const texturePaths: Record<string, string> = {
@@ -435,7 +646,7 @@ const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, a
       t = ((baseAngle + (astro.degree || 0)) * Math.PI) / 180;
     } else {
       const startAngle = astro?.degree ? (astro.degree * Math.PI) / 180 : 0;
-      t = isStatic ? startAngle : (startAngle + clock.getElapsedTime() * speed * 0.1);
+      t = isStatic ? startAngle : (startAngle + clock.getElapsedTime() * speed * 0.1 * timeMultiplier);
     }
 
     if (groupRef.current) {
@@ -540,62 +751,191 @@ const Planet = ({ name, color, size, distance, speed, onSelect, onPlanetClick, a
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="w-[300px] bg-black/90 backdrop-blur-3xl border border-white/20 p-5 rounded-[2.5rem] pointer-events-auto shadow-[0_0_40px_rgba(0,0,0,0.6)]"
+              className="w-[340px] bg-black/90 backdrop-blur-3xl border border-white/20 p-5 rounded-[2.5rem] pointer-events-auto shadow-[0_0_40px_rgba(0,0,0,0.6)]"
             >
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex justify-between items-start mb-3">
                 <div>
-                  <div className="flex items-center gap-2 mb-1.5">
+                  <div className="flex items-center gap-2 mb-1">
                     <div className="w-2 h-2 rounded-full shadow-[0_0_10px_currentcolor]" style={{ backgroundColor: color }} />
-                    <span className="text-[9px] uppercase tracking-[0.3em] font-bold text-stone-500">Celestial Insight</span>
+                    <span className="text-[8px] uppercase tracking-[0.3em] font-bold text-stone-500">Celestial Insight</span>
                   </div>
-                  <h3 className="text-3xl font-light text-white uppercase tracking-widest">{name}</h3>
+                  <h3 className="text-2xl font-light text-white uppercase tracking-widest">{name}</h3>
                 </div>
                 <button 
                    onClick={(e) => { e.stopPropagation(); onSelect(null as any); }} 
                    className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-stone-500 hover:text-white transition-colors border border-white/5"
                 >
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
 
-              <div className="space-y-4">
-                <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
-                  <p className="text-stone-300 text-[13px] font-light leading-relaxed italic">
-                    {name === 'Earth' ? 'The focal point of Gaia consciousness. A living library of physical experience.' : astro?.interpretation || astro?.meaning || 'Planetary frequency synchronized. Exploring resonance.'}
-                  </p>
-                </div>
+              {/* TABS SELECTOR */}
+              <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-white/5 mb-3">
+                <button
+                  onClick={(e) => { e.stopPropagation(); setActiveCardTab('resonance'); }}
+                  className={`flex-1 text-[8px] uppercase tracking-widest py-1.5 rounded-lg font-bold transition-all ${activeCardTab === 'resonance' ? 'bg-white/10 text-white shadow-md' : 'text-stone-400 hover:text-stone-200'}`}
+                >
+                  Resonance
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setActiveCardTab('atmosphere'); }}
+                  className={`flex-1 text-[8px] uppercase tracking-widest py-1.5 rounded-lg font-bold transition-all ${activeCardTab === 'atmosphere' ? 'bg-white/10 text-white shadow-md' : 'text-stone-400 hover:text-stone-200'}`}
+                >
+                  Atmosphere
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setActiveCardTab('temperature'); }}
+                  className={`flex-1 text-[8px] uppercase tracking-widest py-1.5 rounded-lg font-bold transition-all ${activeCardTab === 'temperature' ? 'bg-white/10 text-white shadow-md' : 'text-stone-400 hover:text-stone-200'}`}
+                >
+                  Thermal
+                </button>
+              </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  {astro ? (
-                    <>
-                      <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-                        <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-0.5">Vibration</div>
-                        <div className="text-white text-xs font-bold font-mono">{astro.sign}</div>
-                      </div>
-                      <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-                        <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-0.5">Degree</div>
-                        <div className="text-white text-xs font-bold font-mono">{Math.floor(astro.degree)}°</div>
-                      </div>
-                      <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-                        <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-0.5">House</div>
-                        <div className="text-white text-xs font-bold font-mono">Sector {astro.house}</div>
-                      </div>
-                      <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-                         <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-0.5">Element</div>
-                         <div className="text-white text-xs font-bold font-mono">{elementInfo?.type || 'Space'}</div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="col-span-2 bg-black/40 p-3 rounded-xl border border-white/5 text-center">
-                       <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-1">Status</div>
-                       <div className="text-white text-[10px] font-mono">NODE_UNSYNCED</div>
+              <div className="min-h-[140px] flex flex-col justify-between">
+                {activeCardTab === 'resonance' && (
+                  <div className="space-y-3">
+                    <div className="bg-white/5 p-3 rounded-xl border border-white/5">
+                      <p className="text-stone-300 text-[11px] font-light leading-relaxed italic">
+                        {name === 'Earth' ? 'The focal point of Gaia consciousness. A living library of physical experience.' : astro?.interpretation || astro?.meaning || 'Planetary frequency synchronized. Exploring resonance.'}
+                      </p>
                     </div>
-                  )}
-                </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      {astro ? (
+                        <>
+                          <div className="bg-black/40 p-2.5 rounded-xl border border-white/5">
+                            <div className="text-[7px] text-stone-500 uppercase tracking-widest mb-0.5">Vibration</div>
+                            <div className="text-white text-[11px] font-bold font-mono">{astro.sign}</div>
+                          </div>
+                          <div className="bg-black/40 p-2.5 rounded-xl border border-white/5">
+                            <div className="text-[7px] text-stone-500 uppercase tracking-widest mb-0.5">Degree</div>
+                            <div className="text-white text-[11px] font-bold font-mono">{Math.floor(astro.degree)}°</div>
+                          </div>
+                          <div className="bg-black/40 p-2.5 rounded-xl border border-white/5">
+                            <div className="text-[7px] text-stone-500 uppercase tracking-widest mb-0.5">House</div>
+                            <div className="text-white text-[11px] font-bold font-mono">Sector {astro.house}</div>
+                          </div>
+                          <div className="bg-black/40 p-2.5 rounded-xl border border-white/5">
+                             <div className="text-[7px] text-stone-500 uppercase tracking-widest mb-0.5">Element</div>
+                             <div className="text-white text-[11px] font-bold font-mono">{elementInfo?.type || 'Space'}</div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="col-span-2 bg-black/40 p-2.5 rounded-xl border border-white/5 text-center">
+                           <div className="text-[7px] text-stone-500 uppercase tracking-widest mb-0.5">Status</div>
+                           <div className="text-white text-[10px] font-mono">NODE_UNSYNCED</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {activeCardTab === 'atmosphere' && (
+                  <div className="space-y-2 flex flex-col items-center justify-center p-1 bg-white/5 rounded-2xl border border-white/5">
+                    <div className="text-[8px] text-stone-400 font-bold uppercase tracking-widest self-start px-2 py-1">
+                      {CELESTIAL_CHARTS_DATA[name] ? 'Atmospheric Composition' : 'Energy Field Resonance'}
+                    </div>
+                    {(() => {
+                      const chartInfo = CELESTIAL_CHARTS_DATA[name] || CELESTIAL_CHARTS_DATA['Earth'];
+                      return (
+                        <div className="flex items-center gap-2 w-full h-[120px] pr-2 pointer-events-auto">
+                          <div className="w-[120px] h-[120px] shrink-0">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                <Pie
+                                  data={chartInfo.atmosphere}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={28}
+                                  outerRadius={45}
+                                  paddingAngle={2}
+                                  dataKey="value"
+                                >
+                                  {chartInfo.atmosphere.map((entry, idx) => (
+                                    <Cell key={`cell-${idx}`} fill={entry.color} />
+                                  ))}
+                                </Pie>
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </div>
+                          <div className="flex-1 flex flex-col justify-center gap-1 overflow-y-auto max-h-[110px] pr-1">
+                            {chartInfo.atmosphere.slice(0, 4).map((entry, idx) => (
+                              <div key={idx} className="flex items-center gap-1.5 text-[9px] text-stone-300">
+                                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                                <span className="font-light truncate max-w-[80px]">{entry.name}</span>
+                                <span className="font-mono font-bold ml-auto">{entry.value}%</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {activeCardTab === 'temperature' && (
+                  <div className="space-y-2 p-3 bg-white/5 rounded-2xl border border-white/5">
+                    <div className="flex justify-between text-[8px] text-stone-400 font-bold uppercase tracking-widest">
+                      <span>{CELESTIAL_CHARTS_DATA[name]?.tempUnit === 'Hz' ? 'Spectral Pattern' : 'Thermal Profile'}</span>
+                      <span className="text-stone-300 font-mono">Unit: {CELESTIAL_CHARTS_DATA[name]?.tempUnit || '°C'}</span>
+                    </div>
+                    {(() => {
+                      const chartInfo = CELESTIAL_CHARTS_DATA[name] || CELESTIAL_CHARTS_DATA['Earth'];
+                      return (
+                        <div className="w-full h-[110px] pt-2 pointer-events-auto">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={chartInfo.temperature} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                              <defs>
+                                <linearGradient id={`colorTemp-${name}`} x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor={color} stopOpacity={0.4}/>
+                                  <stop offset="95%" stopColor={color} stopOpacity={0}/>
+                                </linearGradient>
+                              </defs>
+                              <XAxis 
+                                dataKey="name" 
+                                stroke="#78716c" 
+                                fontSize={7} 
+                                tickLine={false} 
+                                axisLine={false}
+                              />
+                              <YAxis 
+                                stroke="#78716c" 
+                                fontSize={7} 
+                                tickLine={false} 
+                                axisLine={false}
+                                domain={['auto', 'auto']}
+                              />
+                              <Tooltip
+                                contentStyle={{ 
+                                  backgroundColor: 'rgba(0,0,0,0.85)', 
+                                  border: '1px solid rgba(255,255,255,0.1)',
+                                  borderRadius: '8px',
+                                  padding: '4px 8px',
+                                  fontSize: '9px',
+                                  fontFamily: 'monospace'
+                                }}
+                                itemStyle={{ color: '#fff', padding: 0 }}
+                                labelStyle={{ color: '#888', marginBottom: '2px' }}
+                              />
+                              <Area 
+                                type="monotone" 
+                                dataKey="temp" 
+                                stroke={color} 
+                                strokeWidth={1.5}
+                                fillOpacity={1} 
+                                fill={`url(#colorTemp-${name})`} 
+                              />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
 
                 <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                  <span className="text-[8px] text-stone-600 uppercase tracking-widest">{distance} AU FROM RADIUS</span>
-                  <span className="text-[9px] text-stone-500 uppercase font-bold tracking-tighter">NODE SYNCED</span>
+                  <span className="text-[7px] text-stone-600 uppercase tracking-widest">{distance} AU FROM RADIUS</span>
+                  <span className="text-[8px] text-stone-500 uppercase font-bold tracking-tighter">NODE SYNCED</span>
                 </div>
               </div>
             </motion.div>
@@ -800,6 +1140,7 @@ const SolarSystem3DScene = ({
   getPlanetPos,
   setSelectedAuraNode
 }: any) => {
+  const [sunCardTab, setSunCardTab] = useState<'resonance' | 'atmosphere' | 'temperature'>('resonance');
 
   useFrame(({ clock }) => {
     if (controlsRef.current) {
@@ -943,55 +1284,183 @@ const SolarSystem3DScene = ({
             <motion.div 
                initial={{ opacity: 0, scale: 0.8 }}
                animate={{ opacity: 1, scale: 1 }}
-               className="w-[400px] bg-black/80 backdrop-blur-3xl border border-white/20 p-8 rounded-[40px] shadow-[0_0_80px_rgba(253,184,19,0.2)] pointer-events-auto"
+               className="w-[360px] bg-black/80 backdrop-blur-3xl border border-white/20 p-6 rounded-[40px] shadow-[0_0_80px_rgba(253,184,19,0.2)] pointer-events-auto"
             >
-              <div className="flex justify-between items-start mb-6">
+              <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h4 className="text-[10px] uppercase tracking-[0.5em] text-amber-500 mb-2">Solar Core</h4>
-                  <h3 className="text-4xl font-light text-white uppercase tracking-widest">Sun</h3>
-                  <div className="w-16 h-1 mt-3 bg-amber-500" />
+                  <h4 className="text-[9px] uppercase tracking-[0.5em] text-amber-500 mb-1">Solar Core</h4>
+                  <h3 className="text-3xl font-light text-white uppercase tracking-widest">Sun</h3>
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); setSelectedPlanet(null); }} className="p-2 text-stone-500 hover:text-white transition-colors">
-                  <X size={20} />
+                <button onClick={(e) => { e.stopPropagation(); setSelectedPlanet(null); }} className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-stone-500 hover:text-white transition-colors border border-white/5">
+                  <X size={16} />
                 </button>
               </div>
 
-              <div className="space-y-6">
-                {(() => {
-                  const sunAstro = getAstrologicalData('Sun');
-                  return (
-                    <>
-                      <div className="white/5 p-5 rounded-3xl border border-white/10">
-                        <p className="text-stone-200 text-sm italic leading-relaxed font-light">
-                          {sunAstro?.interpretation || sunAstro?.meaning || selectedPlanet.description}
-                        </p>
-                      </div>
+              {/* TABS SELECTOR */}
+              <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-white/5 mb-4">
+                <button
+                  onClick={(e) => { e.stopPropagation(); setSunCardTab('resonance'); }}
+                  className={`flex-1 text-[8px] uppercase tracking-widest py-1.5 rounded-lg font-bold transition-all ${sunCardTab === 'resonance' ? 'bg-white/10 text-white shadow-md' : 'text-stone-400 hover:text-stone-200'}`}
+                >
+                  Resonance
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setSunCardTab('atmosphere'); }}
+                  className={`flex-1 text-[8px] uppercase tracking-widest py-1.5 rounded-lg font-bold transition-all ${sunCardTab === 'atmosphere' ? 'bg-white/10 text-white shadow-md' : 'text-stone-400 hover:text-stone-200'}`}
+                >
+                  Atmosphere
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setSunCardTab('temperature'); }}
+                  className={`flex-1 text-[8px] uppercase tracking-widest py-1.5 rounded-lg font-bold transition-all ${sunCardTab === 'temperature' ? 'bg-white/10 text-white shadow-md' : 'text-stone-400 hover:text-stone-200'}`}
+                >
+                  Thermal
+                </button>
+              </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                          <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Vibration</div>
-                          <div className="text-white text-sm font-bold font-mono">{sunAstro?.sign || 'Aries'}</div>
+              <div className="min-h-[140px] flex flex-col justify-between">
+                {sunCardTab === 'resonance' && (
+                  <div className="space-y-4">
+                    {(() => {
+                      const sunAstro = getAstrologicalData('Sun');
+                      return (
+                        <>
+                          <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
+                            <p className="text-stone-200 text-xs italic leading-relaxed font-light">
+                              {sunAstro?.interpretation || sunAstro?.meaning || selectedPlanet.description}
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                              <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-1">Vibration</div>
+                              <div className="text-white text-xs font-bold font-mono">{sunAstro?.sign || 'Aries'}</div>
+                            </div>
+                            <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                              <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-1">Degree</div>
+                              <div className="text-white text-xs font-bold font-mono">{Math.floor(sunAstro?.degree || 0)}°</div>
+                            </div>
+                            <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                              <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-1">House</div>
+                              <div className="text-white text-xs font-bold font-mono">Sector {sunAstro?.house || 1}</div>
+                            </div>
+                            <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                              <div className="text-[8px] text-stone-500 uppercase tracking-widest mb-1">Element</div>
+                              <div className="text-white text-xs font-bold font-mono">{sunAstro?.sign ? SIGN_ELEMENTS[sunAstro.sign]?.type : 'Fire'}</div>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {sunCardTab === 'atmosphere' && (
+                  <div className="space-y-2 flex flex-col items-center justify-center p-2 bg-white/5 rounded-2xl border border-white/5">
+                    <div className="text-[8px] text-stone-400 font-bold uppercase tracking-widest self-start px-2 py-1">
+                      Solar Atmospheric Composition (Corona/Chromosphere)
+                    </div>
+                    {(() => {
+                      const chartInfo = CELESTIAL_CHARTS_DATA['Sun'];
+                      return (
+                        <div className="flex items-center gap-4 w-full h-[120px] pr-2 pointer-events-auto">
+                          <div className="w-[120px] h-[120px] shrink-0">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                <Pie
+                                  data={chartInfo.atmosphere}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={28}
+                                  outerRadius={45}
+                                  paddingAngle={2}
+                                  dataKey="value"
+                                >
+                                  {chartInfo.atmosphere.map((entry, idx) => (
+                                    <Cell key={`cell-${idx}`} fill={entry.color} />
+                                  ))}
+                                </Pie>
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </div>
+                          <div className="flex-1 flex flex-col justify-center gap-1.5 overflow-y-auto max-h-[110px] pr-1">
+                            {chartInfo.atmosphere.map((entry, idx) => (
+                              <div key={idx} className="flex items-center gap-2 text-[9px] text-stone-300 font-mono">
+                                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                                <span className="font-light truncate max-w-[80px]">{entry.name}</span>
+                                <span className="font-bold ml-auto">{entry.value}%</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                          <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Degree</div>
-                          <div className="text-white text-sm font-bold font-mono">{Math.floor(sunAstro?.degree || 0)}°</div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {sunCardTab === 'temperature' && (
+                  <div className="space-y-2 p-3 bg-white/5 rounded-2xl border border-white/5">
+                    <div className="flex justify-between text-[8px] text-stone-400 font-bold uppercase tracking-widest">
+                      <span>Solar Zone Temperatures</span>
+                      <span className="text-stone-300 font-mono">Unit: °C</span>
+                    </div>
+                    {(() => {
+                      const chartInfo = CELESTIAL_CHARTS_DATA['Sun'];
+                      return (
+                        <div className="w-full h-[110px] pt-2 pointer-events-auto">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={chartInfo.temperature} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                              <defs>
+                                <linearGradient id="colorTemp-Sun" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.4}/>
+                                  <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
+                                </linearGradient>
+                              </defs>
+                              <XAxis 
+                                dataKey="name" 
+                                stroke="#78716c" 
+                                fontSize={7} 
+                                tickLine={false} 
+                                axisLine={false}
+                              />
+                              <YAxis 
+                                stroke="#78716c" 
+                                fontSize={7} 
+                                tickLine={false} 
+                                axisLine={false}
+                                domain={['auto', 'auto']}
+                              />
+                              <Tooltip
+                                contentStyle={{ 
+                                  backgroundColor: 'rgba(0,0,0,0.85)', 
+                                  border: '1px solid rgba(255,255,255,0.1)',
+                                  borderRadius: '8px',
+                                  padding: '4px 8px',
+                                  fontSize: '9px',
+                                  fontFamily: 'monospace'
+                                }}
+                                itemStyle={{ color: '#fff', padding: 0 }}
+                                labelStyle={{ color: '#888', marginBottom: '2px' }}
+                              />
+                              <Area 
+                                type="monotone" 
+                                dataKey="temp" 
+                                stroke="#fbbf24" 
+                                strokeWidth={1.5}
+                                fillOpacity={1} 
+                                fill="url(#colorTemp-Sun)" 
+                              />
+                            </AreaChart>
+                          </ResponsiveContainer>
                         </div>
-                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                          <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">House</div>
-                          <div className="text-white text-sm font-bold font-mono">Sector {sunAstro?.house || 1}</div>
-                        </div>
-                        <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                          <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Element</div>
-                          <div className="text-white text-sm font-bold font-mono">{sunAstro?.sign ? SIGN_ELEMENTS[sunAstro.sign]?.type : 'Fire'}</div>
-                        </div>
-                      </div>
-                    </>
-                  );
-                })()}
+                      );
+                    })()}
+                  </div>
+                )}
 
                 <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                   <div className="text-[9px] uppercase tracking-widest text-stone-500 font-bold">Gravitational Influence</div>
-                   <div className="text-amber-500 text-[10px] uppercase tracking-tighter">Prime Source</div>
+                   <div className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">Gravitational Influence</div>
+                   <div className="text-amber-500 text-[9px] uppercase tracking-tighter">Prime Source</div>
                 </div>
               </div>
             </motion.div>
@@ -1172,6 +1641,28 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
   const [hoveredHouse, setHoveredHouse] = useState<any>(null);
   const [selectedAspect, setSelectedAspect] = useState<any>(null);
   const [isStatic, setIsStatic] = useState(false);
+  const [timeMultiplier, setTimeMultiplier] = useState(1);
+
+  useEffect(() => {
+    const handleVoiceCommand = (e: any) => {
+      const { action, target } = e.detail;
+      if (action === 'focus') {
+        const p = planets.find(p => p.name.toLowerCase() === target.toLowerCase());
+        if (p) setSelectedPlanet(p);
+      } else if (action === 'speed_up') {
+        setTimeMultiplier(prev => Math.min(prev * 2, 10));
+      } else if (action === 'slow_down') {
+        setTimeMultiplier(prev => Math.max(prev / 2, 0.1));
+      } else if (action === 'pause_time') {
+        setIsStatic(true);
+      } else if (action === 'resume_time') {
+        setIsStatic(false);
+      }
+    };
+    window.addEventListener('voice-command', handleVoiceCommand);
+    return () => window.removeEventListener('voice-command', handleVoiceCommand);
+  }, []);
+
   const [viewMode, setViewMode] = useState<'solar' | 'chart'>('chart');
   const [rotationPerspective, setRotationPerspective] = useState<'top' | 'isometric' | 'orbit' | 'free'>('free');
   const [showHouseGuide, setShowHouseGuide] = useState(false);
@@ -1255,24 +1746,15 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
       <AnimatePresence mode="wait">
         {viewMode === 'chart' ? (
           <motion.div
-            key="2d-radial-chart"
+            key="3d-natal-astrolabe-chart"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
-            className="w-full h-full p-2 md:p-6 flex items-center justify-center bg-[#020205] select-none"
+            className="w-full h-full flex items-center justify-center bg-[#020205] select-none relative z-10"
           >
-            <div className="w-full h-full max-w-7xl mx-auto flex items-center justify-center">
-              <ClassicBirthChart 
-                data={data} 
-                selectedPlanet={selectedPlanet} 
-                onPlanetClick={(p: any) => {
-                  setSelectedPlanet(p);
-                  if (onPlanetClick && p) {
-                    onPlanetClick(p.name, p.meaning || p.description);
-                  }
-                }} 
-              />
+            <div className="w-full h-full flex items-center justify-center">
+              <NatalChart3D data={data} initialPreset="nadal" />
             </div>
           </motion.div>
         ) : (
@@ -1353,7 +1835,7 @@ export const SolarSystemScene = ({ data, onPlanetClick, onResearch, onSave }: So
                     }}
                     className={`px-4 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-all ${viewMode === 'chart' ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_20px_rgba(147,51,234,0.4)] font-bold' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
                   >
-                    {viewMode === 'chart' ? 'Zodiac Wheel' : 'Solar Dynamics'}
+                    {viewMode === 'chart' ? '3D Natal Astrolabe' : 'Solar Dynamics'}
                   </button>
 
                   {viewMode === 'solar' && (

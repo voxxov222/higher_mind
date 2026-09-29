@@ -10,6 +10,12 @@
     "lint": "eslint app"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.8",
+    "@ai-sdk/google": "^4.0.8",
+    "@ai-sdk/mcp": "^2.0.7",
+    "@ai-sdk/openai": "^4.0.8",
+    "@ai-sdk/react": "^4.0.16",
+    "@base-ui/react": "^1.6.0",
     "@google/genai": "^2.7.0",
     "@react-spring/web": "^10.1.2",
     "@react-three/drei": "^9.122.0",
@@ -21,9 +27,9 @@
     "@remix-run/serve": "^2.17.4",
     "@tailwindcss/vite": "^4.2.4",
     "@types/animejs": "^3.1.13",
-    "@types/d3": "^7.4.3",
     "@types/three": "^0.184.1",
     "@xyflow/react": "^12.10.2",
+    "ai": "^7.0.15",
     "animejs": "^4.4.1",
     "astronomy-engine": "^2.1.19",
     "clsx": "^2.1.1",
@@ -36,23 +42,25 @@
     "isbot": "^5.1.40",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.557.0",
-    "motion": "^12.38.0",
+    "motion": "^12.42.2",
     "postprocessing": "^6.39.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",
     "recharts": "^3.8.1",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.2.4",
     "three": "^0.170.0",
     "vite-tsconfig-paths": "^6.1.1",
     "ws": "^8.21.0",
-    "zustand": "^5.0.13"
+    "zustand": "^4.5.7"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@firebase/eslint-plugin-security-rules": "^0.0.2",
     "@remix-run/dev": "^2.17.5",
+    "@types/d3": "^7.4.3",
     "@types/node": "^22.14.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
@@ -71,6 +79,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1"
+    "@types/react-dom": "^18.3.1",
+    "zustand": "^4.5.7"
   }
 }

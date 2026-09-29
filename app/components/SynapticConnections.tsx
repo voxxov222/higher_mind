@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useSpring, animated } from '@react-spring/web';
+import { motion } from 'motion/react';
 
 interface Point {
   x: number;
@@ -20,18 +20,6 @@ interface SynapticConnectionsProps {
 }
 
 const AnimatedLine: React.FC<{ connection: Connection }> = ({ connection }) => {
-  const props = useSpring({
-    to: {
-      x1: connection.start.x,
-      y1: connection.start.y,
-      x2: connection.end.x,
-      y2: connection.end.y,
-      opacity: connection.active ? 0.8 : (connection.isClose ? 0.15 : 0),
-      strokeWidth: connection.active ? 3 : 1,
-    },
-    config: { tension: 120, friction: 14 }
-  });
-
   return (
     <>
       {connection.active && (
@@ -45,18 +33,27 @@ const AnimatedLine: React.FC<{ connection: Connection }> = ({ connection }) => {
           `}
         </style>
       )}
-      <animated.line
-        x1={props.x1}
-        y1={props.y1}
-        x2={props.x2}
-        y2={props.y2}
+      <motion.line
+        initial={false}
+        animate={{
+          x1: connection.start.x,
+          y1: connection.start.y,
+          x2: connection.end.x,
+          y2: connection.end.y,
+          opacity: connection.active ? 0.8 : (connection.isClose ? 0.15 : 0),
+          strokeWidth: connection.active ? 3 : 1,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 120,
+          damping: 14,
+          mass: 1
+        }}
         stroke="url(#neonGradient)"
-        strokeWidth={props.strokeWidth}
         strokeDasharray="5, 5"
         style={{
           animation: connection.active ? 'synapticFlow 0.5s linear infinite' : 'none'
         }}
-        opacity={props.opacity}
         filter={connection.active ? "url(#neonGlow)" : ""}
         strokeLinecap="round"
       />

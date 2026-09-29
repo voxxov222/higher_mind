@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { Thought, Feeling, Experience, SynapticCluster, ConsciousnessPacket, UserProfileConfig, AstralTheme, CosmicData } from '../types';
+import { Thought, Feeling, Experience, SynapticCluster, ConsciousnessPacket, UserProfileConfig, AstralTheme, CosmicData, MemoryBase, MemoryEntry } from '../types';
+import { fetchHigherMindExplanation } from '../services/geminiService';
 import { ASTRAL_THEMES } from '../utils/themes';
 
 export interface CosmicContextConfig {
@@ -40,6 +41,10 @@ interface HigherMindContextType {
   setCosmicData: (data: CosmicData | null) => void;
   addProfileWidget: (widget: { id: string; type: string; componentName: string; data: any }) => void;
   removeProfileWidget: (id: string) => void;
+  memoryBase: MemoryBase;
+  askHigherMind: (section: string, topic: string, dataContext: any) => Promise<string>;
+  archiveIndexSync: () => void;
+
 }
 
 export interface AIModule {
@@ -237,6 +242,40 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [savedMessages, setSavedMessages] = useState<{ id: string; title: string; content: string; type: string }[]>([]);
   const [userData, setUserData] = useState<UserProfileConfig | null>(null);
   const [cosmicData, setCosmicData] = useState<CosmicData | null>(null);
+  
+  const [memoryBase, setMemoryBase] = useState<MemoryBase>({ entries: [], lastSync: null });
+
+  const archiveIndexSync = useCallback(() => {
+    setMemoryBase(prev => ({ ...prev, lastSync: new Date().toISOString() }));
+  }, []);
+
+  const askHigherMind = useCallback(async (section: string, topic: string, dataContext: any) => {
+    try {
+      const prompt = `Analyze this user's data for the ${section} section concerning ${topic}. Go into detail about what this means, how the user can identify with it, and what practical spiritual or cosmic insights can be drawn from it. Break down specific terms (like Keter, Aleph 11, etc. if relevant). Data: ${JSON.stringify(dataContext)}`;
+      
+      const response = await fetchHigherMindExplanation(prompt);
+      
+      const newEntry: MemoryEntry = {
+        id: `mem_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        section,
+        topic,
+        explanation: response,
+        tags: [section.toLowerCase(), topic.toLowerCase()]
+      };
+      
+      setMemoryBase(prev => ({
+        ...prev,
+        entries: [...prev.entries, newEntry]
+      }));
+      
+      return response;
+    } catch (e) {
+      console.error("Higher Mind analysis failed:", e);
+      return "The Higher Mind is currently integrating new cosmic frequencies. Please try again in a moment.";
+    }
+  }, []);
+
 
   const addProfileWidget = (widget: { id: string; type: string; componentName: string; data: any }) => {
     setUserData(prev => {
@@ -396,7 +435,10 @@ export const HigherMindProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       cosmicData,
       setCosmicData,
       addProfileWidget,
-      removeProfileWidget
+      removeProfileWidget,
+      memoryBase,
+      askHigherMind,
+      archiveIndexSync
     }}>
       {children}
     </HigherMindContext.Provider>

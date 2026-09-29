@@ -1,4 +1,5 @@
 import React, { useRef, useState, useMemo } from 'react';
+import { HigherMindExplanationButton } from './HigherMindExplanationButton';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';

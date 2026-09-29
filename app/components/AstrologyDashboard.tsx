@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HigherMindExplanationButton } from './HigherMindExplanationButton';
 import { motion, AnimatePresence } from 'motion/react';
 import { Moon, Sun, Star, Compass, Activity, Globe, Sparkles, Navigation, Layers, Flame, Droplets, Wind, Hexagon, Info } from 'lucide-react';
 import { CosmicData } from '../types';

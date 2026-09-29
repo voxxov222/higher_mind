@@ -1570,3 +1570,5 @@ export default function DeepSynthesis(props: { data: CosmicData | null; onPresen
 
   return <DeepSynthesisInner {...props} />;
 };
+
+export { DeepSynthesis };

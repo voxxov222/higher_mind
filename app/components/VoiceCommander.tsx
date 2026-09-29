@@ -89,6 +89,23 @@ export default function VoiceCommander({ setActiveTab, openHoloDrawer }: VoiceCo
       } else {
         openHoloDrawer?.('gematria'); handled = true; responseText = 'Opening Holographic Drawer to Gematria Utilities.';
       }
+
+    } else if (lowerCmd.includes('focus on')) {
+      const target = lowerCmd.split('focus on')[1].trim();
+      window.dispatchEvent(new CustomEvent('voice-command', { detail: { action: 'focus', target } }));
+      handled = true; responseText = `Focusing on ${target}.`;
+    } else if (lowerCmd.includes('speed up time') || lowerCmd.includes('faster')) {
+      window.dispatchEvent(new CustomEvent('voice-command', { detail: { action: 'speed_up' } }));
+      handled = true; responseText = 'Accelerating temporal flow.';
+    } else if (lowerCmd.includes('slow down time') || lowerCmd.includes('slower')) {
+      window.dispatchEvent(new CustomEvent('voice-command', { detail: { action: 'slow_down' } }));
+      handled = true; responseText = 'Decelerating temporal flow.';
+    } else if (lowerCmd.includes('pause time') || lowerCmd.includes('stop time')) {
+      window.dispatchEvent(new CustomEvent('voice-command', { detail: { action: 'pause_time' } }));
+      handled = true; responseText = 'Pausing temporal flow.';
+    } else if (lowerCmd.includes('resume time') || lowerCmd.includes('play time')) {
+      window.dispatchEvent(new CustomEvent('voice-command', { detail: { action: 'resume_time' } }));
+      handled = true; responseText = 'Resuming temporal flow.';
     } else if (lowerCmd.includes('torus') || lowerCmd.includes('field')) {
       setActiveTab('torus'); handled = true; responseText = 'Accessing Torus Field Dynamics.';
     } else if (lowerCmd.includes('planets') || lowerCmd.includes('solar system')) {

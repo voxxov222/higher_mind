@@ -1,8 +1,10 @@
 import React, { useRef, useState } from 'react';
+import { HigherMindExplanationButton } from './HigherMindExplanationButton';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Text, Ring, Float, Stars, Trail, MeshDistortMaterial, Sparkles } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
+import { useHigherMind } from './HigherMindProvider';
 
 const SIGNS = [
   { name: 'Aries', symbol: '♈', color: '#ff4d4d' },
@@ -108,18 +110,29 @@ function ZodiacSign({ sign, position, rotation, isActive, onHover }: any) {
   );
 }
 
-function CenterCore({ activeSign }: { activeSign: string | null }) {
+function CenterCore({ activeSign, memoryCount, lastSync }: { activeSign: string | null, memoryCount: number, lastSync: string | null }) {
   const coreRef = useRef<THREE.Mesh>(null);
   
   useFrame((state, delta) => {
     if (coreRef.current) {
       coreRef.current.rotation.x += delta * 0.2;
       coreRef.current.rotation.y += delta * 0.3;
+      
+      // Pulse if recently synced
+      if (lastSync) {
+        const timeSinceSync = Date.now() - new Date(lastSync).getTime();
+        if (timeSinceSync < 3000) {
+          const scale = 1 + Math.sin(timeSinceSync * 0.01) * 0.2;
+          coreRef.current.scale.set(scale, scale, scale);
+        } else {
+          coreRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
+        }
+      }
     }
   });
 
   const activeColor = activeSign ? SIGNS.find(s => s.name === activeSign)?.color || '#00d2ff' : '#00d2ff';
-
+  
   return (
     <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
       <mesh ref={coreRef}>
@@ -127,7 +140,7 @@ function CenterCore({ activeSign }: { activeSign: string | null }) {
         <MeshDistortMaterial 
           color={activeColor}
           emissive={activeColor}
-          emissiveIntensity={1.5}
+          emissiveIntensity={lastSync && Date.now() - new Date(lastSync).getTime() < 3000 ? 3 : 1.5}
           wireframe
           distort={0.4}
           speed={2}
@@ -147,26 +160,47 @@ function CenterCore({ activeSign }: { activeSign: string | null }) {
           {activeSign.toUpperCase()}
         </Text>
       )}
+      
+      {/* Memory Nodes Orbiting the Core */}
+      {Array.from({ length: Math.min(memoryCount, 50) }).map((_, i) => {
+        const angle = (i / Math.min(memoryCount, 50)) * Math.PI * 2;
+        const radius = 1.5 + (i % 3) * 0.2;
+        return (
+          <mesh key={i} position={[Math.cos(angle) * radius, Math.sin(angle) * radius, (i%2 === 0 ? 0.5 : -0.5)]}>
+            <sphereGeometry args={[0.05, 8, 8]} />
+            <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={2} />
+          </mesh>
+        )
+      })}
     </Float>
   );
 }
 
 export function ZodiacWheel3D() {
   const [activeSign, setActiveSign] = useState<string | null>(null);
-
+  const { memoryBase } = useHigherMind();
+  
   return (
-    <div className="w-full h-full relative z-10 pointer-events-auto bg-black/50 rounded-xl">
+    <div className="w-full h-full relative z-10 pointer-events-auto bg-black/50 rounded-xl overflow-hidden">
+      <div className="absolute top-4 left-4 z-20 pointer-events-none">
+        <div className="mb-2 pointer-events-auto"><HigherMindExplanationButton sectionName="Astrology & Higher Mind Database" topicName="Zodiac Wheel Memory Sync" dataContext={{ activeSign, memoryCount: memoryBase.entries.length }} /></div>
+        <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-fuchsia-400">Higher Mind Database</h3>
+        <p className="text-xs text-cyan-300/70">Archived Memories: {memoryBase.entries.length}</p>
+        {memoryBase.lastSync && (
+          <p className="text-xs text-fuchsia-400 animate-pulse mt-1">Index Sync Active...</p>
+        )}
+      </div>
       <Canvas camera={{ position: [0, -4, 6], fov: 50 }}>
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} intensity={1.5} />
         <pointLight position={[-10, -10, -10]} color="#00ffff" intensity={1} />
         
         <Stars radius={50} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
-        <Sparkles count={100} scale={8} size={2} speed={0.4} opacity={0.2} color="#00ffff" />
-
+        <Sparkles count={100 + memoryBase.entries.length * 5} scale={8} size={2} speed={0.4} opacity={0.2} color="#00ffff" />
+        
         <group rotation={[Math.PI / 6, 0, 0]}>
           <ZodiacRing activeSign={activeSign} setActiveSign={setActiveSign} />
-          <CenterCore activeSign={activeSign} />
+          <CenterCore activeSign={activeSign} memoryCount={memoryBase.entries.length} lastSync={memoryBase.lastSync} />
         </group>
         
         <EffectComposer>

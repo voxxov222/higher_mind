@@ -48,7 +48,8 @@ const GoldenRatioSection = React.lazy(() => import('./GoldenRatioSection').then(
 const SkyMapSection = React.lazy(() => import('./SkyMapSection').then(m => ({ default: m.SkyMapSection })));
 const SoulPathSection = React.lazy(() => import('./SoulPathSection').then(m => ({ default: m.SoulPathSection })));
 const AncestralResearchSection = React.lazy(() => import('./AncestralResearchSection').then(m => ({ default: m.AncestralResearchSection })));
-import { TheBigPicture } from './TheBigPicture';
+const SpiritualCosmicNexus = React.lazy(() => import('./SpiritualCosmicNexus').then(m => ({ default: m.SpiritualCosmicNexus })));
+const TheBigPicture = React.lazy(() => import('./TheBigPicture').then(m => ({ default: m.TheBigPicture })));
 const CommunityFeed = React.lazy(() => import('./social/CommunityFeed'));
 const LiveMessenger = React.lazy(() => import('./social/LiveMessenger'));
 const KarmaLedger = React.lazy(() => import('./KarmaLedger').then(m => ({ default: m.KarmaLedger })));
@@ -74,6 +75,7 @@ const Freemason33Section = React.lazy(() => import('./Freemasonry33Section').the
 const TarotGnosis = React.lazy(() => import('./TarotGnosis').then(m => ({ default: m.TarotGnosis })));
 const TarotHologram = React.lazy(() => import('./TarotHologram').then(m => ({ default: m.TarotHologram })));
 const ChineseZodiacGnosis = React.lazy(() => import('./ChineseZodiacGnosis').then(m => ({ default: m.ChineseZodiacGnosis })));
+const MayanGnosticGnosis = React.lazy(() => import('./MayanGnosticGnosis').then(m => ({ default: m.MayanGnosticGnosis })));
 import { soundEngine } from '../lib/soundEffects';
 
 const AstralOSSynthesisEngine = React.lazy(() => import('./AstralOSSynthesisEngine').then(m => ({ default: m.AstralOSSynthesisEngine })));
@@ -98,6 +100,7 @@ import { ProjectableWidget } from './ProjectableWidget';
 import { useHigherMind } from './HigherMindProvider';
 import { HoloSideDrawer } from './HoloSideDrawer';
 import { WidgetGallerySidebar } from './WidgetGallerySidebar';
+import { ChatPanel } from './chat/ChatPanel';
 import { WorkspaceWidgets } from './WorkspaceWidgets';
 
 class ThreeDErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
@@ -2656,6 +2659,7 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'vibrational_tuning'} tabId="vibrational_tuning" onClick={() => setActiveTab('vibrational_tuning')} icon={<Radio className="w-4 h-4 text-fuchsia-400 animate-pulse"/>}>Vibrational Tuning</Tab>
               <Tab active={activeTab === 'alignment'} tabId="alignment" onClick={() => setActiveTab('alignment')} icon={<Radio className="w-4 h-4 text-teal-400 animate-pulse"/>}>Alignment</Tab>
               <Tab active={activeTab === 'ai_agents'} tabId="ai_agents" onClick={() => setActiveTab('ai_agents')} icon={<Cpu className="w-4 h-4 text-emerald-400"/>}>AI Agents Swarm</Tab>
+              <Tab active={activeTab === 'astrology_chatbot'} tabId="astrology_chatbot" onClick={() => setActiveTab('astrology_chatbot')} icon={<MessageCircle className="w-4 h-4 text-pink-400 animate-pulse"/>}>Astrology Chatbot</Tab>
               <Tab active={activeTab === 'astral_os'} tabId="astral_os" onClick={() => { soundEngine.click(); setActiveTab('astral_os'); }} icon={<Cpu className="w-4 h-4 text-cyan-400 animate-pulse"/>}>Astral OS</Tab>
               <Tab active={activeTab === 'astral_oracle'} tabId="astral_oracle" onClick={() => { soundEngine.click(); setActiveTab('astral_oracle'); }} icon={<Sparkles className="w-4 h-4 text-indigo-400 animate-pulse"/>}>Astral Oracle</Tab>
               <Tab active={activeTab === 'astral_os_synthesis'} tabId="astral_os_synthesis" onClick={() => { soundEngine.click(); setActiveTab('astral_os_synthesis'); }} icon={<Zap className="w-4 h-4 text-emerald-400 animate-pulse"/>}>Synthesis Engine</Tab>
@@ -2670,6 +2674,8 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
               <Tab active={activeTab === 'codex'} tabId="codex" onClick={() => setActiveTab('codex')} icon={<Search className="w-4 h-4 text-emerald-400"/>}>Cosmic Codex</Tab>
               <Tab active={activeTab === 'evolution'} tabId="evolution" onClick={() => setActiveTab('evolution')} icon={<Cpu className="w-4 h-4 text-blue-500"/>}>Quantum Evolution</Tab>
               <Tab active={activeTab === 'christ_sophia'} tabId="christ_sophia" onClick={() => setActiveTab('christ_sophia')} icon={<Sparkles className="w-4 h-4 text-amber-300 animate-pulse"/>}>Christ-Sophia Gnosis</Tab>
+              <Tab active={activeTab === 'mayan_gnostic'} tabId="mayan_gnostic" onClick={() => setActiveTab('mayan_gnostic')} icon={<Sparkles className="w-4 h-4 text-purple-400 animate-pulse"/>}>Mayan Gnostic Wheel</Tab>
+              <Tab active={activeTab === 'spiritual_nexus'} tabId="spiritual_nexus" onClick={() => setActiveTab('spiritual_nexus')} icon={<Sparkles className="w-4 h-4 text-cyan-400 animate-pulse"/>}>Spiritual Nexus 3D</Tab>
               <Tab active={activeTab === 'tetragrammaton'} tabId="tetragrammaton" onClick={() => setActiveTab('tetragrammaton')} icon={<Hexagon className="w-4 h-4 text-[#fbbf24]"/>}>YHVH HUD</Tab>
               <Tab active={activeTab === 'freemason33'} tabId="freemason33" onClick={() => setActiveTab('freemason33')} icon={<Sparkles className="w-4 h-4 text-amber-400 animate-pulse"/>}>Free Mason 33</Tab>
               <Tab active={activeTab === 'holographic_rainbow'} tabId="holographic_rainbow" onClick={() => setActiveTab('holographic_rainbow')} icon={<Sparkles className="w-4 h-4 text-purple-400 animate-pulse"/>}>Holographic Rainbow</Tab>
@@ -3826,6 +3832,13 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                     </React.Suspense>
                   </motion.div>
                 )}
+                
+                {activeTab === 'astrology_chatbot' && (
+                  <motion.div key="astrology_chatbot" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="h-full min-h-[700px]">
+                     <ChatPanel />
+                  </motion.div>
+                )}
+
                 {activeTab === 'ai_agents' && (
                   <motion.div key="ai_agents" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="h-full min-h-[700px]">
                     <React.Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="w-8 h-8 text-emerald-400 animate-spin" /></div>}>
@@ -3865,6 +3878,20 @@ export const Dashboard = ({ data, onGenerate, isLoading, activeTab, setActiveTab
                 {activeTab === 'christ_sophia' && (
                   <motion.div key="christ_sophia" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
                     <ChristSophiaSection data={data} />
+                  </motion.div>
+                )}
+                {activeTab === 'mayan_gnostic' && (
+                  <motion.div key="mayan_gnostic" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6">
+                    <React.Suspense fallback={<div className="flex h-[500px] items-center justify-center"><Loader2 className="w-8 h-8 text-purple-400 animate-spin" /></div>}>
+                      <MayanGnosticGnosis data={data} />
+                    </React.Suspense>
+                  </motion.div>
+                )}
+                {activeTab === 'spiritual_nexus' && (
+                  <motion.div key="spiritual_nexus" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} className="space-y-6 h-[800px]">
+                    <React.Suspense fallback={<div className="flex h-[500px] items-center justify-center"><Loader2 className="w-8 h-8 text-cyan-400 animate-spin" /></div>}>
+                      <SpiritualCosmicNexus />
+                    </React.Suspense>
                   </motion.div>
                 )}
                 {activeTab === 'soul_path' && (
@@ -4707,3 +4734,5 @@ const CorrespondenceBox = ({ title, number, correspondence, color, onResearch }:
     </div>
   );
 };
+
+export default Dashboard;

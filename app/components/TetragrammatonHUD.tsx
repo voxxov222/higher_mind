@@ -3,6 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Text, Html, OrbitControls, Sphere, Box, Line, Plane } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'motion/react';
+import { HigherMindExplanationButton } from './HigherMindExplanationButton';
 
 // Tetragrammaton: YHVH - Yud, Hei, Vav, Hei
 const YHVH = ['י', 'ה', 'ו', 'ה'];
@@ -226,7 +227,8 @@ const AlephTavIndexHUD = ({ activeNode }: { activeNode: { type: string, index: n
 
     return (
         <div className="absolute top-4 left-4 w-64 pointer-events-none">
-            <div className="bg-slate-950/80 border border-emerald-500/30 backdrop-blur-md p-4 rounded-xl text-xs font-mono shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+            <div className="mb-4 pointer-events-auto"><HigherMindExplanationButton sectionName="Kabbalah / Tetragrammaton" topicName="YHVH & Aleph-Tav Framework" dataContext={{ activeNode }} /></div>
+<div className="bg-slate-950/80 border border-emerald-500/30 backdrop-blur-md p-4 rounded-xl text-xs font-mono shadow-[0_0_20px_rgba(16,185,129,0.1)]">
                 <div className="text-emerald-400 font-bold mb-2 flex justify-between items-center">
                     <span className="flex items-center gap-2">
                         <span className={`w-1.5 h-1.5 rounded-full ${activeNode !== null ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`}></span>

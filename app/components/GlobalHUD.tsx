@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Download } from 'lucide-react';
 import { PersistentAstrological3DLayer } from './PersistentAstrological3DLayer';
 import VoiceCommander from './VoiceCommander';
 import { DailyTarotPopup } from './DailyTarotPopup';
@@ -18,6 +18,22 @@ export const GlobalHUD = ({ children, setActiveTab }: { children: React.ReactNod
 
             {/* Persistent Astrological 3D layer */}
             <PersistentAstrological3DLayer />
+
+            {/* The Big Picture Quick Jump & Export */}
+            <div className="fixed bottom-56 left-6 z-[1000] pointer-events-auto">
+                <motion.button
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(245,158,11,0.4)' }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                        soundEngine.click();
+                        setActiveTab('the_big_picture');
+                    }}
+                    className="flex h-10 items-center gap-2.5 bg-stone-950/90 hover:bg-black border border-amber-500/40 hover:border-amber-400 px-4 py-2 rounded-xl text-amber-400 font-orbitron text-[10px] tracking-widest uppercase transition-all duration-300 shadow-[0_0_15px_rgba(245,158,11,0.15)] group"
+                >
+                    <Download size={13} className="group-hover:scale-110 transition-transform" />
+                    <span>The Big Picture</span>
+                </motion.button>
+            </div>
 
             {/* Daily Tarot Draw Calibration Trigger */}
             <div className="fixed bottom-40 left-6 z-[1000] pointer-events-auto">

@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
+import { HigherMindExplanationButton } from './HigherMindExplanationButton';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { 
   Float, 

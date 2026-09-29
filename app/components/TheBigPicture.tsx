@@ -6,12 +6,13 @@ import * as THREE from 'three';
 import { 
   Sparkles, Shield, Compass, Cpu, HelpCircle, Activity, Award, Landmark, 
   Flame, Sun, Moon, Hash, BookOpen, Key, Volume2, VolumeX, Eye, Info, Hexagon,
-  Network, EyeOff, RotateCw
+  Network, EyeOff, RotateCw, Download
 } from 'lucide-react';
 import { calculateAllCiphers } from '../utils/gematria';
 import { soundEngine } from '../lib/soundEffects';
 import { CosmicData } from '../types';
 import { EtymologyDecoder } from './EtymologyDecoder';
+const BigPictureExportModal = React.lazy(() => import('./BigPictureExportModal').then(m => ({ default: m.BigPictureExportModal })));
 
 // Let's create an immersive 3D Gnostic Star / Sacred Emblem component with interactive Kabbalah labels
 const kabbalahSephirot = [
@@ -153,6 +154,7 @@ interface TheBigPictureProps {
 export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs }) => {
   const [activeBeliefSystem, setActiveBeliefSystem] = useState<'all' | 'gnostic' | 'hermetic' | 'kabbalah' | 'gematria'>('all');
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Seeker's Details
   const userName = useMemo(() => {
@@ -302,7 +304,7 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
   }, []);
 
   return (
-    <div className="w-full min-h-[900px] bg-zinc-950 border border-white/5 rounded-[2.5rem] p-6 lg:p-10 font-sans relative overflow-hidden text-white flex flex-col space-y-8">
+    <div id="the-big-picture-container" className="w-full min-h-[900px] bg-zinc-950 border border-white/5 rounded-[2.5rem] p-6 lg:p-10 font-sans relative overflow-hidden text-white flex flex-col space-y-8">
       {/* Background glow matrix */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
         <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[120px]" />
@@ -326,17 +328,28 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
         </div>
 
         {/* Action controls */}
-        <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => {
-                soundEngine.click();
-                speakNarrative();
-              }}
-              className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-[10px] font-mono tracking-widest uppercase transition-all ${isSpeaking ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400 animate-pulse' : 'bg-white text-zinc-950 hover:bg-zinc-200 font-bold'}`}
-            >
-              {isSpeaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
-              {isSpeaking ? 'MUTE BROADCAST' : 'ASTRAL OS SYNTHESIS READOUT'}
-            </button>
+        <div className="flex items-center flex-wrap gap-2.5">
+          <button
+            onClick={() => {
+              soundEngine.click();
+              setIsExportModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-3 rounded-2xl text-[10px] font-mono tracking-widest uppercase transition-all bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-bold shadow-[0_0_20px_rgba(245,158,11,0.25)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] cursor-pointer"
+          >
+            <Download size={13} />
+            <span>DOWNLOAD BIG PICTURE</span>
+          </button>
+
+          <button
+            onClick={() => {
+              soundEngine.click();
+              speakNarrative();
+            }}
+            className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-[10px] font-mono tracking-widest uppercase transition-all ${isSpeaking ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400 animate-pulse' : 'bg-white text-zinc-950 hover:bg-zinc-200 font-bold'}`}
+          >
+            {isSpeaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
+            {isSpeaking ? 'MUTE BROADCAST' : 'ASTRAL OS SYNTHESIS READOUT'}
+          </button>
         </div>
       </div>
 
@@ -586,6 +599,18 @@ export const TheBigPicture: React.FC<TheBigPictureProps> = ({ data, loadedInputs
       </div>
 
       <EtymologyDecoder data={data} loadedInputs={loadedInputs} />
+
+      {isExportModalOpen && (
+        <React.Suspense fallback={null}>
+          <BigPictureExportModal
+            isOpen={isExportModalOpen}
+            onClose={() => setIsExportModalOpen(false)}
+            data={data}
+            loadedInputs={loadedInputs}
+            targetElementId="the-big-picture-container"
+          />
+        </React.Suspense>
+      )}
     </div>
   );
 };

@@ -8,10 +8,13 @@ export async function action({ request }: ActionFunctionArgs) {
   }
   
   try {
-    const { action, payload: rawPayload } = await request.json();
-    const payload = rawPayload || {};
+    const body = await request.json();
+    const action = body.action || (body.type === 'deep_dive' ? 'fetchHigherMindExplanation' : null);
+    const payload = body.payload || (body.prompt ? { prompt: body.prompt } : {});
     
     switch (action) {
+      case "fetchHigherMindExplanation":
+        return json(await geminiServer.fetchHigherMindExplanation(payload.prompt || body.prompt || ""));
       case "fetchAstrologyNatalDetails":
         return json(await geminiServer.fetchAstrologyNatalDetails(payload));
       case "fetchCosmicReading":

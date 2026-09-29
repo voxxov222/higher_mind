@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { CosmicData } from '../types';
 import { 
-  Sun, Moon, Star, Compass, Activity, Hexagon, Fingerprint, Zap, Layers, Hash, Award, Grid
+  Sun, Moon, Star, Compass, Activity, Hexagon, Fingerprint, Zap, Layers, Hash, Award, Grid, Globe
 } from 'lucide-react';
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   PieChart as RechartsPieChart, Pie, Cell
 } from 'recharts';
+import { SolarSystemScene } from './SolarSystemScene';
 import { AstrologerStudioMatrix } from './AstrologerStudioMatrix';
 import { ZodiacWheel3D } from './ZodiacWheel3D';
 import { ZodiacAnimation } from './ZodiacAnimation';
@@ -33,6 +34,7 @@ export const GlassDashboard: React.FC<GlassDashboardProps> = ({ data, loadedInpu
   const [hoveredWidgetId, setHoveredWidgetId] = useState<string | null>(null);
 
   const [widgets, setWidgets] = useState<WidgetData[]>([
+    { id: 'planet3d', type: 'planet3d', title: 'Interactive Solar System', icon: Globe, colSpan: 4, rowSpan: 4 },
     { id: 'identity', type: 'identity', title: 'Cosmic Identity', icon: Fingerprint, colSpan: 2, rowSpan: 2 },
     { id: 'vedastro', type: 'vedastro', title: 'VedAstro Perspective', icon: Star, colSpan: 2, rowSpan: 4 },
     { id: 'planets', type: 'planets', title: 'Planetary Alignments', icon: Sun, colSpan: 2, rowSpan: 2 },
@@ -68,6 +70,25 @@ export const GlassDashboard: React.FC<GlassDashboardProps> = ({ data, loadedInpu
     if (!data) return <div className="p-4 text-stone-500 font-mono text-xs text-center w-full mt-4 flex items-center justify-center h-full"><motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}><Hexagon size={24} className="text-white/20" /></motion.div></div>;
 
     switch (widget.type) {
+
+      case 'planet3d':
+        return (
+          <div className="w-full h-full p-2 relative rounded-2xl overflow-hidden group">
+             <div className="absolute top-2 left-4 z-20 opacity-50 group-hover:opacity-100 transition-opacity">
+                <h4 className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest bg-black/40 px-2 py-1 rounded backdrop-blur">3D Planet Explorer</h4>
+             </div>
+             <div className="absolute inset-0 z-10 pointer-events-none border border-cyan-500/20 rounded-2xl shadow-[inset_0_0_40px_rgba(34,211,238,0.05)]" />
+             <div className="w-full h-full pointer-events-auto rounded-xl overflow-hidden bg-black/80">
+                <SolarSystemScene 
+                  data={data}
+                  onPlanetClick={(p) => console.log('Planet clicked', p)}
+                  onResearch={() => {}}
+                  onSave={() => {}}
+                />
+             </div>
+          </div>
+        );
+
       case 'identity':
         return (
           <div className="p-4 flex flex-col justify-center h-full relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-500">

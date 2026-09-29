@@ -30,6 +30,17 @@ export const WidgetGallerySidebar: React.FC<WidgetGallerySidebarProps> = ({
   // Available tools definitions
   const galleryItems = [
     {
+      id: 'mission-patch',
+      type: 'utility',
+      componentName: 'Mission Patch Generator',
+      displayName: 'Mission Patch',
+      description: 'Generate a personalized space mission patch based on a selected planet.',
+      icon: Sparkles,
+      iconColor: 'text-blue-400',
+      glowColor: 'rgba(59,130,246,0.4)',
+      defaultData: { planet: 'Mars' }
+    },
+    {
       id: 'radar-power',
       type: 'chart',
       componentName: 'Planetary Power Radar',

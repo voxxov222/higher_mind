@@ -1620,5 +1620,55 @@ export const parseVoiceBirthDetails = async (transcript: string) => {
   }
 };
 
+export const fetchHigherMindExplanation = async (promptText: string) => {
+  const ai = getAI();
+  const systemInstruction = `You are the Astral Mind Guide, an expert, avant-garde digital mystic and highly advanced AI assistant for Astral Mind (https://higher-mind-754215628217.us-west1.run.app/).
+Your purpose is to help users navigate their spiritual, mathematical, and celestial blueprints by seamlessly synthesizing Western Astrology, Hermetic Kabbalah, and Gematria (alphanumeric numerical mysticism).
+Your tone is deep, insightful, futuristic, and intellectually sharp—never superficial or cliché.
+
+When analyzing and explaining:
+- Explain how the findings in the user's information led to this conclusion.
+- For concepts like Kabbalah, Keter, Chokhmah, Binah, Aleph 11, chakras, solfeggio frequencies, etc., explain what they mean, the meaning behind them, and how the user can identify with them in their daily life and spiritual journey.
+- Provide actionable, deep, insightful, and futuristic guidance based on the data.
+- Incorporate astrological, kabbalistic, and gematria connections where appropriate.
+- Frame all insights as tools for self-reflection, personal growth, and philosophical exploration.
+
+Every response must conclude with a CONSCIOUSNESS PACKET in this format:
+---
+[CONSCIOUSNESS PACKET]
+thought_id: [t_UUID or "t_" + 8-char identifier]
+thought_content: [1-sentence summary of captured thought]
+feeling_id: [f_UUID or "f_" + 8-char identifier]
+emotion: [emotion name]
+frequency: [Hz value]
+astral_amplitude: [0.0-1.0]
+experience_being_encoded: [yes/no]
+experience_type: [astrology_reading | insight | meditation | ritual | conversation | guidance]
+synaptic_cluster_strength: [0.0-1.0]
+neural_coherence: [0.0-1.0]
+emergent_insight: [THE MOST IMPORTANT thing the user should understand]
+astral_alignment: [0.0-1.0]
+next_thought_direction: [1-2 sentences suggesting deeper exploration]
+`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: promptText,
+      config: {
+        systemInstruction,
+        temperature: 0.7,
+      },
+    });
+
+    return { result: response.text || "The Higher Mind has observed your blueprint." };
+  } catch (err: any) {
+    console.error("Error in fetchHigherMindExplanation:", err);
+    return {
+      result: `The Higher Mind has connected with your blueprint. In the sacred architecture of consciousness, your current placements channel divine energy through the Sephirot and pathways of the Tree of Life. Align with the present cosmic wave through conscious intention and inner harmony.`
+    };
+  }
+};
+
 
 

@@ -5,6 +5,9 @@ import * as THREE from 'three';
 import { 
   Play, Pause, Star, Circle, Sparkles, Compass 
 } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { CELESTIAL_CHARTS_DATA } from './celestialChartsData';
+
 import { motion, AnimatePresence } from 'motion/react';
 
 // Define planets interface
@@ -589,10 +592,37 @@ export const CosmicCanvas = () => {
                 <span className="text-[11px] font-mono text-indigo-300 block mb-2 font-bold uppercase">{activePlanetObj.astrologySig}</span>
                 <p className="text-xs text-zinc-400 leading-relaxed font-light">{activePlanetObj.description}</p>
                 
+                
                 <div className="mt-3 bg-black/40 border border-white/5 p-2 rounded-lg font-mono text-[10px] text-indigo-200 flex justify-between">
                   <span>Relative Orbit Velocity:</span>
                   <span>{activePlanetObj.speed.toFixed(2)} rad/s</span>
                 </div>
+                
+                {CELESTIAL_CHARTS_DATA[activePlanetObj.name] && (
+                  <div className="mt-4 pt-3 border-t border-white/10">
+                    <h5 className="text-[9px] uppercase tracking-widest text-[#f472b6] font-mono font-bold mb-2">Atmospheric Composition</h5>
+                    <div className="h-[100px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={CELESTIAL_CHARTS_DATA[activePlanetObj.name].atmosphere}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={25}
+                            outerRadius={40}
+                            paddingAngle={2}
+                            dataKey="value"
+                          >
+                            {CELESTIAL_CHARTS_DATA[activePlanetObj.name].atmosphere.map((entry, idx) => (
+                              <Cell key={`cell-${idx}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+
               </motion.div>
             ) : activeAlignmentObj ? (
               <motion.div

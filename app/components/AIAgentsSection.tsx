@@ -240,8 +240,16 @@ export const AIAgentsSection: React.FC<AIAgentsSectionProps> = ({ cosmicData }) 
              >
                <Search className="w-4 h-4" /> Deep Public Search
              </button>
+             <button
+               onClick={() => swarmEngine.triggerStructureMaintenance()}
+               className="px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/20 rounded-lg flex items-center gap-2 text-xs font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+               title="Dispatch Matrix Sentinel to audit and maintain structure and auto-heal neural streams"
+             >
+               <Brain className="w-4 h-4" /> Maintain Structure
+             </button>
           </div>
         </div>
+
 
         {viewMode === 'network' ? (
           /* Node Map Area */

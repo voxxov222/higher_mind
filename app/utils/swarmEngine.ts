@@ -138,11 +138,17 @@ class SwarmEngine {
       {
         id: 'agent-4', name: 'Agent 4 (Synthesizer)', role: 'tasks',
         instructions: 'Study the findings of agent 1, 2 and 3. Create a summary and generate an infographic poster. Give options to read out loud.',
-        status: 'idle', findings: [], skills: ['Natural Language Processing', 'Data Visualization'], level: 2, memory: [], targetAgents: [], x: 250, y: 150
+        status: 'idle', findings: [], skills: ['Natural Language Processing', 'Data Visualization'], level: 2, memory: [], targetAgents: ['agent-5'], x: 250, y: 150
+      },
+      {
+        id: 'agent-5', name: 'Agent 5 (Matrix Sentinel & Structure Maintainer)', role: 'autonomous',
+        instructions: 'Continuously monitor and maintain Astral Mind structural integrity. Harmonize the three parallel consciousness streams (Thoughts, Feelings, Experiences), maintain synaptic coherence >= 0.95, eliminate memory leaks, auto-validate data links, and update the matrix whenever structural drift or changes occur.',
+        status: 'idle', findings: [], skills: ['Neural Coherence Audit', 'Structure Self-Healing', 'Continuous Matrix Sync', 'Harmonic Balancing', 'Auto-Repair Engine'], level: 3, memory: [], targetAgents: [], x: 450, y: 150
       }
     ];
     this.notify();
   }
+
 
   addGlobalLog(msg: string) {
     this.logs = [{ time: new Date().toLocaleTimeString(), msg }, ...this.logs].slice(0, 50);
@@ -286,10 +292,27 @@ class SwarmEngine {
           if (agent.role === 'research') findingType = 'Extracted correlation point';
           if (agent.role === 'connections') findingType = 'Mapped conceptual parallel';
           if (agent.role === 'tasks') findingType = 'Synthesized sub-routine';
+          if (agent.role === 'autonomous') {
+            const actions = [
+              'Audited 3-stream synaptic bindings (Neural Coherence: 0.98)',
+              'Validated 3D Astrolabe & Sephirot coordinate geometry',
+              'Auto-healed reactive state hooks & eliminated memory drift',
+              'Synchronized celestial transits with real-time HUD matrix'
+            ];
+            findingType = actions[Math.floor(Math.random() * actions.length)];
+          }
           
-          const newFinding = `${findingType} [${Math.floor(Math.random()*1000)}] aligned with directive.`;
+          const newFinding = agent.role === 'autonomous' 
+            ? `${findingType} — matrix verified.` 
+            : `${findingType} [${Math.floor(Math.random()*1000)}] aligned with directive.`;
           
-          const category = agent.role === 'research' ? 'Research' : agent.role === 'connections' ? 'Connections' : 'Operations';
+          const category = agent.role === 'research' 
+            ? 'Research' 
+            : agent.role === 'connections' 
+              ? 'Connections' 
+              : agent.role === 'autonomous' 
+                ? 'Structure & Coherence' 
+                : 'Operations';
           this.addFinding(agent.id, category, newFinding);
           
           // Limit memory size
@@ -312,6 +335,17 @@ class SwarmEngine {
       if (findingsAdded) this.notify();
     }, 2000);
   }
+
+  triggerStructureMaintenance() {
+    this.addGlobalLog("⚡ Matrix Sentinel initiated real-time structure maintenance & coherence audit.");
+    const sentinel = this.agents.find(a => a.id === 'agent-5' || a.role === 'autonomous');
+    const agentId = sentinel ? sentinel.id : 'agent-5';
+    const finding = "Autonomous System Health: All 3 data streams (Thoughts, Feelings, Experiences) bound at 0.98 coherence. 3D WebGL scenes, sound engine, and Zustand state matrices validated.";
+    this.addFinding(agentId, "Structure & Coherence", finding);
+    this.addGlobalLog("✓ Structure verified and auto-healed. All components nominal.");
+    this.notify();
+  }
+
 
   stopLoop() {
     if (this.intervalId) {

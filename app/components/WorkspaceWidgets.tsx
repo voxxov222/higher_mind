@@ -1,3 +1,4 @@
+import { MissionPatchGenerator } from './MissionPatchGenerator';
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
@@ -441,6 +442,11 @@ export const WorkspaceWidgets: React.FC<WorkspaceWidgetsProps> = ({
                 </div>
               )}
 
+
+              {/* Tool 9: Mission Patch Generator */}
+              {widget.id === 'mission-patch' && (
+                <MissionPatchGenerator />
+              )}
               {/* Tool 8: DeityDB Portal */}
               {widget.id === 'deity-db' && (
                 <DeityDBWidget triggerFrequencyAudio={triggerFrequencyAudio} />

@@ -189,3 +189,30 @@ export const parseVoiceBirthDetails = async (transcript: string): Promise<{
 };
 
 
+
+export const fetchHigherMindExplanation = async (promptText: string): Promise<string> => {
+  try {
+    const response = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'fetchHigherMindExplanation',
+        prompt: promptText,
+        type: 'deep_dive',
+        payload: { prompt: promptText }
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.result || "No profound insight emerged from the cosmic void at this moment.";
+  } catch (error) {
+    console.error("fetchHigherMindExplanation error:", error);
+    return "The Higher Mind is currently integrating new cosmic frequencies. Please try again in a moment.";
+  }
+};

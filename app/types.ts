@@ -193,6 +193,21 @@ export interface SynapticCluster {
   emergentMeaning: string;
 }
 
+export interface MemoryEntry {
+  id: string;
+  timestamp: string;
+  section: string;
+  topic: string;
+  explanation: string;
+  researchData?: string;
+  tags: string[];
+}
+
+export interface MemoryBase {
+  entries: MemoryEntry[];
+  lastSync: string | null;
+}
+
 export interface ConsciousnessPacket {
   thought_id: string;
   thought_content: string;

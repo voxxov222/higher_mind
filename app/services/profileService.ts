@@ -16,8 +16,45 @@ interface ProfileStore {
   saveProfile: () => Promise<void>;
 }
 
+export const DEFAULT_PROFILE_CONFIG: UserProfileConfig = {
+  userId: 'demo-user',
+  username: 'cosmic_traveler',
+  displayName: 'Aria Starlight',
+  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200&h=200',
+  avatarType: 'image',
+  bannerUrl: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&q=80&w=1200&h=400',
+  theme: {
+    primaryColor: '#a855f7',
+    secondaryColor: '#3b82f6',
+    glowIntensity: 1,
+    transparency: 0.8,
+    borderStyle: 'glass',
+    fontFamily: 'Inter',
+    backgroundEffect: 'stars'
+  },
+  layout: {
+    widgets: [
+      { id: '1', type: 'bio', title: 'Cosmic Bio', layout: { x: 0, y: 0, w: 2, h: 1 } },
+      { id: '2', type: 'astrology', title: 'Soul Blueprint', layout: { x: 2, y: 0, w: 1, h: 2 } },
+      { id: '3', type: 'energy', title: 'Energy State', layout: { x: 0, y: 1, w: 1, h: 1 } },
+      { id: '4', type: 'socials', title: 'Connections', layout: { x: 1, y: 1, w: 1, h: 1 } },
+    ],
+    mainLayoutType: 'bento',
+    snapToGrid: true
+  },
+  socialLinks: [
+    { platform: 'Twitter', url: 'https://twitter.com', icon: 'Twitter' },
+    { platform: 'Instagram', url: 'https://instagram.com', icon: 'Instagram' },
+  ],
+  bio: {
+    text: "Celestial architect mapping the intersection of ancient wisdom and futuristic tech. Always dreaming in stardust.",
+    moodStatus: "Exploring the 5th Dimension"
+  },
+  researchVault: []
+};
+
 export const useProfileStore = create<ProfileStore>((set, get) => ({
-  config: null,
+  config: DEFAULT_PROFILE_CONFIG,
   isEditing: false,
   setConfig: (config) => set({ config }),
   setEditing: (isEditing) => set({ isEditing }),

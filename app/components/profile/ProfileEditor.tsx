@@ -36,8 +36,8 @@ const ProfileEditor = ({ onClose }: { onClose: () => void }) => {
   const [step, setStep] = useState<'info' | 'astrology' | 'practices' | 'bio'>('info');
 
   useEffect(() => {
-    if (config) setLocalConfig(JSON.parse(JSON.stringify(config)));
-  }, [config]);
+    if (config && !localConfig) setLocalConfig(JSON.parse(JSON.stringify(config)));
+  }, [config, localConfig]);
 
   if (!localConfig) return null;
 

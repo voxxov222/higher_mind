@@ -2,6 +2,7 @@ import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig, loadEnv } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
+import path from "path";
 
 export default defineConfig(({ mode }) => {
   return {
@@ -10,10 +11,39 @@ export default defineConfig(({ mode }) => {
       host: "0.0.0.0",
     },
     resolve: {
-      dedupe: ["react", "react-dom", "three", "@react-three/fiber", "@react-three/drei", "@react-three/postprocessing", "motion/react", "framer-motion"],
+      dedupe: [
+        "react",
+        "react-dom",
+        "three",
+        "@react-three/fiber",
+        "@react-three/drei",
+        "@react-three/postprocessing",
+        "motion/react",
+        "framer-motion",
+        "zustand",
+      ],
     },
     optimizeDeps: {
-      include: ["react", "react-dom", "motion/react", "framer-motion", "lucide-react"],
+      include: [
+        "react",
+        "react-dom",
+        "react-dom/client",
+        "react/jsx-runtime",
+        "react/jsx-dev-runtime",
+        "motion/react",
+        "framer-motion",
+        "lucide-react",
+        "three",
+        "@react-three/fiber",
+        "@react-three/drei",
+        "@react-three/postprocessing",
+        "@xyflow/react",
+        "zustand",
+        "recharts",
+        "d3",
+        "clsx",
+        "tailwind-merge",
+      ],
     },
     plugins: [
       remix({

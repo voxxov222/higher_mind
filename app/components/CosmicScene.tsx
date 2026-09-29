@@ -2,6 +2,7 @@
 import React, { useRef, useMemo, useState, useEffect, createContext, useContext, Component, ErrorInfo, ReactNode } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Line, Ring, Sparkles, Stars, Text, Trail, OrbitControls, Html, PerspectiveCamera, Points, PointMaterial } from '@react-three/drei';
+import { AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 // --- POST-PROCESSING EFFX ---
 import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
@@ -17,6 +18,7 @@ import { X, Minus, Lock, Unlock, Play, Square, Zap, Move, RefreshCw, Activity, F
 import { TerminalOverlay } from './profile/TerminalOverlay';
 import { ProceduralNebula } from './ProceduralNebula';
 import { ProjectedObject3D } from './ProjectedObject3D';
+import { CELESTIAL_CHARTS_DATA } from './celestialChartsData';
 
 class WebGLErrorBoundary extends Component<{children: ReactNode, fallback?: ReactNode}, {hasError: boolean}> {
   constructor(props: {children: ReactNode, fallback?: ReactNode}) {
@@ -853,7 +855,9 @@ const HolographicResearchPanel = ({
   data: CosmicData
 }) => {
   const spectral = spectralTypes[planet.name] || 'O-Class Resonance';
-  const signInfo = ZODIAC_SIGNS[Math.floor(planet.degree / 30)];
+  const signInfo = ZODIAC_SIGNS[Math.floor(planet.degree / 30)] || ZODIAC_SIGNS[0];
+  const [activeCardTab, setActiveCardTab] = useState<'resonance' | 'atmosphere' | 'temperature'>('resonance');
+  const chartInfo = CELESTIAL_CHARTS_DATA[planet.name] || CELESTIAL_CHARTS_DATA['Earth'];
 
   return (
     <Html center distanceFactor={20} position={[0, 0, 5]}>
@@ -861,7 +865,7 @@ const HolographicResearchPanel = ({
         initial={{ opacity: 0, scale: 0.8, x: 40 }}
         animate={{ opacity: 1, scale: 1, x: 0 }}
         exit={{ opacity: 0, scale: 0.8, x: 20 }}
-        className="w-80 bg-stone-950/95 backdrop-blur-3xl border border-white/10 rounded-[2rem] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)] pointer-events-auto ring-1 ring-white/5"
+        className="w-96 bg-stone-950/95 backdrop-blur-3xl border border-white/10 rounded-[2rem] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)] pointer-events-auto ring-1 ring-white/5"
       >
         {/* Spectral Header */}
         <div className="h-24 relative overflow-hidden bg-gradient-to-b from-white/5 to-transparent">
@@ -883,70 +887,190 @@ const HolographicResearchPanel = ({
           </div>
         </div>
 
-        {/* Data Grid */}
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <span className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">Orbital Coordinate</span>
-              <p className="text-[13px] text-white font-mono">{planet.degree.toFixed(2)}° Arc</p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">House Locus</span>
-              <p className="text-[13px] text-white font-mono">House {planet.house}</p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">Sign Alignment</span>
-              <p className="text-[13px] text-white font-mono">{signInfo.name} ({signInfo.symbol})</p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">Elemental Tone</span>
-              <p className="text-[13px] text-white font-mono">{signInfo.element}</p>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Cpu size={12} className="text-rose-500" />
-              <span className="text-[8px] uppercase tracking-widest text-rose-500 font-bold">Axiomatic Interpretation</span>
-            </div>
-            <p className="text-[11px] text-stone-300 leading-relaxed font-light italic">
-              "{planet.meaning}"
-            </p>
-          </div>
-
-          {/* Research Progress Visualization */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-[8px] uppercase tracking-widest text-stone-500">Sync Depth</span>
-              <span className="text-[8px] font-mono text-white">{(Math.random() * 20 + 75).toFixed(1)}%</span>
-            </div>
-            <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: '85%' }}
-                className="h-full bg-gradient-to-r from-rose-500 to-amber-500"
-              />
-            </div>
+        {/* TABS SELECTOR */}
+        <div className="px-6 pt-4">
+          <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-white/5 mb-4">
+            <button
+              onClick={() => setActiveCardTab('resonance')}
+              className={`flex-1 text-[9px] uppercase tracking-widest py-2 rounded-lg font-bold transition-all ${activeCardTab === 'resonance' ? 'bg-white/10 text-white shadow-md' : 'text-stone-400 hover:text-stone-200'}`}
+            >
+              Resonance
+            </button>
+            <button
+              onClick={() => setActiveCardTab('atmosphere')}
+              className={`flex-1 text-[9px] uppercase tracking-widest py-2 rounded-lg font-bold transition-all ${activeCardTab === 'atmosphere' ? 'bg-white/10 text-white shadow-md' : 'text-stone-400 hover:text-stone-200'}`}
+            >
+              Atmosphere
+            </button>
+            <button
+              onClick={() => setActiveCardTab('temperature')}
+              className={`flex-1 text-[9px] uppercase tracking-widest py-2 rounded-lg font-bold transition-all ${activeCardTab === 'temperature' ? 'bg-white/10 text-white shadow-md' : 'text-stone-400 hover:text-stone-200'}`}
+            >
+              Thermal
+            </button>
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="p-4 bg-white/5 border-t border-white/5 flex gap-2">
-          <button 
-            className="flex-1 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-xl text-[9px] uppercase tracking-widest text-rose-400 font-bold transition-all"
-            onClick={() => {
-              // Trigger a "Deep Dive" in the main UI via the existing callback
-              onClose();
-            }}
-          >
-            Initiate Deep Scan
-          </button>
-          <button 
-             className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-stone-500 hover:text-white transition-all"
-             title="Synchronize Data"
-          >
-            <RefreshCw size={14} />
-          </button>
+        {/* Data Grid */}
+        <div className="px-6 pb-6 space-y-6">
+          {activeCardTab === 'resonance' && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <span className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">Orbital Coordinate</span>
+                  <p className="text-[13px] text-white font-mono">{planet.degree.toFixed(2)}° Arc</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">House Locus</span>
+                  <p className="text-[13px] text-white font-mono">House {planet.house}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">Sign Alignment</span>
+                  <p className="text-[13px] text-white font-mono">{signInfo.name} ({signInfo.symbol})</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[8px] uppercase tracking-widest text-stone-500 font-bold">Elemental Tone</span>
+                  <p className="text-[13px] text-white font-mono">{signInfo.element}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Cpu size={12} className="text-rose-500" />
+                  <span className="text-[8px] uppercase tracking-widest text-rose-500 font-bold">Axiomatic Interpretation</span>
+                </div>
+                <p className="text-[11px] text-stone-300 leading-relaxed font-light italic">
+                  "{planet.meaning}"
+                </p>
+              </div>
+
+              {/* Research Progress Visualization */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-[8px] uppercase tracking-widest text-stone-500">Sync Depth</span>
+                  <span className="text-[8px] font-mono text-white">{(Math.random() * 20 + 75).toFixed(1)}%</span>
+                </div>
+                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: '85%' }}
+                    className="h-full bg-gradient-to-r from-rose-500 to-amber-500"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeCardTab === 'atmosphere' && (
+            <div className="space-y-4">
+              <div className="text-[9px] text-stone-400 font-bold uppercase tracking-widest">
+                Atmospheric Composition
+              </div>
+              <div className="flex items-center gap-4 w-full h-[150px]">
+                <div className="w-[150px] h-[150px] shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={chartInfo.atmosphere}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={40}
+                        outerRadius={65}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {chartInfo.atmosphere.map((entry, idx) => (
+                          <Cell key={`cell-${idx}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex-1 flex flex-col justify-center gap-2 overflow-y-auto max-h-[140px] pr-1">
+                  {chartInfo.atmosphere.map((entry, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-[10px] text-stone-300">
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                      <span className="font-light truncate">{entry.name}</span>
+                      <span className="font-mono font-bold ml-auto">{entry.value}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeCardTab === 'temperature' && (
+            <div className="space-y-4">
+              <div className="flex justify-between text-[9px] text-stone-400 font-bold uppercase tracking-widest">
+                <span>Thermal Profile History</span>
+                <span className="text-stone-300 font-mono">Unit: {chartInfo.tempUnit}</span>
+              </div>
+              <div className="w-full h-[160px] pt-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartInfo.temperature} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id={`colorTempBig-${planet.name}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={planet.color || '#3b82f6'} stopOpacity={0.6}/>
+                        <stop offset="95%" stopColor={planet.color || '#3b82f6'} stopOpacity={0.0}/>
+                      </linearGradient>
+                    </defs>
+                    <XAxis 
+                      dataKey="name" 
+                      stroke="#78716c" 
+                      fontSize={10} 
+                      tickLine={false} 
+                      axisLine={false}
+                    />
+                    <YAxis 
+                      stroke="#78716c" 
+                      fontSize={10} 
+                      tickLine={false} 
+                      axisLine={false}
+                      domain={['auto', 'auto']}
+                    />
+                    <RechartsTooltip
+                      contentStyle={{ 
+                        backgroundColor: 'rgba(12,10,9,0.95)', 
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        padding: '8px 12px',
+                        fontSize: '11px',
+                        fontFamily: 'monospace'
+                      }}
+                      itemStyle={{ color: '#fff', padding: 0 }}
+                      labelStyle={{ color: '#888', marginBottom: '4px' }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="temp" 
+                      stroke={planet.color || '#3b82f6'} 
+                      strokeWidth={2}
+                      fillOpacity={1} 
+                      fill={`url(#colorTempBig-${planet.name})`} 
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {/* Footer Actions */}
+          <div className="pt-4 border-t border-white/5 flex gap-2">
+            <button 
+              className="flex-1 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-xl text-[10px] uppercase tracking-widest text-rose-400 font-bold transition-all"
+              onClick={() => {
+                onClose();
+              }}
+            >
+              Initiate Deep Scan
+            </button>
+            <button 
+               className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-stone-500 hover:text-white transition-all"
+               title="Synchronize Data"
+            >
+              <RefreshCw size={16} />
+            </button>
+          </div>
         </div>
       </motion.div>
     </Html>

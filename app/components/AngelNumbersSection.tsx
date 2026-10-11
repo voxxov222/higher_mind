@@ -5,6 +5,43 @@ import { CosmicData } from '../types';
 import { fetchAngelNumberInsight } from '../services/geminiService';
 import { soundEngine } from '../lib/soundEffects';
 
+interface NumericQuestion {
+  q: string;
+  options: string[];
+  correct: number;
+  expl: string;
+}
+
+const getNumericalCaptions = (query: string): { title: string; caption: string }[] => {
+  const n = (query || '').trim() || '111';
+  return [
+    { title: 'The Signal', caption: `${n} appears when attention is ready to notice a pattern. Start by recording where and when you see it.` },
+    { title: 'The Root', caption: `Reduce ${n} to its root digit and read that number as the core theme behind the repetition.` },
+    { title: 'The Alignment', caption: `Pair ${n} with one concrete action today, so the sign becomes practice rather than superstition.` },
+  ];
+};
+
+const numericQuestions: NumericQuestion[] = [
+  {
+    q: 'What is the root (digit sum) of 777?',
+    options: ['3', '7', '21', '9'],
+    correct: 0,
+    expl: '7 + 7 + 7 = 21, and 2 + 1 = 3. Repeated reduction gives the root number.',
+  },
+  {
+    q: 'Which numbers are traditionally treated as master numbers in numerology?',
+    options: ['10, 20, 30', '11, 22, 33', '7, 14, 21', '1, 2, 3'],
+    correct: 1,
+    expl: '11, 22 and 33 are usually not reduced further and are read as master numbers.',
+  },
+  {
+    q: 'In Pythagorean numerology, which number is associated with new beginnings?',
+    options: ['9', '4', '1', '6'],
+    correct: 2,
+    expl: '1 opens the cycle: initiative, independence, and fresh starts. 9 closes it.',
+  },
+];
+
 interface AngelNumbersSectionProps {
   cosmicData: CosmicData | null;
 }
@@ -28,7 +65,7 @@ export const AngelNumbersSection = ({ cosmicData }: AngelNumbersSectionProps) =>
   const [numericScore, setNumericScore] = useState(0);
   const [numericCompleted, setNumericCompleted] = useState(false);
   const [gematriaInput, setGematriaInput] = useState('');
-  const [gematriaSystem, setGematriaSystem] = useState<'standard' | 'pythagorean' | 'ascii'>('standard');
+  const [gematriaSystem, setGematriaSystem] = useState<'standard' | 'pythagorean' | 'ascii' | 'hebrew'>('standard');
   const [history, setHistory] = useState<{word: string, value: number, system: string}[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('gematria_history');
@@ -132,8 +169,15 @@ export const AngelNumbersSection = ({ cosmicData }: AngelNumbersSectionProps) =>
     if (!targetQuery) return;
     setLoading(true);
     try {
-      const data = await fetchAngelNumberInsight(targetQuery, cosmicData);
-      setResult(data);
+      const data: any = await fetchAngelNumberInsight(targetQuery, cosmicData);
+      // The API may return the structured schema or a plain { text / insight } payload; normalize both.
+      const fallbackText = typeof data?.insight === 'string' ? data.insight : typeof data?.text === 'string' ? data.text : '';
+      setResult({
+        ...data,
+        meaning: data?.meaning ?? fallbackText,
+        vocalScript: data?.vocalScript ?? data?.meaning ?? fallbackText,
+        gematriaVibrations: Array.isArray(data?.gematriaVibrations) ? data.gematriaVibrations : [],
+      });
       setActiveSubTab('research');
     } catch (error) {
       console.error(error);
@@ -353,7 +397,7 @@ export const AngelNumbersSection = ({ cosmicData }: AngelNumbersSectionProps) =>
                                             <span className="text-[10px] uppercase tracking-[0.3em] font-bold">Resonance Grid</span>
                                         </div>
                                         <div className="flex flex-wrap gap-3">
-                                            {result.gematriaVibrations.map((v: string, i: number) => (
+                                            {(Array.isArray(result.gematriaVibrations) ? result.gematriaVibrations : []).map((v: string, i: number) => (
                                                 <span key={i} className="px-5 py-2 bg-white/5 border border-white/10 rounded-2xl text-[10px] text-stone-300 uppercase tracking-widest hover:bg-white/10 transition-colors cursor-default">
                                                     {v}
                                                 </span>

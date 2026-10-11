@@ -601,7 +601,7 @@ export const KarmaLedger: React.FC = () => {
         // Set state for details bubble
         const [mX, mY] = d3.pointer(event, d3ContainerRef.current);
         setHoverPosition({ x: mX, y: mY - 10 });
-        setHoverEvent(d);
+        setHoveredEvent(d);
       })
       .on('mousemove', function (event) {
         const [mX, mY] = d3.pointer(event, d3ContainerRef.current);
@@ -615,7 +615,7 @@ export const KarmaLedger: React.FC = () => {
           .attr('r', 5)
           .attr('stroke', lineGradientColor);
 
-        setHoverEvent(null);
+        setHoveredEvent(null);
         setHoverPosition(null);
       });
 

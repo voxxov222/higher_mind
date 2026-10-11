@@ -276,6 +276,7 @@ const PostCreator = ({ onClose, onSubmit }: { onClose: () => void; onSubmit: (ti
 };
 
 const PostCard = ({ post, onConnect }: { post: CommunityPost, onConnect?: (userId: string) => void }) => {
+  const { config } = useProfileStore();
   const [isLiked, setIsLiked] = useState(false);
 
   const handleLike = async () => {

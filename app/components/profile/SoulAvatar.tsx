@@ -7,6 +7,7 @@ import { Bloom, EffectComposer } from '@react-three/postprocessing';
 
 const SoulEntity = ({ color = '#a855f7' }: { color?: string }) => {
   const meshRef = useRef<THREE.Group>(null);
+  const coreRef = useRef<THREE.Mesh>(null);
 
   // Rotate and oscillate
   useFrame((state) => {

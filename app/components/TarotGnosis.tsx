@@ -945,7 +945,7 @@ export const TarotGnosis = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-black/50 border border-white/5 p-4 rounded-2xl">
           <div>
             <div className="flex items-center gap-2">
-                <HigherMindExplanationButton sectionName="Tarot Gnosis" topicName="Current Reading" dataContext={{ activeArchetype, activeSpread, spreadCards }} />
+                <HigherMindExplanationButton sectionName="Tarot Gnosis" topicName="Current Reading" dataContext={{ activeArchetype: selectedCard, activeSpread: spreadMode, spreadCards: spreadMode === 'single' ? singleCard : trinityCards }} />
               <SparklesIcon className="w-5 h-5 text-amber-400 animate-pulse" />
               <h1 className="text-xl font-bold font-sans tracking-tight text-white uppercase sm:text-2xl">
                 Tarot Arcana Gnosis
@@ -1287,7 +1287,7 @@ export const TarotGnosis = () => {
               </h4>
             </div>
             <div className="flex items-center gap-2">
-                <HigherMindExplanationButton sectionName="Tarot Gnosis" topicName="Current Reading" dataContext={{ activeArchetype, activeSpread, spreadCards }} />
+                <HigherMindExplanationButton sectionName="Tarot Gnosis" topicName="Current Reading" dataContext={{ activeArchetype: selectedCard, activeSpread: spreadMode, spreadCards: spreadMode === 'single' ? singleCard : trinityCards }} />
               <span className="text-xs font-mono text-stone-400">Scale:</span>
               <div 
                 className="px-2.5 py-1 rounded bg-black border font-mono text-xs font-bold font-extrabold text-amber-400 shadow-inner"

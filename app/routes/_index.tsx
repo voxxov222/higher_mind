@@ -111,9 +111,10 @@ import { AnimatePresence, motion } from 'motion/react';
 import { auth, signIn, signOut, getCosmicProfile, saveCosmicProfile, updateProfileConfig } from '../firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { UserProfileConfig } from '../types';
-import { Stars, Navigation, Globe, Loader2, Compass } from 'lucide-react';
+import { Stars, Navigation, Globe, Loader2, Compass, Library } from 'lucide-react';
 import { useHigherMind } from '../components/HigherMindProvider';
 import { GlobalHUD } from '../components/GlobalHUD';
+import { EsotericAtlasPanel } from '../components/EsotericAtlasPanel';
 
 const LoadingView = ({ color = "purple" }: { color?: string }) => (
   <div className="w-full h-full flex flex-col items-center justify-center bg-black gap-4">
@@ -153,7 +154,7 @@ export default function Index() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [loadedInputs, setLoadedInputs] = useState<any>(null);
   const [profileConfig, setProfileConfig] = useState<UserProfileConfig | null>(null);
-  const [viewMode, setViewMode] = useState<'blueprint' | 'universe' | 'solar' | 'natal'>('natal');
+  const [viewMode, setViewMode] = useState<'blueprint' | 'universe' | 'solar' | 'natal' | 'atlas'>('natal');
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [externalDeepDive, setExternalDeepDive] = useState<{ title: string; content: string } | null>(null);
   const [vortexMode, setVortexMode] = useState<'material' | 'spirit' | 'sync'>('sync');
@@ -326,6 +327,16 @@ export default function Index() {
                 </Suspense>
               </ChunkErrorBoundary>
             </motion.div>
+          ) : viewMode === 'atlas' ? (
+            <motion.div
+              key="atlas"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full h-full"
+            >
+              <EsotericAtlasPanel />
+            </motion.div>
           ) : viewMode === 'natal' ? (
             <motion.div
               key="natal"
@@ -401,6 +412,17 @@ export default function Index() {
           >
             <Globe className="w-4 h-4 text-emerald-400" />
             <span>Identity</span>
+          </button>
+          <button
+            onClick={() => setViewMode('atlas')}
+            className={`backdrop-blur-xl border px-4 md:px-5 py-2 rounded-full flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${
+              viewMode === 'atlas'
+                ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.4)]'
+                : 'bg-black/40 border-white/20 text-white/60 hover:text-white'
+            }`}
+          >
+            <Library className="w-4 h-4 text-cyan-300" />
+            <span>Atlas</span>
           </button>
         </div>
 

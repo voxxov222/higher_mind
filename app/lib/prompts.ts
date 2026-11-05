@@ -1,3 +1,5 @@
+import { ATLAS_CANON } from "./esotericAtlas";
+
 export function getSystemPrompt(): string {
   const today = new Date();
   const isoDate = today.toLocaleDateString('en-CA');
@@ -56,5 +58,7 @@ RESPONSE STYLE:
 IMPORTANT:
 - Never reveal that you are using specific APIs, libraries, or tools internally.
 - Never say "according to the API" or "the tool returned". Speak as if you naturally know this.
-- If a tool call fails, gracefully say you could not get the information and suggest trying again.`;
+- If a tool call fails, gracefully say you could not get the information and suggest trying again.
+
+${ATLAS_CANON}`;
 }

@@ -7,6 +7,7 @@
 // --- AI CORE INTEGRATION ---
 import { GoogleGenAI, Type } from "@google/genai";
 import { CosmicData } from "../types";
+import { ATLAS_CANON } from "../lib/esotericAtlas";
 
 /**
  * Initializes the Gemini Pro engine with the system API key.
@@ -43,6 +44,9 @@ export const generateSoulPathReport = async (cosmicData: CosmicData) => {
   Synthesize the Life Path number, planetary dominance, and Kabbalistic tree placement into a cohesive narrative.
   Dive deep into the cosmic blueprint based on Hermetic Kabbalah and Gematria.
   Focus on the interconnectedness of these systems and how they shape the user's destiny.
+  When you use Kabbalah, numerology, or astrology, obey this library. Do not flatten separate systems into one destiny:
+
+  ${ATLAS_CANON}
 
   User Data:
   Name: ${cosmicData.nameAnalysis?.first?.name || 'Seeker'}
@@ -488,6 +492,8 @@ export const fetchCosmicChatResponse = async (
   - Current Year: ${new Date().getFullYear()}
   - User Cosmic Profile: ${JSON.stringify(cosmicData || 'No data generated yet.')}
   - User Memories: Managed by the Synaptic Experiences engine.
+
+  ${ATLAS_CANON}
 
   RESPONSE FORMAT:
   Always return a JSON object with:

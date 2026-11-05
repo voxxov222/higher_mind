@@ -1,5 +1,6 @@
 import { ActionFunction, json } from '@remix-run/node';
 import { GoogleGenAI } from '@google/genai';
+import { ATLAS_CANON } from '../lib/esotericAtlas';
 
 let ai: GoogleGenAI | null = null;
 function getAI() {
@@ -31,7 +32,9 @@ For example: "You are currently experiencing your <concept term="Saturn Return">
 You have access to the user's cosmic data:
 ${JSON.stringify(cosmicData, null, 2)}
 
-Provide an interactive narrative response to the user.`;
+Provide an interactive narrative response to the user.
+
+${ATLAS_CANON}`;
 
     let conversationContext = "";
     if (history && history.length > 0) {

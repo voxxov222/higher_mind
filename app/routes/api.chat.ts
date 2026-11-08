@@ -23,7 +23,7 @@ export async function action({ request }: ActionFunctionArgs) {
       stopWhen: stepCountIs(5),
     });
 
-    return result.toDataStreamResponse();
+    return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error("[chat] Unhandled error:", error);
     return new Response("Internal server error.", { status: 500 });

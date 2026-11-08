@@ -128,7 +128,12 @@ export const subscribeToPosts = (callback: (posts: CommunityPost[]) => void) => 
     } as CommunityPost));
     callback(posts);
   }, (error) => {
-    handleFirestoreError(error, OperationType.LIST, path);
+    // Listener errors (e.g. permission denied while signed out) must not escape as uncaught exceptions.
+    try {
+      handleFirestoreError(error, OperationType.LIST, path);
+    } catch {
+      // already logged by handleFirestoreError
+    }
   });
 };
 
@@ -181,7 +186,12 @@ export const subscribeToMessages = (userId: string, recipientId: string, callbac
     } as Message));
     callback(messages);
   }, (error) => {
-    handleFirestoreError(error, OperationType.LIST, path);
+    // Listener errors (e.g. permission denied while signed out) must not escape as uncaught exceptions.
+    try {
+      handleFirestoreError(error, OperationType.LIST, path);
+    } catch {
+      // already logged by handleFirestoreError
+    }
   });
 };
 
@@ -225,7 +235,12 @@ export const subscribeToWallPosts = (userId: string, callback: (posts: WallPost[
     } as WallPost));
     callback(posts);
   }, (error) => {
-    handleFirestoreError(error, OperationType.LIST, path);
+    // Listener errors (e.g. permission denied while signed out) must not escape as uncaught exceptions.
+    try {
+      handleFirestoreError(error, OperationType.LIST, path);
+    } catch {
+      // already logged by handleFirestoreError
+    }
   });
 };
 
@@ -271,7 +286,12 @@ export const subscribeToAffinityRequests = (userId: string, callback: (requests:
     } as AffinityRequest));
     callback(requests);
   }, (error) => {
-    handleFirestoreError(error, OperationType.LIST, path);
+    // Listener errors (e.g. permission denied while signed out) must not escape as uncaught exceptions.
+    try {
+      handleFirestoreError(error, OperationType.LIST, path);
+    } catch {
+      // already logged by handleFirestoreError
+    }
   });
 };
 

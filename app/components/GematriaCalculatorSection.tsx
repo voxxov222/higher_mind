@@ -107,7 +107,7 @@ export const GematriaCalculatorSection = () => {
           <h2 className="text-4xl font-light text-white tracking-[0.2em] uppercase flex items-center gap-4">
             <Calculator className="text-blue-400 w-8 h-8" /> Gematria Matrix
           </h2>
-        <div className="mt-4 flex justify-center"><HigherMindExplanationButton sectionName="Gematria & Numerology" topicName="Analysis" dataContext={{ inputWord, results }} /></div>
+        <div className="mt-4 flex justify-center"><HigherMindExplanationButton sectionName="Gematria & Numerology" topicName="Analysis" dataContext={{ inputWord: input, results }} /></div>
 
           <p className="text-stone-500 text-xs uppercase tracking-widest max-w-lg">
             Advanced numeric resonance decoding engine following the Gematrinator protocol.

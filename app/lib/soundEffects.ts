@@ -289,6 +289,12 @@ class SoundEngine {
     this.playTone(600, 'sine', 0.1, 0.15, 300);
   }
 
+  activate = () => {
+    this.init();
+    if (!this.ctx || this.ctx.state !== 'running') return;
+    this.playTone(400, 'sine', 0.2, 0.1, 900);
+  }
+
   deactivate = () => {
     this.init();
     if (!this.ctx || this.ctx.state !== 'running') return;
